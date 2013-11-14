@@ -1,0 +1,22 @@
+
+
+1) Install GDCM (tested with 2.4)
+
+$ git clone --branch release git://git.code.sf.net/p/gdcm/gdcm
+$ mkdir gdcmbin
+$ cd gdcmbin
+$ cmake ../gdcm
+$ make -j
+$ sudo make install
+
+You can remove the gdcm and gdcmbin directories now.
+
+2) Install GLFW (tested with 3.0.3)
+
+$ git clone https://github.com/glfw/glfw.git
+$ cd glfw
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make -j
+$ sudo make install
