@@ -18,8 +18,7 @@ void VolumeData::loadTexture2D(GLuint &texture, int depth)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    // Could try a better alignment based on data type to make this quicker
-    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, format, type, imagePointer(depth));
 }

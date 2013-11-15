@@ -66,8 +66,9 @@ void display()
 void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     static int curImage = 0;
-    if (key == GLFW_KEY_RIGHT) {
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
         curImage = (curImage + 1) % myVolume->depth;
+        std::cout << curImage << std::endl;
         myVolume->loadTexture2D(texture, curImage);
       
     }
@@ -135,7 +136,7 @@ bool initWindow(int width, int height, const char* title)
 
 
 int main(int argc, char** argv)
-{
+{    
     if (argc != 2) {
         std::cout << "provide dicom directory as argument" << std::endl;
         return 0;

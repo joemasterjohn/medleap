@@ -10,6 +10,7 @@ using namespace std;
 using namespace gdcm;
 
 vector<string> sortImages(DCMImporter::SeriesID series);
+void flipImage(char* buffer, int pixelSize, int width, int height);
 
 DCMImporter::DCMImporter(){}
 
@@ -59,22 +60,33 @@ VolumeData* DCMImporter::importVolume(DCMImporter::SeriesID series)
     int depth = files.size();
     double intercept = img.GetIntercept();
     double slope = img.GetSlope();
-
-    // could check for other types in the future
+    GLenum type;
     int bytesPerPixel;
     switch (img.GetPixelFormat())
     {
+        case PixelFormat::INT8:
+            bytesPerPixel = 1;
+            type = GL_BYTE;
+            break;
+        case PixelFormat::INT16:
+            bytesPerPixel = 2;
+            type = GL_SHORT;
+            break;
         case PixelFormat::UINT8:
-        bytesPerPixel = 1;
-        break;
+            bytesPerPixel = 1;
+            type = GL_UNSIGNED_BYTE;
+            break;
         case PixelFormat::UINT16:
-        bytesPerPixel = 2;
-        break;
+            bytesPerPixel = 2;
+            type = GL_UNSIGNED_SHORT;
+            break;
         default:
-        return NULL;
-        break;
+            return NULL;
+            break;
     }
     
+    std::cout << img.GetPixelFormat() << std::endl;
+
     double windowCenter;
     {
         Attribute<0x0028,0x1050> a;
@@ -94,11 +106,13 @@ VolumeData* DCMImporter::importVolume(DCMImporter::SeriesID series)
     
     // load all the images into a single buffer
     img.GetBuffer(buffer);
+    flipImage(buffer, bytesPerPixel, width, height);
     for (int i = 1; i < depth; i++) {
         ImageReader reader;
         reader.SetFileName(files[i].c_str());
         reader.Read();
         reader.GetImage().GetBuffer(buffer + i * imageSize);
+        flipImage(buffer + i * imageSize, bytesPerPixel, width, height);
     }
     
     // apply modality LUT to convert manufacturer-dependent values to modality units
@@ -124,7 +138,8 @@ VolumeData* DCMImporter::importVolume(DCMImporter::SeriesID series)
         pixel++;
     }
     
-    return new VolumeData((unsigned char*)buffer, width, height, depth, GL_RED, GL_UNSIGNED_SHORT);
+    // CT or MR should always be monochrome, so format is always GL_RED
+    return new VolumeData((unsigned char*)buffer, width, height, depth, GL_RED, type);
 }
 
 /**
@@ -165,4 +180,20 @@ vector<string> sortImages(DCMImporter::SeriesID series)
     
     // the series wasn't found for some reason
     return vector<string>();
+}
+
+/**
+ * Flips an image vertically so the pixel data is read bottom to top (OpenGL style)
+ */
+void flipImage(char* buffer, int pixelSize, int width, int height)
+{
+    int rowSize = pixelSize * width;
+    char temp[rowSize];
+    
+    // reverse rows int image
+    for (int i = 0; i < height/2; i++) {
+        memcpy(temp, buffer + i * rowSize, rowSize);
+        memcpy(buffer + i * rowSize, buffer + (height - 1 - i) * rowSize, rowSize);
+        memcpy(buffer + (height - 1 - i) * rowSize, temp, rowSize);
+    }
 }
