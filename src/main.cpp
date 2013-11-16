@@ -3,7 +3,7 @@
 #include <iostream>
 #include "gl/shader.h"
 #include "gl/program.h"
-#include "import/DCMImporter.h"
+#include "volume/DCMImageSeries.h"
 
 GLFWwindow* window;
 GLuint vao;
@@ -14,13 +14,14 @@ VolumeData* myVolume;
 
 void init()
 {
-    program = Program::create("shaders/simple1.vert",
-                              "shaders/simple1.frag");
+    program = Program::create("shaders/ct_mip.vert",
+                              "shaders/ct_mip.frag");
+    
     program->enable();
     
     glGenTextures(1, &texture);
-    std::cout << myVolume->depth << std::endl;
     myVolume->loadTexture2D(texture, 0);
+
 
     const GLubyte* str = glGetString(GL_VERSION);
     std::cout << "Version = " << str << std::endl;
@@ -60,18 +61,59 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     
+    // set the window
+    float w = myVolume->windows[0].getWidthNormalized(myVolume->type);
+    float c = myVolume->windows[0].getCenterNormalized(myVolume->type);
+    glUniform1i(program->getUniform("signed_normalized"), myVolume->isSigned());
+    glUniform1f(program->getUniform("window_min"), c - w/2.0f);
+    glUniform1f(program->getUniform("window_multiplier"), 1.0f / w);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     static int curImage = 0;
-    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+    if (key == GLFW_KEY_RIGHT/* && action == GLFW_PRESS */) {
         curImage = (curImage + 1) % myVolume->depth;
         std::cout << curImage << std::endl;
         myVolume->loadTexture2D(texture, curImage);
       
     }
+    
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+        myVolume->windows[0].setCenter(myVolume->windows[0].getCenter() + .0002);
+    }
+}
+
+bool down = false;
+
+void mouseCB(GLFWwindow* window, int button, int action, int mods)
+{
+    int x, y;
+    glfwGetWindowPos(window, &x, &y);
+    
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        down = action == GLFW_PRESS;
+    }
+}
+
+void cursorCB(GLFWwindow* window, double x, double y)
+{
+    if (down) {
+        
+        // maybe show histogram while dragging?
+        if (x < 0)
+            myVolume->windows[0].setCenter(myVolume->windows[0].getCenter() - .0002);
+        else if (x > 0)
+            myVolume->windows[0].setCenter(myVolume->windows[0].getCenter() + .0002);
+        
+        if (y < 0)
+            myVolume->windows[0].setWidth(myVolume->windows[0].getWidth() - .0002);
+        else if (y > 0)
+            myVolume->windows[0].setWidth(myVolume->windows[0].getWidth() + .0002);
+    }
+    
 }
 
 bool initWindow(int width, int height, const char* title)
@@ -104,8 +146,8 @@ bool initWindow(int width, int height, const char* title)
 	// Set window callback functions for events
     //glfwSetFramebufferSizeCallback(window, resizeCB);
 	glfwSetKeyCallback(window, keyboardCB);
-	//glfwSetMouseButtonCallback(window, mouseCB);
-    //glfwSetCursorPosCallback(window, cursorCB);
+	glfwSetMouseButtonCallback(window, mouseCB);
+    glfwSetCursorPosCallback(window, cursorCB);
     
     // Set vertical retrace rate (0 == run as fast as possible)
     //glfwSwapInterval(vsync);
@@ -133,19 +175,15 @@ bool initWindow(int width, int height, const char* title)
     return true;
 }
 
-
-
 int main(int argc, char** argv)
 {    
     if (argc != 2) {
         std::cout << "provide dicom directory as argument" << std::endl;
         return 0;
     }
+
     
-    DCMImporter importer;
-    myVolume = importer.importVolume(argv[1]);
-    
-    //imageFilesSorted = findSeriesInDirectory(argv[1]);
+    myVolume = DCMImageSeries::load(argv[1]);
     initWindow(600, 600, "hello world");
     
     return 0;

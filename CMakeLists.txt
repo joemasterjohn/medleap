@@ -9,9 +9,6 @@ source_group("gl" FILES ${SOURCE_GL})
 file(GLOB SOURCE_VOLUME src/volume/*.cpp src/volume/*.h)
 source_group("volume" FILES ${SOURCE_VOLUME})
 
-file(GLOB SOURCE_IMPORT src/import/*.cpp src/import/*.h)
-source_group("import" FILES ${SOURCE_IMPORT})
-
 # output the executable in the build directory (not Debug/Release subdir)
 foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
@@ -19,7 +16,12 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
 endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 
 # make sure shaders are copied into the build directory
-set(DATA_SHADERS shaders/simple1.vert shaders/simple1.frag)
+set(DATA_SHADERS
+    shaders/simple1.vert
+    shaders/simple1.frag
+    shaders/ct_mip.vert
+    shaders/ct_mip.frag
+)
 foreach(item IN LISTS DATA_SHADERS)
     message(STATUS ${item})
     add_custom_command(
@@ -35,7 +37,6 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     ${SOURCE_GL}
     ${SOURCE_VOLUME}
-    ${SOURCE_IMPORT}
     ${DATA_SHADERS}
 )
 
