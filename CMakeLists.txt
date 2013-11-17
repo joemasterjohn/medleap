@@ -22,7 +22,15 @@ set(DATA_SHADERS
     shaders/ct_mip.vert
     shaders/ct_mip.frag
 )
-foreach(item IN LISTS DATA_SHADERS)
+set(DATA_FONTS
+    fonts/menlo14.bmp
+    fonts/menlo14.dat
+    fonts/menlo18.bmp
+    fonts/menlo18.dat
+    fonts/menlo24.bmp
+    fonts/menlo24.dat
+)
+foreach(item IN LISTS DATA_SHADERS DATA_FONTS)
     message(STATUS ${item})
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${item}" 
@@ -30,7 +38,7 @@ foreach(item IN LISTS DATA_SHADERS)
         DEPENDS   "${CMAKE_CURRENT_SOURCE_DIR}/${item}"
     ) 
 endforeach()
-add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS})
+add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS} ${DATA_FONTS})
 source_group("shaders" FILES ${DATA_SHADERS})
 
 add_executable(${PROJECT_NAME}

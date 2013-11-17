@@ -20,8 +20,7 @@ void init()
     program = Program::create("shaders/ct_mip.vert",
                               "shaders/ct_mip.frag");
     
-    tr.load("/Users/justin/Projects/medleap/fonts/menlo18.bmp",
-            "/Users/justin/Projects/medleap/fonts/menlo18.dat");
+    tr.load("fonts/menlo18.bmp", "fonts/menlo18.dat");
     
     program->enable();
     
