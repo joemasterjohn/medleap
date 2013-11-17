@@ -200,3 +200,8 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
     
     return series;
 }
+
+DCMImageSeries::Modality DCMImageSeries::getModality()
+{
+    return modality;
+}

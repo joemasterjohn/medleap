@@ -4,18 +4,24 @@
 #include "gl/shader.h"
 #include "gl/program.h"
 #include "volume/DCMImageSeries.h"
+#include "gl/TextRenderer.h"
 
 GLFWwindow* window;
 GLuint vao;
 GLuint vbo;
 Program* program;
 GLuint texture = 0;
+int iWindow = 0;
 VolumeData* myVolume;
+TextRenderer tr;
 
 void init()
 {
     program = Program::create("shaders/ct_mip.vert",
                               "shaders/ct_mip.frag");
+    
+    tr.load("/Users/justin/Projects/medleap/fonts/menlo18.bmp",
+            "/Users/justin/Projects/medleap/fonts/menlo18.dat");
     
     program->enable();
     
@@ -59,31 +65,81 @@ void reshape(int width, int height)
 
 void display()
 {
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     
+    program->enable();
+
+    int ww, wh;
+    glfwGetWindowSize(window, &ww, &wh);
+    float windowAspect = (float)ww/wh;
+    float imgAspect = (float)myVolume->getWidth() / myVolume->getHeight();
+    if (imgAspect <= 1.0f) {
+        float sx = imgAspect / windowAspect;
+        float sy = 1.0f;
+        float model[] = {
+            sx, 0.0f, 0.0f, 0.0f,
+            0.0f, sy, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f };
+        glUniformMatrix4fv(program->getUniform("model"), 1, false, model);
+    } else {
+        float sx = 1.0f;
+        float sy = windowAspect / imgAspect;
+        float model[] = {
+            sx, 0.0f, 0.0f, 0.0f,
+            0.0f, sy, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f };
+        glUniformMatrix4fv(program->getUniform("model"), 1, false, model);
+    }
+    
     // set the window
-    float w = myVolume->windows[0].getWidthNormalized(myVolume->type);
-    float c = myVolume->windows[0].getCenterNormalized(myVolume->type);
+    float w = myVolume->getWindows()[iWindow].getWidthNormalized(myVolume->getType());
+    float c = myVolume->getWindows()[iWindow].getCenterNormalized(myVolume->getType());
     glUniform1i(program->getUniform("signed_normalized"), myVolume->isSigned());
     glUniform1f(program->getUniform("window_min"), c - w/2.0f);
     glUniform1f(program->getUniform("window_multiplier"), 1.0f / w);
-
+    
+    // set state and shader for drawing medical stuff
+    GLsizei stride = 4 * sizeof(GLfloat);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    int loc = program->getAttribute("vPosition");
+    glEnableVertexAttribArray(loc);
+    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
+    loc = program->getAttribute("vTexCoord");
+    glEnableVertexAttribArray(loc);
+    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
+    glBindTexture(GL_TEXTURE_2D, texture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    
+    {
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+        tr.setColor(1, 1, 0.5);
+        tr.begin(width, height);
+        tr.draw("this is a message", 100, 100);
+        tr.draw("another text", 100, 200);
+        tr.draw("abc", 600, 500);
+        tr.end();
+    }
 }
 
 void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     static int curImage = 0;
     if (key == GLFW_KEY_RIGHT/* && action == GLFW_PRESS */) {
-        curImage = (curImage + 1) % myVolume->depth;
+        curImage = (curImage + 1) % myVolume->getDepth();
         std::cout << curImage << std::endl;
         myVolume->loadTexture2D(texture, curImage);
       
     }
     
     if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-        myVolume->windows[0].setCenter(myVolume->windows[0].getCenter() + .0002);
+        iWindow = (iWindow + 1) % myVolume->getWindows().size();
     }
+    
 }
 
 bool down = false;
@@ -100,20 +156,6 @@ void mouseCB(GLFWwindow* window, int button, int action, int mods)
 
 void cursorCB(GLFWwindow* window, double x, double y)
 {
-    if (down) {
-        
-        // maybe show histogram while dragging?
-        if (x < 0)
-            myVolume->windows[0].setCenter(myVolume->windows[0].getCenter() - .0002);
-        else if (x > 0)
-            myVolume->windows[0].setCenter(myVolume->windows[0].getCenter() + .0002);
-        
-        if (y < 0)
-            myVolume->windows[0].setWidth(myVolume->windows[0].getWidth() - .0002);
-        else if (y > 0)
-            myVolume->windows[0].setWidth(myVolume->windows[0].getWidth() + .0002);
-    }
-    
 }
 
 bool initWindow(int width, int height, const char* title)
@@ -181,10 +223,12 @@ int main(int argc, char** argv)
         std::cout << "provide dicom directory as argument" << std::endl;
         return 0;
     }
-
+    
     
     myVolume = DCMImageSeries::load(argv[1]);
-    initWindow(600, 600, "hello world");
+    initWindow(800, 600, "hello world");
+    
+    
     
     return 0;
 }

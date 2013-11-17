@@ -22,7 +22,6 @@ void main()
     // apply VOI lut
     value = (value - window_min) * window_multiplier;
     value = max(min(1.0, value), 0.0);
-
     
     fColor = vec4(value, value, value, 1.0);
 

@@ -1,6 +1,8 @@
 #include "VolumeData.h"
 #include "gl/Util.h"
 
+using namespace std;
+
 VolumeData::VolumeData(int width, int height, int depth, GLenum format, GLenum type) :
     width(width), height(height), depth(depth), format(format), type(type)
 {
@@ -24,6 +26,21 @@ void VolumeData::loadTexture2D(GLuint &texture, int depth)
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat(), width, height, 0, format, type, data + depth * getImageSize());
 }
 
+unsigned int VolumeData::getWidth()
+{
+    return width;
+}
+
+unsigned int VolumeData::getHeight()
+{
+    return height;
+}
+
+unsigned int VolumeData::getDepth()
+{
+    return depth;
+}
+
 unsigned int VolumeData::getImageSize()
 {
     return getPixelSize() * width * height;
@@ -37,6 +54,16 @@ unsigned int VolumeData::getPixelSize()
 unsigned int VolumeData::getVolumeSize()
 {
     return getImageSize() * depth;
+}
+
+vector<Window>& VolumeData::getWindows()
+{
+    return windows;
+}
+
+GLenum VolumeData::getType()
+{
+    return type;
 }
 
 GLenum VolumeData::internalFormat()

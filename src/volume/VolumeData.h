@@ -18,6 +18,15 @@ public:
     /** Stores the image at depth into the provided 2D texture */
     void loadTexture2D(GLuint& texture, int depth);
     
+    /** Number of pixels horizontally in each slice */
+    unsigned int getWidth();
+    
+    /** Number of pixels vertically in each slice */
+    unsigned int getHeight();
+    
+    /** Number of slices */
+    unsigned int getDepth();
+    
     /** Size in bytes of a single slice/image */
     unsigned int getImageSize();
     
@@ -27,17 +36,22 @@ public:
     /** Size in bytes of all slices */
     unsigned int getVolumeSize();
     
+    /** Windows that store values of interest */
+    std::vector<Window>& getWindows();
+    
+    /** Type for channels in the images */
+    GLenum getType();
+    
     /** Data is stored in a signed format */
     bool isSigned();
 
-//private:
+protected:
     char* data;
     int width;
     int height;
     int depth;
     GLenum format;
     GLenum type;
-    
     std::vector<Window> windows;
     
 private:

@@ -35,6 +35,10 @@ public:
     
     /** Returns all of the file names associated with an image series, sorted by Z */
     static std::vector<std::string> sortFiles(ID seriesID);
+    
+    /** Returns the modality of the data */
+    Modality getModality();
+    
 private:
     Modality modality;
     

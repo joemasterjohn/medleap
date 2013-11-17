@@ -26,7 +26,8 @@ public:
 	void disable();
 
 	static Program* create(const char* vsrc, const char* fsrc);
-    
+    static Program* createFromSrc(const char* vsrc, const char* fsrc);
+    static Program* create(Shader* vShader, Shader* fShader);
 private:
     GLuint id;
     Shader* vShader;
