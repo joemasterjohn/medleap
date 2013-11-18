@@ -14,13 +14,14 @@ GLuint texture = 0;
 int iWindow = 0;
 VolumeData* myVolume;
 TextRenderer tr;
+int curImage = 0;
 
 void init()
 {
     program = Program::create("shaders/ct_mip.vert",
                               "shaders/ct_mip.frag");
     
-    tr.load("fonts/menlo18.bmp", "fonts/menlo18.dat");
+    tr.load("fonts/menlo14.bmp", "fonts/menlo14.dat");
     
     program->enable();
     
@@ -114,11 +115,13 @@ void display()
     
     
     {
+        char message[30];
+        sprintf(message, "image: %d / %d", curImage, myVolume->getDepth());
         int width, height;
         glfwGetWindowSize(window, &width, &height);
-        tr.setColor(1, 1, 0.5);
+        tr.setColor(1, 1, 1);
         tr.begin(width, height);
-        tr.draw("this is a message", 100, 100);
+        tr.draw(message, 100, 100);
         tr.draw("another text", 100, 200);
         tr.draw("abc", 600, 500);
         tr.end();
@@ -127,7 +130,6 @@ void display()
 
 void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    static int curImage = 0;
     if (key == GLFW_KEY_RIGHT/* && action == GLFW_PRESS */) {
         curImage = (curImage + 1) % myVolume->getDepth();
         std::cout << curImage << std::endl;

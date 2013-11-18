@@ -2,7 +2,7 @@
 #define __MEDLEAP_TEXT_RENDERER__
 
 #include "GL/glew.h"
-#include "program.h"
+#include "Program.h"
 #include <string>
 #include <vector>
 

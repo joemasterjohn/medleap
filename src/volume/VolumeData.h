@@ -54,7 +54,6 @@ protected:
     GLenum type;
     std::vector<Window> windows;
     
-private:
     GLenum internalFormat();
 };
 
