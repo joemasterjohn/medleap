@@ -28,7 +28,6 @@ set(DATA_FONTS
     fonts/menlo24.dat
 )
 foreach(item IN LISTS DATA_SHADERS DATA_FONTS)
-    message(STATUS ${item})
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${item}" 
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${item}" "${CMAKE_CURRENT_BINARY_DIR}/${item}"
@@ -47,6 +46,10 @@ source_group("gl" FILES ${SOURCE_GL})
 file(GLOB SOURCE_VOLUME src/volume/*.cpp src/volume/*.h)
 source_group("volume" FILES ${SOURCE_VOLUME})
 source_group("shaders" FILES ${DATA_SHADERS})
+file(GLOB SOURCE_RENDER src/render/*.cpp src/render/*.h)
+source_group("render" FILES ${SOURCE_RENDER})
+file(GLOB SOURCE_MATH src/math/*.cpp src/math/*.h)
+source_group("math" FILES ${SOURCE_MATH})
 # -----------------------------------------------------------------------------------------------------------------------
 
 

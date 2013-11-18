@@ -1,8 +1,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "gl/shader.h"
-#include "gl/program.h"
+#include "gl/Shader.h"
+#include "gl/Program.h"
 #include "volume/DCMImageSeries.h"
 #include "gl/TextRenderer.h"
 
@@ -21,8 +21,8 @@ void init()
     program = Program::create("shaders/ct_mip.vert",
                               "shaders/ct_mip.frag");
     
-    tr.load("fonts/menlo14.bmp", "fonts/menlo14.dat");
-    
+    tr.loadFont("menlo18");
+
     program->enable();
     
     glGenTextures(1, &texture);
@@ -119,11 +119,13 @@ void display()
         sprintf(message, "image: %d / %d", curImage, myVolume->getDepth());
         int width, height;
         glfwGetWindowSize(window, &width, &height);
+        
         tr.setColor(1, 1, 1);
         tr.begin(width, height);
-        tr.draw(message, 100, 100);
-        tr.draw("another text", 100, 200);
-        tr.draw("abc", 600, 500);
+        tr.add("Left", 0, height/2, TextRenderer::LEFT, TextRenderer::CENTER);
+        tr.add("Right", width, height/2, TextRenderer::RIGHT, TextRenderer::CENTER);
+        tr.add("Bottom", width/2, 0, TextRenderer::CENTER, TextRenderer::BOTTOM);
+        tr.add("Top", width/2, height, TextRenderer::CENTER, TextRenderer::TOP);
         tr.end();
     }
 }

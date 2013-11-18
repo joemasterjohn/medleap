@@ -29,16 +29,19 @@ void main()\n\
 // texture coordinate stepping based on a 16x16 grid of glyphs
 static const float GLYPH_STEP = 0.0625f;
 
-TextRenderer::TextRenderer() : fontTexture(0), program(0), r(0), g(0), b(0)
+TextRenderer::TextRenderer() : program(0), vbo(0), r(0), g(0), b(0), currentFont(0)
 {
 }
 
 TextRenderer::~TextRenderer()
 {
-    if (fontTexture)
-        glDeleteTextures(1, &fontTexture);
+    for (map<string, Font*>::iterator it = fonts.begin(); it != fonts.end(); it++) {
+        delete it->second;
+    }
+    
     if (program)
         delete program;
+    
     if (vbo)
         glDeleteBuffers(1, &vbo);
 }
@@ -48,6 +51,12 @@ void TextRenderer::setColor(float r, float g, float b)
     this->r = r;
     this->g = g;
     this->b = b;
+}
+
+void TextRenderer::setFont(std::string fontName)
+{
+    if (fonts.find(fontName) != fonts.end())
+        currentFont = fonts[fontName];
 }
 
 void TextRenderer::begin(int width, int height)
@@ -65,15 +74,28 @@ void TextRenderer::addVertex(int x, int y, float u, float v)
     vertices.push_back(v);
 }
 
-void TextRenderer::draw(const char* text, int x, int y)
+void TextRenderer::add(const char* text, int x, int y, Alignment hAlign, Alignment vAlign)
 {
+    if (hAlign == CENTER) {
+        x -= currentFont->measure(text) / 2;
+    } else if (hAlign == RIGHT) {
+        x -= currentFont->measure(text);
+    }
+    
+    if (vAlign == CENTER) {
+        y -= currentFont->glyphHeight / 2;
+    } else if (vAlign == TOP) {
+        y -= currentFont->glyphHeight;
+    }
+    
     for (; *text; text++) {
         const char c = *text;
-        int glyphWidth = glyphWidths[(unsigned)c];
+        int glyphWidth = currentFont->glyphWidths[(unsigned)c];
+        int glyphHeight = currentFont->glyphHeight;
         
         GLfloat u = GLYPH_STEP * (c % 16);
         GLfloat v = 1.0f - GLYPH_STEP * (c / 16 + 1);
-        float uStep = (float)glyphWidth / textureWidth;
+        float uStep = (float)glyphWidth / currentFont->texWidth;
         
         addVertex(x, y, u, v);
         addVertex(x + glyphWidth, y, u + uStep, v);
@@ -92,44 +114,82 @@ void TextRenderer::end()
     if (vertices.empty())
         return;
     
+    // buffer data
     GLsizei stride = 4 * sizeof(GLfloat);
-
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_DYNAMIC_DRAW);
-    
     int loc = program->getAttribute("vs_position");
+    
+    // set state
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    
     loc = program->getAttribute("vs_texcoord");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
-    
-    
-    
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     program->enable();
     glUniform3f(program->getUniform("color"), r, g, b);
-    glBindTexture(GL_TEXTURE_2D, fontTexture);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBindTexture(GL_TEXTURE_2D, currentFont->texture);
     
+    // render
     glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 4);
+    
+    // reset state
+    glDisable(GL_BLEND);
 }
 
-std::string TextRenderer::load(const char* bmpFileName, const char* metricsFileName)
+bool TextRenderer::loadFont(std::string fontName)
 {
-    unsigned char* data;
-    
-    // create shader program and vertex buffer
+    // create shader program and vertex buffer if first load
     if (!program) {
         program = Program::createFromSrc(vSrc, fSrc);
         glGenBuffers(1, &vbo);
     }
     
-    // open file
+    const char* bmpFileName = ("fonts/" + fontName + ".bmp").c_str();
+    const char* metricsFileName = ("fonts/" + fontName + ".dat").c_str();
+    
+    Font* font = new Font;
+    font->load(bmpFileName, metricsFileName);
+    if (!font->load(bmpFileName, metricsFileName)) {
+        delete font;
+        return false;
+    }
+    
+    fonts[fontName] = font;
+    if (!currentFont)
+        currentFont = font;
+    
+    return font;
+}
+
+TextRenderer::Font::Font()
+{
+}
+
+TextRenderer::Font::~Font()
+{
+    if (texture)
+        glDeleteTextures(1, &texture);
+}
+
+int TextRenderer::Font::measure(const char* s)
+{
+    int width = 0;
+    for (; *s; s++)
+        width += glyphWidths[(unsigned)*s];
+    return width;
+}
+
+bool TextRenderer::Font::load(const char* bmpFileName,
+                                             const char* metricsFileName)
+{
     ifstream fin(bmpFileName, ios::in | ios::binary);
-    if (!fin)
-        return "File not found: " + std::string(bmpFileName);
+    if (!fin) {
+        cerr << "File not found: " + std::string(bmpFileName) << endl;
+        return false;
+    }
     
     // read the byte offset for pixel data start
     fin.seekg(0x0A, ios::beg);
@@ -138,50 +198,53 @@ std::string TextRenderer::load(const char* bmpFileName, const char* metricsFileN
     
     // read the image dimensions
     fin.seekg(0x12, ios::beg);
-    fin.read((char*)&textureWidth, sizeof(unsigned int));
-    fin.read((char*)&textureHeight, sizeof(unsigned int));
+    fin.read((char*)&texWidth, sizeof(unsigned int));
+    fin.read((char*)&texHeight, sizeof(unsigned int));
     
+    // read bit planes
     unsigned short planes = 0;
     fin.read((char*)&planes, sizeof(unsigned short));
-    if (planes != 1)
-        return "Number of color planes must be 1";
+    if (planes != 1) {
+        cerr << "Number of color planes must be 1" << endl;
+        return false;
+    }
     
+    // read bits per pixel
     unsigned short bpp = 0;
     fin.read((char*)&bpp, sizeof(unsigned short));
-    if (bpp != 24)
-        return "Image must be 24 bits per pixel (BGR format)";
+    if (bpp != 24) {
+        cerr << "Image must be 24 bits per pixel (BGR format)" << endl;
+        return false;
+    }
     
     // read the pixel data
-    unsigned size = textureWidth * textureHeight * 3;
-    data = new unsigned char[size];
+    unsigned size = texWidth * texHeight * 3;
+    unsigned char* data = new unsigned char[size];
     fin.seekg(dataStart, ios::beg);
     fin.read((char*)data, sizeof(unsigned char) * size);
     fin.close();
     
     // process into texture
-    if (!fontTexture)
-        glGenTextures(1, &fontTexture);
-    glBindTexture(GL_TEXTURE_2D, fontTexture);
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     delete[] data;
     
     // glyphs (assuming 16x16 in texture) and monospaced
-    if (metricsFileName) {
-        ifstream mfile(metricsFileName, ios::in | ios::binary);
-        if (!mfile)
-            return "Font metrics file not found: " + std::string(metricsFileName);
+    ifstream mfile(metricsFileName, ios::in | ios::binary);
+    if (mfile) {
         mfile.read((char*)glyphWidths, sizeof(unsigned char)*256);
         mfile.close();
     } else {
         for (int i = 0; i < 256; i++)
-            glyphWidths[i] = textureWidth / 16;
+            glyphWidths[i] = texWidth / 16;
     }
-    glyphHeight = textureHeight / 16;
+    glyphHeight = texHeight / 16;
     
-    return std::string();
+    return true;
 }
