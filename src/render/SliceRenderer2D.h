@@ -5,7 +5,7 @@
 #include "gl/Program.h"
 #include "gl/TextRenderer.h"
 #include "volume/DCMImageSeries.h"
-#include "math/Matrix4.h"
+#include "math/Math.h"
 
 class SliceRenderer2D
 {
@@ -19,6 +19,9 @@ public:
     
     int getCurrentSlice();
     void setCurrentSlice(int sliceIndex);
+    
+    int getCurrentWindow();
+    void setCurrentWindow(int currentWindow);
     
 private:
     class OrientationLabel

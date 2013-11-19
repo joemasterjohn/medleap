@@ -158,7 +158,11 @@ void SliceRenderer2D::drawSlice()
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
     
     glBindTexture(GL_TEXTURE_2D, sliceTexture);
+    
+    
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    
 }
 
 void SliceRenderer2D::drawOrientationOverlay()
@@ -204,15 +208,24 @@ void SliceRenderer2D::drawOrientationOverlay()
         text.add(labels[i].text.c_str(), x, y, hAlign, vAlign);
     }
     
-    char buf[30];
+    char buf[60];
     sprintf(buf, "slice: %d/%d", (currentSlice+1), volume->getDepth());
     text.add(buf, 0, 0, TextRenderer::LEFT, TextRenderer::BOTTOM);
     
     float wc = volume->getWindows()[currentWindow].getCenter();
     float ww = volume->getWindows()[currentWindow].getWidth();
-
     sprintf(buf, "WC = %.1f  WW = %.1f", wc, ww);
-    text.add(buf, 0, 22);
+    text.add(buf, windowWidth, 0, TextRenderer::RIGHT, TextRenderer::BOTTOM);
+    
+    std::string name = volume->getValue<std::string, 0x0010, 0x0010>();
+    std::replace(name.begin(), name.end(), '^', ' ');
+    text.add(name.c_str(), 0, windowHeight, TextRenderer::LEFT, TextRenderer::TOP);
+    
+
+    const cgl::Vec3 vsize = volume->getVoxelSize();
+
+    sprintf(buf, "Voxel Size: %.2f, %.2f, %.2f", vsize.x, vsize.y, vsize.z);
+    text.add(buf, windowWidth, windowHeight, TextRenderer::RIGHT, TextRenderer::TOP);
     
     text.end();
 }
@@ -232,4 +245,14 @@ void SliceRenderer2D::setCurrentSlice(int sliceIndex)
 {
     currentSlice = std::max(0, sliceIndex) % volume->getDepth();
     volume->loadTexture2D(sliceTexture, currentSlice);
+}
+
+int SliceRenderer2D::getCurrentWindow()
+{
+    return currentWindow;
+}
+
+void SliceRenderer2D::setCurrentWindow(int window)
+{
+    currentWindow = std::max(0, window) % volume->getWindows().size();
 }

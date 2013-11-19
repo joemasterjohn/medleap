@@ -106,6 +106,7 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
     reader.Read();
     Image& img = reader.GetImage();
     DataSet& dataSet = reader.GetFile().GetDataSet();
+    
     int width = img.GetColumns();
     int height = img.GetRows();
     int depth = files.size();
@@ -196,7 +197,7 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
         }
         delete[] centers;
         delete[] widths;
-        
+                
         // patient orientation
         const double* cosines = img.GetDirectionCosines();
         cgl::Vec3 x(cosines[0], cosines[1], cosines[2]);
@@ -209,6 +210,14 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
         w.setWidthNormalized(1.0f, type);
         series->windows.push_back(w);
     }
+    
+    // give the series a reader to the first image so it can get meta data
+    series->reader.SetFileName(files[0].c_str());
+    series->reader.Read();
+    
+    const double* pixelSpacing = series->getValues<const double*, 0x0028, 0x0030>();
+    
+    series->setVoxelSize(pixelSpacing[0], pixelSpacing[1], series->getValue<double, 0x0018, 0x0050>());
     
     return series;
 }
@@ -226,4 +235,9 @@ const cgl::Mat3& DCMImageSeries::getPatientBasis() const
 vector<Window>& DCMImageSeries::getWindows()
 {
     return windows;
+}
+
+bool DCMImageSeries::hasValue(uint16_t G, uint16_t E)
+{
+    return reader.GetFile().GetDataSet().FindDataElement(Tag(G,E));
 }

@@ -26,6 +26,18 @@ void VolumeData::loadTexture2D(GLuint &texture, int depth)
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat(), width, height, 0, format, type, data + depth * getImageSize());
 }
 
+void VolumeData::setVoxelSize(float x, float y, float z)
+{
+    this->voxelSize.x = x;
+    this->voxelSize.y = y;
+    this->voxelSize.z = z;
+}
+
+const cgl::Vec3& VolumeData::getVoxelSize() const
+{
+    return voxelSize;
+}
+
 unsigned int VolumeData::getWidth()
 {
     return width;

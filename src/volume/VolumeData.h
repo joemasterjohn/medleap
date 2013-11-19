@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <vector>
 #include "Window.h"
+#include "math/Math.h"
 
 /** Base class for any volumetric data that is stored in a regular grid of voxels. **/
 class VolumeData
@@ -14,6 +15,12 @@ public:
     
     /** Creates a volume using the memory stored in data; does not copy or allocate new memory */
     VolumeData(char* data, int width, int height, int depth, GLenum format, GLenum type);
+    
+    /** Dimensions of a voxel in real world units */
+    const cgl::Vec3& getVoxelSize() const;
+    
+    /** Sets the size of each voxel in real world units */
+    void setVoxelSize(float x, float y, float z);
     
     /** Stores the image at depth into the provided 2D texture */
     void loadTexture2D(GLuint& texture, int depth);
@@ -49,6 +56,7 @@ protected:
     int depth;
     GLenum format;
     GLenum type;
+    cgl::Vec3 voxelSize;
     
     GLenum internalFormat();
 };

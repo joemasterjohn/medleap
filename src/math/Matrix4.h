@@ -3,14 +3,13 @@
 
 #include <iostream>
 #include <iomanip>
-#include "Math.h"
+#include "Vector2.h"
+#include "Vector3.h"
+#include "Vector4.h"
 
 namespace cgl
 {
-  template <typename T> class Matrix4;
-  typedef Matrix4<float> Mat4;
-  typedef Matrix4<double> Mat4d;
-  
+
   /// A 4x4 matrix. The values are stored by column first:
   ///
   /// M = | a e i m |

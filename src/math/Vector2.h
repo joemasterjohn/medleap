@@ -1,18 +1,15 @@
 #ifndef CGL_VECTOR2_H_
 #define CGL_VECTOR2_H_
 
+
 #include <iostream>
 #include <iomanip>
 #include "Math.h"
+#include "Vector3.h"
+#include "Vector4.h"
 
 namespace cgl
 {
-  template <typename T> class Vector2;
-  template <typename T> class Vector3;
-  template <typename T> class Vector4;
-  typedef Vector2<float> Vec2;
-  typedef Vector2<double> Vec2d;
-
   /// 2D Vector with X and Y components.
   template <typename T> class Vector2 
   {

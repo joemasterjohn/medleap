@@ -34,6 +34,10 @@ void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)
     if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
         renderer2D.setCurrentSlice(renderer2D.getCurrentSlice() + 1);
     }
+    
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+        renderer2D.setCurrentWindow(renderer2D.getCurrentWindow() + 1);
+    }
 }
 
 void resizeCB(GLFWwindow* window, int width, int height)

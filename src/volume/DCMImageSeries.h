@@ -3,7 +3,9 @@
 
 #include "VolumeData.h"
 #include <string>
-#include "math/Matrix3.h"
+#include "math/Math.h"
+#include "gdcmReader.h"
+#include "gdcmAttribute.h"
 
 /** DICOM image series */
 class DCMImageSeries : public VolumeData
@@ -36,6 +38,23 @@ public:
     /** Matrix that transforms DICOM image space (+X right, +Y down) to patient space (+X = left, +Y = posterior, +Z = superior) */
     const cgl::Mat3& getPatientBasis() const;
     
+    /** Checks if the DICOM tag <G,E> exists in the data set */
+    bool hasValue(uint16_t G, uint16_t E);
+    
+    /** Returns a value of type T with the DICOM tag <G,E>. */
+    template <typename T, uint16_t G, uint16_t E> T getValue() {
+        gdcm::Attribute<G,E> at;
+        at.SetFromDataSet(reader.GetFile().GetDataSet());
+        return at.GetValue();
+    }
+    
+    /** Returns a value of type T with the DICOM tag <G,E>. */
+    template <typename T, uint16_t G, uint16_t E> T getValues() {
+        gdcm::Attribute<G,E> at;
+        at.SetFromDataSet(reader.GetFile().GetDataSet());
+        return at.GetValues();
+    }
+    
     /** This will search a directory to find all unique CT or MT image series. */
     static std::vector<ID> search(const char* directoryPath);
     
@@ -48,9 +67,8 @@ public:
     /** Returns all of the file names associated with an image series, sorted by Z */
     static std::vector<std::string> sortFiles(ID seriesID);
     
-
-    
 private:
+    gdcm::Reader reader;
     Modality modality;
     cgl::Mat3 orientation;
     std::vector<Window> windows;

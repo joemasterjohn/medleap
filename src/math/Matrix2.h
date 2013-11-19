@@ -3,14 +3,12 @@
 
 #include <iostream>
 #include <iomanip>
-#include "Math.h"
+#include "Vector2.h"
+#include "Vector3.h"
+#include "Vector4.h"
 
 namespace cgl
 {
-  template <typename T> class Matrix2;
-  typedef Matrix2<float> Mat2;
-  typedef Matrix2<double> Mat2d;
-  
   /// 2x2 matrix. The values are ordered by column first:
   ///
   /// M = | a c |
