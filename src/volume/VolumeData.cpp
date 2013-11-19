@@ -56,11 +56,6 @@ unsigned int VolumeData::getVolumeSize()
     return getImageSize() * depth;
 }
 
-vector<Window>& VolumeData::getWindows()
-{
-    return windows;
-}
-
 GLenum VolumeData::getType()
 {
     return type;

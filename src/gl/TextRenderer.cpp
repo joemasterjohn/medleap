@@ -29,7 +29,7 @@ void main()\n\
 // texture coordinate stepping based on a 16x16 grid of glyphs
 static const float GLYPH_STEP = 0.0625f;
 
-TextRenderer::TextRenderer() : program(0), vbo(0), r(0), g(0), b(0), currentFont(0)
+TextRenderer::TextRenderer() : program(0), vbo(0), r(0), g(0), b(0), currentFont(0), dirty(true)
 {
 }
 
@@ -64,6 +64,7 @@ void TextRenderer::begin(int width, int height)
     windowWidth = width;
     windowHeight = height;
     vertices.clear();
+    dirty = true;
 }
 
 void TextRenderer::addVertex(int x, int y, float u, float v)
@@ -114,13 +115,15 @@ void TextRenderer::end()
     if (vertices.empty())
         return;
     
-    // buffer data
-    GLsizei stride = 4 * sizeof(GLfloat);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_DYNAMIC_DRAW);
-    int loc = program->getAttribute("vs_position");
+    if (dirty) {
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_DYNAMIC_DRAW);
+        dirty = false;
+    }
     
     // set state
+    GLsizei stride = 4 * sizeof(GLfloat);
+    int loc = program->getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
     loc = program->getAttribute("vs_texcoord");

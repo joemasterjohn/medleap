@@ -5,7 +5,7 @@
 #include <vector>
 #include "Window.h"
 
-/** Stores stuff **/
+/** Base class for any volumetric data that is stored in a regular grid of voxels. **/
 class VolumeData
 {
 public:
@@ -36,9 +36,6 @@ public:
     /** Size in bytes of all slices */
     unsigned int getVolumeSize();
     
-    /** Windows that store values of interest */
-    std::vector<Window>& getWindows();
-    
     /** Type for channels in the images */
     GLenum getType();
     
@@ -52,7 +49,6 @@ protected:
     int depth;
     GLenum format;
     GLenum type;
-    std::vector<Window> windows;
     
     GLenum internalFormat();
 };

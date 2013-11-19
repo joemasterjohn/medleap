@@ -19,7 +19,6 @@ void applyModalityLUT(T* buffer, int width, int height, int depth, double slope,
     }
 }
 
-
 DCMImageSeries::DCMImageSeries(int width, int height, int depth, GLenum format, GLenum type)
     : VolumeData(width, height, depth, format, type)
 {
@@ -81,8 +80,6 @@ vector<string> DCMImageSeries::sortFiles(DCMImageSeries::ID id)
     
     // weak error checking
     if (!sorter.Sort(unsorted)) {
-        for (string s : unsorted)
-            std::cout << s << endl;
         cerr << "Problem sorting images!" << endl;
     }
     return sorter.GetFilenames();
@@ -146,7 +143,6 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
         reader.Read();
         reader.GetImage().GetBuffer(series->data + offset);
         gl::flipImage(series->data + offset, series->width, series->height, series->getPixelSize());
-        cout << (double)i / series->depth << std::endl;
     }
     
     // transform from manufacturer values to modality values
@@ -198,10 +194,28 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
     delete[] centers;
     delete[] widths;
     
+    
+    // patient orientation
+    const double* cosines = img.GetDirectionCosines();
+    cgl::Vec3 x(cosines[0], cosines[1], cosines[2]);
+    cgl::Vec3 y(cosines[3], cosines[4], cosines[5]);
+    cgl::Vec3 z = x.cross(y);
+    series->orientation = cgl::Mat3(x, y, z);
+    
     return series;
 }
 
 DCMImageSeries::Modality DCMImageSeries::getModality()
 {
     return modality;
+}
+
+const cgl::Mat3& DCMImageSeries::getPatientBasis() const
+{
+    return orientation;
+}
+
+vector<Window>& DCMImageSeries::getWindows()
+{
+    return windows;
 }

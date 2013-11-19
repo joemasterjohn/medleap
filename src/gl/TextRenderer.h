@@ -70,6 +70,7 @@ private:
     std::map<std::string, Font*> fonts;
     Font* currentFont;
     int windowWidth, windowHeight;
+    bool dirty;
     
     void addVertex(int x, int y, float u, float v);
 };

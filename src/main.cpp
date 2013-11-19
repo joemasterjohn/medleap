@@ -5,156 +5,44 @@
 #include "gl/Program.h"
 #include "volume/DCMImageSeries.h"
 #include "gl/TextRenderer.h"
+#include "render/SliceRenderer2D.h"
 
+SliceRenderer2D renderer2D;
 GLFWwindow* window;
-GLuint vao;
-GLuint vbo;
-Program* program;
-GLuint texture = 0;
-int iWindow = 0;
-VolumeData* myVolume;
-TextRenderer tr;
-int curImage = 0;
+DCMImageSeries* myVolume;
 
 void init()
 {
-    program = Program::create("shaders/ct_mip.vert",
-                              "shaders/ct_mip.frag");
-    
-    tr.loadFont("menlo18");
-
-    program->enable();
-    
-    glGenTextures(1, &texture);
-    myVolume->loadTexture2D(texture, 0);
-
-
-    const GLubyte* str = glGetString(GL_VERSION);
-    std::cout << "Version = " << str << std::endl;
-    
-    // create a VAO
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    
-    // create a VBO
-    GLfloat data[] = { -1, -1, 0, 0,
-                        1, -1, 1, 0,
-                        1,  1, 1, 1,
-                       -1, -1, 0, 0,
-                        1,  1, 1, 1,
-                        -1,  1, 0, 1};
-    
-    GLsizei stride = 4 * sizeof(GLfloat);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-    
-    int loc = program->getAttribute("vPosition");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    
-    loc = program->getAttribute("vTexCoord");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
+    renderer2D.init();
+    renderer2D.setVolume(myVolume);
 }
 
 void reshape(int width, int height)
 {
-    
+    renderer2D.resize(width, height);
 }
 
 void display()
 {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
-    
-    program->enable();
-
-    int ww, wh;
-    glfwGetWindowSize(window, &ww, &wh);
-    float windowAspect = (float)ww/wh;
-    float imgAspect = (float)myVolume->getWidth() / myVolume->getHeight();
-    if (imgAspect <= 1.0f) {
-        float sx = imgAspect / windowAspect;
-        float sy = 1.0f;
-        float model[] = {
-            sx, 0.0f, 0.0f, 0.0f,
-            0.0f, sy, 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f };
-        glUniformMatrix4fv(program->getUniform("model"), 1, false, model);
-    } else {
-        float sx = 1.0f;
-        float sy = windowAspect / imgAspect;
-        float model[] = {
-            sx, 0.0f, 0.0f, 0.0f,
-            0.0f, sy, 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f };
-        glUniformMatrix4fv(program->getUniform("model"), 1, false, model);
-    }
-    
-    // set the window
-    float w = myVolume->getWindows()[iWindow].getWidthNormalized(myVolume->getType());
-    float c = myVolume->getWindows()[iWindow].getCenterNormalized(myVolume->getType());
-    glUniform1i(program->getUniform("signed_normalized"), myVolume->isSigned());
-    glUniform1f(program->getUniform("window_min"), c - w/2.0f);
-    glUniform1f(program->getUniform("window_multiplier"), 1.0f / w);
-    
-    // set state and shader for drawing medical stuff
-    GLsizei stride = 4 * sizeof(GLfloat);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    int loc = program->getAttribute("vPosition");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    loc = program->getAttribute("vTexCoord");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    
-    
-    {
-        char message[30];
-        sprintf(message, "image: %d / %d", curImage, myVolume->getDepth());
-        int width, height;
-        glfwGetWindowSize(window, &width, &height);
-        
-        tr.setColor(1, 1, 1);
-        tr.begin(width, height);
-        tr.add("Left", 0, height/2, TextRenderer::LEFT, TextRenderer::CENTER);
-        tr.add("Right", width, height/2, TextRenderer::RIGHT, TextRenderer::CENTER);
-        tr.add("Bottom", width/2, 0, TextRenderer::CENTER, TextRenderer::BOTTOM);
-        tr.add("Top", width/2, height, TextRenderer::CENTER, TextRenderer::TOP);
-        tr.end();
-    }
+    renderer2D.draw();
 }
 
 void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_RIGHT/* && action == GLFW_PRESS */) {
-        curImage = (curImage + 1) % myVolume->getDepth();
-        std::cout << curImage << std::endl;
-        myVolume->loadTexture2D(texture, curImage);
-      
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+        renderer2D.setCurrentSlice(renderer2D.getCurrentSlice() + 1);
     }
-    
-    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-        iWindow = (iWindow + 1) % myVolume->getWindows().size();
-    }
-    
 }
 
-bool down = false;
+void resizeCB(GLFWwindow* window, int width, int height)
+{
+    renderer2D.resize(width, height);
+}
 
 void mouseCB(GLFWwindow* window, int button, int action, int mods)
 {
-    int x, y;
-    glfwGetWindowPos(window, &x, &y);
-    
-    if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        down = action == GLFW_PRESS;
-    }
 }
 
 void cursorCB(GLFWwindow* window, double x, double y)
@@ -173,6 +61,7 @@ bool initWindow(int width, int height, const char* title)
     glfwWindowHint(GLFW_BLUE_BITS, 8);
     glfwWindowHint(GLFW_ALPHA_BITS, 8);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_SAMPLES, 8);
     
     // Use OpenGL 3.2 core profile
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -189,7 +78,7 @@ bool initWindow(int width, int height, const char* title)
     glfwMakeContextCurrent(window);
     
 	// Set window callback functions for events
-    //glfwSetFramebufferSizeCallback(window, resizeCB);
+    glfwSetFramebufferSizeCallback(window, resizeCB);
 	glfwSetKeyCallback(window, keyboardCB);
 	glfwSetMouseButtonCallback(window, mouseCB);
     glfwSetCursorPosCallback(window, cursorCB);
@@ -227,11 +116,13 @@ int main(int argc, char** argv)
         return 0;
     }
     
-    
     myVolume = DCMImageSeries::load(argv[1]);
+    if (!myVolume) {
+        std::cout << "could not find volume " << argv[1] << std::endl;
+        return 0;
+    }
+    
     initWindow(800, 600, "hello world");
-    
-    
     
     return 0;
 }

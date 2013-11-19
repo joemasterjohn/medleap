@@ -14,10 +14,10 @@ endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 # make sure resources are copied into the build directory
 # -----------------------------------------------------------------------------------------------------------------------
 set(DATA_SHADERS
-    shaders/simple1.vert
-    shaders/simple1.frag
-    shaders/ct_mip.vert
-    shaders/ct_mip.frag
+    shaders/color.vert
+    shaders/color.frag
+    shaders/slice2D.vert
+    shaders/slice2D.frag
 )
 set(DATA_FONTS
     fonts/menlo14.bmp
@@ -59,6 +59,8 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     ${SOURCE_GL}
     ${SOURCE_VOLUME}
+    ${SOURCE_MATH}
+    ${SOURCE_RENDER}
     ${DATA_SHADERS}
 )
 add_dependencies(${PROJECT_NAME} SHADER_COPY)
