@@ -43,6 +43,44 @@ void Window::updateMinMax()
     max = center + width / 2.0f;
 }
 
+void Window::setCenterNormalized(float value, GLenum type)
+{
+    switch (type)
+    {
+        case GL_BYTE:
+            center = value * 255 - 128;
+            break;
+        case GL_UNSIGNED_BYTE:
+            center = value * 255.0;
+            break;
+        case GL_SHORT:
+            center = value * 65535 - 32768;
+            break;
+        case GL_UNSIGNED_SHORT:
+            center = value * 65535;
+            break;
+        default:
+            center = value;
+    }
+}
+
+void Window::setWidthNormalized(float value, GLenum type)
+{
+    switch (type)
+    {
+        case GL_BYTE:
+        case GL_UNSIGNED_BYTE:
+            width = value * 255.0;
+            break;
+        case GL_SHORT:
+        case GL_UNSIGNED_SHORT:
+            width = value * 65535;
+            break;
+        default:
+            width = value;
+    }
+}
+
 float Window::getCenterNormalized(GLenum type)
 {
     switch (type)

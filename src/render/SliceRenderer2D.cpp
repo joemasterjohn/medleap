@@ -149,11 +149,11 @@ void SliceRenderer2D::drawSlice()
     GLsizei stride = 4 * sizeof(GLfloat);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     
-    int loc = sliceShader->getAttribute("vPosition");
+    int loc = sliceShader->getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
     
-    loc = sliceShader->getAttribute("vTexCoord");
+    loc = sliceShader->getAttribute("vs_texcoord");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
     

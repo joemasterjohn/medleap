@@ -2,15 +2,12 @@
 
 uniform mat4 model;
 
-in vec4 vPosition;
-in vec2 vTexCoord;
-
-out vec4 outcolor;
-out vec2 outtexcoord;
+in vec4 vs_position;
+in vec2 vs_texcoord;
+out vec2 fs_texcoord;
 
 void main()
 {
-    gl_Position = model * vPosition;
-    outcolor = vec4(vTexCoord,1,1);
-    outtexcoord = vTexCoord;
+    gl_Position = model * vs_position;
+    fs_texcoord = vs_texcoord;
 }

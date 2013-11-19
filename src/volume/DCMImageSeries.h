@@ -14,7 +14,8 @@ public:
     enum Modality
     {
         CT,
-        MR
+        MR,
+        UNKNOWN
     };
     
     /** Identifies a DICOM image series on disk */

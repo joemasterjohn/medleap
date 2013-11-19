@@ -52,6 +52,9 @@ vector<DCMImageSeries::ID> DCMImageSeries::search(const char* directoryPath)
             } else if (strModality == "MR") {
                 ID id = { seriesID, directoryPath, MR, files.size() };
                 ids.push_back(id);
+            } else {
+                ID id = { seriesID, directoryPath, UNKNOWN, files.size() };
+                ids.push_back(id);
             }
         }
     }
@@ -106,7 +109,7 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
     int width = img.GetColumns();
     int height = img.GetRows();
     int depth = files.size();
-    
+        
     // only supporting 8/16-bit monochrome images (CT and MR)
     // even if CT data is stored unsigned, it is always signed after the
     // conversion to Hounsfield units (might need to worry about how I do
@@ -134,6 +137,7 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
     
     // load all the images into the series
     DCMImageSeries* series = new DCMImageSeries(width, height, depth, format, type);
+    series->modality = id.modality;
     img.GetBuffer(series->data);
     gl::flipImage(series->data, series->width, series->height, series->getPixelSize());
     for (int i = 1; i < series->depth; i++) {
@@ -146,61 +150,65 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
     }
     
     // transform from manufacturer values to modality values
-    double intercept = img.GetIntercept();
-    double slope = img.GetSlope();
-    switch (type)
-    {
-        case GL_BYTE:
-            applyModalityLUT((GLbyte*)series->data, width, height, depth, slope, intercept);
-            break;
-        case GL_UNSIGNED_BYTE:
-            applyModalityLUT((GLubyte*)series->data, width, height, depth, slope, intercept);
-            break;
-        case GL_SHORT:
-            applyModalityLUT((GLshort*)series->data, width, height, depth, slope, intercept);
-            break;
-        case GL_UNSIGNED_SHORT:
-            applyModalityLUT((GLushort*)series->data, width, height, depth, slope, intercept);
-            break;
-        default:
-            return NULL;
-            break;
+    if (series->modality != UNKNOWN) {
+        double intercept = img.GetIntercept();
+        double slope = img.GetSlope();
+        switch (type)
+        {
+            case GL_BYTE:
+                applyModalityLUT((GLbyte*)series->data, width, height, depth, slope, intercept);
+                break;
+            case GL_UNSIGNED_BYTE:
+                applyModalityLUT((GLubyte*)series->data, width, height, depth, slope, intercept);
+                break;
+            case GL_SHORT:
+                applyModalityLUT((GLshort*)series->data, width, height, depth, slope, intercept);
+                break;
+            case GL_UNSIGNED_SHORT:
+                applyModalityLUT((GLushort*)series->data, width, height, depth, slope, intercept);
+                break;
+            default:
+                return NULL;
+                break;
+        }
     }
     
     // store value of interest LUTs as windows
-    int numWindows;
-    double* centers;
-    double* widths;
-    {
-        Attribute<0x0028,0x1050> a;
-        a.Set(dataSet);
-        numWindows = a.GetNumberOfValues();
-        centers = new double[numWindows];
-        memcpy(centers, a.GetValues(), sizeof(double) * numWindows);
-    }
-    {
-        Attribute<0x0028,0x1051> a;
-        a.Set(dataSet);
-        widths = new double[numWindows];
-        memcpy(widths, a.GetValues(), sizeof(double) * numWindows);
-    }
-    for (int i = 0; i < numWindows; i++) {
+    if (series->modality != UNKNOWN) {
+        int numWindows;
+        double* centers;
+        double* widths;
+        {
+            Attribute<0x0028,0x1050> a;
+            a.Set(dataSet);
+            numWindows = a.GetNumberOfValues();
+            centers = new double[numWindows];
+            memcpy(centers, a.GetValues(), sizeof(double) * numWindows);
+        }
+        {
+            Attribute<0x0028,0x1051> a;
+            a.Set(dataSet);
+            widths = new double[numWindows];
+            memcpy(widths, a.GetValues(), sizeof(double) * numWindows);
+        }
+        for (int i = 0; i < numWindows; i++) {
+            series->windows.push_back(Window(centers[i], widths[i]));
+        }
+        delete[] centers;
+        delete[] widths;
         
-        // convert to normalized windows
-        
-        
-        series->windows.push_back(Window(centers[i], widths[i]));
+        // patient orientation
+        const double* cosines = img.GetDirectionCosines();
+        cgl::Vec3 x(cosines[0], cosines[1], cosines[2]);
+        cgl::Vec3 y(cosines[3], cosines[4], cosines[5]);
+        cgl::Vec3 z = x.cross(y);
+        series->orientation = cgl::Mat3(x, y, z);
+    } else {
+        Window w(0,0);
+        w.setCenterNormalized(0.5f, type);
+        w.setWidthNormalized(1.0f, type);
+        series->windows.push_back(w);
     }
-    delete[] centers;
-    delete[] widths;
-    
-    
-    // patient orientation
-    const double* cosines = img.GetDirectionCosines();
-    cgl::Vec3 x(cosines[0], cosines[1], cosines[2]);
-    cgl::Vec3 y(cosines[3], cosines[4], cosines[5]);
-    cgl::Vec3 z = x.cross(y);
-    series->orientation = cgl::Mat3(x, y, z);
     
     return series;
 }

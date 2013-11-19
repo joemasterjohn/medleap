@@ -15,6 +15,9 @@ public:
     
     float getCenter();
     
+    void setCenterNormalized(float value, GLenum type);
+    void setWidthNormalized(float value, GLenum type);
+    
     /** Calculates the center in [0, 1] range with the given pixel type */
     float getCenterNormalized(GLenum type);
     float getWidth();
