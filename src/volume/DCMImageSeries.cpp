@@ -4,7 +4,7 @@
 #include "gdcmTag.h"
 #include "gdcmScanner.h"
 #include "gdcmIPPSorter.h"
-#include "gl/Util.h"
+#include "util/Util.h"
 
 using namespace std;
 using namespace gdcm;

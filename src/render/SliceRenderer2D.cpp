@@ -1,4 +1,5 @@
 #include "SliceRenderer2D.h"
+#include "math/Transform.h"
 
 using namespace cgl;
 

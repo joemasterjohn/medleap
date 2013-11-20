@@ -41,15 +41,11 @@ add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS} ${DATA_FONTS})
 # source group naming for IDEs
 # -----------------------------------------------------------------------------------------------------------------------
 source_group("" FILES src/main.cpp)
-file(GLOB SOURCE_GL src/gl/*.cpp src/gl/*.h)
-source_group("gl" FILES ${SOURCE_GL})
 file(GLOB SOURCE_VOLUME src/volume/*.cpp src/volume/*.h)
 source_group("volume" FILES ${SOURCE_VOLUME})
 source_group("shaders" FILES ${DATA_SHADERS})
 file(GLOB SOURCE_RENDER src/render/*.cpp src/render/*.h)
 source_group("render" FILES ${SOURCE_RENDER})
-file(GLOB SOURCE_MATH src/math/*.cpp src/math/*.h)
-source_group("math" FILES ${SOURCE_MATH})
 # -----------------------------------------------------------------------------------------------------------------------
 
 
@@ -57,9 +53,7 @@ source_group("math" FILES ${SOURCE_MATH})
 # -----------------------------------------------------------------------------------------------------------------------
 add_executable(${PROJECT_NAME}
     src/main.cpp
-    ${SOURCE_GL}
     ${SOURCE_VOLUME}
-    ${SOURCE_MATH}
     ${SOURCE_RENDER}
     ${DATA_SHADERS}
 )
@@ -70,8 +64,9 @@ add_dependencies(${PROJECT_NAME} SHADER_COPY)
 # libraries
 # -----------------------------------------------------------------------------------------------------------------------
 include_directories(src)
-add_subdirectory(deps/glew)
-include_directories(deps/glew/include)
+add_subdirectory(cgl)
+include_directories(cgl)
+include_directories(cgl/glew)
 find_package(GDCM REQUIRED)
 include_directories(${GDCM_INCLUDE_DIRS})
 find_package(GLFW REQUIRED)
@@ -85,7 +80,7 @@ if (APPLE)
     target_link_libraries(
         ${PROJECT_NAME}
         gdcmMSFF
-        glew
+        cgl
         ${GLFW_LIBRARY}
         ${OPENGL_LIBRARY}
         ${COCOA_LIBRARY}

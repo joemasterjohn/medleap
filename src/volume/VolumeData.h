@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <vector>
 #include "Window.h"
-#include "math/Math.h"
+#include "math/Vector3.h"
 
 /** Base class for any volumetric data that is stored in a regular grid of voxels. **/
 class VolumeData

@@ -4,7 +4,7 @@
 #include "gl/Shader.h"
 #include "gl/Program.h"
 #include "volume/DCMImageSeries.h"
-#include "gl/TextRenderer.h"
+#include "util/TextRenderer.h"
 #include "render/SliceRenderer2D.h"
 
 SliceRenderer2D renderer2D;

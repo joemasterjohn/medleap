@@ -3,7 +3,7 @@
 
 #include "VolumeData.h"
 #include <string>
-#include "math/Math.h"
+#include "math/Matrix3.h"
 #include "gdcmReader.h"
 #include "gdcmAttribute.h"
 

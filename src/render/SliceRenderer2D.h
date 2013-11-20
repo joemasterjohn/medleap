@@ -3,9 +3,9 @@
 
 #include <GL/glew.h>
 #include "gl/Program.h"
-#include "gl/TextRenderer.h"
+#include "util/TextRenderer.h"
 #include "volume/DCMImageSeries.h"
-#include "math/Math.h"
+#include "math/Matrix4.h"
 
 class SliceRenderer2D
 {

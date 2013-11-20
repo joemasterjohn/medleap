@@ -3,41 +3,8 @@
 
 #include <cmath>
 #include <algorithm>
-
-namespace cgl
-{
-    static const float PI          = 3.1415926536f;
-    static const float PI2         = 2.0f * PI;
-    static const float DEG_TO_RAD  = 0.0174532925f;
-    static const float RAD_TO_DEG  = 57.295779513f;
-    
-    template <typename T> class Vector2;
-    template <typename T> class Vector3;
-    template <typename T> class Vector4;
-    template <typename T> class Matrix2;
-    template <typename T> class Matrix3;
-    template <typename T> class Matrix4;
-
-    typedef Vector2<float> Vec2;
-    typedef Vector2<double> Vec2d;
-    typedef Vector3<float> Vec3;
-    typedef Vector3<double> Vec3d;
-    typedef Vector4<float> Vec4;
-    typedef Vector4<double> Vec4d;
-    typedef Matrix2<float> Mat2;
-    typedef Matrix2<double> Mat2d;
-    typedef Matrix3<float> Mat3;
-    typedef Matrix3<double> Mat3d;
-    typedef Matrix4<float> Mat4;
-    typedef Matrix4<double> Mat4d;
-}
-
-#include "Vector2.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "Matrix2.h"
-#include "Matrix3.h"
 #include "Matrix4.h"
+#include "Vector3.h"
 
 namespace cgl {
   
