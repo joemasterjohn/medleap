@@ -46,6 +46,8 @@ source_group("volume" FILES ${SOURCE_VOLUME})
 source_group("shaders" FILES ${DATA_SHADERS})
 file(GLOB SOURCE_RENDER src/render/*.cpp src/render/*.h)
 source_group("render" FILES ${SOURCE_RENDER})
+file(GLOB SOURCE_UI src/ui/*.cpp src/ui/*.h)
+source_group("ui" FILES ${SOURCE_UI})
 # -----------------------------------------------------------------------------------------------------------------------
 
 
@@ -55,6 +57,7 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     ${SOURCE_VOLUME}
     ${SOURCE_RENDER}
+    ${SOURCE_UI}
     ${DATA_SHADERS}
 )
 add_dependencies(${PROJECT_NAME} SHADER_COPY)

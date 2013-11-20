@@ -1,43 +1,44 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "gl/Shader.h"
-#include "gl/Program.h"
 #include "volume/DCMImageSeries.h"
-#include "util/TextRenderer.h"
 #include "render/SliceRenderer2D.h"
+#include "render/Renderer3D.h"
+#include "ui/UIController.h"
 
 SliceRenderer2D renderer2D;
 GLFWwindow* window;
 DCMImageSeries* myVolume;
+UIController* controller;
+
+Renderer3D renderer3D;
 
 void init()
 {
-    renderer2D.init();
-    renderer2D.setVolume(myVolume);
+    renderer3D.init();
+    
+//    renderer2D.init();
+//    renderer2D.setVolume(myVolume);
 }
 
 void reshape(int width, int height)
 {
-    renderer2D.resize(width, height);
+//    renderer2D.resize(width, height);
+    renderer3D.resize(width, height);
 }
 
 void display()
 {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
-    renderer2D.draw();
+//    renderer2D.draw();
+    
+    renderer3D.draw();
 }
 
 void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
-        renderer2D.setCurrentSlice(renderer2D.getCurrentSlice() + 1);
-    }
-    
-    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-        renderer2D.setCurrentWindow(renderer2D.getCurrentWindow() + 1);
-    }
+    controller->keyboardInput(window, key, action, mods);
 }
 
 void resizeCB(GLFWwindow* window, int width, int height)
@@ -47,10 +48,17 @@ void resizeCB(GLFWwindow* window, int width, int height)
 
 void mouseCB(GLFWwindow* window, int button, int action, int mods)
 {
+    controller->mouseButton(window, button, action, mods);
 }
 
 void cursorCB(GLFWwindow* window, double x, double y)
 {
+    controller->mouseMotion(window, x, y);
+}
+
+void scrollCB(GLFWwindow* window, double dx, double dy)
+{
+    controller->scroll(window, dx, dy);
 }
 
 bool initWindow(int width, int height, const char* title)
@@ -86,6 +94,7 @@ bool initWindow(int width, int height, const char* title)
 	glfwSetKeyCallback(window, keyboardCB);
 	glfwSetMouseButtonCallback(window, mouseCB);
     glfwSetCursorPosCallback(window, cursorCB);
+    glfwSetScrollCallback(window, scrollCB);
     
     // Set vertical retrace rate (0 == run as fast as possible)
     //glfwSwapInterval(vsync);
@@ -125,6 +134,8 @@ int main(int argc, char** argv)
         std::cout << "could not find volume " << argv[1] << std::endl;
         return 0;
     }
+    
+    controller = new UIController(&renderer3D);
     
     initWindow(800, 600, "hello world");
     

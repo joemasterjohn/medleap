@@ -172,9 +172,9 @@ void SliceRenderer2D::drawOrientationOverlay()
     axisShader->enable();
     float aspect = (float)windowWidth / windowHeight;
     if (aspect >= 1) {
-        glUniformMatrix4fv(axisShader->getUniform("model"), 1, false, cgl::scale(1.0f/aspect, 1, 1));
+        glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, cgl::scale(1.0f/aspect, 1, 1));
     } else {
-        glUniformMatrix4fv(axisShader->getUniform("model"), 1, false, cgl::scale(1, aspect, 1));
+        glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, cgl::scale(1, aspect, 1));
     }
     GLsizei stride = 5 * sizeof(GLfloat);
     
