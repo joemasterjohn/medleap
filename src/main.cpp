@@ -16,34 +16,35 @@ Renderer3D renderer3D;
 void init()
 {
     renderer3D.init();
-    
-//    renderer2D.init();
-//    renderer2D.setVolume(myVolume);
-}
-
-void reshape(int width, int height)
-{
-//    renderer2D.resize(width, height);
-    renderer3D.resize(width, height);
+    renderer3D.setVolume(myVolume);
+    renderer2D.init();
+    renderer2D.setVolume(myVolume);
 }
 
 void display()
 {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
-//    renderer2D.draw();
     
-    renderer3D.draw();
+    if (controller->mode3D) {
+        renderer3D.draw();
+    } else {
+        renderer2D.draw();
+    }
 }
 
 void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    if (key == GLFW_KEY_M && action == GLFW_PRESS)
+        controller->mode3D = !controller->mode3D;
+    
     controller->keyboardInput(window, key, action, mods);
 }
 
 void resizeCB(GLFWwindow* window, int width, int height)
 {
     renderer2D.resize(width, height);
+    renderer3D.resize(width, height);
 }
 
 void mouseCB(GLFWwindow* window, int button, int action, int mods)
@@ -109,7 +110,8 @@ bool initWindow(int width, int height, const char* title)
     
     // Let program initialize OpenGL resources
     init();
-    reshape(width, height);
+    renderer2D.resize(width, height);
+    renderer3D.resize(width, height);
     
     // Start rendering loop
     while (!glfwWindowShouldClose(window)) {
@@ -135,7 +137,7 @@ int main(int argc, char** argv)
         return 0;
     }
     
-    controller = new UIController(&renderer3D);
+    controller = new UIController(&renderer2D, &renderer3D);
     
     initWindow(800, 600, "hello world");
     

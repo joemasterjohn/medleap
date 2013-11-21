@@ -4,7 +4,9 @@
 #include <GL/glew.h>
 #include <vector>
 #include "Window.h"
+#include "volume/BoundingBox.h"
 #include "math/Vector3.h"
+#include "gl/Texture.h"
 
 /** Base class for any volumetric data that is stored in a regular grid of voxels. **/
 class VolumeData
@@ -24,6 +26,12 @@ public:
     
     /** Stores the image at depth into the provided 2D texture */
     void loadTexture2D(GLuint& texture, int depth);
+    
+    /** Stores all images into a 3D texture */
+    void loadTexture3D(cgl::Texture* texture);
+    
+    /** Returns a bounding box of the normalized real world dimensions of the volume */
+    const BoundingBox& getBounds();
     
     /** Number of pixels horizontally in each slice */
     unsigned int getWidth();
@@ -57,6 +65,7 @@ protected:
     GLenum format;
     GLenum type;
     cgl::Vec3 voxelSize;
+    BoundingBox* bounds;
     
     GLenum internalFormat();
 };

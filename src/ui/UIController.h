@@ -1,6 +1,7 @@
 #ifndef __MEDLEAP_UI_CONTROLLER__
 #define __MEDLEAP_UI_CONTROLLER__
 
+#include "render/SliceRenderer2D.h"
 #include "render/Renderer3D.h"
 #include "ui/CameraControl3D.h"
 #include "KeyboardMouseListener.h"
@@ -8,7 +9,7 @@
 class UIController : public KeyboardMouseListener
 {
 public:
-    UIController(Renderer3D* renderer);
+    UIController(SliceRenderer2D* renderer2D, Renderer3D* renderer);
     
     void update();
     
@@ -17,7 +18,10 @@ public:
     void mouseMotion(GLFWwindow* window, double x, double y);
     void scroll(GLFWwindow* window, double dx, double dy);
     
+    bool mode3D;
+
 private:
+    SliceRenderer2D* renderer2D;
     CameraControl3D cameraControl;
 };
 

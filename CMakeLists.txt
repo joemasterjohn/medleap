@@ -18,6 +18,8 @@ set(DATA_SHADERS
     shaders/color.frag
     shaders/slice2D.vert
     shaders/slice2D.frag
+    shaders/test.vert
+    shaders/test.frag
 )
 set(DATA_FONTS
     fonts/menlo14.bmp

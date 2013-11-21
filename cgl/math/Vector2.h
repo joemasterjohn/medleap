@@ -4,9 +4,12 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include "Vector3.h"
 
 namespace cgl
 {
+    template <typename T> class Vector3;
+    
     /// 2D Vector with X and Y components.
     template <typename T> class Vector2
     {

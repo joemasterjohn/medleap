@@ -228,11 +228,15 @@ void SliceRenderer2D::drawOrientationOverlay()
     sprintf(buf, "Voxel Size: %.2f, %.2f, %.2f", vsize.x, vsize.y, vsize.z);
     text.add(buf, windowWidth, windowHeight, TextRenderer::RIGHT, TextRenderer::TOP);
     
+    sprintf(buf, "Image Size: %d x %d", volume->getWidth(), volume->getHeight());
+    text.add(buf, windowWidth, windowHeight - 18, TextRenderer::RIGHT, TextRenderer::TOP);
+    
     text.end();
 }
 
 void SliceRenderer2D::draw()
 {
+    glBindVertexArray(vao);
     drawSlice();
     drawOrientationOverlay();
 }
