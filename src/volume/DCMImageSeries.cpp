@@ -10,18 +10,30 @@ using namespace std;
 using namespace gdcm;
 
 template <typename T>
-void applyModalityLUT(T* buffer, int width, int height, int depth, double slope, double intercept)
+void applyModalityLUT(T* buffer, int width, int height, int depth, double slope, double intercept, int* min, int* max)
 {
+    *min = numeric_limits<int>::infinity();
+    *max = -numeric_limits<int>::infinity();
+    
     int totalPixels = width * height * depth;
     for (int i = 0; i < totalPixels; i++) {
         *buffer = (*buffer) * slope + intercept;
+        if (*buffer > *max) *max = *buffer;
+        if (*buffer < *min) *min = *buffer;
+        
         buffer++;
     }
 }
 
 DCMImageSeries::DCMImageSeries(int width, int height, int depth, GLenum format, GLenum type)
-    : VolumeData(width, height, depth, format, type)
+    : VolumeData(width, height, depth, format, type), activeWindow(0), histogram(0)
 {
+}
+
+DCMImageSeries::~DCMImageSeries()
+{
+    if (histogram)
+        delete histogram;
 }
 
 vector<DCMImageSeries::ID> DCMImageSeries::search(const char* directoryPath)
@@ -62,7 +74,7 @@ vector<DCMImageSeries::ID> DCMImageSeries::search(const char* directoryPath)
     return ids;
 }
 
-vector<string> DCMImageSeries::sortFiles(DCMImageSeries::ID id)
+void DCMImageSeries::sortFiles(DCMImageSeries::ID id, vector<string>& fileNames, double* zSpacing)
 {
     // use directory from the series
     Directory directory;
@@ -79,13 +91,15 @@ vector<string> DCMImageSeries::sortFiles(DCMImageSeries::ID id)
     
     IPPSorter sorter;
     sorter.SetComputeZSpacing(true);
-    sorter.SetZSpacingTolerance(0.000001);
+    sorter.SetZSpacingTolerance(0.001);
     
     // weak error checking
     if (!sorter.Sort(unsorted)) {
         cerr << "Problem sorting images!" << endl;
     }
-    return sorter.GetFilenames();
+    
+    fileNames = sorter.GetFilenames();
+    *zSpacing = sorter.GetZSpacing();
 }
 
 DCMImageSeries* DCMImageSeries::load(const char* directoryPath)
@@ -96,7 +110,9 @@ DCMImageSeries* DCMImageSeries::load(const char* directoryPath)
 
 DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
 {
-    vector<string> files = sortFiles(id);
+    vector<string> files;
+    double zSpacing;
+    sortFiles(id, files, &zSpacing);
     if (files.size() < 2)
         return NULL;
     
@@ -151,22 +167,23 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
     }
     
     // transform from manufacturer values to modality values
+    int min, max;
     if (series->modality != UNKNOWN) {
         double intercept = img.GetIntercept();
         double slope = img.GetSlope();
         switch (type)
         {
             case GL_BYTE:
-                applyModalityLUT((GLbyte*)series->data, width, height, depth, slope, intercept);
+                applyModalityLUT((GLbyte*)series->data, width, height, depth, slope, intercept, &min, &max);
                 break;
             case GL_UNSIGNED_BYTE:
-                applyModalityLUT((GLubyte*)series->data, width, height, depth, slope, intercept);
+                applyModalityLUT((GLubyte*)series->data, width, height, depth, slope, intercept, &min, &max);
                 break;
             case GL_SHORT:
-                applyModalityLUT((GLshort*)series->data, width, height, depth, slope, intercept);
+                applyModalityLUT((GLshort*)series->data, width, height, depth, slope, intercept, &min, &max);
                 break;
             case GL_UNSIGNED_SHORT:
-                applyModalityLUT((GLushort*)series->data, width, height, depth, slope, intercept);
+                applyModalityLUT((GLushort*)series->data, width, height, depth, slope, intercept, &min, &max);
                 break;
             default:
                 return NULL;
@@ -193,7 +210,9 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
             memcpy(widths, a.GetValues(), sizeof(double) * numWindows);
         }
         for (int i = 0; i < numWindows; i++) {
-            series->windows.push_back(Window(centers[i], widths[i]));
+            Window window(type);
+            window.setReal(centers[i], widths[i]);
+            series->windows.push_back(window);
         }
         delete[] centers;
         delete[] widths;
@@ -205,10 +224,7 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
         cgl::Vec3 z = x.cross(y);
         series->orientation = cgl::Mat3(x, y, z);
     } else {
-        Window w(0,0);
-        w.setCenterNormalized(0.5f, type);
-        w.setWidthNormalized(1.0f, type);
-        series->windows.push_back(w);
+        series->windows.push_back(Window(type));
     }
     
     // give the series a reader to the first image so it can get meta data
@@ -217,7 +233,8 @@ DCMImageSeries* DCMImageSeries::load(DCMImageSeries::ID id)
     
     const double* pixelSpacing = series->getValues<const double*, 0x0028, 0x0030>();
     
-    series->setVoxelSize(pixelSpacing[0], pixelSpacing[1], series->getValue<double, 0x0018, 0x0050>());
+    // Z spacing should be regular between images (this is NOT slice thickness attribute)
+    series->setVoxelSize(pixelSpacing[0], pixelSpacing[1], zSpacing);
     
     return series;
 }
@@ -240,4 +257,22 @@ vector<Window>& DCMImageSeries::getWindows()
 bool DCMImageSeries::hasValue(uint16_t G, uint16_t E)
 {
     return reader.GetFile().GetDataSet().FindDataElement(Tag(G,E));
+}
+
+Window& DCMImageSeries::getCurrentWindow()
+{
+    return windows[activeWindow];
+}
+
+void DCMImageSeries::setNextWindow()
+{
+    activeWindow = (activeWindow + 1) % windows.size();
+}
+
+void DCMImageSeries::setPrevWindow()
+{
+    if (activeWindow == 0)
+        activeWindow = windows.size() - 1;
+    else
+        activeWindow = (activeWindow - 1) % windows.size();
 }

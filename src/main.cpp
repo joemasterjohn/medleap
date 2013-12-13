@@ -138,6 +138,7 @@ int main(int argc, char** argv)
     }
     
     controller = new UIController(&renderer2D, &renderer3D);
+    controller->setVolume(myVolume);
     
     initWindow(800, 600, "hello world");
     

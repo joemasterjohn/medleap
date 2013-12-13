@@ -19,10 +19,6 @@ public:
     
     int getCurrentSlice();
     void setCurrentSlice(int sliceIndex);
-    
-    int getCurrentWindow();
-    void setCurrentWindow(int currentWindow);
-    
 private:
     class OrientationLabel
     {
@@ -44,7 +40,6 @@ private:
     int windowWidth;
     int windowHeight;
     int currentSlice;
-    int currentWindow;
     std::vector<OrientationLabel> labels;
     cgl::Mat4 modelMatrix;
     

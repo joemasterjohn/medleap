@@ -6,6 +6,7 @@
 #include "math/Matrix3.h"
 #include "gdcmReader.h"
 #include "gdcmAttribute.h"
+#include "Histogram.h"
 
 /** DICOM image series */
 class DCMImageSeries : public VolumeData
@@ -29,11 +30,19 @@ public:
         unsigned int numImages;
     };
     
+    ~DCMImageSeries();
+    
     /** Returns the modality of the data */
     Modality getModality();
     
     /** Windows that store values of interest */
     std::vector<Window>& getWindows();
+    
+    Window& getCurrentWindow();
+    
+    void setNextWindow();
+    
+    void setPrevWindow();
     
     /** Matrix that transforms DICOM image space (+X right, +Y down) to patient space (+X = left, +Y = posterior, +Z = superior) */
     const cgl::Mat3& getPatientBasis() const;
@@ -64,14 +73,16 @@ public:
     /** This will load the first image series found in a directory */
     static DCMImageSeries* load(const char* directoryPath);
     
-    /** Returns all of the file names associated with an image series, sorted by Z */
-    static std::vector<std::string> sortFiles(ID seriesID);
+    /** Stores file names sorted by Z into the fileNames parameter. Also stores the computed Z spacing into zSpacing parameter. */
+    static void sortFiles(ID seriesID, std::vector<std::string>& fileNames, double* zSpacing);
     
 private:
     gdcm::Reader reader;
     Modality modality;
     cgl::Mat3 orientation;
     std::vector<Window> windows;
+    int activeWindow;
+    Histogram* histogram;
 
     /** Can only construct by using static methods */
     DCMImageSeries(int width, int height, int depth, GLenum format, GLenum type);

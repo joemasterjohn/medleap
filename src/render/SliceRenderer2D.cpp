@@ -32,8 +32,7 @@ SliceRenderer2D::SliceRenderer2D() :
     numOrientationVertices(0),
     windowWidth(0),
     windowHeight(0),
-    currentSlice(0),
-    currentWindow(0)
+    currentSlice(0)
 {
 }
 
@@ -139,11 +138,9 @@ void SliceRenderer2D::drawSlice()
     sliceShader->enable();
     
     // set the uniforms
-    float w = volume->getWindows()[currentWindow].getWidthNormalized(volume->getType());
-    float c = volume->getWindows()[currentWindow].getCenterNormalized(volume->getType());
     glUniform1i(sliceShader->getUniform("signed_normalized"), volume->isSigned());
-    glUniform1f(sliceShader->getUniform("window_min"), c - w/2.0f);
-    glUniform1f(sliceShader->getUniform("window_multiplier"), 1.0f / w);
+    glUniform1f(sliceShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
+    glUniform1f(sliceShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
     glUniformMatrix4fv(sliceShader->getUniform("model"), 1, false, modelMatrix);
     
     // set state and shader for drawing medical stuff
@@ -213,8 +210,8 @@ void SliceRenderer2D::drawOrientationOverlay()
     sprintf(buf, "slice: %d/%d", (currentSlice+1), volume->getDepth());
     text.add(buf, 0, 0, TextRenderer::LEFT, TextRenderer::BOTTOM);
     
-    float wc = volume->getWindows()[currentWindow].getCenter();
-    float ww = volume->getWindows()[currentWindow].getWidth();
+    float wc = volume->getCurrentWindow().getCenterReal();
+    float ww = volume->getCurrentWindow().getWidthReal();
     sprintf(buf, "WC = %.1f  WW = %.1f", wc, ww);
     text.add(buf, windowWidth, 0, TextRenderer::RIGHT, TextRenderer::BOTTOM);
     
@@ -250,14 +247,4 @@ void SliceRenderer2D::setCurrentSlice(int sliceIndex)
 {
     currentSlice = std::max(0, sliceIndex) % volume->getDepth();
     volume->loadTexture2D(sliceTexture, currentSlice);
-}
-
-int SliceRenderer2D::getCurrentWindow()
-{
-    return currentWindow;
-}
-
-void SliceRenderer2D::setCurrentWindow(int window)
-{
-    currentWindow = std::max(0, window) % volume->getWindows().size();
 }

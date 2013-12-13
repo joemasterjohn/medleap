@@ -12,9 +12,10 @@ void UIController::keyboardInput(GLFWwindow *window, int key, int action, int mo
         if (key == GLFW_KEY_RIGHT) {
             renderer2D->setCurrentSlice(renderer2D->getCurrentSlice() + 1);
         }
-        else if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-            renderer2D->setCurrentWindow(renderer2D->getCurrentWindow() + 1);
-        }
+    }
+    
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+        volume->setNextWindow();
     }
 }
 
@@ -34,4 +35,9 @@ void UIController::scroll(GLFWwindow *window, double dx, double dy)
 {
     if (mode3D)
         cameraControl.scroll(window, dx, dy);
+}
+
+void UIController::setVolume(DCMImageSeries* volume)
+{
+    this->volume = volume;
 }

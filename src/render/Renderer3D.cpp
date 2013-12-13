@@ -137,10 +137,8 @@ void Renderer3D::draw()
         glUniform3fv(boxShader->getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
         glUniform1i(boxShader->getUniform("signed_normalized"), volume->isSigned());
         
-        float w = volume->getWindows()[0].getWidthNormalized(volume->getType());
-        float c = volume->getWindows()[0].getCenterNormalized(volume->getType());
-        glUniform1f(boxShader->getUniform("window_min"), c - w/2.0f);
-        glUniform1f(boxShader->getUniform("window_multiplier"), 1.0f / w);
+        glUniform1f(boxShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
+        glUniform1f(boxShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
         
 
         int loc = boxShader->getAttribute("vs_position");

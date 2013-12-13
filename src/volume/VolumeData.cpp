@@ -50,9 +50,6 @@ void VolumeData::setVoxelSize(float x, float y, float z)
     float totalHeight = y * height;
     float totalDepth = z * depth;
     
-    // TODO: why is this not right for my CT data? Says 10 but should be 3?
-    totalDepth = 3 * depth;
-    
     cgl::Vec3 v(totalWidth, totalHeight, totalDepth);
     v.normalize();
     delete bounds;

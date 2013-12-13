@@ -1,114 +1,64 @@
 #include "Window.h"
+#include <iostream>
 
-Window::Window(float center, float width) : center(center), width(width)
+Window::Window(GLenum type)
 {
-    updateMinMax();
-}
-
-void Window::setCenter(float center)
-{
-    this->center = center;
-    updateMinMax();
-}
-
-void Window::setWidth(float width)
-{
-    this->width = width;
-    updateMinMax();
-}
-
-float Window::getCenter()
-{
-    return center;
-}
-
-float Window::getWidth()
-{
-    return width;
-}
-
-float Window::getMin()
-{
-    return min;
-}
-
-float Window::getMax()
-{
-    return max;
-}
-
-void Window::updateMinMax()
-{
-    min = center - width / 2.0f;
-    max = center + width / 2.0f;
-}
-
-void Window::setCenterNormalized(float value, GLenum type)
-{
-    switch (type)
-    {
+    switch (type) {
         case GL_BYTE:
-            center = value * 255 - 128;
+            typeMin = -128;
+            typeRange = 255;
             break;
         case GL_UNSIGNED_BYTE:
-            center = value * 255.0;
+            typeMin = 0;
+            typeRange = 255;
             break;
         case GL_SHORT:
-            center = value * 65535 - 32768;
+            typeMin = -32768;
+            typeRange = 65535;
             break;
         case GL_UNSIGNED_SHORT:
-            center = value * 65535;
+            typeMin = 0;
+            typeRange = 65535;
             break;
         default:
-            center = value;
+            std::cerr << "Window constructed with unknown type" << std::endl;
     }
+    
+    setNorm(0.5f, 1.0f);
 }
 
-void Window::setWidthNormalized(float value, GLenum type)
+void Window::setReal(float center, float width)
 {
-    switch (type)
-    {
-        case GL_BYTE:
-        case GL_UNSIGNED_BYTE:
-            width = value * 255.0;
-            break;
-        case GL_SHORT:
-        case GL_UNSIGNED_SHORT:
-            width = value * 65535;
-            break;
-        default:
-            width = value;
-    }
+    centerReal = center;
+    widthReal = width;
+    centerNorm = (centerReal - typeMin) / typeRange;
+    widthNorm = widthReal / typeRange;
+    
+    minReal = centerReal - widthReal / 2.0f;
+    maxReal = centerReal + widthReal / 2.0f;
+    minNorm = centerNorm - widthNorm / 2.0f;
+    maxNorm = centerNorm + widthNorm / 2.0f;
 }
 
-float Window::getCenterNormalized(GLenum type)
+void Window::setNorm(float center, float width)
 {
-    switch (type)
-    {
-        case GL_BYTE:
-            return (center + 128.0) / 255.0;
-        case GL_UNSIGNED_BYTE:
-            return center / 255.0;
-        case GL_SHORT:
-            return (center + 32768.0) / 65535.0;
-        case GL_UNSIGNED_SHORT:
-            return center / 65535.0;
-        default:
-            return center;
-    }
+    centerNorm = center;
+    widthNorm = width;
+    centerReal = centerNorm * typeRange + typeMin;
+    widthReal = widthNorm * typeRange;
+    
+    minReal = centerReal - widthReal / 2.0f;
+    maxReal = centerReal + widthReal / 2.0f;
+    minNorm = centerNorm - widthNorm / 2.0f;
+    maxNorm = centerNorm + widthNorm / 2.0f;
 }
 
-float Window::getWidthNormalized(GLenum type)
-{
-    switch (type)
-    {
-        case GL_BYTE:
-        case GL_UNSIGNED_BYTE:
-            return width / 255.0;
-        case GL_SHORT:
-        case GL_UNSIGNED_SHORT:
-            return width / 65535.0;
-        default:
-            return center;
-    }
-}
+float Window::getCenterReal() { return centerReal; }
+float Window::getWidthReal() { return widthReal; }
+float Window::getMinReal() { return minReal; }
+float Window::getMaxReal() { return maxReal; }
+
+float Window::getCenterNorm() { return centerNorm; }
+float Window::getWidthNorm() { return widthNorm; }
+float Window::getMinNorm() { return minNorm; }
+float Window::getMaxNorm() { return maxNorm; }
