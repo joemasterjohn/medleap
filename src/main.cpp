@@ -7,6 +7,7 @@
 #include "ui/UIController.h"
 #include "volume/Histogram.h"
 #include "util/Util.h"
+#include "volume/VolumeLoader.h"
 
 SliceRenderer2D renderer2D;
 GLFWwindow* window;
@@ -133,17 +134,17 @@ int main(int argc, char** argv)
         return 0;
     }
     
-    VolumeData::Loader loader;
+    VolumeLoader loader;
     myVolume = loader.load(argv[1]);
     if (!myVolume) {
         std::cout << "could not find volume " << argv[1] << std::endl;
         return 0;
     }
     
-//    Histogram histo(-1024, 1500, 4);
-//    std::cout << gl::toString(myVolume->getType()) << std::endl;
-//    histo.readData((GLshort*)myVolume->data, myVolume->getNumVoxels());
-//    histo.print();
+    Histogram histo(-1024, 1500, 4);
+    std::cout << gl::toString(myVolume->getType()) << std::endl;
+    histo.readData((GLshort*)myVolume->data, myVolume->getNumVoxels());
+    histo.print();
     
 //    myVolume->getHistogram()->print();
 //    myVolume->getHistogram()->printVisual(60, 220);
