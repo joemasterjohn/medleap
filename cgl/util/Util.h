@@ -10,6 +10,8 @@ namespace gl
      */
     int sizeOf(GLenum typeEnum);
     
+    const char* toString(GLenum glEnum);
+    
     /**
      * This will flip the rows a buffer of pixels. This is useful since most images store
      * rows starting at the top, but OpenGL reads starting at the bottom.

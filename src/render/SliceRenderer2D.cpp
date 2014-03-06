@@ -41,7 +41,7 @@ SliceRenderer2D::~SliceRenderer2D()
     // TODO: delete resources
 }
 
-void SliceRenderer2D::setVolume(DCMImageSeries* volume)
+void SliceRenderer2D::setVolume(VolumeData* volume)
 {
     this->volume = volume;
     

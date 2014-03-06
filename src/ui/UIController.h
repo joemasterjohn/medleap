@@ -17,12 +17,12 @@ public:
     void mouseButton(GLFWwindow* window, int button, int action, int mods);
     void mouseMotion(GLFWwindow* window, double x, double y);
     void scroll(GLFWwindow* window, double dx, double dy);
-    void setVolume(DCMImageSeries* volume);
+    void setVolume(VolumeData* volume);
     
     bool mode3D;
 
 private:
-    DCMImageSeries* volume;
+    VolumeData* volume;
     SliceRenderer2D* renderer2D;
     CameraControl3D cameraControl;
 };

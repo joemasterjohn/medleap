@@ -18,7 +18,7 @@ cgl::Camera& Renderer3D::getCamera()
     return camera;
 }
 
-void Renderer3D::setVolume(DCMImageSeries* volume)
+void Renderer3D::setVolume(VolumeData* volume)
 {
     this->volume = volume;
     volume->loadTexture3D(volumeTexture);

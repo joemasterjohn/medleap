@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include "gl/Program.h"
 #include "util/TextRenderer.h"
-#include "volume/DCMImageSeries.h"
+#include "volume/VolumeData.h"
 #include "math/Matrix4.h"
 
 class SliceRenderer2D
@@ -13,7 +13,7 @@ public:
     SliceRenderer2D();
     ~SliceRenderer2D();
     void init();
-    void setVolume(DCMImageSeries* volume);
+    void setVolume(VolumeData* volume);
     void draw();
     void resize(int width, int height);
     
@@ -28,7 +28,7 @@ private:
         OrientationLabel(std::string text, cgl::Vec2 position) : text(text), position(position) {}
     };
     
-    DCMImageSeries* volume;
+    VolumeData* volume;
     TextRenderer text;
     Program* sliceShader;
     Program* axisShader;

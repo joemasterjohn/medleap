@@ -37,7 +37,7 @@ void UIController::scroll(GLFWwindow *window, double dx, double dy)
         cameraControl.scroll(window, dx, dy);
 }
 
-void UIController::setVolume(DCMImageSeries* volume)
+void UIController::setVolume(VolumeData* volume)
 {
     this->volume = volume;
 }

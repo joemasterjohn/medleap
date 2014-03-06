@@ -6,7 +6,7 @@
 #include "gl/Viewport.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
-#include "volume/DCMImageSeries.h"
+#include "volume/VolumeData.h"
 #include "util/Camera.h"
 
 class Renderer3D
@@ -18,13 +18,13 @@ public:
     void resize(int width, int height);
     void draw();
     
-    void setVolume(DCMImageSeries* volume);
+    void setVolume(VolumeData* volume);
     
     cgl::Camera& getCamera();
     
 private:
     cgl::Texture* volumeTexture;
-    DCMImageSeries* volume;
+    VolumeData* volume;
     cgl::Camera camera;
     cgl::Viewport viewport;
     cgl::Mat4 model;

@@ -3,34 +3,85 @@
 
 #include <GL/glew.h>
 #include <vector>
+#include <string>
 #include "Window.h"
 #include "volume/BoundingBox.h"
 #include "math/Vector3.h"
 #include "gl/Texture.h"
+#include "math/Matrix3.h"
+#include "gdcmReader.h"
+#include "gdcmAttribute.h"
+#include "Histogram.h"
 
-/** Base class for any volumetric data that is stored in a regular grid of voxels. **/
+/** Volumetric data loaded from a DICOM image series. Stored in a regular grid of voxels. All voxel values are assumed to be an integer  format, 8 or 16 bits, signed or unsigned. */
 class VolumeData
 {
 public:
-    /** Creates an empty volume with memory allocated to fit the specified dimensions */
-    VolumeData(int width, int height, int depth, GLenum format, GLenum type);
     
-    /** Creates a volume using the memory stored in data; does not copy or allocate new memory */
-    VolumeData(char* data, int width, int height, int depth, GLenum format, GLenum type);
+    /** The type of image data */
+    enum Modality
+    {
+        CT,         // computed tomography
+        MR,         // magnetic resonance
+        UNKNOWN     // any other data
+    };
     
-    /** Dimensions of a voxel in real world units */
+    /** Identifies a DICOM image series on disk */
+    struct ID
+    {
+        std::string uid;
+        std::string directory;
+        Modality modality;
+        unsigned int numImages;
+    };
+    
+    /** Utility class for constructing a VolumeData from DICOM image series */
+    class Loader
+    {
+    public:
+        /** This will search a directory to find all unique CT or MT image series. */
+        std::vector<ID> search(const char* directoryPath);
+        
+        /** Loads the specified image series */
+        VolumeData* load(ID seriesID);
+        
+        /** This will load the first image series found in a directory */
+        VolumeData* load(const char* directoryPath);
+        
+        /** Stores file names sorted by Z into the fileNames parameter. Also stores the computed Z spacing into zSpacing parameter. */
+        void sortFiles(ID seriesID, std::vector<std::string>& fileNames, double* zSpacing);
+
+    private:
+        VolumeData* volume;
+
+        /** The modality LUT transforms device-dependent values to device-independent modality values. For example, it will transform raw UINT16 CT data values into signed CT Hounsfield units. It uses the slope and intercept stored in the DICOM dataset to transform values. */
+        template <typename T>
+        void applyModalityLUT(double slope, double intercept)
+        {
+            T* buffer = (T*)volume->data;
+            volume->minVoxelValue = std::numeric_limits<int>::infinity();
+            volume->maxVoxelValue = -std::numeric_limits<int>::infinity();
+            for (int i = 0; i < volume->getNumVoxels(); i++) {
+                *buffer = (*buffer) * slope + intercept;
+                if (*buffer > volume->maxVoxelValue) volume->maxVoxelValue = *buffer;
+                if (*buffer < volume->minVoxelValue) volume->minVoxelValue = *buffer;
+                buffer++;
+            }
+        }
+    };
+    
+    friend class Loader;
+    
+    
+    
+    
+    /** Clean up resources */
+    ~VolumeData();
+    
+    /** Dimensions of each voxel in real world units (ex. millimeters) */
     const cgl::Vec3& getVoxelSize() const;
     
-    /** Sets the size of each voxel in real world units */
-    void setVoxelSize(float x, float y, float z);
-    
-    /** Stores the image at depth into the provided 2D texture */
-    void loadTexture2D(GLuint& texture, int depth);
-    
-    /** Stores all images into a 3D texture */
-    void loadTexture3D(cgl::Texture* texture);
-    
-    /** Returns a bounding box of the normalized real world dimensions of the volume */
+    /** Returns a bounding box of the normalized real world dimensions of the volume. */
     const BoundingBox& getBounds();
     
     /** Number of pixels horizontally in each slice */
@@ -51,23 +102,95 @@ public:
     /** Size in bytes of all slices */
     unsigned int getVolumeSize();
     
+    /** Total number of voxels in the volume (WxHxD) */
+    unsigned int getNumVoxels();
+    
     /** Type for channels in the images */
     GLenum getType();
     
     /** Data is stored in a signed format */
     bool isSigned();
+    
+    /** The minimum voxel value stored in the data */
+    int getMinValue();
+    
+    /** The maximum voxel value stored in the data */
+    int getMaxValue();
 
-protected:
+    /** Returns the modality of the data */
+    Modality getModality();
+    
+    /** Returns the default histogram */
+    Histogram* getHistogram();
+    
+    /** Windows that store values of interest */
+    std::vector<Window>& getWindows();
+    
+    /** The currently active voxel value window (determines which values are displayed) */
+    Window& getCurrentWindow();
+    
+    /** Matrix that transforms DICOM image space (+X right, +Y down) to patient space (+X = left, +Y = posterior, +Z = superior) */
+    const cgl::Mat3& getPatientBasis() const;
+    
+    /** Checks if the DICOM tag <G,E> exists in the data set */
+    bool hasValue(uint16_t G, uint16_t E);
+    
+    /** Returns a value of type T with the DICOM tag <G,E>. */
+    template <typename T, uint16_t G, uint16_t E> T getValue() {
+        gdcm::Attribute<G,E> at;
+        at.SetFromDataSet(reader.GetFile().GetDataSet());
+        return at.GetValue();
+    }
+    
+    /** Returns a value of type T with the DICOM tag <G,E>. */
+    template <typename T, uint16_t G, uint16_t E> T getValues() {
+        gdcm::Attribute<G,E> at;
+        at.SetFromDataSet(reader.GetFile().GetDataSet());
+        return at.GetValues();
+    }
+    
+    /** Sets the size of each voxel in real world units */
+    void setVoxelSize(float x, float y, float z);
+    
+    /** Sets the current window to the next available window */
+    void setNextWindow();
+    
+    /** Sets the current window to the previous available window */
+    void setPrevWindow();
+    
+    /** Stores the image/slice at depth into the provided 2D texture */
+    void loadTexture2D(GLuint& texture, int depth);
+    
+    /** Stores all images/slices into a 3D texture (single channel per voxel) */
+    void loadTexture3D(cgl::Texture* texture);
+
+    
+    // raw data buffer
     char* data;
+    
+private:
     int width;
     int height;
     int depth;
     GLenum format;
     GLenum type;
+    int minVoxelValue;
+    int maxVoxelValue;
     cgl::Vec3 voxelSize;
     BoundingBox* bounds;
+    gdcm::Reader reader;
+    Modality modality;
+    cgl::Mat3 orientation;
+    std::vector<Window> windows;
+    int activeWindow;
+    Histogram* histogram;
+    
+
+    /** Private constructor since loading is complex and done by the Loader class */
+    VolumeData();
     
     GLenum internalFormat();
+    
 };
 
 #endif // __MEDLEAP_VOLUME_DATA__

@@ -1,14 +1,16 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "volume/DCMImageSeries.h"
+#include "volume/VolumeData.h"
 #include "render/SliceRenderer2D.h"
 #include "render/Renderer3D.h"
 #include "ui/UIController.h"
+#include "volume/Histogram.h"
+#include "util/Util.h"
 
 SliceRenderer2D renderer2D;
 GLFWwindow* window;
-DCMImageSeries* myVolume;
+VolumeData* myVolume;
 UIController* controller;
 
 Renderer3D renderer3D;
@@ -125,22 +127,31 @@ bool initWindow(int width, int height, const char* title)
 }
 
 int main(int argc, char** argv)
-{    
+{
     if (argc != 2) {
         std::cout << "provide dicom directory as argument" << std::endl;
         return 0;
     }
     
-    myVolume = DCMImageSeries::load(argv[1]);
+    VolumeData::Loader loader;
+    myVolume = loader.load(argv[1]);
     if (!myVolume) {
         std::cout << "could not find volume " << argv[1] << std::endl;
         return 0;
     }
     
-    controller = new UIController(&renderer2D, &renderer3D);
-    controller->setVolume(myVolume);
+//    Histogram histo(-1024, 1500, 4);
+//    std::cout << gl::toString(myVolume->getType()) << std::endl;
+//    histo.readData((GLshort*)myVolume->data, myVolume->getNumVoxels());
+//    histo.print();
     
-    initWindow(800, 600, "hello world");
+//    myVolume->getHistogram()->print();
+//    myVolume->getHistogram()->printVisual(60, 220);
+    
+//    controller = new UIController(&renderer2D, &renderer3D);
+//    controller->setVolume(myVolume);
+    
+//    initWindow(800, 600, "hello world");
     
     return 0;
 }

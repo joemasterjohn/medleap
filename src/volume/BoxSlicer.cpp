@@ -1,4 +1,4 @@
-#include "boxslicer.h"
+#include "BoxSlicer.h"
 #include <limits>
 #include <algorithm>
 #include "math/Vector4.h"

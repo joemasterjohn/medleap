@@ -23,6 +23,23 @@ int gl::sizeOf(GLenum typeEnum)
     }
 }
 
+const char* gl::toString(GLenum glEnum)
+{
+    switch (glEnum)
+    {
+        case GL_UNSIGNED_BYTE:
+            return "GL_UNSIGNED_BYTE";
+        case GL_BYTE:
+            return "GL_BYTE";
+        case GL_UNSIGNED_SHORT:
+            return "GL_UNSIGNED_SHORT";
+        case GL_SHORT:
+            return "GL_SHORT";
+        default:
+            return "UNKNOWN";
+    }
+}
+
 void gl::flipImage(void* buffer, int width, int height, int pixelSize)
 {
     char* buf = (char*)buffer;
