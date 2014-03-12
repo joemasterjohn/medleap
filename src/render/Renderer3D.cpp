@@ -53,13 +53,6 @@ void Renderer3D::init()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     
     
-
-    
-    
-    
-    
-    
-    
     boxShader = Program::create("shaders/test.vert", "shaders/test.frag");
     
 }
@@ -104,7 +97,7 @@ void Renderer3D::draw()
         
         lineShader->enable();
         
-        cgl::Mat4 mvp = camera.getProjection() * camera.getView() * model;
+        cgl::Mat4 mvp = camera.getProjection() * camera.getView();
         glUniformMatrix4fv(lineShader->getUniform("modelViewProjection"), 1, false, mvp);
         
         GLsizei stride = sizeof(GLfloat) * 6;
@@ -130,7 +123,7 @@ void Renderer3D::draw()
         
         boxShader->enable();
         
-        cgl::Mat4 mvp = camera.getProjection() * camera.getView() * model;
+        cgl::Mat4 mvp = camera.getProjection() * camera.getView();
         glUniformMatrix4fv(boxShader->getUniform("modelViewProjection"), 1, false, mvp);
         
         glUniform3fv(boxShader->getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
@@ -156,6 +149,45 @@ void Renderer3D::draw()
 //        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glBlendEquation(GL_FUNC_ADD);
 
+        glDisable(GL_BLEND);
+    }
+    
+    // box 2
+    {
+        volumeTexture->bind();
+        updateSlices();
+        
+        glBindBuffer(GL_ARRAY_BUFFER, boxVBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxIBO);
+        
+        boxShader->enable();
+        
+        cgl::Mat4 mvp = camera.getProjection() * camera.getView() * cgl::translation(0.25, 0, 0);
+        glUniformMatrix4fv(boxShader->getUniform("modelViewProjection"), 1, false, mvp);
+        
+        glUniform3fv(boxShader->getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
+        glUniform3fv(boxShader->getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
+        glUniform1i(boxShader->getUniform("signed_normalized"), volume->isSigned());
+        
+        glUniform1f(boxShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
+        glUniform1f(boxShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
+        
+        
+        int loc = boxShader->getAttribute("vs_position");
+        glEnableVertexAttribArray(loc);
+        glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
+        
+        glEnable(GL_BLEND);
+        //        glBlendFunc(GL_ONE, GL_ONE);
+        glBlendEquation(GL_MAX);
+        //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glEnable(GL_PRIMITIVE_RESTART);
+        glPrimitiveRestartIndex(65535);
+        glDrawElements(GL_TRIANGLE_FAN, numSliceIndices, GL_UNSIGNED_SHORT, 0);
+        glDisable(GL_PRIMITIVE_RESTART);
+        //        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glBlendEquation(GL_FUNC_ADD);
+        
         glDisable(GL_BLEND);
     }
     

@@ -8,8 +8,9 @@
 #include "gl/Texture.h"
 #include "volume/VolumeData.h"
 #include "util/Camera.h"
+#include "render/RenderLayer.h"
 
-class Renderer3D
+class Renderer3D : public RenderLayer
 {
 public:
     Renderer3D();
