@@ -70,10 +70,14 @@ void MainController::setMode(MainController::Mode mode)
         case MODE_2D:
             renderer.clearLayers();
             renderer.pushLayer(controller2D.getRenderLayer());
+            activeControllers.clear();
+            activeControllers.push_front(&controller2D);
             break;
         case MODE_3D:
             renderer.clearLayers();
             renderer.pushLayer(controller3D.getRenderLayer());
+            activeControllers.clear();
+            activeControllers.push_front(&controller3D);
             break;
     }
 }
@@ -117,8 +121,8 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
         volume->setNextWindow();
     }
 
-    
-    // TODO go through controllers and process
+    for (Controller* c : activeControllers)
+        c->keyboardInput(window, key, action, mods);
 }
 
 void MainController::resize(int width, int height)
@@ -130,15 +134,18 @@ void MainController::resize(int width, int height)
 
 void MainController::mouseButton(GLFWwindow *window, int button, int action, int mods)
 {
-    // TODO go through controllers and process
+    for (Controller* c : activeControllers)
+        c->mouseButton(window, button, action, mods);
 }
 
 void MainController::mouseMotion(GLFWwindow *window, double x, double y)
 {
-    // TODO go through controllers and process
+    for (Controller* c : activeControllers)
+        c->mouseMotion(window, x, y);
 }
 
 void MainController::scroll(GLFWwindow *window, double dx, double dy)
 {
-    // TODO go through controllers and process
+    for (Controller* c : activeControllers)
+        c->scroll(window, dx, dy);
 }

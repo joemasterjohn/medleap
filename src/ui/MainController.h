@@ -4,6 +4,7 @@
 #include "render/MainRenderer.h"
 #include "ui/Controller2D.h"
 #include "ui/Controller3D.h"
+#include <list>
 
 /** Main class (singleton) that controls the UI events and owns the rendering. */
 class MainController
@@ -43,6 +44,7 @@ private:
     MainRenderer renderer;
     Controller2D controller2D;
     Controller3D controller3D;
+    std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;
 };
