@@ -1,30 +1,30 @@
-#include "Renderer3D.h"
+#include "VolumeRenderer.h"
 #include "math/Transform.h"
 #include "volume/BoxSlicer.h"
 
 using namespace cgl;
 using namespace std;
 
-Renderer3D::Renderer3D()
+VolumeRenderer::VolumeRenderer()
 {
 }
 
-Renderer3D::~Renderer3D()
+VolumeRenderer::~VolumeRenderer()
 {
 }
 
-cgl::Camera& Renderer3D::getCamera()
+cgl::Camera& VolumeRenderer::getCamera()
 {
     return camera;
 }
 
-void Renderer3D::setVolume(VolumeData* volume)
+void VolumeRenderer::setVolume(VolumeData* volume)
 {
     this->volume = volume;
     volume->loadTexture3D(volumeTexture);
 }
 
-void Renderer3D::init()
+void VolumeRenderer::init()
 {
     
     volumeTexture = new Texture(GL_TEXTURE_3D);
@@ -57,14 +57,14 @@ void Renderer3D::init()
     
 }
 
-void Renderer3D::resize(int width, int height)
+void VolumeRenderer::resize(int width, int height)
 {
     viewport.width = width;
     viewport.height = height;
     camera.setProjection(cgl::perspective(1.0471975512, 1, 0.1f, 100.0f));
 }
 
-void Renderer3D::updateSlices()
+void VolumeRenderer::updateSlices()
 {
     BoxSlicer slicer;
     slicer.slice(volume->getBounds(), camera, 128);
@@ -86,7 +86,7 @@ void Renderer3D::updateSlices()
     numSliceIndices = slicer.getIndices().size();
 }
 
-void Renderer3D::draw()
+void VolumeRenderer::draw()
 {
     glBindVertexArray(vao);
     

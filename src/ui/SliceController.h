@@ -1,16 +1,16 @@
-#ifndef __medleap__Controller2D__
-#define __medleap__Controller2D__
+#ifndef __medleap__SliceController__
+#define __medleap__SliceController__
 
 #include "ui/Controller.h"
-#include "render/SliceRenderer2D.h"
+#include "render/SliceRenderer.h"
 
-/** Main controller for 2D mode */
-class Controller2D : public Controller
+/** Controls slice rendering layer */
+class SliceController : public Controller
 {
 public:
-    Controller2D();
-    ~Controller2D();
-    SliceRenderer2D* getRenderLayer();
+    SliceController();
+    ~SliceController();
+    SliceRenderer* getRenderLayer();
     void setVolume(VolumeData* volume);
     
     bool keyboardInput(GLFWwindow* window, int key, int action, int mods);
@@ -19,8 +19,8 @@ public:
     bool scroll(GLFWwindow* window, double dx, double dy);
     
 private:
-    SliceRenderer2D renderer;
+    SliceRenderer renderer;
     VolumeData* volume;
 };
 
-#endif /* defined(__medleap__Controller2D__) */
+#endif /* defined(__medleap__SliceController__) */

@@ -1,4 +1,4 @@
-#include "SliceRenderer2D.h"
+#include "SliceRenderer.h"
 #include "math/Transform.h"
 
 using namespace cgl;
@@ -21,7 +21,7 @@ static const AxisLabel axes[] = {
 };
 // -----------------------------------------------------------------
 
-SliceRenderer2D::SliceRenderer2D() :
+SliceRenderer::SliceRenderer() :
     volume(NULL),
     sliceShader(NULL),
     axisShader(NULL),
@@ -36,12 +36,12 @@ SliceRenderer2D::SliceRenderer2D() :
 {
 }
 
-SliceRenderer2D::~SliceRenderer2D()
+SliceRenderer::~SliceRenderer()
 {
     // TODO: delete resources
 }
 
-void SliceRenderer2D::setVolume(VolumeData* volume)
+void SliceRenderer::setVolume(VolumeData* volume)
 {
     this->volume = volume;
     
@@ -88,7 +88,7 @@ void SliceRenderer2D::setVolume(VolumeData* volume)
     resize(windowWidth, windowHeight);
 }
 
-void SliceRenderer2D::resize(int width, int height)
+void SliceRenderer::resize(int width, int height)
 {
     this->windowWidth = width;
     this->windowHeight = height;
@@ -103,7 +103,7 @@ void SliceRenderer2D::resize(int width, int height)
         cgl::scale(1.0f, windowAspect / sliceAspect, 1.0f);
 }
 
-void SliceRenderer2D::init()
+void SliceRenderer::init()
 {
     // TODO rename these shaders
     sliceShader = Program::create("shaders/slice2D.vert", "shaders/slice2D.frag");
@@ -133,7 +133,7 @@ void SliceRenderer2D::init()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 }
 
-void SliceRenderer2D::drawSlice()
+void SliceRenderer::drawSlice()
 {
     sliceShader->enable();
     
@@ -163,7 +163,7 @@ void SliceRenderer2D::drawSlice()
     
 }
 
-void SliceRenderer2D::drawOrientationOverlay()
+void SliceRenderer::drawOrientationOverlay()
 {
     // draw lines
     axisShader->enable();
@@ -206,45 +206,27 @@ void SliceRenderer2D::drawOrientationOverlay()
         text.add(labels[i].text.c_str(), x, y, hAlign, vAlign);
     }
     
+    // Slice #
     char buf[60];
     sprintf(buf, "slice: %d/%d", (currentSlice+1), volume->getDepth());
     text.add(buf, 0, 0, TextRenderer::LEFT, TextRenderer::BOTTOM);
     
-    float wc = volume->getCurrentWindow().getCenterReal();
-    float ww = volume->getCurrentWindow().getWidthReal();
-    sprintf(buf, "WC = %.1f  WW = %.1f", wc, ww);
-    text.add(buf, windowWidth, 0, TextRenderer::RIGHT, TextRenderer::BOTTOM);
-    
-    std::string name = volume->getValue<std::string, 0x0010, 0x0010>();
-    std::replace(name.begin(), name.end(), '^', ' ');
-    text.add(name.c_str(), 0, windowHeight, TextRenderer::LEFT, TextRenderer::TOP);
-    
-
-    const cgl::Vec3 vsize = volume->getVoxelSize();
-
-    sprintf(buf, "Voxel Size: %.2f, %.2f, %.2f", vsize.x, vsize.y, vsize.z);
-    text.add(buf, windowWidth, windowHeight, TextRenderer::RIGHT, TextRenderer::TOP);
-    
-    sprintf(buf, "Image Size: %d x %d", volume->getWidth(), volume->getHeight());
-    text.add(buf, windowWidth, windowHeight - 18, TextRenderer::RIGHT, TextRenderer::TOP);
-    
     text.end();
 }
 
-void SliceRenderer2D::draw()
+void SliceRenderer::draw()
 {
     glBindVertexArray(vao);
     drawSlice();
     drawOrientationOverlay();
 }
 
-int SliceRenderer2D::getCurrentSlice()
+int SliceRenderer::getCurrentSlice()
 {
     return currentSlice;
 }
 
-void SliceRenderer2D::setCurrentSlice(int sliceIndex)
+void SliceRenderer::setCurrentSlice(int sliceIndex)
 {
-    currentSlice = std::max(0, sliceIndex) % volume->getDepth();
-    volume->loadTexture2D(sliceTexture, currentSlice);
+    volume->loadTexture2D(sliceTexture, currentSlice = sliceIndex);
 }

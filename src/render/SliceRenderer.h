@@ -1,5 +1,5 @@
-#ifndef __medleap__SliceRenderer2D__
-#define __medleap__SliceRenderer2D__
+#ifndef __medleap__SliceRenderer__
+#define __medleap__SliceRenderer__
 
 #include <GL/glew.h>
 #include "render/RenderLayer.h"
@@ -9,11 +9,11 @@
 #include "math/Matrix4.h"
 
 /** Renders a 2D slice of the volume */
-class SliceRenderer2D : public RenderLayer
+class SliceRenderer : public RenderLayer
 {
 public:
-    SliceRenderer2D();
-    ~SliceRenderer2D();
+    SliceRenderer();
+    ~SliceRenderer();
     void init();
     void setVolume(VolumeData* volume);
     void draw();
@@ -49,4 +49,4 @@ private:
     void drawOrientationOverlay();
 };
 
-#endif /* defined(__medleap__SliceRenderer2D__) */
+#endif /* defined(__medleap__SliceRenderer__) */

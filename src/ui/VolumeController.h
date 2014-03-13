@@ -1,16 +1,16 @@
-#ifndef __medleap__Controller3D__
-#define __medleap__Controller3D__
+#ifndef __medleap__VolumeController__
+#define __medleap__VolumeController__
 
 #include "ui/Controller.h"
 #include "render/Renderer3D.h"
 #include "ui/CameraControl3D.h"
 
 /** Main controller for 3D mode */
-class Controller3D : public Controller
+class VolumeController : public Controller
 {
 public:
-    Controller3D();
-    ~Controller3D();
+    VolumeController();
+    ~VolumeController();
     Renderer3D* getRenderLayer();
     void setVolume(VolumeData* volume);
     
@@ -25,4 +25,4 @@ private:
     VolumeData* volume;
 };
 
-#endif /* defined(__medleap__Controller3D__) */
+#endif /* defined(__medleap__VolumeController__) */

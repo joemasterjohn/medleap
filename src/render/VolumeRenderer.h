@@ -1,5 +1,5 @@
-#ifndef __medleap__Renderer3D__
-#define __medleap__Renderer3D__
+#ifndef __medleap__VolumeRenderer__
+#define __medleap__VolumeRenderer__
 
 #include <GL/glew.h>
 #include "math/Matrix4.h"
@@ -10,11 +10,11 @@
 #include "util/Camera.h"
 #include "render/RenderLayer.h"
 
-class Renderer3D : public RenderLayer
+class VolumeRenderer : public RenderLayer
 {
 public:
-    Renderer3D();
-    ~Renderer3D();
+    VolumeRenderer();
+    ~VolumeRenderer();
     void init();
     void resize(int width, int height);
     void draw();
@@ -45,4 +45,4 @@ private:
     void updateSlices();
 };
 
-#endif /* defined(__medleap__Renderer3D__) */
+#endif /* defined(__medleap__VolumeRenderer__) */

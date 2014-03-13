@@ -13,6 +13,9 @@ public:
     
     /** Draw layer */
     virtual void draw() = 0;
+    
+    /** Rendering surface area is resized */
+    virtual void resize(int width, int height) = 0;
 };
 
 #endif /* defined(__medleap__RenderLayer__) */

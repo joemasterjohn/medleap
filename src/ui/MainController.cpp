@@ -30,8 +30,6 @@ void scrollCB(GLFWwindow* window, double dx, double dy)
 
 
 
-
-
 MainController& MainController::getInstance()
 {
     static MainController controller;
@@ -69,15 +67,15 @@ void MainController::setMode(MainController::Mode mode)
     switch (mode) {
         case MODE_2D:
             renderer.clearLayers();
-            renderer.pushLayer(controller2D.getRenderLayer());
             activeControllers.clear();
-            activeControllers.push_front(&controller2D);
+            pushController(&sliceController);
+            pushController(&volumeInfoController);
             break;
         case MODE_3D:
             renderer.clearLayers();
-            renderer.pushLayer(controller3D.getRenderLayer());
             activeControllers.clear();
-            activeControllers.push_front(&controller3D);
+            pushController(&volumeController);
+            pushController(&volumeInfoController);
             break;
     }
 }
@@ -88,18 +86,19 @@ void MainController::setVolume(VolumeData* volume)
         return;
     
     if (this->volume == NULL) {
-        controller2D.getRenderLayer()->init();
-        controller3D.getRenderLayer()->init();
+        sliceController.getRenderLayer()->init();
+        volumeController.getRenderLayer()->init();
+        volumeInfoController.getRenderLayer()->init();
     } else {
         delete this->volume;
     }
     
     this->volume = volume;
-    controller2D.setVolume(volume);
-    controller3D.setVolume(volume);
+    sliceController.setVolume(volume);
+    volumeController.setVolume(volume);
+    volumeInfoController.setVolume(volume);
     
-    controller2D.getRenderLayer()->resize(renderer.getWidth(), renderer.getHeight());
-    controller3D.getRenderLayer()->resize(renderer.getWidth(), renderer.getHeight());
+    resize(renderer.getWidth(), renderer.getHeight());
 }
 
 void MainController::startLoop()
@@ -128,8 +127,9 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
 void MainController::resize(int width, int height)
 {
     renderer.resize(width, height);
-    controller2D.getRenderLayer()->resize(width, height);
-    controller3D.getRenderLayer()->resize(width, height);
+    sliceController.getRenderLayer()->resize(width, height);
+    volumeController.getRenderLayer()->resize(width, height);
+    volumeInfoController.getRenderLayer()->resize(width, height);
 }
 
 void MainController::mouseButton(GLFWwindow *window, int button, int action, int mods)
@@ -148,4 +148,11 @@ void MainController::scroll(GLFWwindow *window, double dx, double dy)
 {
     for (Controller* c : activeControllers)
         c->scroll(window, dx, dy);
+}
+
+void MainController::pushController(Controller* controller)
+{
+    activeControllers.push_front(controller);
+    if (controller->getRenderLayer())
+        renderer.pushLayer(controller->getRenderLayer());
 }

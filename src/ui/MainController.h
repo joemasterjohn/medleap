@@ -2,8 +2,9 @@
 #define __medleap__MainController__
 
 #include "render/MainRenderer.h"
-#include "ui/Controller2D.h"
-#include "ui/Controller3D.h"
+#include "ui/SliceController.h"
+#include "ui/VolumeController.h"
+#include "ui/VolumeInfoController.h"
 #include <list>
 
 /** Main class (singleton) that controls the UI events and owns the rendering. */
@@ -37,16 +38,18 @@ private:
     MainController(const MainController& copy);
     MainController& operator=(const MainController& copy);
     
+    void pushController(Controller* controller);
+    
     void setMode(Mode mode);
-    void pushController();
-    void popController();
     
     MainRenderer renderer;
-    Controller2D controller2D;
-    Controller3D controller3D;
+    SliceController sliceController;
+    VolumeController volumeController;
+    VolumeInfoController volumeInfoController;
     std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;
+    
 };
 
 #endif /* defined(__medleap__MainController__) */

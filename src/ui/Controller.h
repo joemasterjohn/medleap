@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include "render/RenderLayer.h"
 
-/** User interface controller. Controllers typically operate on a single render layer. Controllers process user input top-to-bottom starting with the highest-level render layer. The user input may pass through this controller to the next layer only if the respective functions allow it (by returning TRUE); otherwise, the input is "consumed" and will not reach lower-level layers. */
+/** User interface controller. Controllers operate on a single render layer. Controllers process user input top-to-bottom starting with the highest-level render layer. The user input may pass through this controller to the next layer only if the respective functions allow it (by returning TRUE); otherwise, the input is "consumed" and will not reach lower-level layers. A controller may have "children" controllers. */
 class Controller
 {
 public:
