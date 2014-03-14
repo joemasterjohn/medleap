@@ -97,6 +97,7 @@ void MainController::setVolume(VolumeData* volume)
     sliceController.setVolume(volume);
     volumeController.setVolume(volume);
     volumeInfoController.setVolume(volume);
+    histogramController.setVolume(volume);
     
     setMode(mode);
 }

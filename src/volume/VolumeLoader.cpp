@@ -147,39 +147,39 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
         gl::flipImage(volume->data + offset, volume->width, volume->height, volume->getPixelSize());
     }
     
-    // transform from manufacturer values to modality values
-    if (volume->modality != VolumeData::UNKNOWN) {
-        double intercept = img.GetIntercept();
-        double slope = img.GetSlope();
-        
-        // numBins in histogram is hard-coded to 1024 for now... might want this to be more robust
-        switch (volume->type)
-        {
-            case GL_BYTE:
-                applyModalityLUT<GLbyte>(slope, intercept);
-                volume->histogram = new Histogram(volume->minVoxelValue, volume->maxVoxelValue, 1024);
-                volume->histogram->readData((GLbyte*)volume->data, volume->getNumVoxels());
-                break;
-            case GL_UNSIGNED_BYTE:
-                applyModalityLUT<GLubyte>(slope, intercept);
-                volume->histogram = new Histogram(volume->minVoxelValue, volume->maxVoxelValue, 1024);
-                volume->histogram->readData((GLubyte*)volume->data, volume->getNumVoxels());
-                break;
-            case GL_SHORT:
-                applyModalityLUT<GLshort>(slope, intercept);
-                volume->histogram = new Histogram(volume->minVoxelValue, volume->maxVoxelValue, 1024);
-                volume->histogram->readData((GLshort*)volume->data, volume->getNumVoxels());
-                break;
-            case GL_UNSIGNED_SHORT:
-                applyModalityLUT<GLushort>(slope, intercept);
-                volume->histogram = new Histogram(volume->minVoxelValue, volume->maxVoxelValue, 1024);
-                volume->histogram->readData((GLushort*)volume->data, volume->getNumVoxels());
-                break;
-            default:
-                return NULL;
-                break;
-        }
+    // Apply modality LUT (if possible) and update min/max values
+    switch (volume->type)
+    {
+        case GL_BYTE:
+            if (volume->modality == VolumeData::UNKNOWN)
+                calculateMinMax<GLbyte>();
+            else
+                applyModalityLUT<GLbyte>(img.GetSlope(), img.GetIntercept());
+            break;
+        case GL_UNSIGNED_BYTE:
+            if (volume->modality == VolumeData::UNKNOWN)
+                calculateMinMax<GLubyte>();
+            else
+                applyModalityLUT<GLubyte>(img.GetSlope(), img.GetIntercept());
+            break;
+        case GL_SHORT:
+            if (volume->modality == VolumeData::UNKNOWN)
+                calculateMinMax<GLshort>();
+            else
+                applyModalityLUT<GLshort>(img.GetSlope(), img.GetIntercept());
+            break;
+        case GL_UNSIGNED_SHORT:
+            if (volume->modality == VolumeData::UNKNOWN)
+                calculateMinMax<GLushort>();
+            else
+                applyModalityLUT<GLushort>(img.GetSlope(), img.GetIntercept());
+            break;
+        default:
+            return NULL;
+            break;
     }
+    
+    
     
     // store value of interest LUTs as windows
     if (volume->modality != VolumeData::UNKNOWN) {

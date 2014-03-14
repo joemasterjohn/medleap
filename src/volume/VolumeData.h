@@ -11,7 +11,6 @@
 #include "math/Matrix3.h"
 #include "gdcmReader.h"
 #include "gdcmAttribute.h"
-#include "Histogram.h"
 
 /** Volumetric data loaded from a DICOM image series. Stored in a regular grid of voxels. All voxel values are assumed to be an integer  format, 8 or 16 bits, signed or unsigned. */
 class VolumeData
@@ -74,9 +73,6 @@ public:
     /** Returns the modality of the data */
     Modality getModality();
     
-    /** Returns the default histogram */
-    Histogram* getHistogram();
-    
     /** Windows that store values of interest */
     std::vector<Window>& getWindows();
     
@@ -117,12 +113,12 @@ public:
     
     /** Stores all images/slices into a 3D texture (single channel per voxel) */
     void loadTexture3D(cgl::Texture* texture);
-
     
-    // raw data buffer
-    char* data;
+    /** Pointer to the raw data bytes */
+    char* getData();
     
 private:
+    char* data;
     int width;
     int height;
     int depth;
@@ -137,8 +133,6 @@ private:
     cgl::Mat3 orientation;
     std::vector<Window> windows;
     int activeWindow;
-    Histogram* histogram;
-    
 
     /** Private constructor since loading is complex and done by the Loader class */
     VolumeData();

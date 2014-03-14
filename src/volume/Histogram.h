@@ -42,8 +42,6 @@ public:
     /** Prints a visual representation of histogram to stdout */
     void print();
     
-    void printVisual(int rows, int cols);
-
 private:
     int min;
     int max;

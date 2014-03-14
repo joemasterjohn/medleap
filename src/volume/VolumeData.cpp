@@ -17,13 +17,10 @@ VolumeData::VolumeData()
     bounds = new BoundingBox(1,1,1);
     modality = UNKNOWN;
     activeWindow = 0;
-    histogram = 0;
 }
 
 VolumeData::~VolumeData()
 {
-    if (histogram)
-        delete histogram;
 }
 
 void VolumeData::loadTexture2D(GLuint &texture, int depth)
@@ -123,6 +120,11 @@ GLenum VolumeData::getType()
     return type;
 }
 
+char* VolumeData::getData()
+{
+    return data;
+}
+
 cgl::Vec3 VolumeData::getDimensionsMM() const
 {
     return cgl::Vec3(width * voxelSize.x,
@@ -153,11 +155,6 @@ bool VolumeData::isSigned()
 VolumeData::Modality VolumeData::getModality()
 {
     return modality;
-}
-
-Histogram* VolumeData::getHistogram()
-{
-    return histogram;
 }
 
 const cgl::Mat3& VolumeData::getPatientBasis() const

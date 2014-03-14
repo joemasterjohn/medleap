@@ -47,6 +47,20 @@ private:
             buffer++;
         }
     }
+    
+    /** This is used instead of modality LUT if the modality is unknown */
+    template <typename T>
+    void calculateMinMax()
+    {
+        T* buffer = (T*)volume->data;
+        volume->minVoxelValue = std::numeric_limits<int>::infinity();
+        volume->maxVoxelValue = -std::numeric_limits<int>::infinity();
+        for (int i = 0; i < volume->getNumVoxels(); i++) {
+            if (*buffer > volume->maxVoxelValue) volume->maxVoxelValue = *buffer;
+            if (*buffer < volume->minVoxelValue) volume->minVoxelValue = *buffer;
+            buffer++;
+        }
+    }
 };
 
 #endif // __MEDLEAP_VOLUME_LOADER__
