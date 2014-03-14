@@ -10,7 +10,7 @@ class SliceController : public Controller
 public:
     SliceController();
     ~SliceController();
-    SliceRenderer* getRenderLayer();
+    SliceRenderer* getRenderer();
     void setVolume(VolumeData* volume);
     
     bool keyboardInput(GLFWwindow* window, int key, int action, int mods);

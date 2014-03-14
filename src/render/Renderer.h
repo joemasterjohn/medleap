@@ -1,12 +1,12 @@
-#ifndef __medleap__RenderLayer__
-#define __medleap__RenderLayer__
+#ifndef __medleap__Renderer__
+#define __medleap__Renderer__
 
 /** Rendering is done in layers so UI elements can be presented on top of the volume visualization in an arbitrary fashion. The rendering process will visit a stack of layers and render bottom to top. */
-class RenderLayer
+class Renderer
 {
 public:
     /** Virtual destructor */
-    virtual ~RenderLayer() {}
+    virtual ~Renderer() {}
     
     /** Initialize resources. Called once upon loading. */
     virtual void init() = 0;
@@ -18,4 +18,4 @@ public:
     virtual void resize(int width, int height) = 0;
 };
 
-#endif /* defined(__medleap__RenderLayer__) */
+#endif /* defined(__medleap__Renderer__) */

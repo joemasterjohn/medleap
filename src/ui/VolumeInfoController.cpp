@@ -8,7 +8,7 @@ VolumeInfoController::~VolumeInfoController()
 {
 }
 
-VolumeInfoRenderer* VolumeInfoController::getRenderLayer()
+VolumeInfoRenderer* VolumeInfoController::getRenderer()
 {
     return &renderer;
 }

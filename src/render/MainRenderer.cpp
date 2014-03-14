@@ -64,23 +64,23 @@ void MainRenderer::draw()
     glClear(GL_COLOR_BUFFER_BIT);
     
     // draw from stack
-    for (RenderLayer* r : activeLayers) {
+    for (Renderer* r : activeLayers) {
         r->draw();
     }
     
     glfwSwapBuffers(window);
 }
 
-void MainRenderer::pushLayer(RenderLayer* layer)
+void MainRenderer::pushLayer(Renderer* layer)
 {
     activeLayers.push_back(layer);
 }
 
-RenderLayer* MainRenderer::popLayer()
+Renderer* MainRenderer::popLayer()
 {
     if (activeLayers.empty())
         return NULL;
-    RenderLayer* popped = activeLayers.back();
+    Renderer* popped = activeLayers.back();
     activeLayers.pop_back();
     
     return popped;

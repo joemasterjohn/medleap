@@ -9,7 +9,7 @@ class VolumeInfoController : public Controller
 public:
     VolumeInfoController();
     ~VolumeInfoController();
-    VolumeInfoRenderer* getRenderLayer();
+    VolumeInfoRenderer* getRenderer();
     void setVolume(VolumeData* volume);
     
 private:

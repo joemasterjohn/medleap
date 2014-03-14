@@ -152,6 +152,7 @@ void VolumeRenderer::draw()
         glDisable(GL_BLEND);
     }
     
+    /*
     // box 2
     {
         volumeTexture->bind();
@@ -189,7 +190,7 @@ void VolumeRenderer::draw()
         glBlendEquation(GL_FUNC_ADD);
         
         glDisable(GL_BLEND);
-    }
+    }*/
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

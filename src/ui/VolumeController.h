@@ -2,7 +2,7 @@
 #define __medleap__VolumeController__
 
 #include "ui/Controller.h"
-#include "render/Renderer3D.h"
+#include "render/VolumeRenderer.h"
 #include "ui/CameraControl3D.h"
 
 /** Main controller for 3D mode */
@@ -11,7 +11,7 @@ class VolumeController : public Controller
 public:
     VolumeController();
     ~VolumeController();
-    Renderer3D* getRenderLayer();
+    VolumeRenderer* getRenderer();
     void setVolume(VolumeData* volume);
     
     bool keyboardInput(GLFWwindow* window, int key, int action, int mods);
@@ -20,7 +20,7 @@ public:
     bool scroll(GLFWwindow* window, double dx, double dy);
     
 private:
-    Renderer3D renderer;
+    VolumeRenderer renderer;
     CameraControl3D* cameraControl;
     VolumeData* volume;
 };

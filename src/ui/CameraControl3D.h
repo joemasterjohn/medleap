@@ -1,13 +1,13 @@
 #ifndef __MEDLEAP_CAMERA_CONTROL_3D__
 #define __MEDLEAP_CAMERA_CONTROL_3D__
 
-#include "render/Renderer3D.h"
+#include "render/VolumeRenderer.h"
 #include "KeyboardMouseListener.h"
 
 class CameraControl3D : public KeyboardMouseListener
 {
 public:
-    CameraControl3D(Renderer3D* renderer);
+    CameraControl3D(VolumeRenderer* renderer);
     
     void update();
     
@@ -16,7 +16,7 @@ public:
     void mouseMotion(GLFWwindow* window, double x, double y);
     void scroll(GLFWwindow* window, double dx, double dy);
 private:
-    Renderer3D* renderer;
+    VolumeRenderer* renderer;
     bool mouseDragLeftButton;
     double dragStartX;
     double dragStartY;

@@ -86,9 +86,9 @@ void MainController::setVolume(VolumeData* volume)
         return;
     
     if (this->volume == NULL) {
-        sliceController.getRenderLayer()->init();
-        volumeController.getRenderLayer()->init();
-        volumeInfoController.getRenderLayer()->init();
+        sliceController.getRenderer()->init();
+        volumeController.getRenderer()->init();
+        volumeInfoController.getRenderer()->init();
     } else {
         delete this->volume;
     }
@@ -127,9 +127,9 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
 void MainController::resize(int width, int height)
 {
     renderer.resize(width, height);
-    sliceController.getRenderLayer()->resize(width, height);
-    volumeController.getRenderLayer()->resize(width, height);
-    volumeInfoController.getRenderLayer()->resize(width, height);
+    sliceController.getRenderer()->resize(width, height);
+    volumeController.getRenderer()->resize(width, height);
+    volumeInfoController.getRenderer()->resize(width, height);
 }
 
 void MainController::mouseButton(GLFWwindow *window, int button, int action, int mods)
@@ -153,6 +153,6 @@ void MainController::scroll(GLFWwindow *window, double dx, double dy)
 void MainController::pushController(Controller* controller)
 {
     activeControllers.push_front(controller);
-    if (controller->getRenderLayer())
-        renderer.pushLayer(controller->getRenderLayer());
+    if (controller->getRenderer())
+        renderer.pushLayer(controller->getRenderer());
 }

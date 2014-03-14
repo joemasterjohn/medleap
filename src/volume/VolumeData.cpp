@@ -56,12 +56,9 @@ void VolumeData::setVoxelSize(float x, float y, float z)
     this->voxelSize.y = y;
     this->voxelSize.z = z;
     
-    float totalWidth = x * width;
-    float totalHeight = y * height;
-    float totalDepth = z * depth;
-    
-    cgl::Vec3 v(totalWidth, totalHeight, totalDepth);
+    cgl::Vec3 v = getDimensionsMM();
     v.normalize();
+    
     delete bounds;
     bounds = new BoundingBox(v.x, v.y, v.z);
 }
@@ -124,6 +121,13 @@ int VolumeData::getMaxValue()
 GLenum VolumeData::getType()
 {
     return type;
+}
+
+cgl::Vec3 VolumeData::getDimensionsMM() const
+{
+    return cgl::Vec3(width * voxelSize.x,
+                height * voxelSize.y,
+                depth * voxelSize.z);
 }
 
 GLenum VolumeData::internalFormat()

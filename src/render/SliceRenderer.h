@@ -2,14 +2,14 @@
 #define __medleap__SliceRenderer__
 
 #include <GL/glew.h>
-#include "render/RenderLayer.h"
+#include "render/Renderer.h"
 #include "gl/Program.h"
 #include "util/TextRenderer.h"
 #include "volume/VolumeData.h"
 #include "math/Matrix4.h"
 
 /** Renders a 2D slice of the volume */
-class SliceRenderer : public RenderLayer
+class SliceRenderer : public Renderer
 {
 public:
     SliceRenderer();

@@ -3,7 +3,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "render/RenderLayer.h"
+#include "render/Renderer.h"
 #include <list>
 
 /** Controls all rendering. Should be created once upon application start. */
@@ -21,10 +21,10 @@ public:
     void draw();
     
     /** Pushes a render layer to the drawing stack. This will be the last layer drawn. */
-    void pushLayer(RenderLayer* layer);
+    void pushLayer(Renderer* layer);
     
     /** Pops the top layer from the drawing stack. Returns the popped layer or NULL if empty. */
-    RenderLayer* popLayer();
+    Renderer* popLayer();
     
     /** Pops all layers off the drawing stack. */
     void clearLayers();
@@ -42,7 +42,7 @@ public:
     void resize(int width, int height);
     
 private:
-    std::list<RenderLayer*> activeLayers;
+    std::list<Renderer*> activeLayers;
     GLFWwindow* window;
     int width;
     int height;

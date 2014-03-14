@@ -34,14 +34,29 @@ void VolumeInfoRenderer::draw()
     std::replace(name.begin(), name.end(), '^', ' ');
     text.add(name.c_str(), 0, windowHeight, TextRenderer::LEFT, TextRenderer::TOP);
     
-    // Voxel Size
-    const cgl::Vec3 vsize = volume->getVoxelSize();
-    sprintf(buf, "Voxel Size: %.2f, %.2f, %.2f", vsize.x, vsize.y, vsize.z);
+    // Dimensions (voxels)
+    double numVoxels = volume->getNumVoxels() / 1000.0;
+    char unit = 'K';
+    if (volume->getNumVoxels() > 1000.0) {
+        numVoxels /= 1000.0;
+        unit = 'M';
+    }
+    sprintf(buf, "Volume Dimensions (voxels): %d x %d x %d (%.1f%c total)",
+            volume->getWidth(),
+            volume->getHeight(),
+            volume->getDepth(),
+            numVoxels,
+            unit);
     text.add(buf, windowWidth, windowHeight, TextRenderer::RIGHT, TextRenderer::TOP);
     
-    // Image Size
-    sprintf(buf, "Image Size: %d x %d", volume->getWidth(), volume->getHeight());
+    // Dimensions (mm)
+    cgl::Vec3 v = volume->getDimensionsMM();
+    sprintf(buf, "Volume Dimensions (mm): %.1f x %.1f x %.1f", v.x, v.y, v.z);
     text.add(buf, windowWidth, windowHeight - 18, TextRenderer::RIGHT, TextRenderer::TOP);
+    
+    const cgl::Vec3 vsize = volume->getVoxelSize();
+    sprintf(buf, "Voxel Size (mm): %.2f x %.2f x %.2f", vsize.x, vsize.y, vsize.z);
+    text.add(buf, windowWidth, windowHeight - 36, TextRenderer::RIGHT, TextRenderer::TOP);
     
     text.end();
 }

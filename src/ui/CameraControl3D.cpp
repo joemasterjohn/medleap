@@ -3,7 +3,7 @@
 
 using namespace cgl;
 
-CameraControl3D::CameraControl3D(Renderer3D* renderer) : renderer(renderer), mouseDragLeftButton(false)
+CameraControl3D::CameraControl3D(VolumeRenderer* renderer) : renderer(renderer), mouseDragLeftButton(false)
 {
 }
 

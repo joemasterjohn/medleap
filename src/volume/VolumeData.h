@@ -32,6 +32,9 @@ public:
     /** Dimensions of each voxel in real world units (ex. millimeters) */
     const cgl::Vec3& getVoxelSize() const;
     
+    /** Dimensions of the entire volume in millimeters */
+    cgl::Vec3 getDimensionsMM() const;
+    
     /** Returns a bounding box of the normalized real world dimensions of the volume. */
     const BoundingBox& getBounds();
     

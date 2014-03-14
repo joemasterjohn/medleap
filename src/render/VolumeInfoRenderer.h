@@ -2,12 +2,12 @@
 #define __medleap__VolumeInfoRenderer__
 
 #include <GL/glew.h>
-#include "render/RenderLayer.h"
+#include "render/Renderer.h"
 #include "util/TextRenderer.h"
 #include "volume/VolumeData.h"
 
 /** Draws informational text for the volume data */
-class VolumeInfoRenderer : public RenderLayer
+class VolumeInfoRenderer : public Renderer
 {
 public:
     void init();

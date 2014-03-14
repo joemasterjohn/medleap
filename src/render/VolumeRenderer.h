@@ -8,9 +8,9 @@
 #include "gl/Texture.h"
 #include "volume/VolumeData.h"
 #include "util/Camera.h"
-#include "render/RenderLayer.h"
+#include "render/Renderer.h"
 
-class VolumeRenderer : public RenderLayer
+class VolumeRenderer : public Renderer
 {
 public:
     VolumeRenderer();

@@ -10,7 +10,7 @@ VolumeController::~VolumeController()
     delete cameraControl;
 }
 
-Renderer3D* VolumeController::getRenderLayer()
+VolumeRenderer* VolumeController::getRenderer()
 {
     return &renderer;
 }

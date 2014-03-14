@@ -8,7 +8,7 @@ SliceController::~SliceController()
 {
 }
 
-SliceRenderer* SliceController::getRenderLayer()
+SliceRenderer* SliceController::getRenderer()
 {
     return &renderer;
 }
