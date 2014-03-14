@@ -70,7 +70,7 @@ void MainRenderer::draw()
     // draw from stack
     int layer = 0;
     for (Renderer* r : activeLayers) {
-        applyDocking(layer);
+        applyDocking(r, layer);
         r->draw();
         layer++;
     }
@@ -78,7 +78,7 @@ void MainRenderer::draw()
     glfwSwapBuffers(window);
 }
 
-void MainRenderer::applyDocking(int layer)
+void MainRenderer::applyDocking(Renderer* renderer, int layer)
 {
     int x = 0;
     int y = 0;
@@ -90,7 +90,10 @@ void MainRenderer::applyDocking(int layer)
     } else if (layer < bottomDocking.layerIndex) {
         y += h * bottomDocking.percent;
         h *= (1.0 - bottomDocking.percent);
+        renderer->resize(w, h);
     }
+    
+    // TODO: other docking
 
     glViewport(x, y, w, h);
 }

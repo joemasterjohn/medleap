@@ -26,7 +26,6 @@ void VolumeRenderer::setVolume(VolumeData* volume)
 
 void VolumeRenderer::init()
 {
-    
     volumeTexture = new Texture(GL_TEXTURE_3D);
     
     camera.setView(cgl::lookAt(0, 0, 2, 0, 0, 0, 0, 1, 0));

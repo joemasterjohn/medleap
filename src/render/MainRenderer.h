@@ -74,7 +74,7 @@ private:
     Docking bottomDocking;
     Docking topDocking;
     
-    void applyDocking(int layer);
+    void applyDocking(Renderer* renderer, int layer);
 };
 
 #endif /* defined(__medleap__MainRenderer__) */
