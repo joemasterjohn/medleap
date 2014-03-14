@@ -5,6 +5,7 @@
 #include "ui/SliceController.h"
 #include "ui/VolumeController.h"
 #include "ui/VolumeInfoController.h"
+#include "ui/HistogramController.h"
 #include <list>
 
 /** Main class (singleton) that controls the UI events and owns the rendering. */
@@ -46,6 +47,7 @@ private:
     SliceController sliceController;
     VolumeController volumeController;
     VolumeInfoController volumeInfoController;
+    HistogramController histogramController;
     std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;

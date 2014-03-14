@@ -39,7 +39,7 @@ MainController& MainController::getInstance()
 MainController::MainController() :
     volume(NULL)
 {
-    setMode(MODE_2D);
+    mode = MODE_2D;
 }
 
 MainController::~MainController()
@@ -98,7 +98,7 @@ void MainController::setVolume(VolumeData* volume)
     volumeController.setVolume(volume);
     volumeInfoController.setVolume(volume);
     
-    resize(renderer.getWidth(), renderer.getHeight());
+    setMode(mode);
 }
 
 void MainController::startLoop()
@@ -127,9 +127,10 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
 void MainController::resize(int width, int height)
 {
     renderer.resize(width, height);
-    sliceController.getRenderer()->resize(width, height);
-    volumeController.getRenderer()->resize(width, height);
-    volumeInfoController.getRenderer()->resize(width, height);
+    for (Controller* c : activeControllers) {
+        if (c->getRenderer())
+            c->getRenderer()->resize(width, height);
+    }
 }
 
 void MainController::mouseButton(GLFWwindow *window, int button, int action, int mods)
@@ -153,6 +154,8 @@ void MainController::scroll(GLFWwindow *window, double dx, double dy)
 void MainController::pushController(Controller* controller)
 {
     activeControllers.push_front(controller);
-    if (controller->getRenderer())
+    if (controller->getRenderer()) {
         renderer.pushLayer(controller->getRenderer());
+        controller->getRenderer()->resize(renderer.getWidth(), renderer.getHeight());
+    }
 }

@@ -7,9 +7,6 @@
 class HistogramController
 {
 public:
-    HistogramController();
-    ~HistogramController();
-    
     HistogramRenderer* getRenderer();
     
 private:

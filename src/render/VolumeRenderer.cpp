@@ -61,7 +61,7 @@ void VolumeRenderer::resize(int width, int height)
 {
     viewport.width = width;
     viewport.height = height;
-    camera.setProjection(cgl::perspective(1.0471975512, 1, 0.1f, 100.0f));
+    camera.setProjection(cgl::perspective(1.0471975512, viewport.aspect(), 0.1f, 100.0f));
 }
 
 void VolumeRenderer::updateSlices()
