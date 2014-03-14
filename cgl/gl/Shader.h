@@ -5,8 +5,6 @@
 #include <iostream>
 #include <string>
 
-struct GLShaderObject;
-
 /// GLSL shader object reference.
 class Shader
 {

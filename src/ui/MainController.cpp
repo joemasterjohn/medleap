@@ -2,7 +2,6 @@
 
 using namespace std;
 
-
 void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     MainController::getInstance().keyboardInput(window, key, action, mods);
@@ -28,8 +27,6 @@ void scrollCB(GLFWwindow* window, double dx, double dy)
     MainController::getInstance().scroll(window, dx, dy);
 }
 
-
-
 MainController& MainController::getInstance()
 {
     static MainController controller;
@@ -40,6 +37,7 @@ MainController::MainController() :
     volume(NULL)
 {
     mode = MODE_2D;
+    showHistogram = true;
 }
 
 MainController::~MainController()
@@ -59,6 +57,11 @@ void MainController::init()
 	glfwSetMouseButtonCallback(renderer.getWindow(), mouseCB);
     glfwSetCursorPosCallback(renderer.getWindow(), cursorCB);
     glfwSetScrollCallback(renderer.getWindow(), scrollCB);
+    
+    sliceController.getRenderer()->init();
+    volumeController.getRenderer()->init();
+    volumeInfoController.getRenderer()->init();
+    histogramController.getRenderer()->init();
 }
 
 void MainController::setMode(MainController::Mode mode)
@@ -70,12 +73,16 @@ void MainController::setMode(MainController::Mode mode)
             activeControllers.clear();
             pushController(&sliceController);
             pushController(&volumeInfoController);
+            if (showHistogram)
+                pushController(&histogramController, MainController::Docking(MainController::Docking::BOTTOM, 0.2));
             break;
         case MODE_3D:
             renderer.clearLayers();
             activeControllers.clear();
             pushController(&volumeController);
             pushController(&volumeInfoController);
+            if (showHistogram)
+                pushController(&histogramController, MainController::Docking(MainController::Docking::BOTTOM, 0.2));
             break;
     }
 }
@@ -85,13 +92,8 @@ void MainController::setVolume(VolumeData* volume)
     if (this->volume == volume)
         return;
     
-    if (this->volume == NULL) {
-        sliceController.getRenderer()->init();
-        volumeController.getRenderer()->init();
-        volumeInfoController.getRenderer()->init();
-    } else {
+    if (this->volume != NULL)
         delete this->volume;
-    }
     
     this->volume = volume;
     sliceController.setVolume(volume);
@@ -111,6 +113,12 @@ void MainController::startLoop()
     glfwTerminate();
 }
 
+void MainController::toggleHistogram()
+{
+    showHistogram = !showHistogram;
+    setMode(mode);
+}
+
 void MainController::keyboardInput(GLFWwindow *window, int key, int action, int mods)
 {
     if (key == GLFW_KEY_M && action == GLFW_PRESS) {
@@ -121,6 +129,9 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
         volume->setNextWindow();
     }
 
+    if (key == GLFW_KEY_H && action == GLFW_PRESS)
+        toggleHistogram();
+    
     for (Controller* c : activeControllers)
         c->keyboardInput(window, key, action, mods);
 }
@@ -154,9 +165,33 @@ void MainController::scroll(GLFWwindow *window, double dx, double dy)
 
 void MainController::pushController(Controller* controller)
 {
+    Docking docking(MainController::Docking::NONE, 0);
+    pushController(controller, docking);
+}
+
+void MainController::pushController(Controller* controller, MainController::Docking docking)
+{
     activeControllers.push_front(controller);
     if (controller->getRenderer()) {
-        renderer.pushLayer(controller->getRenderer());
+        
+        switch (docking.position)
+        {
+            case MainController::Docking::LEFT:
+                renderer.dockLeft(controller->getRenderer(), docking.percent);
+                break;
+            case MainController::Docking::RIGHT:
+                renderer.dockRight(controller->getRenderer(), docking.percent);
+                break;
+            case MainController::Docking::BOTTOM:
+                renderer.dockBottom(controller->getRenderer(), docking.percent);
+                break;
+            case MainController::Docking::TOP:
+                renderer.dockTop(controller->getRenderer(), docking.percent);
+                break;
+            default:
+                renderer.pushLayer(controller->getRenderer());
+        }
+        
         controller->getRenderer()->resize(renderer.getWidth(), renderer.getHeight());
     }
 }

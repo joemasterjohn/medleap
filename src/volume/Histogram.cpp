@@ -9,7 +9,7 @@ Histogram::Histogram(int min, int max, int numBins)
     this->min = min;
     this->max = max;
     this->numBins = numBins;
-    this->binWidth = (double)(max - min - 1) / numBins;
+    this->binWidth = (double)(max - min + 1) / numBins;
     bins = new unsigned int[numBins];
     clearBins();
 }

@@ -36,5 +36,5 @@ void HistogramController::setVolume(VolumeData* volume)
             break;
     }
     
-    histogram->print();
+    renderer.setHistogram(histogram);
 }

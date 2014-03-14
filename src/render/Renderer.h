@@ -1,6 +1,8 @@
 #ifndef __medleap__Renderer__
 #define __medleap__Renderer__
 
+#include "gl/Viewport.h"
+
 /** Rendering is done in layers so UI elements can be presented on top of the volume visualization in an arbitrary fashion. The rendering process will visit a stack of layers and render bottom to top. */
 class Renderer
 {

@@ -6,7 +6,7 @@
 #include "volume/VolumeData.h"
 #include "volume/Histogram.h"
 
-class HistogramController
+class HistogramController : public Controller
 {
 public:
     HistogramController();

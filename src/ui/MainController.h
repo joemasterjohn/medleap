@@ -33,6 +33,15 @@ private:
         MODE_3D
     };
     
+    class Docking
+    {
+    public:
+        enum Position { NONE, LEFT, RIGHT, BOTTOM, TOP };
+        Position position;
+        double percent;
+        Docking(Position position, double percent) : position(position), percent(percent) {}
+    };
+    
     MainController();
     
     // copy constructor and assignment operators are not implemented as this class is a singleton
@@ -40,8 +49,11 @@ private:
     MainController& operator=(const MainController& copy);
     
     void pushController(Controller* controller);
-    
+    void pushController(Controller* controller, Docking docking);
+
     void setMode(Mode mode);
+    
+    void toggleHistogram();
     
     MainRenderer renderer;
     SliceController sliceController;
@@ -51,7 +63,7 @@ private:
     std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;
-    
+    bool showHistogram;
 };
 
 #endif /* defined(__medleap__MainController__) */

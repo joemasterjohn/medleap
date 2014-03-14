@@ -2,6 +2,10 @@
 
 MainRenderer::MainRenderer()
 {
+    leftDocking.layerIndex = -1;
+    rightDocking.layerIndex = -1;
+    bottomDocking.layerIndex = -1;
+    topDocking.layerIndex = -1;
 }
 
 MainRenderer::~MainRenderer()
@@ -64,11 +68,31 @@ void MainRenderer::draw()
     glClear(GL_COLOR_BUFFER_BIT);
     
     // draw from stack
+    int layer = 0;
     for (Renderer* r : activeLayers) {
+        applyDocking(layer);
         r->draw();
+        layer++;
     }
     
     glfwSwapBuffers(window);
+}
+
+void MainRenderer::applyDocking(int layer)
+{
+    int x = 0;
+    int y = 0;
+    int w = width;
+    int h = height;
+    
+    if (layer == bottomDocking.layerIndex) {
+        h *= bottomDocking.percent;
+    } else if (layer < bottomDocking.layerIndex) {
+        y += h * bottomDocking.percent;
+        h *= (1.0 - bottomDocking.percent);
+    }
+
+    glViewport(x, y, w, h);
 }
 
 void MainRenderer::pushLayer(Renderer* layer)
@@ -76,20 +100,62 @@ void MainRenderer::pushLayer(Renderer* layer)
     activeLayers.push_back(layer);
 }
 
+void MainRenderer::dockLeft(Renderer* layer, double percent)
+{
+    leftDocking.percent = percent;
+    leftDocking.layerIndex = activeLayers.size();
+    pushLayer(layer);
+}
+
+void MainRenderer::dockRight(Renderer* layer, double percent)
+{
+    rightDocking.percent = percent;
+    rightDocking.layerIndex = activeLayers.size();
+    pushLayer(layer);
+}
+
+void MainRenderer::dockBottom(Renderer* layer, double percent)
+{
+    bottomDocking.percent = percent;
+    bottomDocking.layerIndex = activeLayers.size();
+    pushLayer(layer);
+}
+
+void MainRenderer::dockTop(Renderer* layer, double percent)
+{
+    topDocking.percent = percent;
+    topDocking.layerIndex = activeLayers.size();
+    pushLayer(layer);
+}
+
 Renderer* MainRenderer::popLayer()
 {
     if (activeLayers.empty())
         return NULL;
+    
     Renderer* popped = activeLayers.back();
     activeLayers.pop_back();
+    
+    // check if this was a docked layer and remove if so
+    if (leftDocking.layerIndex == activeLayers.size())
+        leftDocking.layerIndex = -1;
+    if (rightDocking.layerIndex == activeLayers.size())
+        rightDocking.layerIndex = -1;
+    if (bottomDocking.layerIndex == activeLayers.size())
+        bottomDocking.layerIndex = -1;
+    if (topDocking.layerIndex == activeLayers.size())
+        topDocking.layerIndex = -1;
     
     return popped;
 }
 
 void MainRenderer::clearLayers()
 {
-    while (!activeLayers.empty())
-        activeLayers.pop_back();
+    activeLayers.clear();
+    leftDocking.layerIndex = -1;
+    rightDocking.layerIndex = -1;
+    bottomDocking.layerIndex = -1;
+    topDocking.layerIndex = -1;
 }
 
 int MainRenderer::getWidth()
