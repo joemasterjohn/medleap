@@ -32,7 +32,21 @@ void VolumeInfoRenderer::draw()
     // Patient Name
     std::string name = volume->getValue<std::string, 0x0010, 0x0010>();
     std::replace(name.begin(), name.end(), '^', ' ');
-    text.add(name.c_str(), 0, windowHeight, TextRenderer::LEFT, TextRenderer::TOP);
+    text.add(("Patient: " + name).c_str(), 0, windowHeight, TextRenderer::LEFT, TextRenderer::TOP);
+    
+    // Modality
+    switch (volume->getModality())
+    {
+        case VolumeData::CT:
+            text.add("Modality: CT", 0, windowHeight - 18, TextRenderer::LEFT, TextRenderer::TOP);
+            break;
+        case VolumeData::MR:
+            text.add("Modality: MR", 0, windowHeight - 18, TextRenderer::LEFT, TextRenderer::TOP);
+            break;
+        default:
+            text.add("Modality: UNKNOWN", 0, windowHeight - 18, TextRenderer::LEFT, TextRenderer::TOP);
+    }
+    
     
     // Dimensions (voxels)
     double numVoxels = volume->getNumVoxels() / 1000.0;
@@ -54,6 +68,7 @@ void VolumeInfoRenderer::draw()
     sprintf(buf, "Volume Dimensions (mm): %.1f x %.1f x %.1f", v.x, v.y, v.z);
     text.add(buf, windowWidth, windowHeight - 18, TextRenderer::RIGHT, TextRenderer::TOP);
     
+    // Voxel Size
     const cgl::Vec3 vsize = volume->getVoxelSize();
     sprintf(buf, "Voxel Size (mm): %.2f x %.2f x %.2f", vsize.x, vsize.y, vsize.z);
     text.add(buf, windowWidth, windowHeight - 36, TextRenderer::RIGHT, TextRenderer::TOP);
