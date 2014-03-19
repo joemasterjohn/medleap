@@ -87,13 +87,37 @@ void MainRenderer::applyDocking(Renderer* renderer, int layer)
     
     if (layer == bottomDocking.layerIndex) {
         h *= bottomDocking.percent;
-    } else if (layer < bottomDocking.layerIndex) {
-        y += h * bottomDocking.percent;
-        h *= (1.0 - bottomDocking.percent);
+    } else if (layer == topDocking.layerIndex) {
+        y += height * (1.0 - topDocking.percent);
+        h *= topDocking.percent;
+    } else if (layer == leftDocking.layerIndex) {
+        w *= leftDocking.percent;
+    } else if (layer == rightDocking.layerIndex) {
+        x += width * (1.0 - rightDocking.percent);
+        w *= rightDocking.percent;
+    }
+    
+    if (layer < bottomDocking.layerIndex) {
+        y += height * bottomDocking.percent;
+        h *= 1.0 - bottomDocking.percent;
         renderer->resize(w, h);
     }
     
-    // TODO: other docking
+    if (layer < topDocking.layerIndex) {
+        h *= 1.0 - topDocking.percent;
+        renderer->resize(w, h);
+    }
+    
+    if (layer < leftDocking.layerIndex) {
+        x += width * leftDocking.percent;
+        w *= 1.0 - leftDocking.percent;
+        renderer->resize(w, h);
+    }
+    
+    if (layer < rightDocking.layerIndex) {
+        w *= 1.0 - leftDocking.percent;
+        renderer->resize(w, h);
+    }
 
     glViewport(x, y, w, h);
 }
