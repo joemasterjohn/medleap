@@ -17,7 +17,7 @@ void HistogramController::setVolume(VolumeData* volume)
         delete histogram;
     
     // 1024 bins is somewhat arbitrary; consider adding customization later
-    int numBins = 1024;
+    int numBins = 512;
     histogram = new Histogram(volume->getMinValue(), volume->getMaxValue(), numBins);
     
     switch (volume->getType())
@@ -37,4 +37,11 @@ void HistogramController::setVolume(VolumeData* volume)
     }
     
     renderer.setHistogram(histogram);
+    renderer.setVolume(volume);
+}
+
+bool HistogramController::mouseMotion(GLFWwindow* window, double x, double y)
+{
+    renderer.setCursor(x, y);
+    return true;
 }

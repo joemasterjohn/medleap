@@ -1,8 +1,9 @@
 #include "VolumeInfoRenderer.h"
+#include "util/TextRenderer.h"
+#include "ui/MainController.h"
 
 void VolumeInfoRenderer::init()
 {
-    text.loadFont("menlo14");
 }
 
 void VolumeInfoRenderer::setVolume(VolumeData* volume)
@@ -18,6 +19,8 @@ void VolumeInfoRenderer::resize(int width, int height)
 
 void VolumeInfoRenderer::draw()
 {
+    TextRenderer& text = MainController::getInstance().getText();
+    
     text.setColor(1, 1, 1);
     text.begin(windowWidth, windowHeight);
     

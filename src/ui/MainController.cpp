@@ -27,6 +27,11 @@ void scrollCB(GLFWwindow* window, double dx, double dy)
     MainController::getInstance().scroll(window, dx, dy);
 }
 
+TextRenderer& MainController::getText()
+{
+    return text;
+}
+
 MainController& MainController::getInstance()
 {
     static MainController controller;
@@ -57,6 +62,8 @@ void MainController::init()
 	glfwSetMouseButtonCallback(renderer.getWindow(), mouseCB);
     glfwSetCursorPosCallback(renderer.getWindow(), cursorCB);
     glfwSetScrollCallback(renderer.getWindow(), scrollCB);
+    
+    text.loadFont("menlo14");
     
     sliceController.getRenderer()->init();
     volumeController.getRenderer()->init();
@@ -153,6 +160,8 @@ void MainController::mouseButton(GLFWwindow *window, int button, int action, int
 
 void MainController::mouseMotion(GLFWwindow *window, double x, double y)
 {
+    // convert y to bottom up
+    y = renderer.getHeight() - y - 1;
     for (Controller* c : activeControllers)
         c->mouseMotion(window, x, y);
 }

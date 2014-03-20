@@ -13,6 +13,8 @@ public:
     HistogramRenderer* getRenderer();
     void setVolume(VolumeData* volume);
     
+    bool mouseMotion(GLFWwindow* window, double x, double y);
+    
 private:
     HistogramRenderer renderer;
     VolumeData* volume;

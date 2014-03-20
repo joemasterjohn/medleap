@@ -7,6 +7,7 @@
 #include "math/Matrix4.h"
 #include "volume/VolumeData.h"
 #include "volume/Histogram.h"
+#include "util/TextRenderer.h"
 
 class HistogramRenderer : public Renderer
 {
@@ -19,16 +20,24 @@ public:
     void setVolume(VolumeData* volume);
     void setHistogram(Histogram* histogram);
     
+    void setCursor(int x, int y);
+    
 private:
+    VolumeData* volume;
+    TextRenderer text;
     cgl::Texture* histo1D;
     Program* shader;
+    Program* colorShader;
     GLuint vao;
     GLuint vbo;
+    GLsizei stride;
     cgl::Mat4 histoModelMatrix;
-    // shader program
-    // vbo
-    // vao
+    Histogram* histogram;
+    int cursorX, cursorY;
+    float cursorShaderOffset;
+    float cursorValue;
     
+    void drawCursorValue();
 };
 
 #endif /* defined(__medleap__HistogramRenderer__) */

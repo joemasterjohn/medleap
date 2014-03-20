@@ -3,7 +3,6 @@
 
 #include <GL/glew.h>
 #include "render/Renderer.h"
-#include "util/TextRenderer.h"
 #include "volume/VolumeData.h"
 
 /** Draws informational text for the volume data */
@@ -16,7 +15,6 @@ public:
     void resize(int width, int height);
     
 private:
-    TextRenderer text;
     int windowWidth;
     int windowHeight;
     VolumeData* volume;

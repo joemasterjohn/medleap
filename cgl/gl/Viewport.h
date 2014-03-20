@@ -24,6 +24,8 @@ namespace cgl
         bool operator==(const Viewport&) const;
         
         bool operator!=(const Viewport&) const;
+        
+        bool contains(int x, int y);
     };
     
 } // namespace cgl

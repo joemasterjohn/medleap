@@ -53,7 +53,6 @@ void VolumeRenderer::init()
     
     
     boxShader = Program::create("shaders/test.vert", "shaders/test.frag");
-    
 }
 
 void VolumeRenderer::resize(int width, int height)

@@ -7,6 +7,7 @@
 #include "ui/VolumeInfoController.h"
 #include "ui/HistogramController.h"
 #include <list>
+#include "util/TextRenderer.h"
 
 /** Main class (singleton) that controls the UI events and owns the rendering. */
 class MainController
@@ -23,6 +24,8 @@ public:
     void mouseButton(GLFWwindow* window, int button, int action, int mods);
     void mouseMotion(GLFWwindow* window, double x, double y);
     void scroll(GLFWwindow* window, double dx, double dy);
+    
+    TextRenderer& getText();
     
     static MainController& getInstance();
     
@@ -64,6 +67,7 @@ private:
     Mode mode;
     VolumeData* volume;
     bool showHistogram;
+    TextRenderer text;
 };
 
 #endif /* defined(__medleap__MainController__) */
