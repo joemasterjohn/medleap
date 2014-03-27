@@ -33,6 +33,9 @@ public:
     /** Returns the largest value accepted by the histogram */
     int getMax();
     
+    /** Returns getMax() - getMin() */
+    int getRange();
+    
     /** Returns the size of the largest bin */
     int getMaxFrequency();
     
@@ -45,6 +48,7 @@ public:
 private:
     int min;
     int max;
+    int range;
     int maxFrequency;
     int numBins;
     double binWidth;

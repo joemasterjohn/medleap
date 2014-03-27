@@ -47,6 +47,7 @@ const char* hounsfield(int value)
 
 HistogramRenderer::HistogramRenderer() :
     histo1D(NULL),
+    transferFn(NULL),
     shader(NULL),
     colorShader(NULL)
 {
@@ -56,6 +57,8 @@ HistogramRenderer::~HistogramRenderer()
 {
     if (histo1D)
         delete histo1D;
+    if (transferFn)
+        delete transferFn;
     if (shader)
         delete shader;
     if (colorShader)
@@ -65,16 +68,18 @@ HistogramRenderer::~HistogramRenderer()
 void HistogramRenderer::init()
 {
     histo1D = new cgl::Texture(GL_TEXTURE_2D);
-    unsigned char data[] = { 0, 64, 128, 255 };
-    histo1D->bind();
-    histo1D->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    histo1D->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    histo1D->setData2D(GL_RED, 2, 2, GL_RED, GL_UNSIGNED_BYTE, data);
+    
+    transferFn = new cgl::Texture(GL_TEXTURE_2D);
+    
     
     
     shader = Program::create("shaders/histogram.vert", "shaders/histogram.frag");
     colorShader = Program::create("shaders/histo_line.vert", "shaders/histo_line.frag");
+    
+    shader->enable();
+    glUniform1i(shader->getUniform("tex_histogram"), 0);
+    glUniform1i(shader->getUniform("tex_transfer"), 1);
+
     
     // create a VAO
     glGenVertexArrays(1, &vao);
@@ -105,8 +110,13 @@ void HistogramRenderer::init()
 
 void HistogramRenderer::draw()
 {
-    // histogram texture
     shader->enable();
+
+    glActiveTexture(GL_TEXTURE1);
+    transferFn->bind();
+    glActiveTexture(GL_TEXTURE0);
+    histo1D->bind();
+    
     glUniformMatrix4fv(shader->getUniform("model"), 1, false, histoModelMatrix);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     int loc = shader->getAttribute("vs_position");
@@ -118,13 +128,42 @@ void HistogramRenderer::draw()
     histo1D->bind();
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
-    drawCursorValue();
+    drawWindowMarkers();
+    
+    if (drawCursor)
+        drawCursorValue();
+}
+
+void HistogramRenderer::drawWindowMarkers()
+{
+    colorShader->enable();
+    int loc = colorShader->getAttribute("vs_position");
+    glEnableVertexAttribArray(loc);
+    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
+    
+    
+    double wc = volume->getCurrentWindow().getCenterReal();
+    double ww = volume->getCurrentWindow().getWidthReal();
+    double markL = (wc - ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
+    double markC = (wc - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
+    double markR = (wc + ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
+
+    glUniform4f(colorShader->getUniform("color"), 0.5f, 0.5f, 0.8f, 1.0f);
+    glUniform1f(colorShader->getUniform("offset"), markL * 2.0f);
+    glDrawArrays(GL_LINES, 6, 2);
+    glUniform1f(colorShader->getUniform("offset"), markR * 2.0f);
+    glDrawArrays(GL_LINES, 6, 2);
+    
+    glUniform4f(colorShader->getUniform("color"), 0.8f, 0.8f, 1.0f, 1.0f);
+    glUniform1f(colorShader->getUniform("offset"), markC * 2.0f);
+    glDrawArrays(GL_LINES, 6, 2);
 }
 
 void HistogramRenderer::drawCursorValue()
 {
     // cursor line
     colorShader->enable();
+    glUniform4f(colorShader->getUniform("color"), 1.0f, 1.0f, 0.0f, 1.0f);
     glUniform1f(colorShader->getUniform("offset"), cursorShaderOffset);
     int loc = colorShader->getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
@@ -158,6 +197,16 @@ void HistogramRenderer::setVolume(VolumeData* volume)
     this->volume = volume;
 }
 
+cgl::Texture* HistogramRenderer::getTransferFn()
+{
+    return transferFn;
+}
+
+void HistogramRenderer::setDrawCursor(bool draw)
+{
+    drawCursor = draw;
+}
+
 void HistogramRenderer::setHistogram(Histogram* histogram)
 {
     this->histogram = histogram;
@@ -167,13 +216,15 @@ void HistogramRenderer::setHistogram(Histogram* histogram)
     unsigned char pixels[drawWidth * drawHeight];
     std::fill(pixels, pixels + drawWidth * drawHeight, 0);
     
+    double logMaxFreq = std::log(histogram->getMaxFrequency()+1);
+    
     for (int bin = 0; bin < histogram->getNumBins(); bin++) {
         int size = histogram->getSize(bin);
         
         // linear y scale:
 //        double sizeNorm = (double)size / histogram->getMaxFrequency();
         // logarithmic y scale:
-        double sizeNorm = (double)std::log(size)/std::log(histogram->getMaxFrequency());
+        double sizeNorm = std::log(size+1) / logMaxFreq;
         
         int binHeight = (int)(sizeNorm * drawHeight);
         

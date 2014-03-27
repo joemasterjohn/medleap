@@ -8,6 +8,7 @@ Histogram::Histogram(int min, int max, int numBins)
     
     this->min = min;
     this->max = max;
+    this->range = max - min;
     this->numBins = numBins;
     this->binWidth = (double)(max - min + 1) / numBins;
     bins = new unsigned int[numBins];
@@ -43,6 +44,11 @@ int Histogram::getMin()
 int Histogram::getMax()
 {
     return max;
+}
+
+int Histogram::getRange()
+{
+    return range;
 }
 
 int Histogram::getMaxFrequency()

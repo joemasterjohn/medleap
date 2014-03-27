@@ -35,6 +35,9 @@ bool VolumeController::mouseButton(GLFWwindow* window, int button, int action, i
 
 bool VolumeController::mouseMotion(GLFWwindow* window, double x, double y)
 {
+    if (!renderer.getViewport().contains(x, y))
+        return true;
+    
     cameraControl->mouseMotion(window, x, y);
     return true;
 }

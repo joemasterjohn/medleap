@@ -162,8 +162,9 @@ void MainController::mouseMotion(GLFWwindow *window, double x, double y)
 {
     // convert y to bottom up
     y = renderer.getHeight() - y - 1;
-    for (Controller* c : activeControllers)
+    for (Controller* c : activeControllers) {
         c->mouseMotion(window, x, y);
+    }
 }
 
 void MainController::scroll(GLFWwindow *window, double dx, double dy)
