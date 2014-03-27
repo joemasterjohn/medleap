@@ -148,13 +148,11 @@ void HistogramRenderer::drawWindowMarkers()
     double markC = (wc - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
     double markR = (wc + ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
 
-    glUniform4f(colorShader->getUniform("color"), 0.5f, 0.5f, 0.8f, 1.0f);
+    glUniform4f(colorShader->getUniform("color"), 0.5f, 0.5f, 1.0f, 1.0f);
     glUniform1f(colorShader->getUniform("offset"), markL * 2.0f);
     glDrawArrays(GL_LINES, 6, 2);
     glUniform1f(colorShader->getUniform("offset"), markR * 2.0f);
     glDrawArrays(GL_LINES, 6, 2);
-    
-    glUniform4f(colorShader->getUniform("color"), 0.8f, 0.8f, 1.0f, 1.0f);
     glUniform1f(colorShader->getUniform("offset"), markC * 2.0f);
     glDrawArrays(GL_LINES, 6, 2);
 }
@@ -163,7 +161,7 @@ void HistogramRenderer::drawCursorValue()
 {
     // cursor line
     colorShader->enable();
-    glUniform4f(colorShader->getUniform("color"), 1.0f, 1.0f, 0.0f, 1.0f);
+    glUniform4f(colorShader->getUniform("color"), 0.5f, 1.0f, 0.5f, 1.0f);
     glUniform1f(colorShader->getUniform("offset"), cursorShaderOffset);
     int loc = colorShader->getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
@@ -172,7 +170,7 @@ void HistogramRenderer::drawCursorValue()
     
     // cursor histogram value
     TextRenderer& text = MainController::getInstance().getText();
-    text.setColor(1, 1, 0);
+    text.setColor(.5f, 1, .5f);
     text.begin(viewport.width, viewport.height);
     char buf[120];
     
