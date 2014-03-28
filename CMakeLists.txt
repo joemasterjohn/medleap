@@ -18,8 +18,8 @@ set(DATA_SHADERS
     shaders/color.frag
     shaders/slice2D.vert
     shaders/slice2D.frag
-    shaders/test.vert
-    shaders/test.frag
+    shaders/vol_mip_1D.vert
+    shaders/vol_mip_1D.frag
     shaders/histogram.vert
     shaders/histogram.frag
     shaders/histo_line.vert

@@ -52,7 +52,7 @@ void VolumeRenderer::init()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     
     
-    boxShader = Program::create("shaders/test.vert", "shaders/test.frag");
+    boxShader = Program::create("shaders/vol_mip_1D.vert", "shaders/vol_mip_1D.frag");
 }
 
 void VolumeRenderer::resize(int width, int height)

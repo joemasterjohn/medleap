@@ -201,7 +201,5 @@ void MainController::pushController(Controller* controller, MainController::Dock
             default:
                 renderer.pushLayer(controller->getRenderer());
         }
-        
-        controller->getRenderer()->resize(renderer.getWidth(), renderer.getHeight());
     }
 }
