@@ -18,6 +18,7 @@ void CameraControl3D::mouseButton(GLFWwindow *window, int button, int action, in
         if (mouseDragLeftButton) {
             dragStartView = renderer->getCamera().getView();
         }
+        renderer->setMoving(mouseDragLeftButton);
     }
 }
 

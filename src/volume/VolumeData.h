@@ -99,6 +99,15 @@ public:
         return at.GetValues();
     }
     
+    /** Returns the value of a voxel (as a signed integer, not the type of the underlying data) */
+    template <typename T> int getVoxelValue(int x, int y, int z)
+    {
+        x = std::min(std::max(0, x), width-1);
+        y = std::min(std::max(0, y), height-1);
+        z = std::min(std::max(0, z), depth-1);
+        return (int)(((T*)(data))[z * width * height + y * width + x]);
+    }
+    
     /** Sets the size of each voxel in real world units */
     void setVoxelSize(float x, float y, float z);
     
@@ -114,11 +123,25 @@ public:
     /** Stores all images/slices into a 3D texture (single channel per voxel) */
     void loadTexture3D(cgl::Texture* texture);
     
+    /** Stores normalized gradient vectors in a 3D texture */
+    void loadGradientTexture(cgl::Texture* texture);
+    
     /** Pointer to the raw data bytes */
     char* getData();
     
+    /** Vector storing minimum x, y, and z components of all gradient vectors */
+    const cgl::Vec3& getMinGradient();
+    
+    /** Vector storing maximum x, y, and z components of all gradient vectors */
+    const cgl::Vec3& getMaxGradient();
+    
 private:
     char* data;
+    std::vector<cgl::Vec3> gradients;
+    cgl::Vec3 minGradient;
+    cgl::Vec3 maxGradient;
+    float minGradientMag;
+    float maxGradientMag;
     int width;
     int height;
     int depth;
@@ -138,6 +161,41 @@ private:
     VolumeData();
     
     GLenum internalFormat();
+    
+    /** Computes gradient vectors for this volume. Gradients are always stored as floats, regardless of the volume data type. */
+    template<typename T> void computeGradients()
+    {
+        gradients.clear();
+        minGradientMag = std::numeric_limits<float>::infinity();
+        minGradient = cgl::Vec3(minGradientMag);
+        maxGradientMag = -std::numeric_limits<float>::infinity();
+        maxGradient = cgl::Vec3(maxGradientMag);
+        
+        // compute gradient vectors
+        for (int z = 0; z < depth; z++) {
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int gx = (getVoxelValue<T>(x+1, y, z) - getVoxelValue<T>(x-1, y, z)) / (2 * voxelSize.x);
+                    int gy = (getVoxelValue<T>(x, y+1, z) - getVoxelValue<T>(x, y-1, z)) / (2 * voxelSize.y);
+                    int gz = (getVoxelValue<T>(x, y, z+1) - getVoxelValue<T>(x, y, z-1)) / (2 * voxelSize.z);
+                    cgl::Vec3 g(gx, gy, gz);
+
+                    float mag = g.length();
+                    if (mag < minGradientMag) minGradientMag = mag;
+                    if (mag > maxGradientMag) maxGradientMag = mag;
+                    
+                    if (g.x < minGradient.x) minGradient.x = g.x;
+                    if (g.y < minGradient.y) minGradient.y = g.y;
+                    if (g.z < minGradient.z) minGradient.z = g.z;
+                    if (g.x > maxGradient.x) maxGradient.x = g.x;
+                    if (g.y > maxGradient.y) maxGradient.y = g.y;
+                    if (g.z > maxGradient.z) maxGradient.z = g.z;
+                                        
+                    gradients.push_back(g);
+                }
+            }
+        }
+    }
     
     friend class VolumeLoader;
 };

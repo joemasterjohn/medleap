@@ -26,12 +26,9 @@ VolumeData::~VolumeData()
 void VolumeData::loadTexture2D(GLuint &texture, int depth)
 {
     glBindTexture(GL_TEXTURE_2D, texture);
-    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat(), width, height, 0, format, type, data + depth * getImageSize());
 }
 
@@ -45,6 +42,32 @@ void VolumeData::loadTexture3D(cgl::Texture* texture)
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexImage3D(GL_TEXTURE_3D, 0, internalFormat(), width, height, depth, 0, format, type, data);
+}
+
+void VolumeData::loadGradientTexture(cgl::Texture* texture)
+{
+    // gradient texture will be 8-bits per channel
+    unsigned char* data = new unsigned char[width * height * depth * 3];
+    
+    cgl::Vec3 rangeGradient = maxGradient - minGradient;
+    
+    unsigned char* p = data;
+    for (cgl::Vec3 g : gradients) {
+        *p++ = ((g.x - minGradient.x) / rangeGradient.x) * 255;
+        *p++ = ((g.y - minGradient.y) / rangeGradient.y) * 255;
+        *p++ = ((g.z - minGradient.z) / rangeGradient.z) * 255;
+    }
+    
+    texture->bind();
+    glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, width, height, depth, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    
+    delete[] data;
 }
 
 void VolumeData::setVoxelSize(float x, float y, float z)
@@ -123,6 +146,16 @@ GLenum VolumeData::getType()
 char* VolumeData::getData()
 {
     return data;
+}
+
+const cgl::Vec3& VolumeData::getMinGradient()
+{
+    return minGradient;
+}
+
+const cgl::Vec3& VolumeData::getMaxGradient()
+{
+    return maxGradient;
 }
 
 cgl::Vec3 VolumeData::getDimensionsMM() const

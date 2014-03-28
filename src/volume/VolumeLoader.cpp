@@ -147,6 +147,14 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
         gl::flipImage(volume->data + offset, volume->width, volume->height, volume->getPixelSize());
     }
     
+    // give the series a reader to the first image so it can get meta data
+    volume->reader.SetFileName(files[0].c_str());
+    volume->reader.Read();
+    
+    // Z spacing should be regular between images (this is NOT slice thickness attribute)
+    const double* pixelSpacing = volume->getValues<const double*, 0x0028, 0x0030>();
+    volume->setVoxelSize(pixelSpacing[0], pixelSpacing[1], zSpacing);
+    
     // Apply modality LUT (if possible) and update min/max values
     switch (volume->type)
     {
@@ -155,24 +163,28 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
                 calculateMinMax<GLbyte>();
             else
                 applyModalityLUT<GLbyte>(img.GetSlope(), img.GetIntercept());
+            volume->computeGradients<GLbyte>();
             break;
         case GL_UNSIGNED_BYTE:
             if (volume->modality == VolumeData::UNKNOWN)
                 calculateMinMax<GLubyte>();
             else
                 applyModalityLUT<GLubyte>(img.GetSlope(), img.GetIntercept());
+            volume->computeGradients<GLubyte>();
             break;
         case GL_SHORT:
             if (volume->modality == VolumeData::UNKNOWN)
                 calculateMinMax<GLshort>();
             else
                 applyModalityLUT<GLshort>(img.GetSlope(), img.GetIntercept());
+            volume->computeGradients<GLshort>();
             break;
         case GL_UNSIGNED_SHORT:
             if (volume->modality == VolumeData::UNKNOWN)
                 calculateMinMax<GLushort>();
             else
                 applyModalityLUT<GLushort>(img.GetSlope(), img.GetIntercept());
+            volume->computeGradients<GLushort>();
             break;
         default:
             return NULL;
@@ -216,15 +228,6 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
     } else {
         volume->windows.push_back(Window(volume->type));
     }
-    
-    // give the series a reader to the first image so it can get meta data
-    volume->reader.SetFileName(files[0].c_str());
-    volume->reader.Read();
-    
-    
-    // Z spacing should be regular between images (this is NOT slice thickness attribute)
-    const double* pixelSpacing = volume->getValues<const double*, 0x0028, 0x0030>();
-    volume->setVoxelSize(pixelSpacing[0], pixelSpacing[1], zSpacing);
     
     return volume;
 }

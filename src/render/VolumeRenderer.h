@@ -23,8 +23,14 @@ public:
     
     cgl::Camera& getCamera();
     
+    void markDirty();
+    void setMoving(bool moving);
+    
 private:
+    bool dirty;
+    bool moving;
     cgl::Texture* volumeTexture;
+    cgl::Texture* gradientTexture;
     VolumeData* volume;
     cgl::Camera camera;
     cgl::Viewport viewport;
