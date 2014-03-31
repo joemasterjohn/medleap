@@ -20,3 +20,10 @@ $ cd build
 $ cmake ..
 $ make -j
 $ sudo make install
+
+3) Install GLEW (tested with 1.10.0)
+
+Download tar archive from http://glew.sourceforge.net/index.html
+$ cd glew
+$ make
+$ make install

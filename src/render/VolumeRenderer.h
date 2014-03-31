@@ -6,6 +6,7 @@
 #include "gl/Viewport.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
+#include "gl/Buffer.h"
 #include "volume/VolumeData.h"
 #include "util/Camera.h"
 #include "render/Renderer.h"
@@ -42,11 +43,11 @@ private:
     GLuint vbo;
     int numGridVerts;
     
-    // box
+    // proxy geometry
     Program* boxShader;
     int numSliceIndices;
-    GLuint boxVBO;
-    GLuint boxIBO;
+    cgl::Buffer* proxyVertices;
+    cgl::Buffer* proxyIndices;
     
     void updateSlices();
 };

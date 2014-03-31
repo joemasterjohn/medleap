@@ -33,7 +33,7 @@ void main()
     
     // TODO
     // TODO: temp remove (should come from CLUT texture)
-    float alpha = value * value; // linear alpha (could also be log, or tent?)
+    float alpha = value; // linear alpha (could also be log, or tent?)
 
     // opacity correction based on sampling rate
     alpha = 1.0 - pow(1.0 - alpha, opacityCorrection);

@@ -9,10 +9,16 @@ VolumeRenderer::VolumeRenderer()
 {
     dirty = true;
     moving = false;
+    proxyVertices = NULL;
+    proxyIndices = NULL;
 }
 
 VolumeRenderer::~VolumeRenderer()
 {
+    if (proxyVertices)
+        delete proxyVertices;
+    if (proxyIndices)
+        delete proxyIndices;
 }
 
 cgl::Camera& VolumeRenderer::getCamera()
@@ -65,6 +71,8 @@ void VolumeRenderer::init()
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     
+    proxyVertices = new cgl::Buffer(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    proxyIndices = new cgl::Buffer(GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     
     boxShader = Program::create("shaders/vol_mip_1D.vert", "shaders/vol_mip_1D.frag");
     boxShader->enable();
@@ -84,19 +92,13 @@ void VolumeRenderer::updateSlices()
     BoxSlicer slicer;
     slicer.slice(volume->getBounds(), camera, moving ? 128 : 512);
     
-    glGenBuffers(1, &boxIBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxIBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 slicer.getIndices().size() * sizeof(GLushort),
-                 &slicer.getIndices()[0],
-                 GL_STATIC_DRAW);
+    proxyIndices->bind();
+    proxyIndices->setData(&slicer.getIndices()[0],
+                          slicer.getIndices().size() * sizeof(GLushort));
     
-    glGenBuffers(1, &boxVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, boxVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 slicer.getVertices().size() * sizeof(slicer.getVertices()[0]),
-                 &slicer.getVertices()[0],
-                 GL_STATIC_DRAW);
+    proxyVertices->bind();
+    proxyVertices->setData(&slicer.getVertices()[0],
+                           slicer.getVertices().size() * sizeof(slicer.getVertices()[0]));
     
     numSliceIndices = slicer.getIndices().size();
 }
@@ -128,16 +130,15 @@ void VolumeRenderer::draw()
         glDrawArrays(GL_LINES, 0, numGridVerts);
     }
     
-    // box
+    // proxy geometry
     {
         glActiveTexture(GL_TEXTURE1);
         gradientTexture->bind();
         glActiveTexture(GL_TEXTURE0);
         volumeTexture->bind();
+        
         updateSlices();
         
-        glBindBuffer(GL_ARRAY_BUFFER, boxVBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxIBO);
         
         boxShader->enable();
         
@@ -151,7 +152,7 @@ void VolumeRenderer::draw()
         glUniform1f(boxShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
         glUniform1f(boxShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
         
-        glUniform1f(boxShader->getUniform("opacityCorrection"), 1.0f);
+        glUniform1f(boxShader->getUniform("opacityCorrection"), moving ? 4.0f : 1.0f);
         glUniform3f(boxShader->getUniform("lightDirection"), camera.getForward().x, camera.getForward().y, camera.getForward().z);
         
         glUniform3f(boxShader->getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
