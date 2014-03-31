@@ -24,6 +24,8 @@ set(DATA_SHADERS
     shaders/histogram.frag
     shaders/histo_line.vert
     shaders/histo_line.frag
+    shaders/simple_tex.vert
+    shaders/simple_tex.frag
 )
 set(DATA_FONTS
     fonts/menlo14.bmp

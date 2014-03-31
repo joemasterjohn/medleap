@@ -7,6 +7,7 @@
 #include "gl/Program.h"
 #include "gl/Texture.h"
 #include "gl/Buffer.h"
+#include "gl/Framebuffer.h"
 #include "volume/VolumeData.h"
 #include "util/Camera.h"
 #include "render/Renderer.h"
@@ -48,6 +49,12 @@ private:
     int numSliceIndices;
     cgl::Buffer* proxyVertices;
     cgl::Buffer* proxyIndices;
+    
+    // render to texture (downscaling)
+    cgl::Framebuffer* sceneFramebuffer;
+    cgl::Texture* sceneTexture;
+    Program* sceneProgram;
+    cgl::Buffer* sceneBuffer;
     
     void updateSlices();
 };

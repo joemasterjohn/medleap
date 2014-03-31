@@ -33,6 +33,7 @@ void CameraControl3D::mouseMotion(GLFWwindow *window, double x, double y)
         Mat4 m1 = rotation(pitch, dragStartView.row(0));
         Mat4 m2 = rotation(yaw, dragStartView.row(1));
         renderer->getCamera().setView(dragStartView * m1 * m2);
+        renderer->markDirty();
     } else {
         dragStartX = x;
         dragStartY = y;
@@ -41,6 +42,8 @@ void CameraControl3D::mouseMotion(GLFWwindow *window, double x, double y)
 
 void CameraControl3D::scroll(GLFWwindow *window, double dx, double dy)
 {
-    if (!mouseDragLeftButton)
+    if (!mouseDragLeftButton) {
         renderer->getCamera().translateBackward(dy * 0.2);
+        renderer->markDirty();
+    }
 }

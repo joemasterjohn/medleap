@@ -29,7 +29,7 @@ bool MainRenderer::init(int width, int height, const char* title)
     glfwWindowHint(GLFW_BLUE_BITS, 8);
     glfwWindowHint(GLFW_ALPHA_BITS, 8);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
-    glfwWindowHint(GLFW_SAMPLES, 8);
+//    glfwWindowHint(GLFW_SAMPLES, 8);
     
     // Use OpenGL 3.2 core profile
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
