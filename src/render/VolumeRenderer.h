@@ -15,6 +15,9 @@
 class VolumeRenderer : public Renderer
 {
 public:
+    enum RenderMode { MIP, VR };
+    
+    
     VolumeRenderer();
     ~VolumeRenderer();
     void init();
@@ -27,8 +30,15 @@ public:
     
     void markDirty();
     void setMoving(bool moving);
+    void setMode(RenderMode mode);
+    RenderMode getMode();
+    
+    int getNumSamples();
     
 private:
+    RenderMode renderMode;
+    int numSamples;
+    float movingSampleScale;
     bool dirty;
     bool moving;
     cgl::Texture* volumeTexture;

@@ -46,7 +46,7 @@ bool MainRenderer::init(int width, int height, const char* title)
     glfwMakeContextCurrent(window);
     
     // Set vertical retrace rate (0 == run as fast as possible)
-    //glfwSwapInterval(vsync);
+    glfwSwapInterval(1);
     
     // Initialize GLEW, which provides access to OpenGL functions / extensions
 	glewExperimental = GL_TRUE;

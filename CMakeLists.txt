@@ -16,10 +16,10 @@ endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 set(DATA_SHADERS
     shaders/color.vert
     shaders/color.frag
-    shaders/slice2D.vert
-    shaders/slice2D.frag
-    shaders/vol_mip_1D.vert
-    shaders/vol_mip_1D.frag
+    shaders/slice_clut.vert
+    shaders/slice_clut.frag
+    shaders/volume_clut.vert
+    shaders/volume_clut.frag
     shaders/histogram.vert
     shaders/histogram.frag
     shaders/histo_line.vert

@@ -15,6 +15,9 @@ VolumeRenderer::VolumeRenderer()
     sceneTexture = NULL;
     sceneProgram = NULL;
     sceneBuffer = NULL;
+    numSamples = 256;
+    movingSampleScale = 0.5f;
+    renderMode = VR;
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -55,6 +58,21 @@ void VolumeRenderer::markDirty()
     dirty = true;
 }
 
+void VolumeRenderer::setMode(VolumeRenderer::RenderMode mode)
+{
+    this->renderMode = mode;
+}
+
+VolumeRenderer::RenderMode VolumeRenderer::getMode()
+{
+    return renderMode;
+}
+
+int VolumeRenderer::getNumSamples()
+{
+    return numSamples;
+}
+
 void VolumeRenderer::init()
 {
     volumeTexture = new Texture(GL_TEXTURE_3D);
@@ -88,7 +106,7 @@ void VolumeRenderer::init()
     proxyVertices = new Buffer(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     proxyIndices = new Buffer(GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     
-    boxShader = Program::create("shaders/vol_mip_1D.vert", "shaders/vol_mip_1D.frag");
+    boxShader = Program::create("shaders/volume_clut.vert", "shaders/volume_clut.frag");
     boxShader->enable();
     glUniform1i(boxShader->getUniform("tex_volume"), 0);
     glUniform1i(boxShader->getUniform("tex_gradients"), 1);
@@ -132,7 +150,7 @@ void VolumeRenderer::resize(int width, int height)
 void VolumeRenderer::updateSlices()
 {
     BoxSlicer slicer;
-    slicer.slice(volume->getBounds(), camera, moving ? 128 : 512);
+    slicer.slice(volume->getBounds(), camera, moving ? numSamples * movingSampleScale : numSamples);
     
     proxyIndices->bind();
     proxyIndices->setData(&slicer.getIndices()[0],
@@ -149,125 +167,123 @@ void VolumeRenderer::draw()
 {
     glBindVertexArray(vao);
     
-
-    if (dirty)
+    
+    // axes
     {
-        
-        // bind framebuffer with full viewport
-        sceneFramebuffer->bind();
-        glClear(GL_COLOR_BUFFER_BIT);
-        glViewport(0, 0, sceneTexture->getWidth(), sceneTexture->getHeight());
-        
-        
-        // axes
-        {
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-            
-            lineShader->enable();
-            
-            cgl::Mat4 mvp = camera.getProjection() * camera.getView();
-            glUniformMatrix4fv(lineShader->getUniform("modelViewProjection"), 1, false, mvp);
-            
-            GLsizei stride = sizeof(GLfloat) * 6;
-            
-            int loc = lineShader->getAttribute("vs_position");
-            glEnableVertexAttribArray(loc);
-            glVertexAttribPointer(loc, 3, GL_FLOAT, false, stride, 0);
-            
-            loc = lineShader->getAttribute("vs_color");
-            glEnableVertexAttribArray(loc);
-            glVertexAttribPointer(loc, 3, GL_FLOAT, false, stride, (GLvoid*)(3 * sizeof(GLfloat)));
-            
-            glDrawArrays(GL_LINES, 0, numGridVerts);
-        }
-        
-        // proxy geometry
-        {
-            glActiveTexture(GL_TEXTURE1);
-            gradientTexture->bind();
-            glActiveTexture(GL_TEXTURE0);
-            volumeTexture->bind();
-            
-            updateSlices();
-            
-            
-            boxShader->enable();
-            
-            cgl::Mat4 mvp = camera.getProjection() * camera.getView();
-            glUniformMatrix4fv(boxShader->getUniform("modelViewProjection"), 1, false, mvp);
-            
-            glUniform3fv(boxShader->getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
-            glUniform3fv(boxShader->getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
-            glUniform1i(boxShader->getUniform("signed_normalized"), volume->isSigned());
-            
-            glUniform1f(boxShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
-            glUniform1f(boxShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
-            
-            glUniform1f(boxShader->getUniform("opacityCorrection"), moving ? 4.0f : 1.0f);
-            glUniform3f(boxShader->getUniform("lightDirection"), camera.getForward().x, camera.getForward().y, camera.getForward().z);
-            
-            glUniform3f(boxShader->getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
-            
-            cgl::Vec3 r = volume->getMaxGradient() - volume->getMinGradient();
-            glUniform3f(boxShader->getUniform("rangeGradient"), r.x, r.y, r.z);
-            
-            int loc = boxShader->getAttribute("vs_position");
-            glEnableVertexAttribArray(loc);
-            glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
-            
-            
-            glEnable(GL_BLEND);
-            
-            // MIP:
-            //        glBlendEquation(GL_MAX);
-            
-            
-            // DVR
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            
-            
-            
-            glEnable(GL_PRIMITIVE_RESTART);
-            glPrimitiveRestartIndex(65535);
-            glDrawElements(GL_TRIANGLE_FAN, numSliceIndices, GL_UNSIGNED_SHORT, 0);
-            glDisable(GL_PRIMITIVE_RESTART);
-            
-            // MIP:
-            glBlendEquation(GL_FUNC_ADD);
-            
-            // DVR:
-            
-            
-            glDisable(GL_BLEND);
-        }
-        
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         
-        std::cout << "rendered a frame" << std::endl;
-        dirty = false;
+        lineShader->enable();
+        
+        cgl::Mat4 mvp = camera.getProjection() * camera.getView();
+        glUniformMatrix4fv(lineShader->getUniform("modelViewProjection"), 1, false, mvp);
+        
+        GLsizei stride = sizeof(GLfloat) * 6;
+        
+        int loc = lineShader->getAttribute("vs_position");
+        glEnableVertexAttribArray(loc);
+        glVertexAttribPointer(loc, 3, GL_FLOAT, false, stride, 0);
+        
+        loc = lineShader->getAttribute("vs_color");
+        glEnableVertexAttribArray(loc);
+        glVertexAttribPointer(loc, 3, GL_FLOAT, false, stride, (GLvoid*)(3 * sizeof(GLfloat)));
+        
+        glDrawArrays(GL_LINES, 0, numGridVerts);
     }
     
-    sceneFramebuffer->unbind();
-    // render from the texture now
+    // proxy geometry
     {
-        // use original viewport
-        viewport.apply();
-        sceneBuffer->bind();
+        glActiveTexture(GL_TEXTURE1);
+        gradientTexture->bind();
+        glActiveTexture(GL_TEXTURE0);
+        volumeTexture->bind();
         
-        sceneProgram->enable();
-        sceneTexture->bind();
+        updateSlices();
         
-        GLsizei stride = sizeof(GLfloat) * 4;
-        int loc = sceneProgram->getAttribute("vs_position");
+        
+        boxShader->enable();
+        
+        cgl::Mat4 mvp = camera.getProjection() * camera.getView();
+        glUniformMatrix4fv(boxShader->getUniform("modelViewProjection"), 1, false, mvp);
+        
+        glUniform3fv(boxShader->getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
+        glUniform3fv(boxShader->getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
+        glUniform1i(boxShader->getUniform("signed_normalized"), volume->isSigned());
+        glUniform1i(boxShader->getUniform("use_shading"), renderMode == VolumeRenderer::VR ? 1 : 0);
+        glUniform1f(boxShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
+        glUniform1f(boxShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
+        
+        glUniform1f(boxShader->getUniform("opacityCorrection"), moving ? 1/movingSampleScale : 1.0f);
+        glUniform3f(boxShader->getUniform("lightDirection"), camera.getForward().x, camera.getForward().y, camera.getForward().z);
+        
+        glUniform3f(boxShader->getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
+        
+        cgl::Vec3 r = volume->getMaxGradient() - volume->getMinGradient();
+        glUniform3f(boxShader->getUniform("rangeGradient"), r.x, r.y, r.z);
+        
+        int loc = boxShader->getAttribute("vs_position");
         glEnableVertexAttribArray(loc);
-        glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-        loc = sceneProgram->getAttribute("vs_texcoord");
-        glEnableVertexAttribArray(loc);
-        glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
+        glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
         
-        glDrawArrays(GL_TRIANGLES, 0, 6);
         
+        glEnable(GL_BLEND);
+        
+        switch (renderMode)
+        {
+            case MIP:
+                glBlendEquation(GL_MAX);
+                glBlendFunc(GL_ONE, GL_ONE);
+                break;
+            case VR:
+                glBlendEquation(GL_FUNC_ADD);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                break;
+        }
+        
+        
+        
+        glEnable(GL_PRIMITIVE_RESTART);
+        glPrimitiveRestartIndex(65535);
+        glDrawElements(GL_TRIANGLE_FAN, numSliceIndices, GL_UNSIGNED_SHORT, 0);
+        glDisable(GL_PRIMITIVE_RESTART);
+        
+        // MIP:
+        
+        
+        // DVR:
+        
+        
+        glDisable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquation(GL_FUNC_ADD);
     }
+    
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    
+//        std::cout << "rendered a frame" << std::endl;
+//        dirty = false;
+//    }
+//
+//    sceneFramebuffer->unbind();
+//    // render from the texture now
+//    {
+//        // use original viewport
+//        viewport.apply();
+//        sceneBuffer->bind();
+//
+//        sceneProgram->enable();
+//        sceneTexture->bind();
+//        
+//        GLsizei stride = sizeof(GLfloat) * 4;
+//        int loc = sceneProgram->getAttribute("vs_position");
+//        glEnableVertexAttribArray(loc);
+//        glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
+//        loc = sceneProgram->getAttribute("vs_texcoord");
+//        glEnableVertexAttribArray(loc);
+//        glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
+//        
+//        glDrawArrays(GL_TRIANGLES, 0, 6);
+//        
+//    }
 }

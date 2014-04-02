@@ -6,6 +6,7 @@ uniform float window_min;
 uniform float window_multiplier;
 uniform vec3 volumeDimensions;
 uniform bool signed_normalized;
+uniform bool use_shading;
 uniform vec3 lightDirection;
 uniform vec3 minGradient;
 uniform vec3 rangeGradient;
@@ -30,24 +31,24 @@ void main()
     value = max(min(1.0, value), 0.0);
     
     // apply CLUT
-    
     // TODO
     // TODO: temp remove (should come from CLUT texture)
     float alpha = value; // linear alpha (could also be log, or tent?)
-
     // opacity correction based on sampling rate
     alpha = 1.0 - pow(1.0 - alpha, opacityCorrection);
 
-    // transform gradient texture color to original gradient for shading (0,1 conversion to -1,1)
-    vec3 g = texture(tex_gradients, fs_texcoord).rgb;
-    g.x = g.x * rangeGradient.x + minGradient.x;
-    g.y = g.y * rangeGradient.y + minGradient.y;
-    g.z = g.z * rangeGradient.z + minGradient.z;
-    vec3 n = normalize(g);
-    float shading = max(min(1.0, dot(n, lightDirection)), 0.25);
+    vec3 color = (vec3(0.0, 0.0, 0.0) * (1.0 - value) + value * vec3(1.0));
 
-    vec3 rgb = (vec3(1.0, 0.0, 0.0) * (1.0 - value) + value * vec3(1.0)) * shading;
-    display_color = vec4(rgb, alpha);
+    if (use_shading) {
+        vec3 g = texture(tex_gradients, fs_texcoord).rgb;
+        g.x = g.x * rangeGradient.x + minGradient.x;
+        g.y = g.y * rangeGradient.y + minGradient.y;
+        g.z = g.z * rangeGradient.z + minGradient.z;
+        vec3 n = normalize(g);
+        color *= max(min(1.0, dot(n, lightDirection)), 0.3); // .3 is ambient
+    }
+    
+    display_color = vec4(color, alpha);
     
 //    display_color = vec4(g, 0.02);
 }

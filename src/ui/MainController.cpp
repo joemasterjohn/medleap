@@ -69,6 +69,8 @@ void MainController::init()
     volumeController.getRenderer()->init();
     volumeInfoController.getRenderer()->init();
     histogramController.getRenderer()->init();
+    
+    volumeInfoController.getRenderer()->setVolumeRenderer(volumeController.getRenderer());
 }
 
 void MainController::setMode(MainController::Mode mode)
@@ -130,6 +132,12 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
 {
     if (key == GLFW_KEY_M && action == GLFW_PRESS) {
         setMode((mode == MODE_2D) ? MODE_3D : MODE_2D);
+    }
+    
+    if (key == GLFW_KEY_V && action == GLFW_PRESS) {
+        VolumeRenderer* vr = volumeController.getRenderer();
+        VolumeRenderer::RenderMode mode = vr->getMode();
+        vr->setMode(mode == VolumeRenderer::MIP ? VolumeRenderer::VR : VolumeRenderer::MIP);
     }
     
     if (key == GLFW_KEY_UP && action == GLFW_PRESS) {

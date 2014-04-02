@@ -106,7 +106,7 @@ void SliceRenderer::resize(int width, int height)
 void SliceRenderer::init()
 {
     // TODO rename these shaders
-    sliceShader = Program::create("shaders/slice2D.vert", "shaders/slice2D.frag");
+    sliceShader = Program::create("shaders/slice_clut.vert", "shaders/slice_clut.frag");
     axisShader = Program::create("shaders/color.vert", "shaders/color.frag");
 
     // load fonts for text rendering

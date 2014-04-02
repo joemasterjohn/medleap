@@ -11,6 +11,11 @@ void VolumeInfoRenderer::setVolume(VolumeData* volume)
     this->volume = volume;
 }
 
+void VolumeInfoRenderer::setVolumeRenderer(VolumeRenderer* volumeRenderer)
+{
+    this->volumeRenderer = volumeRenderer;
+}
+
 void VolumeInfoRenderer::resize(int width, int height)
 {
     this->windowWidth = width;
@@ -49,6 +54,16 @@ void VolumeInfoRenderer::draw()
         default:
             text.add("Modality: UNKNOWN", 0, windowHeight - 18, TextRenderer::LEFT, TextRenderer::TOP);
     }
+    
+    // Rendering mode
+    if (volumeRenderer->getMode() == VolumeRenderer::MIP)
+        text.add("Render Mode: MIP", 0, windowHeight - 18 * 2, TextRenderer::LEFT, TextRenderer::TOP);
+    else
+        text.add("Render Mode: VR", 0, windowHeight - 18 * 2, TextRenderer::LEFT, TextRenderer::TOP);
+    
+    // Rendering sample rate
+    sprintf(buf, "Sampling Planes: %d", volumeRenderer->getNumSamples());
+    text.add(buf, 0, windowHeight - 18 * 3, TextRenderer::LEFT, TextRenderer::TOP);
     
     
     // Dimensions (voxels)
