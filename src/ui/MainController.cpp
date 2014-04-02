@@ -140,6 +140,11 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
         vr->setMode(mode == VolumeRenderer::MIP ? VolumeRenderer::VR : VolumeRenderer::MIP);
     }
     
+    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+        VolumeRenderer* vr = volumeController.getRenderer();
+        vr->toggleShading();
+    }
+    
     if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
         volume->setNextWindow();
     }

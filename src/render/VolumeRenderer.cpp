@@ -18,6 +18,7 @@ VolumeRenderer::VolumeRenderer()
     numSamples = 256;
     movingSampleScale = 0.5f;
     renderMode = VR;
+    shading = true;
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -71,6 +72,16 @@ VolumeRenderer::RenderMode VolumeRenderer::getMode()
 int VolumeRenderer::getNumSamples()
 {
     return numSamples;
+}
+
+void VolumeRenderer::toggleShading()
+{
+    shading = !shading;
+}
+
+bool VolumeRenderer::useShading()
+{
+    return shading;
 }
 
 void VolumeRenderer::init()
@@ -209,7 +220,7 @@ void VolumeRenderer::draw()
         glUniform3fv(boxShader->getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
         glUniform3fv(boxShader->getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
         glUniform1i(boxShader->getUniform("signed_normalized"), volume->isSigned());
-        glUniform1i(boxShader->getUniform("use_shading"), renderMode == VolumeRenderer::VR ? 1 : 0);
+        glUniform1i(boxShader->getUniform("use_shading"), (renderMode == VolumeRenderer::VR && shading));
         glUniform1f(boxShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
         glUniform1f(boxShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
         

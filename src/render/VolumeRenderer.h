@@ -33,9 +33,12 @@ public:
     void setMode(RenderMode mode);
     RenderMode getMode();
     
+    bool useShading();
+    void toggleShading();
     int getNumSamples();
     
 private:
+    bool shading;
     RenderMode renderMode;
     int numSamples;
     float movingSampleScale;
