@@ -135,14 +135,11 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
     }
     
     if (key == GLFW_KEY_V && action == GLFW_PRESS) {
-        VolumeRenderer* vr = volumeController.getRenderer();
-        VolumeRenderer::RenderMode mode = vr->getMode();
-        vr->setMode(mode == VolumeRenderer::MIP ? VolumeRenderer::VR : VolumeRenderer::MIP);
+        volumeController.getRenderer()->cycleMode();
     }
     
     if (key == GLFW_KEY_L && action == GLFW_PRESS) {
-        VolumeRenderer* vr = volumeController.getRenderer();
-        vr->toggleShading();
+        volumeController.getRenderer()->toggleShading();
     }
     
     if (key == GLFW_KEY_UP && action == GLFW_PRESS) {

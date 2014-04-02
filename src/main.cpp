@@ -3,6 +3,8 @@
 #include <iostream>
 #include "volume/VolumeLoader.h"
 
+#include "volume/CLUT.h"
+
 int main(int argc, char** argv)
 {
     if (argc != 2) {

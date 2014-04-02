@@ -64,6 +64,11 @@ void VolumeRenderer::setMode(VolumeRenderer::RenderMode mode)
     this->renderMode = mode;
 }
 
+void VolumeRenderer::cycleMode()
+{
+    renderMode = (renderMode == VR) ? MIP : VR;
+}
+
 VolumeRenderer::RenderMode VolumeRenderer::getMode()
 {
     return renderMode;

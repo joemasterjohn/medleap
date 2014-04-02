@@ -150,12 +150,11 @@ bool TextRenderer::loadFont(std::string fontName)
         glGenBuffers(1, &vbo);
     }
     
-    const char* bmpFileName = ("fonts/" + fontName + ".bmp").c_str();
-    const char* metricsFileName = ("fonts/" + fontName + ".dat").c_str();
+    std::string bmpFileName = std::string("fonts/" + fontName + ".bmp");
+    std::string metricsFileName = std::string("fonts/" + fontName + ".dat");
     
     Font* font = new Font;
-    font->load(bmpFileName, metricsFileName);
-    if (!font->load(bmpFileName, metricsFileName)) {
+    if (!font->load(bmpFileName.c_str(), metricsFileName.c_str())) {
         delete font;
         return false;
     }
@@ -185,8 +184,7 @@ int TextRenderer::Font::measure(const char* s)
     return width;
 }
 
-bool TextRenderer::Font::load(const char* bmpFileName,
-                                             const char* metricsFileName)
+bool TextRenderer::Font::load(const char* bmpFileName, const char* metricsFileName)
 {
     ifstream fin(bmpFileName, ios::in | ios::binary);
     if (!fin) {

@@ -30,7 +30,9 @@ public:
     
     void markDirty();
     void setMoving(bool moving);
+    
     void setMode(RenderMode mode);
+    void cycleMode();
     RenderMode getMode();
     
     bool useShading();
