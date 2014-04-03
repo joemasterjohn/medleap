@@ -3,7 +3,6 @@
 
 #include "ui/Controller.h"
 #include "render/VolumeRenderer.h"
-#include "ui/CameraControl3D.h"
 
 /** Main controller for 3D mode */
 class VolumeController : public Controller
@@ -21,8 +20,14 @@ public:
     
 private:
     VolumeRenderer renderer;
-    CameraControl3D* cameraControl;
     VolumeData* volume;
+    
+    // camera control
+    bool mouseDragLeftButton;
+    bool mouseDragRightButton;
+    double dragStartX;
+    double dragStartY;
+    Mat4 dragStartView;
 };
 
 #endif /* defined(__medleap__VolumeController__) */
