@@ -2,6 +2,10 @@
 #define __medleap__CLUTRenderer__
 
 #include "Renderer.h"
+#include "gl/Buffer.h"
+#include "gl/Program.h"
+#include "gl/Texture.h"
+#include "volume/CLUT.h"
 
 class CLUTRenderer : public Renderer
 {
@@ -11,17 +15,15 @@ public:
     void init();
     void draw();
     void resize(int width, int height);
-    
-    
-    // Have a shader render into a framebuffer to create the gradient texture
-    // Vertex geometry will be created for each gradient point
-    //
-    // *---*---------------*
-    // |   |               |
-    // |   |               |
-    // *---*---------------*
+    void setCLUT(CLUT* clut);
+    cgl::Texture* getTexture();
     
 private:
+    Program* quadShader;
+    cgl::Buffer* quadVBO;
+    cgl::Texture* clutTexture;
+    CLUT* clut;
+    int stride;
 };
 
 #endif /* defined(__medleap__CLUTRenderer__) */

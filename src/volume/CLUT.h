@@ -2,6 +2,7 @@
 #define __medleap__CLUT__
 
 #include "math/Vector4.h"
+#include "gl/Texture.h"
 #include <vector>
 
 /** Color look-up table */
@@ -36,7 +37,7 @@ public:
     void addColorStop(float position, cgl::Vec4 color);
     void clearStops();
     
-    void saveTexture();
+    void saveTexture(cgl::Texture* texture);
     
 private:
     std::vector<ColorStop> stops;

@@ -39,6 +39,8 @@ public:
     void toggleShading();
     int getNumSamples();
     
+    void setCLUTTexture(cgl::Texture* texture);
+    
 private:
     bool shading;
     RenderMode renderMode;
@@ -52,6 +54,9 @@ private:
     cgl::Camera camera;
     cgl::Viewport viewport;
     cgl::Mat4 model;
+    
+    // color look-up table texture
+    cgl::Texture* clutTexture;
     
     // grid
     Program* lineShader;

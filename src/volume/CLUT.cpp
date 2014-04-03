@@ -127,7 +127,7 @@ cgl::Vec4 CLUT::getColor(float position)
     return left->getColor() * (1.0f - np) + right->getColor() * np;
 }
 
-void CLUT::saveTexture()
+void CLUT::saveTexture(cgl::Texture* texture)
 {
     int l = 0;
     int r = 1;
@@ -143,11 +143,18 @@ void CLUT::saveTexture()
             right = &stops[++r];
         }
         
-        cgl::Vec4 color = left->getColor() * (1.0f - p) + right->getColor() * p;
+        float pn = (p - left->getPosition()) / (right->getPosition() - left->getPosition());
         
+        cgl::Vec4 color = left->getColor() * (1.0f - pn) + right->getColor() * pn;
         buf[ptr++] = (unsigned char)(color.x * 255);
         buf[ptr++] = (unsigned char)(color.y * 255);
         buf[ptr++] = (unsigned char)(color.z * 255);
         buf[ptr++] = (unsigned char)(color.w * 255);
     }
+    
+    texture->bind();
+    texture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    texture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    texture->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    texture->setData1D(0, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, buf);
 }

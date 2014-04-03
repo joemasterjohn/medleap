@@ -2,6 +2,7 @@
 
 uniform sampler3D tex_volume;
 uniform sampler3D tex_gradients;
+uniform sampler1D tex_clut;
 uniform float window_min;
 uniform float window_multiplier;
 uniform vec3 volumeDimensions;
@@ -30,25 +31,21 @@ void main()
     value = (value - window_min) * window_multiplier;
     value = max(min(1.0, value), 0.0);
     
-    // apply CLUT
-    // TODO
-    // TODO: temp remove (should come from CLUT texture)
-    float alpha = value; // linear alpha (could also be log, or tent?)
+    // color/opacity from look-up table using windowed data value
+    vec4 color = texture(tex_clut, value).rgba;
+    
     // opacity correction based on sampling rate
-    alpha = 1.0 - pow(1.0 - alpha, opacityCorrection);
+    color.a = 1.0 - pow(1.0 - color.a, opacityCorrection);
 
-    vec3 color = (vec3(0.0, 0.0, 0.0) * (1.0 - value) + value * vec3(1.0));
-
+    // apply shading using stored gradients
     if (use_shading) {
         vec3 g = texture(tex_gradients, fs_texcoord).rgb;
         g.x = g.x * rangeGradient.x + minGradient.x;
         g.y = g.y * rangeGradient.y + minGradient.y;
         g.z = g.z * rangeGradient.z + minGradient.z;
         vec3 n = normalize(g);
-        color *= max(min(1.0, dot(n, lightDirection)), 0.3); // .3 is ambient
+        color.rgb *= max(min(1.0, dot(n, lightDirection)), 0.3); // .3 is ambient
     }
     
-    display_color = vec4(color, alpha);
-    
-//    display_color = vec4(g, 0.02);
+    display_color = color;
 }

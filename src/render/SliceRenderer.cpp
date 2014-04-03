@@ -41,6 +41,11 @@ SliceRenderer::~SliceRenderer()
     // TODO: delete resources
 }
 
+void SliceRenderer::setCLUTTexture(cgl::Texture* texture)
+{
+    this->clutTexture = texture;
+}
+
 void SliceRenderer::setVolume(VolumeData* volume)
 {
     this->volume = volume;
@@ -108,6 +113,10 @@ void SliceRenderer::init()
     // TODO rename these shaders
     sliceShader = Program::create("shaders/slice_clut.vert", "shaders/slice_clut.frag");
     axisShader = Program::create("shaders/color.vert", "shaders/color.frag");
+    
+    sliceShader->enable();
+    glUniform1i(sliceShader->getUniform("tex_slice"), 0);
+    glUniform1i(sliceShader->getUniform("tex_clut"), 1);
 
     // load fonts for text rendering
     text.loadFont("menlo14");
@@ -137,6 +146,11 @@ void SliceRenderer::drawSlice()
 {
     sliceShader->enable();
     
+    glActiveTexture(GL_TEXTURE1);
+    clutTexture->bind();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, sliceTexture);
+    
     // set the uniforms
     glUniform1i(sliceShader->getUniform("signed_normalized"), volume->isSigned());
     glUniform1f(sliceShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
@@ -154,9 +168,6 @@ void SliceRenderer::drawSlice()
     loc = sliceShader->getAttribute("vs_texcoord");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
-    
-    glBindTexture(GL_TEXTURE_2D, sliceTexture);
-    
     
     glDrawArrays(GL_TRIANGLES, 0, 6);
     

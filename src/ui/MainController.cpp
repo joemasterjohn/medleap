@@ -69,8 +69,11 @@ void MainController::init()
     volumeController.getRenderer()->init();
     volumeInfoController.getRenderer()->init();
     histogramController.getRenderer()->init();
+    clutController.getRenderer()->init();
     
     volumeInfoController.getRenderer()->setVolumeRenderer(volumeController.getRenderer());
+    clutController.setVolumeRenderer(volumeController.getRenderer());
+    clutController.setSliceRenderer(sliceController.getRenderer());
 }
 
 void MainController::setMode(MainController::Mode mode)
@@ -83,7 +86,8 @@ void MainController::setMode(MainController::Mode mode)
             pushController(&sliceController);
             pushController(&volumeInfoController);
             if (showHistogram)
-                pushController(&histogramController, MainController::Docking(MainController::Docking::BOTTOM, 0.2));
+                pushController(&histogramController, Docking(MainController::Docking::BOTTOM, 0.2));
+            pushController(&clutController, Docking(Docking::TOP, 0.075));
             break;
         case MODE_3D:
             renderer.clearLayers();
@@ -91,7 +95,8 @@ void MainController::setMode(MainController::Mode mode)
             pushController(&volumeController);
             pushController(&volumeInfoController);
             if (showHistogram)
-                pushController(&histogramController, MainController::Docking(MainController::Docking::BOTTOM, 0.2));
+                pushController(&histogramController, Docking(Docking::BOTTOM, 0.2));
+            pushController(&clutController, Docking(Docking::TOP, 0.075));
             break;
     }
 }

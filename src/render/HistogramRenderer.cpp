@@ -79,11 +79,6 @@ void HistogramRenderer::init()
     shader->enable();
     glUniform1i(shader->getUniform("tex_histogram"), 0);
     glUniform1i(shader->getUniform("tex_transfer"), 1);
-
-    
-    // create a VAO
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
     
     // vertex buffer for geometry: contains vertices for
     // 1) the histogram quad (drawn as a texture)

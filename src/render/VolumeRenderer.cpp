@@ -19,6 +19,7 @@ VolumeRenderer::VolumeRenderer()
     movingSampleScale = 0.5f;
     renderMode = VR;
     shading = true;
+    clutTexture = NULL;
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -89,16 +90,21 @@ bool VolumeRenderer::useShading()
     return shading;
 }
 
+void VolumeRenderer::setCLUTTexture(cgl::Texture* texture)
+{
+    this->clutTexture = texture;
+}
+
 void VolumeRenderer::init()
 {
     volumeTexture = new Texture(GL_TEXTURE_3D);
     gradientTexture = new Texture(GL_TEXTURE_3D);
-    
+
     camera.setView(cgl::lookAt(0, 0, 2, 0, 0, 0, 0, 1, 0));
     
     lineShader = Program::create("shaders/color.vert", "shaders/color.frag");
     
-    sceneProgram = Program::create("shaders/simple_tex.vert", "shaders/simple_tex.frag");
+    sceneProgram = Program::create("shaders/texture_2D.vert", "shaders/texture_2D.frag");
     
     GLfloat vertexData[] = {
         0, 0, 0, 1, 0, 0,
@@ -126,8 +132,8 @@ void VolumeRenderer::init()
     boxShader->enable();
     glUniform1i(boxShader->getUniform("tex_volume"), 0);
     glUniform1i(boxShader->getUniform("tex_gradients"), 1);
-    
-    
+    glUniform1i(boxShader->getUniform("tex_clut"), 2);
+
     
     sceneFramebuffer = new Framebuffer;
     sceneTexture = new Texture(GL_TEXTURE_2D);
@@ -154,6 +160,7 @@ void VolumeRenderer::init()
         sceneBuffer->bind();
         sceneBuffer->setData(vdata, sizeof(vdata));
     }
+    
 }
 
 void VolumeRenderer::resize(int width, int height)
@@ -209,6 +216,8 @@ void VolumeRenderer::draw()
     
     // proxy geometry
     {
+        glActiveTexture(GL_TEXTURE2);
+        clutTexture->bind();
         glActiveTexture(GL_TEXTURE1);
         gradientTexture->bind();
         glActiveTexture(GL_TEXTURE0);

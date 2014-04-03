@@ -48,6 +48,19 @@ void Texture::unbind() const
     glBindTexture(target, 0);
 }
 
+void Texture::setData1D(GLint level,
+                        GLint internalFormat,
+                        GLsizei width,
+                        GLenum format,
+                        GLenum type,
+                        const GLvoid *data)
+{
+    this->width = width;
+    this->height = 1;
+    this->depth = 1;
+    glTexImage1D(target, level, internalFormat, width, 0, format, type, data);
+}
+
 void Texture::setData2D(GLint level,
                         GLint internalFormat,
                         GLsizei width,

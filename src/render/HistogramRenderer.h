@@ -34,7 +34,6 @@ private:
     cgl::Texture* transferFn;
     Program* shader;
     Program* colorShader;
-    GLuint vao;
     GLuint vbo;
     GLsizei stride;
     cgl::Mat4 histoModelMatrix;

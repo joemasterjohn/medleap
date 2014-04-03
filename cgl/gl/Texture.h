@@ -35,6 +35,14 @@ namespace cgl
         /** Unbinds the referenced texture object from its target. */
         void unbind() const;
         
+        /** Set 1D texture data (glTexImage1D) */
+        void setData1D(GLint level,
+                       GLint internalFormat,
+                       GLsizei width,
+                       GLenum format,
+                       GLenum type,
+                       const GLvoid* data);
+        
         /** Set 2D texture data (glTexImage2D) */
         void setData2D(GLint level,
                        GLint internalFormat,

@@ -6,6 +6,7 @@
 #include "ui/VolumeController.h"
 #include "ui/VolumeInfoController.h"
 #include "ui/HistogramController.h"
+#include "ui/CLUTController.h"
 #include <list>
 #include "util/TextRenderer.h"
 
@@ -63,6 +64,7 @@ private:
     VolumeController volumeController;
     VolumeInfoController volumeInfoController;
     HistogramController histogramController;
+    CLUTController clutController;
     std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;

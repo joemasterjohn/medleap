@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include "render/Renderer.h"
 #include "gl/Program.h"
+#include "gl/Texture.h"
 #include "util/TextRenderer.h"
 #include "volume/VolumeData.h"
 #include "math/Matrix4.h"
@@ -21,6 +22,7 @@ public:
     
     int getCurrentSlice();
     void setCurrentSlice(int sliceIndex);
+    void setCLUTTexture(cgl::Texture* texture);
 private:
     class OrientationLabel
     {
@@ -34,6 +36,7 @@ private:
     TextRenderer text;
     Program* sliceShader;
     Program* axisShader;
+    cgl::Texture* clutTexture;
     GLuint sliceTexture;
     GLuint vao;
     GLuint vbo;
