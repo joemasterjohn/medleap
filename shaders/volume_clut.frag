@@ -36,7 +36,7 @@ void main()
     
     // opacity correction based on sampling rate
     color.a = 1.0 - pow(1.0 - color.a, opacityCorrection);
-
+    
     // apply shading using stored gradients
     if (use_shading) {
         vec3 g = texture(tex_gradients, fs_texcoord).rgb;

@@ -17,6 +17,18 @@ CLUTController::CLUTController()
     test.addColorStop(0.6f, cgl::Vec4(1, 0, 0, 1));
     cluts.push_back(test);
     
+    CLUT yellowToWhite;
+    yellowToWhite.clearStops();
+    yellowToWhite.addColorStop(0.0f, cgl::Vec4(1, 1, 0, 0));
+    yellowToWhite.addColorStop(1.0f, cgl::Vec4(1, 1, 1, 1));
+    cluts.push_back(yellowToWhite);
+    
+    CLUT monochrome;
+    monochrome.clearStops();
+    monochrome.addColorStop(0.0f, cgl::Vec4(1, 1, 1, 0));
+    monochrome.addColorStop(1.0f, cgl::Vec4(1, 1, 1, 1));
+    cluts.push_back(monochrome);
+    
     renderer.setCLUT(&getActiveCLUT());
 }
 

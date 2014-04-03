@@ -82,6 +82,12 @@ int CLUT::findNearestStop(float pos)
 
 void CLUT::addColorStop(float position, cgl::Vec4 color)
 {
+    // if no stops, just add it
+    if (stops.empty()) {
+        stops.push_back(ColorStop(position, color));
+        return;
+    }
+    
     int left = findLeftStop(position);
     
     std::min(3,4);
@@ -125,6 +131,11 @@ cgl::Vec4 CLUT::getColor(float position)
     
     // return linearly interpolated color
     return left->getColor() * (1.0f - np) + right->getColor() * np;
+}
+
+void CLUT::clearStops()
+{
+    stops.clear();
 }
 
 void CLUT::saveTexture(cgl::Texture* texture)
