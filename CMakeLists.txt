@@ -50,14 +50,26 @@ add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS} ${DATA_FONTS})
 
 # source group naming for IDEs
 # -----------------------------------------------------------------------------------------------------------------------
-source_group("" FILES src/main.cpp)
+source_group("" FILES src/main.cpp src/glew/glew.c)
+source_group("shaders" FILES ${DATA_SHADERS})
+
 file(GLOB SOURCE_VOLUME src/volume/*.cpp src/volume/*.h)
 source_group("volume" FILES ${SOURCE_VOLUME})
-source_group("shaders" FILES ${DATA_SHADERS})
+
 file(GLOB SOURCE_RENDER src/render/*.cpp src/render/*.h)
 source_group("render" FILES ${SOURCE_RENDER})
+
 file(GLOB SOURCE_UI src/ui/*.cpp src/ui/*.h)
 source_group("ui" FILES ${SOURCE_UI})
+
+file(GLOB SOURCE_GL src/gl/*.cpp src/gl/*.h)
+source_group("gl" FILES ${SOURCE_GL})
+
+file(GLOB SOURCE_MATH src/math/*.cpp src/math/*.h)
+source_group("math" FILES ${SOURCE_MATH})
+
+file(GLOB SOURCE_UTIL src/util/*.cpp src/util/*.h)
+source_group("util" FILES ${SOURCE_UTIL})
 # -----------------------------------------------------------------------------------------------------------------------
 
 
@@ -65,9 +77,13 @@ source_group("ui" FILES ${SOURCE_UI})
 # -----------------------------------------------------------------------------------------------------------------------
 add_executable(${PROJECT_NAME}
     src/main.cpp
+    src/glew/glew.c
     ${SOURCE_VOLUME}
     ${SOURCE_RENDER}
     ${SOURCE_UI}
+    ${SOURCE_GL}
+    ${SOURCE_MATH}
+    ${SOURCE_UTIL}
     ${DATA_SHADERS}
 )
 add_dependencies(${PROJECT_NAME} SHADER_COPY)
@@ -77,9 +93,17 @@ add_dependencies(${PROJECT_NAME} SHADER_COPY)
 # libraries
 # -----------------------------------------------------------------------------------------------------------------------
 include_directories(src)
-add_subdirectory(cgl)
-include_directories(cgl)
-include_directories(cgl/glew)
+#add_subdirectory(cgl)
+#include_directories(cgl)
+include_directories(src/glew)
+
+# add include directories so the headers can be used without subdirectories
+include_directories(src/gl)
+include_directories(src/math)
+include_directories(src/util)
+include_directories(src/glew)
+
+
 find_package(GDCM REQUIRED)
 include_directories(${GDCM_INCLUDE_DIRS})
 find_package(GLFW REQUIRED)
@@ -93,7 +117,7 @@ if (APPLE)
     target_link_libraries(
         ${PROJECT_NAME}
         gdcmMSFF
-        cgl
+        #cgl
         ${GLFW_LIBRARY}
         ${OPENGL_LIBRARY}
         ${COCOA_LIBRARY}
