@@ -82,12 +82,12 @@ void VolumeInfoRenderer::draw()
     text.add(buf, windowWidth, windowHeight, TextRenderer::RIGHT, TextRenderer::TOP);
     
     // Dimensions (mm)
-    cgl::Vec3 v = volume->getDimensionsMM();
+    Vec3 v = volume->getDimensionsMM();
     sprintf(buf, "Volume Dimensions (mm): %.1f x %.1f x %.1f", v.x, v.y, v.z);
     text.add(buf, windowWidth, windowHeight - 18, TextRenderer::RIGHT, TextRenderer::TOP);
     
     // Voxel Size
-    const cgl::Vec3 vsize = volume->getVoxelSize();
+    const Vec3 vsize = volume->getVoxelSize();
     sprintf(buf, "Voxel Size (mm): %.2f x %.2f x %.2f", vsize.x, vsize.y, vsize.z);
     text.add(buf, windowWidth, windowHeight - 36, TextRenderer::RIGHT, TextRenderer::TOP);
     

@@ -8,25 +8,25 @@ CLUTController::CLUTController()
     cluts.push_back(CLUT());
     
     CLUT redToWhite;
-    redToWhite.addColorStop(0.25f, cgl::Vec4(1, 0, 0, 1));
+    redToWhite.addColorStop(0.25f, Vec4(1, 0, 0, 1));
     cluts.push_back(redToWhite);
     
     CLUT test;
-    test.addColorStop(0.2f, cgl::Vec4(0, 1, 0, 1));
-    test.addColorStop(0.4f, cgl::Vec4(1, 1, 0, 1));
-    test.addColorStop(0.6f, cgl::Vec4(1, 0, 0, 1));
+    test.addColorStop(0.2f, Vec4(0, 1, 0, 1));
+    test.addColorStop(0.4f, Vec4(1, 1, 0, 1));
+    test.addColorStop(0.6f, Vec4(1, 0, 0, 1));
     cluts.push_back(test);
     
     CLUT yellowToWhite;
     yellowToWhite.clearStops();
-    yellowToWhite.addColorStop(0.0f, cgl::Vec4(1, 1, 0, 0));
-    yellowToWhite.addColorStop(1.0f, cgl::Vec4(1, 1, 1, 1));
+    yellowToWhite.addColorStop(0.0f, Vec4(1, 1, 0, 0));
+    yellowToWhite.addColorStop(1.0f, Vec4(1, 1, 1, 1));
     cluts.push_back(yellowToWhite);
     
     CLUT monochrome;
     monochrome.clearStops();
-    monochrome.addColorStop(0.0f, cgl::Vec4(1, 1, 1, 0));
-    monochrome.addColorStop(1.0f, cgl::Vec4(1, 1, 1, 1));
+    monochrome.addColorStop(0.0f, Vec4(1, 1, 1, 0));
+    monochrome.addColorStop(1.0f, Vec4(1, 1, 1, 1));
     cluts.push_back(monochrome);
     
     renderer.setCLUT(&getActiveCLUT());

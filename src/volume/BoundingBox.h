@@ -17,14 +17,14 @@ public:
     float getWidth() const;
     float getHeight() const;
     float getLength() const;
-    cgl::Vec3 getMinimum() const;
-    cgl::Vec3 getMaximum() const;
-    const std::vector<cgl::Vec4>& getVertices() const;
+    Vec3 getMinimum() const;
+    Vec3 getMaximum() const;
+    const std::vector<Vec4>& getVertices() const;
     const std::vector<Edge>& getEdges() const;
     
 private:
-    cgl::Vec3 size;
-    std::vector<cgl::Vec4> vertices;
+    Vec3 size;
+    std::vector<Vec4> vertices;
     std::vector<Edge> edges;
 };
 

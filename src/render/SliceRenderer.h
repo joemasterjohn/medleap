@@ -1,7 +1,7 @@
 #ifndef __medleap__SliceRenderer__
 #define __medleap__SliceRenderer__
 
-#include <GL/glew.h>
+#include "gl/glew.h"
 #include "render/Renderer.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
@@ -22,21 +22,21 @@ public:
     
     int getCurrentSlice();
     void setCurrentSlice(int sliceIndex);
-    void setCLUTTexture(cgl::Texture* texture);
+    void setCLUTTexture(gl::Texture* texture);
 private:
     class OrientationLabel
     {
     public:
         std::string text;
-        cgl::Vec2 position;
-        OrientationLabel(std::string text, cgl::Vec2 position) : text(text), position(position) {}
+        Vec2 position;
+        OrientationLabel(std::string text, Vec2 position) : text(text), position(position) {}
     };
     
     VolumeData* volume;
     TextRenderer text;
-    Program* sliceShader;
-    Program* axisShader;
-    cgl::Texture* clutTexture;
+    gl::Program* sliceShader;
+    gl::Program* axisShader;
+    gl::Texture* clutTexture;
     GLuint sliceTexture;
     GLuint vao;
     GLuint vbo;
@@ -46,7 +46,7 @@ private:
     int windowHeight;
     int currentSlice;
     std::vector<OrientationLabel> labels;
-    cgl::Mat4 modelMatrix;
+    Mat4 modelMatrix;
     
     void drawSlice();
     void drawOrientationOverlay();

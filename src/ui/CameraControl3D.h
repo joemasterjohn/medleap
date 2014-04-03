@@ -20,7 +20,7 @@ private:
     bool mouseDragLeftButton;
     double dragStartX;
     double dragStartY;
-    cgl::Mat4 dragStartView;
+    Mat4 dragStartView;
 };
 
 #endif // __MEDLEAP_CAMERA_CONTROL_3D__

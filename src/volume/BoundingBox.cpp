@@ -1,6 +1,6 @@
 #include "BoundingBox.h"
 
-using namespace cgl;
+
 using namespace std;
 
 BoundingBox::BoundingBox(float width, float height, float length) : size(width, height, length)

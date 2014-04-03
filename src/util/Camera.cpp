@@ -1,7 +1,7 @@
 #include "camera.h"
 #include "math/Transform.h"
 
-using namespace cgl;
+using namespace glmath;
 
 Camera::Camera()
 {}

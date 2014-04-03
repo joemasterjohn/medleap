@@ -2,6 +2,8 @@
 #include <sstream>
 #include "Shader.h"
 
+using namespace gl;
+
 Shader::Shader() : id(0), type(0)
 {
 }

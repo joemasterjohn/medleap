@@ -16,12 +16,12 @@ public:
     void draw();
     void resize(int width, int height);
     void setCLUT(CLUT* clut);
-    cgl::Texture* getTexture();
+    gl::Texture* getTexture();
     
 private:
-    Program* quadShader;
-    cgl::Buffer* quadVBO;
-    cgl::Texture* clutTexture;
+    gl::Program* quadShader;
+    gl::Buffer* quadVBO;
+    gl::Texture* clutTexture;
     CLUT* clut;
     int stride;
 };

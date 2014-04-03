@@ -1,7 +1,7 @@
 #ifndef CGL_VIEWPORT_H_
 #define CGL_VIEWPORT_H_
 
-namespace cgl
+namespace gl
 {
     class Viewport
     {

@@ -1,6 +1,8 @@
 #include "TextRenderer.h"
 #include <fstream>
+#include <iostream>
 
+using namespace gl;
 using namespace std;
 
 static const char* vSrc = "\

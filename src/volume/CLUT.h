@@ -14,30 +14,30 @@ public:
     {
     public:
         ColorStop(float position, float r, float g, float b, float a);
-        ColorStop(float position, cgl::Vec4 color);
+        ColorStop(float position, Vec4 color);
         
         float getPosition();
         void setPosition(float position);
         
-        cgl::Vec4 getColor();
+        Vec4 getColor();
         void setColor(float r, float g, float b, float a);
-        void setColor(cgl::Vec4 color);
+        void setColor(Vec4 color);
         
     private:
         float position;
-        cgl::Vec4 color;
+        Vec4 color;
     };
     
     
     CLUT();
     ~CLUT();
-    cgl::Vec4 getColor(float position);
+    Vec4 getColor(float position);
     ColorStop& getColorStop(float position);
     void removeColorStop(float position);
-    void addColorStop(float position, cgl::Vec4 color);
+    void addColorStop(float position, Vec4 color);
     void clearStops();
     
-    void saveTexture(cgl::Texture* texture);
+    void saveTexture(gl::Texture* texture);
     
 private:
     std::vector<ColorStop> stops;

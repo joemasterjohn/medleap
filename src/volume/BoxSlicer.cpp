@@ -4,7 +4,7 @@
 #include "math/Vector4.h"
 
 using namespace std;
-using namespace cgl;
+
 
 BoxSlicer::VertexSorter::VertexSorter(BoxSlicer* slicer) : slicer(slicer)
 {

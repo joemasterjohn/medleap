@@ -1,23 +1,24 @@
 #include "SliceRenderer.h"
 #include "math/Transform.h"
 
-using namespace cgl;
+using namespace gl;
+using namespace glmath;
 
 // Patient orientation axes with respective labels
 // -----------------------------------------------------------------
 struct AxisLabel
 {
     std::string label;
-    cgl::Vec3 vector;
+    Vec3 vector;
 };
 
 static const AxisLabel axes[] = {
-    { "L", cgl::Vec3(1,0,0) },  // left
-    { "R", cgl::Vec3(-1,0,0) }, // right
-    { "P", cgl::Vec3(0,1,0) },  // posterior (back)
-    { "A", cgl::Vec3(0,-1,0) }, // anterior (front)
-    { "S", cgl::Vec3(0,0,1) },  // superior (head)
-    { "I", cgl::Vec3(0,0,-1) }, // inferior (foot)
+    { "L", Vec3(1,0,0) },  // left
+    { "R", Vec3(-1,0,0) }, // right
+    { "P", Vec3(0,1,0) },  // posterior (back)
+    { "A", Vec3(0,-1,0) }, // anterior (front)
+    { "S", Vec3(0,0,1) },  // superior (head)
+    { "I", Vec3(0,0,-1) }, // inferior (foot)
 };
 // -----------------------------------------------------------------
 
@@ -41,7 +42,7 @@ SliceRenderer::~SliceRenderer()
     // TODO: delete resources
 }
 
-void SliceRenderer::setCLUTTexture(cgl::Texture* texture)
+void SliceRenderer::setCLUTTexture(gl::Texture* texture)
 {
     this->clutTexture = texture;
 }
@@ -59,7 +60,7 @@ void SliceRenderer::setVolume(VolumeData* volume)
     Mat3 patient2image = volume->getPatientBasis().transpose();
     for (int i = 0; i < sizeof(axes) / sizeof(AxisLabel); i++) {
         const AxisLabel& axis = axes[i];
-        cgl::Vec3 v = patient2image * axis.vector;
+        Vec3 v = patient2image * axis.vector;
         
         // DICOM image space means +X is right and +Y is down; in OpenGL,
         // +Y is up so negate the y component
@@ -67,7 +68,7 @@ void SliceRenderer::setVolume(VolumeData* volume)
         
         // add the line if its projection on the XY image plane has some length
         if (std::sqrt(v.x * v.x + v.y * v.y) > 0.1) {
-            cgl::Vec3 color = (v * 0.5) + 0.5;
+            Vec3 color = (v * 0.5) + 0.5;
             
             vertexData.push_back(0);
             vertexData.push_back(0);
@@ -81,7 +82,7 @@ void SliceRenderer::setVolume(VolumeData* volume)
             vertexData.push_back(color.y);
             vertexData.push_back(color.z);
             
-            labels.push_back(OrientationLabel(axis.label, cgl::Vec2(v)));
+            labels.push_back(OrientationLabel(axis.label, Vec2(v)));
             numOrientationVertices += 2;
         }
     }
@@ -104,8 +105,8 @@ void SliceRenderer::resize(int width, int height)
     float sliceAspect = (float)volume->getWidth() / volume->getHeight();
     
     modelMatrix = (sliceAspect <= 1.0f) ?
-        cgl::scale(sliceAspect / windowAspect, 1.0f, 1.0f) :
-        cgl::scale(1.0f, windowAspect / sliceAspect, 1.0f);
+        scale(sliceAspect / windowAspect, 1.0f, 1.0f) :
+        scale(1.0f, windowAspect / sliceAspect, 1.0f);
 }
 
 void SliceRenderer::init()
@@ -180,9 +181,9 @@ void SliceRenderer::drawOrientationOverlay()
     axisShader->enable();
     float aspect = (float)windowWidth / windowHeight;
     if (aspect >= 1) {
-        glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, cgl::scale(1.0f/aspect, 1, 1));
+        glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, scale(1.0f/aspect, 1, 1));
     } else {
-        glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, cgl::scale(1, aspect, 1));
+        glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, scale(1, aspect, 1));
     }
     GLsizei stride = 5 * sizeof(GLfloat);
     

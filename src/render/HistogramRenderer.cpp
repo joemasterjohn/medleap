@@ -3,6 +3,8 @@
 #include "ui/MainController.h"
 #include <string>
 
+using namespace gl;
+
 // this only applies to CT modality
 const char* hounsfield(int value)
 {
@@ -67,9 +69,9 @@ HistogramRenderer::~HistogramRenderer()
 
 void HistogramRenderer::init()
 {
-    histo1D = new cgl::Texture(GL_TEXTURE_2D);
+    histo1D = new Texture(GL_TEXTURE_2D);
     
-    transferFn = new cgl::Texture(GL_TEXTURE_2D);
+    transferFn = new Texture(GL_TEXTURE_2D);
     
     
     
@@ -190,7 +192,7 @@ void HistogramRenderer::setVolume(VolumeData* volume)
     this->volume = volume;
 }
 
-cgl::Texture* HistogramRenderer::getTransferFn()
+Texture* HistogramRenderer::getTransferFn()
 {
     return transferFn;
 }

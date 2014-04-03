@@ -31,13 +31,13 @@ public:
             resize(width, height);
     }
     
-    const cgl::Viewport& getViewport()
+    const gl::Viewport& getViewport()
     {
         return viewport;
     }
     
 protected:
-    cgl::Viewport viewport;
+    gl::Viewport viewport;
 };
 
 #endif /* defined(__medleap__Renderer__) */

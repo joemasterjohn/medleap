@@ -1,7 +1,7 @@
 #ifndef __medleap__MainRenderer__
 #define __medleap__MainRenderer__
 
-#include <GL/glew.h>
+#include "gl/glew.h"
 #include <GLFW/glfw3.h>
 #include "render/Renderer.h"
 #include <list>

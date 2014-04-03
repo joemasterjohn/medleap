@@ -1,7 +1,7 @@
 #include "CameraControl3D.h"
 #include "math/Transform.h"
 
-using namespace cgl;
+using namespace glmath;
 
 CameraControl3D::CameraControl3D(VolumeRenderer* renderer) : renderer(renderer), mouseDragLeftButton(false)
 {

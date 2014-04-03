@@ -1,12 +1,6 @@
 #include "Framebuffer.h"
 
-using namespace cgl;
-
-Framebuffer::Framebuffer()
-{
-    target = GL_FRAMEBUFFER;
-    glGenFramebuffers(1, &id);
-}
+using namespace gl;
 
 Framebuffer::Framebuffer(GLenum target)
 {
@@ -34,12 +28,20 @@ void Framebuffer::setTarget(GLenum target)
     this->target = target;
 }
 
-void Framebuffer::setColorTarget(int i, cgl::Texture* texture, int level)
+void Framebuffer::setColorTarget(int i, gl::Texture* texture, int level)
 {
-    glFramebufferTexture2D(target, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture->getID(), level);
+    glFramebufferTexture2D(target,
+                           GL_COLOR_ATTACHMENT0 + i,
+                           GL_TEXTURE_2D,
+                           texture->getID(),
+                           level);
 }
 
-void Framebuffer::setDepthTarget(cgl::Texture* texture, int level)
+void Framebuffer::setDepthTarget(gl::Texture* texture, int level)
 {
-    glFramebufferTexture2D(target, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->getID(), level);
+    glFramebufferTexture2D(target,
+                           GL_DEPTH_ATTACHMENT,
+                           GL_TEXTURE_2D,
+                           texture->getID(),
+                           level);
 }

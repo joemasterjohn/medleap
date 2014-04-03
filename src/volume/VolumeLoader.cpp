@@ -221,10 +221,10 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
         
         // patient orientation
         const double* cosines = img.GetDirectionCosines();
-        cgl::Vec3 x(cosines[0], cosines[1], cosines[2]);
-        cgl::Vec3 y(cosines[3], cosines[4], cosines[5]);
-        cgl::Vec3 z = x.cross(y);
-        volume->orientation = cgl::Mat3(x, y, z);
+        Vec3 x(cosines[0], cosines[1], cosines[2]);
+        Vec3 y(cosines[3], cosines[4], cosines[5]);
+        Vec3 z = x.cross(y);
+        volume->orientation = Mat3(x, y, z);
     } else {
         volume->windows.push_back(Window(volume->type));
     }

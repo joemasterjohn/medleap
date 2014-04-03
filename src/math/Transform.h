@@ -6,7 +6,7 @@
 #include "Matrix4.h"
 #include "Vector3.h"
 
-namespace cgl {
+namespace glmath {
   
   /// Returns the value clamped to be in [min, max].
   template <typename T> T clamp(T value, T min, T max)

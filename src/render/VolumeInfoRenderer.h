@@ -1,7 +1,7 @@
 #ifndef __medleap__VolumeInfoRenderer__
 #define __medleap__VolumeInfoRenderer__
 
-#include <GL/glew.h>
+#include "gl/glew.h"
 #include "render/Renderer.h"
 #include "volume/VolumeData.h"
 #include "render/VolumeRenderer.h"

@@ -1,6 +1,6 @@
 #include "Buffer.h"
 
-using namespace cgl;
+using namespace gl;
 
 Buffer::Buffer(GLenum target, GLenum usage) : target(target), usage(usage)
 {
@@ -35,4 +35,14 @@ void Buffer::setData(const GLvoid* data, GLsizeiptr size)
 void Buffer::setSubData(const GLvoid* data, GLsizeiptr size, GLintptr offset)
 {
     glBufferSubData(target, offset, size, data);
+}
+
+Buffer* Buffer::createVBO(GLenum usage)
+{
+    return new Buffer(GL_ARRAY_BUFFER, usage);
+}
+
+Buffer* Buffer::createIBO(GLenum usage)
+{
+    return new Buffer(GL_ELEMENT_ARRAY_BUFFER, usage);
 }

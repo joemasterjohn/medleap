@@ -90,7 +90,7 @@ bool HistogramController::mouseButton(GLFWwindow* window, int button, int action
 
 void HistogramController::updateTransferTex1D()
 {
-    cgl::Texture* tex = renderer.getTransferFn();
+    gl::Texture* tex = renderer.getTransferFn();
     tex->bind();
     tex->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     tex->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);

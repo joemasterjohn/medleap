@@ -1,7 +1,7 @@
 #ifndef __MEDLEAP_VOLUME_DATA__
 #define __MEDLEAP_VOLUME_DATA__
 
-#include <GL/glew.h>
+#include "gl/glew.h"
 #include <vector>
 #include <string>
 #include "Window.h"
@@ -29,10 +29,10 @@ public:
     ~VolumeData();
     
     /** Dimensions of each voxel in real world units (ex. millimeters) */
-    const cgl::Vec3& getVoxelSize() const;
+    const Vec3& getVoxelSize() const;
     
     /** Dimensions of the entire volume in millimeters */
-    cgl::Vec3 getDimensionsMM() const;
+    Vec3 getDimensionsMM() const;
     
     /** Returns a bounding box of the normalized real world dimensions of the volume. */
     const BoundingBox& getBounds();
@@ -80,7 +80,7 @@ public:
     Window& getCurrentWindow();
     
     /** Matrix that transforms DICOM image space (+X right, +Y down) to patient space (+X = left, +Y = posterior, +Z = superior) */
-    const cgl::Mat3& getPatientBasis() const;
+    const Mat3& getPatientBasis() const;
     
     /** Checks if the DICOM tag <G,E> exists in the data set */
     bool hasValue(uint16_t G, uint16_t E);
@@ -121,25 +121,25 @@ public:
     void loadTexture2D(GLuint& texture, int depth);
     
     /** Stores all images/slices into a 3D texture (single channel per voxel) */
-    void loadTexture3D(cgl::Texture* texture);
+    void loadTexture3D(gl::Texture* texture);
     
     /** Stores normalized gradient vectors in a 3D texture */
-    void loadGradientTexture(cgl::Texture* texture);
+    void loadGradientTexture(gl::Texture* texture);
     
     /** Pointer to the raw data bytes */
     char* getData();
     
     /** Vector storing minimum x, y, and z components of all gradient vectors */
-    const cgl::Vec3& getMinGradient();
+    const Vec3& getMinGradient();
     
     /** Vector storing maximum x, y, and z components of all gradient vectors */
-    const cgl::Vec3& getMaxGradient();
+    const Vec3& getMaxGradient();
     
 private:
     char* data;
-    std::vector<cgl::Vec3> gradients;
-    cgl::Vec3 minGradient;
-    cgl::Vec3 maxGradient;
+    std::vector<Vec3> gradients;
+    Vec3 minGradient;
+    Vec3 maxGradient;
     float minGradientMag;
     float maxGradientMag;
     int width;
@@ -149,11 +149,11 @@ private:
     GLenum type;
     int minVoxelValue;
     int maxVoxelValue;
-    cgl::Vec3 voxelSize;
+    Vec3 voxelSize;
     BoundingBox* bounds;
     gdcm::Reader reader;
     Modality modality;
-    cgl::Mat3 orientation;
+    Mat3 orientation;
     std::vector<Window> windows;
     int activeWindow;
 
@@ -167,9 +167,9 @@ private:
     {
         gradients.clear();
         minGradientMag = std::numeric_limits<float>::infinity();
-        minGradient = cgl::Vec3(minGradientMag);
+        minGradient = Vec3(minGradientMag);
         maxGradientMag = -std::numeric_limits<float>::infinity();
-        maxGradient = cgl::Vec3(maxGradientMag);
+        maxGradient = Vec3(maxGradientMag);
         
         // compute gradient vectors
         for (int z = 0; z < depth; z++) {
@@ -178,7 +178,7 @@ private:
                     int gx = (getVoxelValue<T>(x+1, y, z) - getVoxelValue<T>(x-1, y, z)) / (2 * voxelSize.x);
                     int gy = (getVoxelValue<T>(x, y+1, z) - getVoxelValue<T>(x, y-1, z)) / (2 * voxelSize.y);
                     int gz = (getVoxelValue<T>(x, y, z+1) - getVoxelValue<T>(x, y, z-1)) / (2 * voxelSize.z);
-                    cgl::Vec3 g(gx, gy, gz);
+                    Vec3 g(gx, gy, gz);
 
                     float mag = g.length();
                     if (mag < minGradientMag) minGradientMag = mag;

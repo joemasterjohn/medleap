@@ -1,7 +1,7 @@
 #ifndef __MEDLEAP_GL_UTIL__
 #define __MEDLEAP_GL_UTIL__
 
-#include "GL/glew.h"
+#include "gl/glew.h"
 
 namespace gl
 {
@@ -17,7 +17,6 @@ namespace gl
      * rows starting at the top, but OpenGL reads starting at the bottom.
      */
     void flipImage(void* buffer, int width, int height, int pixelSize);
-    
-} // namespace cgl
+}
 
 #endif // __MEDLEAP_GL_UTIL__

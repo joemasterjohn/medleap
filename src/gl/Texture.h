@@ -1,9 +1,9 @@
 #ifndef CGL_TEXTURE_H_
 #define CGL_TEXTURE_H_
 
-#include <GL/glew.h>
+#include "gl/glew.h"
 
-namespace cgl
+namespace gl
 {
     class Texture
     {

@@ -1,6 +1,6 @@
 #include "Texture.h"
 
-using namespace cgl;
+using namespace gl;
 
 Texture::Texture(GLenum target) : id(0), target(target), width(0), height(0), depth(0)
 {

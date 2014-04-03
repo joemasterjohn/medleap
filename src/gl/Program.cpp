@@ -1,6 +1,7 @@
 #include "Program.h"
+#include <iostream>
 
-Program* generateProgram(Shader* vShader, Shader* fShader);
+using namespace gl;
 
 Program::Program()
 {

@@ -1,11 +1,13 @@
 #include "CLUT.h"
 #include <algorithm>
 
+using namespace gl;
+
 CLUT::ColorStop::ColorStop(float position, float r, float g, float b, float a) : position(position), color(r,g,b,a)
 {
 }
 
-CLUT::ColorStop::ColorStop(float position, cgl::Vec4 color) : position(position), color(color)
+CLUT::ColorStop::ColorStop(float position, Vec4 color) : position(position), color(color)
 {
 }
 
@@ -19,7 +21,7 @@ void CLUT::ColorStop::setPosition(float position)
     this->position = position;
 }
 
-cgl::Vec4 CLUT::ColorStop::getColor()
+Vec4 CLUT::ColorStop::getColor()
 {
     return color;
 }
@@ -32,7 +34,7 @@ void CLUT::ColorStop::setColor(float r, float g, float b, float a)
     color.w = a;
 }
 
-void CLUT::ColorStop::setColor(cgl::Vec4 color)
+void CLUT::ColorStop::setColor(Vec4 color)
 {
     this->color = color;
 }
@@ -80,7 +82,7 @@ int CLUT::findNearestStop(float pos)
     return left+1;
 }
 
-void CLUT::addColorStop(float position, cgl::Vec4 color)
+void CLUT::addColorStop(float position, Vec4 color)
 {
     // if no stops, just add it
     if (stops.empty()) {
@@ -111,7 +113,7 @@ CLUT::ColorStop& CLUT::getColorStop(float position)
     return stops[findNearestStop(position)];
 }
 
-cgl::Vec4 CLUT::getColor(float position)
+Vec4 CLUT::getColor(float position)
 {
     // make sure position is in [0,1]
     position = std::min(std::max(position, 0.0f), 1.0f);
@@ -138,7 +140,7 @@ void CLUT::clearStops()
     stops.clear();
 }
 
-void CLUT::saveTexture(cgl::Texture* texture)
+void CLUT::saveTexture(Texture* texture)
 {
     int l = 0;
     int r = 1;
@@ -156,7 +158,7 @@ void CLUT::saveTexture(cgl::Texture* texture)
         
         float pn = (p - left->getPosition()) / (right->getPosition() - left->getPosition());
         
-        cgl::Vec4 color = left->getColor() * (1.0f - pn) + right->getColor() * pn;
+        Vec4 color = left->getColor() * (1.0f - pn) + right->getColor() * pn;
         buf[ptr++] = (unsigned char)(color.x * 255);
         buf[ptr++] = (unsigned char)(color.y * 255);
         buf[ptr++] = (unsigned char)(color.z * 255);

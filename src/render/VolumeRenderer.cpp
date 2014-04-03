@@ -2,8 +2,9 @@
 #include "math/Transform.h"
 #include "volume/BoxSlicer.h"
 
-using namespace cgl;
+using namespace gl;
 using namespace std;
+using namespace glmath;
 
 VolumeRenderer::VolumeRenderer()
 {
@@ -38,7 +39,7 @@ VolumeRenderer::~VolumeRenderer()
         delete sceneBuffer;
 }
 
-cgl::Camera& VolumeRenderer::getCamera()
+Camera& VolumeRenderer::getCamera()
 {
     return camera;
 }
@@ -90,7 +91,7 @@ bool VolumeRenderer::useShading()
     return shading;
 }
 
-void VolumeRenderer::setCLUTTexture(cgl::Texture* texture)
+void VolumeRenderer::setCLUTTexture(Texture* texture)
 {
     this->clutTexture = texture;
 }
@@ -100,7 +101,7 @@ void VolumeRenderer::init()
     volumeTexture = new Texture(GL_TEXTURE_3D);
     gradientTexture = new Texture(GL_TEXTURE_3D);
 
-    camera.setView(cgl::lookAt(0, 0, 2, 0, 0, 0, 0, 1, 0));
+    camera.setView(lookAt(0, 0, 2, 0, 0, 0, 0, 1, 0));
     
     lineShader = Program::create("shaders/color.vert", "shaders/color.frag");
     
@@ -167,7 +168,7 @@ void VolumeRenderer::resize(int width, int height)
 {
     viewport.width = width;
     viewport.height = height;
-    camera.setProjection(cgl::perspective(1.0471975512, viewport.aspect(), 0.1f, 100.0f));
+    camera.setProjection(perspective(1.0471975512, viewport.aspect(), 0.1f, 100.0f));
 }
 
 void VolumeRenderer::updateSlices()
@@ -198,7 +199,7 @@ void VolumeRenderer::draw()
         
         lineShader->enable();
         
-        cgl::Mat4 mvp = camera.getProjection() * camera.getView();
+        Mat4 mvp = camera.getProjection() * camera.getView();
         glUniformMatrix4fv(lineShader->getUniform("modelViewProjection"), 1, false, mvp);
         
         GLsizei stride = sizeof(GLfloat) * 6;
@@ -228,7 +229,7 @@ void VolumeRenderer::draw()
         
         boxShader->enable();
         
-        cgl::Mat4 mvp = camera.getProjection() * camera.getView();
+        Mat4 mvp = camera.getProjection() * camera.getView();
         glUniformMatrix4fv(boxShader->getUniform("modelViewProjection"), 1, false, mvp);
         
         glUniform3fv(boxShader->getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
@@ -243,7 +244,7 @@ void VolumeRenderer::draw()
         
         glUniform3f(boxShader->getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
         
-        cgl::Vec3 r = volume->getMaxGradient() - volume->getMinGradient();
+        Vec3 r = volume->getMaxGradient() - volume->getMinGradient();
         glUniform3f(boxShader->getUniform("rangeGradient"), r.x, r.y, r.z);
         
         int loc = boxShader->getAttribute("vs_position");

@@ -1,7 +1,7 @@
 #ifndef medleap_Controller_h
 #define medleap_Controller_h
 
-#include <GL/glew.h>
+#include "gl/glew.h"
 #include <GLFW/glfw3.h>
 #include "render/Renderer.h"
 

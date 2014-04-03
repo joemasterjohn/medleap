@@ -1,7 +1,7 @@
 #include "viewport.h"
-#include <GL/glew.h>
+#include "gl/glew.h"
 
-using namespace cgl;
+using namespace gl;
 
 Viewport::Viewport() : x(0), y(0), width(1), height(1)
 {

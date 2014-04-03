@@ -6,7 +6,7 @@
 #include "math/Vector3.h"
 #include "util/Camera.h"
 #include "volume/BoundingBox.h"
-#include <GL/glew.h>
+#include "gl/glew.h"
 
 /**
  * Intersects a number of view-aligned planes with an axis-aligned bounding box.
@@ -22,10 +22,10 @@ public:
     BoxSlicer();
     
     /** Cuts the box into slices and stores the data in this class */
-    void slice(const BoundingBox& bounds, const cgl::Camera& camera, int slices);
+    void slice(const BoundingBox& bounds, const Camera& camera, int slices);
     
     /** Vertex positions */
-    const std::vector<cgl::Vec3>& getVertices();
+    const std::vector<Vec3>& getVertices();
     
     /** Indices for the geometry */
     const std::vector<GLushort>& getIndices();
@@ -46,14 +46,14 @@ private:
     
     friend class VertexSorter;
     
-    cgl::Vec3 up;
-    cgl::Vec3 right;
-    cgl::Vec3 normal;
-    std::vector<cgl::Vec3> vertices;
+    Vec3 up;
+    Vec3 right;
+    Vec3 normal;
+    std::vector<Vec3> vertices;
     std::vector<GLushort> indices;
     const GLushort primRestartIndex;
     
-    void slicePlane(const cgl::Vec3& p, const BoundingBox& bounds);
+    void slicePlane(const Vec3& p, const BoundingBox& bounds);
 };
 
 #endif // BOXSLICER_H

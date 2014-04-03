@@ -1,7 +1,7 @@
 #ifndef __medleap__VolumeRenderer__
 #define __medleap__VolumeRenderer__
 
-#include <GL/glew.h>
+#include "gl/glew.h"
 #include "math/Matrix4.h"
 #include "gl/Viewport.h"
 #include "gl/Program.h"
@@ -26,7 +26,7 @@ public:
     
     void setVolume(VolumeData* volume);
     
-    cgl::Camera& getCamera();
+    Camera& getCamera();
     
     void markDirty();
     void setMoving(bool moving);
@@ -39,7 +39,7 @@ public:
     void toggleShading();
     int getNumSamples();
     
-    void setCLUTTexture(cgl::Texture* texture);
+    void setCLUTTexture(gl::Texture* texture);
     
 private:
     bool shading;
@@ -48,33 +48,33 @@ private:
     float movingSampleScale;
     bool dirty;
     bool moving;
-    cgl::Texture* volumeTexture;
-    cgl::Texture* gradientTexture;
+    gl::Texture* volumeTexture;
+    gl::Texture* gradientTexture;
     VolumeData* volume;
-    cgl::Camera camera;
-    cgl::Viewport viewport;
-    cgl::Mat4 model;
+    Camera camera;
+    gl::Viewport viewport;
+    Mat4 model;
     
     // color look-up table texture
-    cgl::Texture* clutTexture;
+    gl::Texture* clutTexture;
     
     // grid
-    Program* lineShader;
+    gl::Program* lineShader;
     GLuint vao;
     GLuint vbo;
     int numGridVerts;
     
     // proxy geometry
-    Program* boxShader;
+    gl::Program* boxShader;
     int numSliceIndices;
-    cgl::Buffer* proxyVertices;
-    cgl::Buffer* proxyIndices;
+    gl::Buffer* proxyVertices;
+    gl::Buffer* proxyIndices;
     
     // render to texture (downscaling)
-    cgl::Framebuffer* sceneFramebuffer;
-    cgl::Texture* sceneTexture;
-    Program* sceneProgram;
-    cgl::Buffer* sceneBuffer;
+    gl::Framebuffer* sceneFramebuffer;
+    gl::Texture* sceneTexture;
+    gl::Program* sceneProgram;
+    gl::Buffer* sceneBuffer;
     
     void updateSlices();
 };

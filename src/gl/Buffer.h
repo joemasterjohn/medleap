@@ -1,15 +1,18 @@
 #ifndef CGL_BUFFER_H_
 #define CGL_BUFFER_H_
 
-#include <GL/glew.h>
+#include "gl/glew.h"
 
-namespace cgl
+namespace gl
 {
+    /** Buffer object for storing vertex and index data, among other things */
     class Buffer
     {
     public:
+        /** Creates a new buffer an allocates OpenGL resources */
         Buffer(GLenum target, GLenum usage);
         
+        /** Destroys the buffer and releases the OpenGL resources */
         ~Buffer();
         
         /** Binds the buffer to its current target. */
@@ -26,6 +29,12 @@ namespace cgl
         
         /** Uploads data to a subset of the OpenGL-managed buffer */
         void setSubData(const GLvoid* data, GLsizeiptr size, GLintptr offset);
+        
+        /** Creates a vertex buffer (GL_ARRAY_BUFFER) with default usage GL_STATIC_DRAW */
+        static Buffer* createVBO(GLenum usage = GL_STATIC_DRAW);
+        
+        /** Creates an index buffer (GL_ELEMENT_ARRAY_BUFFER) with default usage GL_STATIC_DRAW */
+        static Buffer* createIBO(GLenum usage = GL_STATIC_DRAW);
         
     private:
         GLuint id;

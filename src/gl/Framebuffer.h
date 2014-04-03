@@ -1,18 +1,19 @@
 #ifndef CGL_FRAMEBUFFER_H_
 #define CGL_FRAMEBUFFER_H_
 
-#include <GL/glew.h>
+#include "gl/glew.h"
 #include "gl/Texture.h"
 
-namespace cgl
+namespace gl
 {
+    /** OpenGL framebuffer object */
     class Framebuffer
     {
     public:
-        Framebuffer();
+        /** Creates a framebuffer object and allocates OpenGL resources */
+        Framebuffer(GLenum target = GL_FRAMEBUFFER);
         
-        Framebuffer(GLenum target);
-        
+        /** Deletes this object and releases OpenGL resources */
         ~Framebuffer();
         
         /** Binds the framebuffer to its current target */
@@ -25,11 +26,10 @@ namespace cgl
         void setTarget(GLenum target);
         
         /** Sets a texture's MIP level as a color target at attachment i */
-        void setColorTarget(int i, cgl::Texture* texture, int level = 0);
+        void setColorTarget(int i, gl::Texture* texture, int level = 0);
         
         /** Sets a texture's MIP level as a depth target */
-        void setDepthTarget(cgl::Texture* texture, int level = 0);
-        
+        void setDepthTarget(gl::Texture* texture, int level = 0);
         
     private:
         GLuint id;

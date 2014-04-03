@@ -22,7 +22,7 @@ public:
     
     void setCursor(int x, int y);
     
-    cgl::Texture* getTransferFn();
+    gl::Texture* getTransferFn();
     
     void setDrawCursor(bool draw);
     
@@ -30,13 +30,13 @@ private:
     bool drawCursor;
     VolumeData* volume;
     TextRenderer text;
-    cgl::Texture* histo1D;
-    cgl::Texture* transferFn;
-    Program* shader;
-    Program* colorShader;
+    gl::Texture* histo1D;
+    gl::Texture* transferFn;
+    gl::Program* shader;
+    gl::Program* colorShader;
     GLuint vbo;
     GLsizei stride;
-    cgl::Mat4 histoModelMatrix;
+    Mat4 histoModelMatrix;
     Histogram* histogram;
     int cursorX, cursorY;
     float cursorShaderOffset;

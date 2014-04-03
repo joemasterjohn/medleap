@@ -1,6 +1,6 @@
 #include "CLUTRenderer.h"
 
-using namespace cgl;
+using namespace gl;
 
 CLUTRenderer::CLUTRenderer()
 {
@@ -19,7 +19,7 @@ void CLUTRenderer::setCLUT(CLUT* clut)
         clut->saveTexture(clutTexture);
 }
 
-Texture* CLUTRenderer::getTexture()
+gl::Texture* CLUTRenderer::getTexture()
 {
     return clutTexture;
 }
@@ -42,7 +42,7 @@ void CLUTRenderer::init()
     
     stride = 3 * sizeof(GLfloat);
     
-    quadVBO = new Buffer(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    quadVBO = new gl::Buffer(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
     quadVBO->bind();
     quadVBO->setData(quadVerts, sizeof(quadVerts));
 }

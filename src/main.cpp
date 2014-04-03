@@ -1,9 +1,7 @@
-#include <GL/glew.h>
+#include "gl/glew.h"
 #include "ui/MainController.h"
 #include <iostream>
 #include "volume/VolumeLoader.h"
-
-#include "volume/CLUT.h"
 
 int main(int argc, char** argv)
 {

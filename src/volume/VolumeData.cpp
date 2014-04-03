@@ -2,6 +2,7 @@
 #include "util/Util.h"
 #include "volume/Histogram.h"
 
+using namespace gl;
 using namespace std;
 
 VolumeData::VolumeData()
@@ -32,7 +33,7 @@ void VolumeData::loadTexture2D(GLuint &texture, int depth)
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat(), width, height, 0, format, type, data + depth * getImageSize());
 }
 
-void VolumeData::loadTexture3D(cgl::Texture* texture)
+void VolumeData::loadTexture3D(Texture* texture)
 {
     texture->bind();
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -44,15 +45,15 @@ void VolumeData::loadTexture3D(cgl::Texture* texture)
     glTexImage3D(GL_TEXTURE_3D, 0, internalFormat(), width, height, depth, 0, format, type, data);
 }
 
-void VolumeData::loadGradientTexture(cgl::Texture* texture)
+void VolumeData::loadGradientTexture(Texture* texture)
 {
     // gradient texture will be 8-bits per channel
     unsigned char* data = new unsigned char[width * height * depth * 3];
     
-    cgl::Vec3 rangeGradient = maxGradient - minGradient;
+    Vec3 rangeGradient = maxGradient - minGradient;
     
     unsigned char* p = data;
-    for (cgl::Vec3 g : gradients) {
+    for (Vec3 g : gradients) {
         *p++ = ((g.x - minGradient.x) / rangeGradient.x) * 255;
         *p++ = ((g.y - minGradient.y) / rangeGradient.y) * 255;
         *p++ = ((g.z - minGradient.z) / rangeGradient.z) * 255;
@@ -76,7 +77,7 @@ void VolumeData::setVoxelSize(float x, float y, float z)
     this->voxelSize.y = y;
     this->voxelSize.z = z;
     
-    cgl::Vec3 v = getDimensionsMM();
+    Vec3 v = getDimensionsMM();
     v.normalize();
     
     delete bounds;
@@ -88,7 +89,7 @@ const BoundingBox& VolumeData::getBounds()
     return *bounds;
 }
 
-const cgl::Vec3& VolumeData::getVoxelSize() const
+const Vec3& VolumeData::getVoxelSize() const
 {
     return voxelSize;
 }
@@ -148,19 +149,19 @@ char* VolumeData::getData()
     return data;
 }
 
-const cgl::Vec3& VolumeData::getMinGradient()
+const Vec3& VolumeData::getMinGradient()
 {
     return minGradient;
 }
 
-const cgl::Vec3& VolumeData::getMaxGradient()
+const Vec3& VolumeData::getMaxGradient()
 {
     return maxGradient;
 }
 
-cgl::Vec3 VolumeData::getDimensionsMM() const
+Vec3 VolumeData::getDimensionsMM() const
 {
-    return cgl::Vec3(width * voxelSize.x,
+    return Vec3(width * voxelSize.x,
                 height * voxelSize.y,
                 depth * voxelSize.z);
 }
@@ -190,7 +191,7 @@ VolumeData::Modality VolumeData::getModality()
     return modality;
 }
 
-const cgl::Mat3& VolumeData::getPatientBasis() const
+const Mat3& VolumeData::getPatientBasis() const
 {
     return orientation;
 }
