@@ -117,9 +117,6 @@ public:
     /** Sets the current window to the previous available window */
     void setPrevWindow();
     
-    /** Stores the image/slice at depth into the provided 2D texture */
-    void loadTexture2D(GLuint& texture, int depth);
-    
     /** Stores all images/slices into a 3D texture (single channel per voxel) */
     void loadTexture3D(gl::Texture* texture);
     
@@ -134,6 +131,11 @@ public:
     
     /** Vector storing maximum x, y, and z components of all gradient vectors */
     const Vec3& getMaxGradient();
+    
+    /** Stored pixel format */
+    GLenum getFormat();
+    
+    GLenum internalFormat();
     
 private:
     char* data;
@@ -159,8 +161,6 @@ private:
 
     /** Private constructor since loading is complex and done by the Loader class */
     VolumeData();
-    
-    GLenum internalFormat();
     
     /** Computes gradient vectors for this volume. Gradients are always stored as floats, regardless of the volume data type. */
     template<typename T> void computeGradients()

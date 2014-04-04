@@ -5,6 +5,7 @@
 #include "layers/Renderer.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
+#include "gl/Buffer.h"
 #include "data/VolumeData.h"
 #include "math/Matrix4.h"
 
@@ -35,17 +36,16 @@ private:
     gl::Program* sliceShader;
     gl::Program* axisShader;
     gl::Texture* clutTexture;
-    GLuint sliceTexture;
-    GLuint vao;
-    GLuint vbo;
-    GLuint orientationVBO;
+    gl::Texture* sliceTexture;
+    gl::Buffer* sliceVBO;
+    gl::Buffer* axisVBO;
+    
     int numOrientationVertices;
-    int windowWidth;
-    int windowHeight;
     int currentSlice;
     std::vector<OrientationLabel> labels;
     Mat4 modelMatrix;
     
+    void updateTexture();
     void drawSlice();
     void drawOrientationOverlay();
 };

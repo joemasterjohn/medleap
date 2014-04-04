@@ -27,20 +27,17 @@ SliceRenderer::SliceRenderer() :
     volume(NULL),
     sliceShader(NULL),
     axisShader(NULL),
-    sliceTexture(0),
-    vao(0),
-    vbo(0),
-    orientationVBO(0),
+    clutTexture(NULL),
+    sliceTexture(NULL),
+    sliceVBO(NULL),
+    axisVBO(NULL),
     numOrientationVertices(0),
-    windowWidth(0),
-    windowHeight(0),
     currentSlice(0)
 {
 }
 
 SliceRenderer::~SliceRenderer()
 {
-    // TODO: delete resources
 }
 
 void SliceRenderer::setCLUTTexture(gl::Texture* texture)
@@ -48,12 +45,28 @@ void SliceRenderer::setCLUTTexture(gl::Texture* texture)
     this->clutTexture = texture;
 }
 
+void SliceRenderer::updateTexture()
+{
+    sliceTexture->bind();
+    sliceTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    sliceTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    
+    sliceTexture->setData2D(0,
+                            volume->internalFormat(),
+                            volume->getWidth(),
+                            volume->getHeight(),
+                            volume->getFormat(),
+                            volume->getType(),
+                            volume->getData() + currentSlice * volume->getImageSize());
+}
+
 void SliceRenderer::setVolume(VolumeData* volume)
 {
     this->volume = volume;
     
     // set texture to the first slice in the volume
-    volume->loadTexture2D(sliceTexture, currentSlice = 0);
+    updateTexture();
     
     // vertex buffer and text labels for the orientation lines
     labels.clear();
@@ -88,18 +101,15 @@ void SliceRenderer::setVolume(VolumeData* volume)
         }
     }
     
-    glGenBuffers(1, &orientationVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, orientationVBO);
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), &vertexData[0], GL_STATIC_DRAW);
+    axisVBO = Buffer::createVBO();
+    axisVBO->bind();
+    axisVBO->setData(&vertexData[0], vertexData.size() * sizeof(GLfloat));
     
-    resize(windowWidth, windowHeight);
+    resize(viewport.width, viewport.height);
 }
 
 void SliceRenderer::resize(int width, int height)
 {
-    this->windowWidth = width;
-    this->windowHeight = height;
-    
     // model matrix will scale to keep the displayed image in proportion to its
     // intended dimensions without changing the input vertices in NDC
     float windowAspect = (float)width / height;
@@ -112,7 +122,6 @@ void SliceRenderer::resize(int width, int height)
 
 void SliceRenderer::init()
 {
-    // TODO rename these shaders
     sliceShader = Program::create("shaders/slice_clut.vert", "shaders/slice_clut.frag");
     axisShader = Program::create("shaders/color.vert", "shaders/color.frag");
     
@@ -121,11 +130,7 @@ void SliceRenderer::init()
     glUniform1i(sliceShader->getUniform("tex_clut"), 1);
     
     // create a texture to store the current slice
-    glGenTextures(1, &sliceTexture);
-    
-    // create a VAO for 2D rendering
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    sliceTexture = new Texture(GL_TEXTURE_2D);
     
     // vertex buffer for the slice image geometry
     GLfloat vertexData[] = {
@@ -136,9 +141,10 @@ void SliceRenderer::init()
          1,  1, 1, 1,
         -1,  1, 0, 1
     };
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    
+    sliceVBO = Buffer::createVBO();
+    sliceVBO->bind();
+    sliceVBO->setData(vertexData, sizeof(vertexData));
 }
 
 void SliceRenderer::drawSlice()
@@ -148,7 +154,7 @@ void SliceRenderer::drawSlice()
     glActiveTexture(GL_TEXTURE1);
     clutTexture->bind();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, sliceTexture);
+    sliceTexture->bind();
     
     // set the uniforms
     glUniform1i(sliceShader->getUniform("signed_normalized"), volume->isSigned());
@@ -158,7 +164,7 @@ void SliceRenderer::drawSlice()
     
     // set state and shader for drawing medical stuff
     GLsizei stride = 4 * sizeof(GLfloat);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    sliceVBO->bind();
     
     int loc = sliceShader->getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
@@ -169,8 +175,6 @@ void SliceRenderer::drawSlice()
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
     
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    
-    
 }
 
 void SliceRenderer::drawOrientationOverlay()
@@ -179,15 +183,15 @@ void SliceRenderer::drawOrientationOverlay()
     
     // draw lines
     axisShader->enable();
-    float aspect = (float)windowWidth / windowHeight;
+    float aspect = viewport.aspect();
     if (aspect >= 1) {
         glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, scale(1.0f/aspect, 1, 1));
     } else {
         glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, scale(1, aspect, 1));
     }
     GLsizei stride = 5 * sizeof(GLfloat);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, orientationVBO);
+
+    axisVBO->bind();
 
     int loc = axisShader->getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
@@ -201,7 +205,7 @@ void SliceRenderer::drawOrientationOverlay()
     
     // draw the text (could be cleaner and more efficient)
     text.setColor(1, 1, 1);
-    text.begin(windowWidth, windowHeight);
+    text.begin(viewport.width, viewport.height);
     for (int i = 0; i < labels.size(); i++) {
         float fx = labels[i].position.x;
         float fy = labels[i].position.y;
@@ -210,11 +214,11 @@ void SliceRenderer::drawOrientationOverlay()
         else
             fy *= aspect;
         
-        int x = (int)((fx * 0.5 + 0.5) * windowWidth);
-        int y = (int)((fy * 0.5 + 0.5) * windowHeight);
+        int x = (int)((fx * 0.5 + 0.5) * viewport.width);
+        int y = (int)((fy * 0.5 + 0.5) * viewport.height);
         
-        TextRenderer::Alignment hAlign = x < windowWidth / 2 ? TextRenderer::LEFT : TextRenderer::RIGHT;
-        TextRenderer::Alignment vAlign = y < windowHeight / 2 ? TextRenderer::BOTTOM : TextRenderer::TOP;
+        TextRenderer::Alignment hAlign = x < viewport.width / 2 ? TextRenderer::LEFT : TextRenderer::RIGHT;
+        TextRenderer::Alignment vAlign = y < viewport.height / 2 ? TextRenderer::BOTTOM : TextRenderer::TOP;
         text.add(labels[i].text.c_str(), x, y, hAlign, vAlign);
     }
     
@@ -223,7 +227,6 @@ void SliceRenderer::drawOrientationOverlay()
 
 void SliceRenderer::draw()
 {
-    glBindVertexArray(vao);
     drawSlice();
     drawOrientationOverlay();
 }
@@ -235,5 +238,6 @@ int SliceRenderer::getCurrentSlice()
 
 void SliceRenderer::setCurrentSlice(int sliceIndex)
 {
-    volume->loadTexture2D(sliceTexture, currentSlice = sliceIndex);
+    currentSlice = sliceIndex;
+    updateTexture();
 }

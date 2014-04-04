@@ -23,15 +23,6 @@ VolumeData::~VolumeData()
 {
 }
 
-void VolumeData::loadTexture2D(GLuint &texture, int depth)
-{
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat(), width, height, 0, format, type, data + depth * getImageSize());
-}
-
 void VolumeData::loadTexture3D(Texture* texture)
 {
     texture->bind();
@@ -156,6 +147,11 @@ const Vec3& VolumeData::getMinGradient()
 const Vec3& VolumeData::getMaxGradient()
 {
     return maxGradient;
+}
+
+GLenum VolumeData::getFormat()
+{
+    return format;
 }
 
 Vec3 VolumeData::getDimensionsMM() const
