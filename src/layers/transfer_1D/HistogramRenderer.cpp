@@ -1,6 +1,6 @@
 #include "HistogramRenderer.h"
 #include "math/Transform.h"
-#include "ui/MainController.h"
+#include "main/MainController.h"
 #include <string>
 
 using namespace gl;

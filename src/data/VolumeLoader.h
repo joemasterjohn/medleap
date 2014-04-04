@@ -1,7 +1,7 @@
 #ifndef __MEDLEAP_VOLUME_LOADER__
 #define __MEDLEAP_VOLUME_LOADER__
 
-#include "volume/VolumeData.h"
+#include "VolumeData.h"
 #include "gdcmReader.h"
 #include "gdcmAttribute.h"
 

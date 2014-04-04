@@ -1,11 +1,11 @@
 #ifndef __medleap__CLUTRenderer__
 #define __medleap__CLUTRenderer__
 
-#include "Renderer.h"
+#include "layers/Renderer.h"
 #include "gl/Buffer.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
-#include "volume/CLUT.h"
+#include "CLUT.h"
 
 class CLUTRenderer : public Renderer
 {

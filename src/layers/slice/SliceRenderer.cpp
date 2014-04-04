@@ -1,5 +1,6 @@
 #include "SliceRenderer.h"
 #include "math/Transform.h"
+#include "main/MainController.h"
 
 using namespace gl;
 using namespace glmath;
@@ -118,9 +119,6 @@ void SliceRenderer::init()
     sliceShader->enable();
     glUniform1i(sliceShader->getUniform("tex_slice"), 0);
     glUniform1i(sliceShader->getUniform("tex_clut"), 1);
-
-    // load fonts for text rendering
-    text.loadFont("menlo14");
     
     // create a texture to store the current slice
     glGenTextures(1, &sliceTexture);
@@ -177,6 +175,8 @@ void SliceRenderer::drawSlice()
 
 void SliceRenderer::drawOrientationOverlay()
 {
+    TextRenderer& text = MainController::getInstance().getText();
+    
     // draw lines
     axisShader->enable();
     float aspect = (float)windowWidth / windowHeight;
@@ -217,11 +217,6 @@ void SliceRenderer::drawOrientationOverlay()
         TextRenderer::Alignment vAlign = y < windowHeight / 2 ? TextRenderer::BOTTOM : TextRenderer::TOP;
         text.add(labels[i].text.c_str(), x, y, hAlign, vAlign);
     }
-    
-    // Slice #
-    char buf[60];
-    sprintf(buf, "slice: %d/%d", (currentSlice+1), volume->getDepth());
-    text.add(buf, 0, 0, TextRenderer::LEFT, TextRenderer::BOTTOM);
     
     text.end();
 }

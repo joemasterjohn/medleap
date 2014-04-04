@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include "Window.h"
-#include "volume/BoundingBox.h"
+#include "BoundingBox.h"
 #include "math/Vector3.h"
 #include "gl/Texture.h"
 #include "math/Matrix3.h"

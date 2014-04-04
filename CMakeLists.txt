@@ -50,36 +50,59 @@ add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS} ${DATA_FONTS})
 
 # source group naming for IDEs
 # -----------------------------------------------------------------------------------------------------------------------
-source_group("" FILES src/main.cpp)
 source_group("shaders" FILES ${DATA_SHADERS})
-
-file(GLOB SOURCE_VOLUME src/volume/*.cpp src/volume/*.h)
-source_group("volume" FILES ${SOURCE_VOLUME})
-
-file(GLOB SOURCE_RENDER src/render/*.cpp src/render/*.h)
-source_group("render" FILES ${SOURCE_RENDER})
-
-file(GLOB SOURCE_UI src/ui/*.cpp src/ui/*.h)
-source_group("ui" FILES ${SOURCE_UI})
 
 file(GLOB SOURCE_GL src/gl/*.cpp src/gl/*.c src/gl/*.h)
 source_group("gl" FILES ${SOURCE_GL})
+
+file(GLOB SOURCE_MAIN src/main/*.cpp src/main/*.h)
+source_group("main" FILES ${SOURCE_MAIN})
+
+file(GLOB SOURCE_DATA src/data/*.cpp src/data/*.h)
+source_group("data" FILES ${SOURCE_DATA})
 
 file(GLOB SOURCE_MATH src/math/*.cpp src/math/*.h)
 source_group("math" FILES ${SOURCE_MATH})
 
 file(GLOB SOURCE_UTIL src/util/*.cpp src/util/*.h)
 source_group("util" FILES ${SOURCE_UTIL})
+
+file(GLOB SOURCE_LAYERS src/layers/*.cpp src/layers/*.h)
+source_group("layers" FILES ${SOURCE_LAYERS})
+
+file(GLOB SOURCE_LAYER_SLICE src/layers/slice/*.cpp src/layers/slice/*.h)
+source_group("layers\\slice" FILES ${SOURCE_LAYER_SLICE})
+
+file(GLOB SOURCE_LAYER_TFN1D src/layers/transfer_1D/*.cpp src/layers/transfer_1D/*.h)
+source_group("layers\\transfer_1D" FILES ${SOURCE_LAYER_TFN1D})
+
+file(GLOB SOURCE_LAYER_TFN2D src/layers/transfer_2D/*.cpp src/layers/transfer_2D/*.h)
+source_group("layers\\transfer_2D" FILES ${SOURCE_LAYER_TFN2D})
+
+file(GLOB SOURCE_LAYER_VOLUME src/layers/volume/*.cpp src/layers/volume/*.h)
+source_group("layers\\volume" FILES ${SOURCE_LAYER_VOLUME})
+
+file(GLOB SOURCE_LAYER_VOLINFO src/layers/volume_info/*.cpp src/layers/volume_info/*.h)
+source_group("layers\\volume_info" FILES ${SOURCE_LAYER_VOLINFO})
+
+file(GLOB SOURCE_LAYER_VOLORNT src/layers/volume_orientation/*.cpp src/layers/volume_orientation/*.h)
+source_group("layers\\volume_orientation" FILES ${SOURCE_LAYER_VOLORNT})
+
 # -----------------------------------------------------------------------------------------------------------------------
 
 
 # main executable
 # -----------------------------------------------------------------------------------------------------------------------
 add_executable(${PROJECT_NAME}
-    src/main.cpp
-    ${SOURCE_VOLUME}
-    ${SOURCE_RENDER}
-    ${SOURCE_UI}
+    ${SOURCE_MAIN}
+    ${SOURCE_DATA}
+    ${SOURCE_LAYERS}
+    ${SOURCE_LAYER_SLICE}
+    ${SOURCE_LAYER_TFN1D}
+    ${SOURCE_LAYER_TFN2D}
+    ${SOURCE_LAYER_VOLUME}
+    ${SOURCE_LAYER_VOLINFO}
+    ${SOURCE_LAYER_VOLORNT}
     ${SOURCE_GL}
     ${SOURCE_MATH}
     ${SOURCE_UTIL}

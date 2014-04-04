@@ -1,6 +1,6 @@
 #include "VolumeRenderer.h"
 #include "math/Transform.h"
-#include "volume/BoxSlicer.h"
+#include "BoxSlicer.h"
 
 using namespace gl;
 using namespace std;

@@ -1,8 +1,8 @@
 #ifndef __medleap__VolumeInfoController__
 #define __medleap__VolumeInfoController__
 
-#include "ui/Controller.h"
-#include "render/VolumeInfoRenderer.h"
+#include "layers/Controller.h"
+#include "VolumeInfoRenderer.h"
 
 class VolumeInfoController : public Controller
 {

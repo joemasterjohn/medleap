@@ -1,8 +1,8 @@
 #ifndef __medleap__VolumeController__
 #define __medleap__VolumeController__
 
-#include "ui/Controller.h"
-#include "render/VolumeRenderer.h"
+#include "layers/Controller.h"
+#include "layers/volume/VolumeRenderer.h"
 
 /** Main controller for 3D mode */
 class VolumeController : public Controller

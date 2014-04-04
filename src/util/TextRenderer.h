@@ -1,7 +1,7 @@
 #ifndef __MEDLEAP_TEXT_RENDERER__
 #define __MEDLEAP_TEXT_RENDERER__
 
-#include "GL/glew.h"
+#include "gl/glew.h"
 #include "gl/Program.h"
 #include <string>
 #include <vector>
@@ -44,6 +44,12 @@ public:
     
     /** Performs actual drawing */
     void end();
+    
+    /** Returns height of text */
+    int measureHeight(const char* text);
+    
+    /** Returns width of text */
+    int measureWidth(const char* text);
   
 private:
     

@@ -1,14 +1,14 @@
 #ifndef __medleap__MainController__
 #define __medleap__MainController__
 
-#include "render/MainRenderer.h"
-#include "ui/SliceController.h"
-#include "ui/VolumeController.h"
-#include "ui/VolumeInfoController.h"
-#include "ui/HistogramController.h"
-#include "ui/CLUTController.h"
-#include <list>
+#include "MainRenderer.h"
+#include "layers/slice/SliceController.h"
+#include "layers/volume/VolumeController.h"
+#include "layers/volume_info/VolumeInfoController.h"
+#include "layers/transfer_1D/HistogramController.h"
+#include "layers/transfer_1D/CLUTController.h"
 #include "util/TextRenderer.h"
+#include <list>
 
 /** Main class (singleton) that controls the UI events and owns the rendering. */
 class MainController

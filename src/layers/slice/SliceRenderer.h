@@ -2,11 +2,10 @@
 #define __medleap__SliceRenderer__
 
 #include "gl/glew.h"
-#include "render/Renderer.h"
+#include "layers/Renderer.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
-#include "util/TextRenderer.h"
-#include "volume/VolumeData.h"
+#include "data/VolumeData.h"
 #include "math/Matrix4.h"
 
 /** Renders a 2D slice of the volume */
@@ -33,7 +32,6 @@ private:
     };
     
     VolumeData* volume;
-    TextRenderer text;
     gl::Program* sliceShader;
     gl::Program* axisShader;
     gl::Texture* clutTexture;

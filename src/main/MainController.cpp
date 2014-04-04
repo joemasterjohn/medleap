@@ -72,6 +72,8 @@ void MainController::init()
     clutController.getRenderer()->init();
     
     volumeInfoController.getRenderer()->setVolumeRenderer(volumeController.getRenderer());
+    volumeInfoController.getRenderer()->setSliceRenderer(sliceController.getRenderer());
+    
     clutController.setVolumeRenderer(volumeController.getRenderer());
     clutController.setSliceRenderer(sliceController.getRenderer());
 }

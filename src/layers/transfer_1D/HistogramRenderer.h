@@ -1,12 +1,12 @@
 #ifndef __medleap__HistogramRenderer__
 #define __medleap__HistogramRenderer__
 
-#include "render/Renderer.h"
+#include "layers/Renderer.h"
 #include "gl/Texture.h"
 #include "gl/Program.h"
 #include "math/Matrix4.h"
-#include "volume/VolumeData.h"
-#include "volume/Histogram.h"
+#include "data/VolumeData.h"
+#include "Histogram.h"
 #include "util/TextRenderer.h"
 
 class HistogramRenderer : public Renderer

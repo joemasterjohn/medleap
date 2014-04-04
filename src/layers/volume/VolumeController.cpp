@@ -39,6 +39,14 @@ bool VolumeController::mouseButton(GLFWwindow* window, int button, int action, i
         renderer.setMoving(mouseDragLeftButton);
     }
     
+//    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+//        mouseDragRightButton = action == GLFW_PRESS;
+//        if (mouseDragRightButton) {
+//            dragStartView = renderer.getCamera().getView();
+//        }
+//        renderer.setMoving(mouseDragRightButton);
+//    }
+    
     return true;
 }
 
@@ -58,6 +66,13 @@ bool VolumeController::mouseMotion(GLFWwindow* window, double x, double y)
         Mat4 m2 = rotation(yaw, dragStartView.row(1));
         renderer.getCamera().setView(dragStartView * m1 * m2);
         renderer.markDirty();
+    } else if (mouseDragRightButton) {
+//        double dx = x - dragStartX;
+//        double dy = y - dragStartY;
+//        
+//        Mat4 tm = translation(dx*0.002, dy*0.002, 0);
+//        renderer.getCamera().setView(tm * dragStartView);
+//        
     } else {
         dragStartX = x;
         dragStartY = y;

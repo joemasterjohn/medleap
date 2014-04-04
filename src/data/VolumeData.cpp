@@ -1,6 +1,5 @@
 #include "VolumeData.h"
 #include "util/Util.h"
-#include "volume/Histogram.h"
 
 using namespace gl;
 using namespace std;

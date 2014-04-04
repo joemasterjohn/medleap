@@ -3,7 +3,7 @@
 
 #include "gl/glew.h"
 #include <GLFW/glfw3.h>
-#include "render/Renderer.h"
+#include "layers/Renderer.h"
 #include <list>
 
 /** Controls all rendering. Should be created once upon application start. */

@@ -2,9 +2,10 @@
 #define __medleap__VolumeInfoRenderer__
 
 #include "gl/glew.h"
-#include "render/Renderer.h"
-#include "volume/VolumeData.h"
-#include "render/VolumeRenderer.h"
+#include "layers/Renderer.h"
+#include "data/VolumeData.h"
+#include "layers/volume/VolumeRenderer.h"
+#include "layers/slice/SliceRenderer.h"
 
 /** Draws informational text for the volume data */
 class VolumeInfoRenderer : public Renderer
@@ -14,6 +15,7 @@ public:
     void draw();
     void setVolume(VolumeData* volume);
     void setVolumeRenderer(VolumeRenderer* renderer);
+    void setSliceRenderer(SliceRenderer* renderer);
     void resize(int width, int height);
     
 private:
@@ -21,6 +23,9 @@ private:
     int windowHeight;
     VolumeData* volume;
     VolumeRenderer* volumeRenderer;
+    SliceRenderer* sliceRenderer;
+    
+    void drawText(const char* text, int row);
 };
 
 #endif /* defined(__medleap__VolumeInfoRenderer__) */

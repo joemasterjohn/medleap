@@ -1,7 +1,7 @@
 #ifndef __MEDLEAP_VOLUME_WINDOW__
 #define __MEDLEAP_VOLUME_WINDOW__
 
-#include "GL/glew.h"
+#include "gl/glew.h"
 
 /** 
  * Describes a range of pixels that will be visible. For example, one data set

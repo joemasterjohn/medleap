@@ -1,8 +1,8 @@
 #ifndef __medleap__SliceController__
 #define __medleap__SliceController__
 
-#include "ui/Controller.h"
-#include "render/SliceRenderer.h"
+#include "layers/Controller.h"
+#include "SliceRenderer.h"
 
 /** Controls slice rendering layer */
 class SliceController : public Controller

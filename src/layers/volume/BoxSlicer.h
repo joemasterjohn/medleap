@@ -5,7 +5,7 @@
 #include "math/Vector2.h"
 #include "math/Vector3.h"
 #include "util/Camera.h"
-#include "volume/BoundingBox.h"
+#include "data/BoundingBox.h"
 #include "gl/glew.h"
 
 /**

@@ -1,11 +1,11 @@
 #ifndef __medleap__CLUTController__
 #define __medleap__CLUTController__
 
-#include "Controller.h"
-#include "render/CLUTRenderer.h"
-#include "render/VolumeRenderer.h"
-#include "render/SliceRenderer.h"
-#include "volume/CLUT.h"
+#include "layers/Controller.h"
+#include "CLUTRenderer.h"
+#include "CLUT.h"
+#include "layers/volume/VolumeRenderer.h"
+#include "layers/slice/SliceRenderer.h"
 #include <vector>
 
 /** User input controller for color look-up tables */

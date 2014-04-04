@@ -1,10 +1,10 @@
 #ifndef __medleap__HistogramController__
 #define __medleap__HistogramController__
 
-#include "ui/Controller.h"
-#include "render/HistogramRenderer.h"
-#include "volume/VolumeData.h"
-#include "volume/Histogram.h"
+#include "layers/Controller.h"
+#include "HistogramRenderer.h"
+#include "data/VolumeData.h"
+#include "Histogram.h"
 
 class HistogramController : public Controller
 {

@@ -144,6 +144,19 @@ void TextRenderer::end()
     glDisable(GL_BLEND);
 }
 
+int TextRenderer::measureHeight(const char *text)
+{
+    return currentFont->glyphHeight;
+}
+
+int TextRenderer::measureWidth(const char *text)
+{
+    int length = 0;
+    while (*text)
+        length += currentFont->glyphWidths[(unsigned)*text++];
+    return length;
+}
+
 bool TextRenderer::loadFont(std::string fontName)
 {
     // create shader program and vertex buffer if first load
