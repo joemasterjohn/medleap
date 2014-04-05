@@ -18,25 +18,49 @@ public:
         unsigned int numImages;
     };
     
+    enum State
+    {
+        READY, LOADING, FINISHED
+    };
+    
+    VolumeLoader();
+    
     /** This will search a directory to find all unique CT or MT image series. */
     std::vector<ID> search(const char* directoryPath);
     
-    /** Loads the specified image series */
-    VolumeData* load(ID seriesID);
+    /** Loads the specified image series. */
+    void setSource(ID seriesID);
     
     /** This will load the first image series found in a directory */
-    VolumeData* load(const char* directoryPath);
+    void setSource(const char* directoryPath);
     
     /** Stores file names sorted by Z into the fileNames parameter. Also stores the computed Z spacing into zSpacing parameter. */
     void sortFiles(ID seriesID, std::vector<std::string>& fileNames, double* zSpacing);
+
+    /** Retrieves the previously loaded volume, or NULL if it failed. The caller now owns the volume memory and is responsible for deleting it. After calling once this will return NULL until the next load is called. Resets the state to READY. */
+    VolumeData* getVolume();
+    
+    /** Current state of the loader */
+    State getState();
+    
+    /** More details about what's going on */
+    std::string getStateMessage();
     
 private:
     VolumeData* volume;
+    ID id;
+    State state;
+    std::string stateMessage;
+    
+    /** Actual loading work */
+    void load();
     
     /** The modality LUT transforms device-dependent values to device-independent modality values. For example, it will transform raw UINT16 CT data values into signed CT Hounsfield units. It uses the slope and intercept stored in the DICOM dataset to transform values. */
     template <typename T>
     void applyModalityLUT(double slope, double intercept)
     {
+        stateMessage = "Applying Modality Transformation";
+
         T* buffer = (T*)volume->data;
         volume->minVoxelValue = std::numeric_limits<int>::infinity();
         volume->maxVoxelValue = -std::numeric_limits<int>::infinity();
@@ -52,6 +76,8 @@ private:
     template <typename T>
     void calculateMinMax()
     {
+        stateMessage = "Calculating Min/Max Values";
+
         T* buffer = (T*)volume->data;
         volume->minVoxelValue = std::numeric_limits<int>::infinity();
         volume->maxVoxelValue = -std::numeric_limits<int>::infinity();

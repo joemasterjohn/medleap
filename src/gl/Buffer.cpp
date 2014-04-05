@@ -17,6 +17,11 @@ void Buffer::bind()
     glBindBuffer(target, id);
 }
 
+void Buffer::unbind()
+{
+    glBindBuffer(target, 0);
+}
+
 void Buffer::setTarget(GLenum target)
 {
     this->target = target;

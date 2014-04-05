@@ -18,6 +18,9 @@ namespace gl
         /** Binds the buffer to its current target. */
         void bind();
         
+        /** Clears the binding between this buffer's target and any buffer */
+        void unbind();
+        
         /** Sets the target to which the buffer is bound. Must be applied before a call to bind() */
         void setTarget(GLenum target);
         

@@ -15,7 +15,7 @@
 class VolumeRenderer : public Renderer
 {
 public:
-    enum RenderMode { MIP, VR };
+    enum RenderMode { MIP, VR, ISOSURFACE, NUM_OF_MODES };
     
     
     VolumeRenderer();
@@ -41,6 +41,9 @@ public:
     
     void setCLUTTexture(gl::Texture* texture);
     
+    void setOpacityScale(float scale);
+    float getOpacityScale();
+    
 private:
     bool shading;
     RenderMode renderMode;
@@ -54,6 +57,7 @@ private:
     Camera camera;
     gl::Viewport viewport;
     Mat4 model;
+    float opacityScale;
     
     // color look-up table texture
     gl::Texture* clutTexture;

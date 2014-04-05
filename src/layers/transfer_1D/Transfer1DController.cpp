@@ -1,23 +1,60 @@
-#include "HistogramController.h"
+#include "Transfer1DController.h"
 
-HistogramController::HistogramController() : histogram(NULL), transfer1DPixels(NULL)
+Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels(NULL)
 {
     lMouseDrag = false;
     rMouseDrag = false;
+    
+    
+    volumeRenderer = NULL;
+    
+    // start out with the default CLUT: black->white gradient
+    cluts.push_back(CLUT());
+    
+    CLUT redToWhite;
+    redToWhite.addColorStop(0.25f, Vec4(1, 0, 0, 1));
+    cluts.push_back(redToWhite);
+    
+    CLUT test;
+    test.addColorStop(0.2f, Vec4(0, 1, 0, .8f));
+    test.addColorStop(0.4f, Vec4(1, 1, 0, .9f));
+    test.addColorStop(0.6f, Vec4(1, 0, 0, 1));
+    cluts.push_back(test);
+    
+    CLUT mid;
+    mid.clearStops();
+    mid.addColorStop(0.0f, Vec4(0, 0, 0, 0));
+    mid.addColorStop(0.5f, Vec4(1, 1, 1, 1));
+    mid.addColorStop(1.0f, Vec4(0, 0, 0, 0));
+    cluts.push_back(mid);
+    
+    CLUT yellowToWhite;
+    yellowToWhite.clearStops();
+    yellowToWhite.addColorStop(0.0f, Vec4(1, 0, 0, 1));
+    yellowToWhite.addColorStop(1.0f, Vec4(0, 1, 0, 0.1));
+    cluts.push_back(yellowToWhite);
+    
+    CLUT monochrome;
+    monochrome.clearStops();
+    monochrome.addColorStop(0.0f, Vec4(1, 1, 1, 0));
+    monochrome.addColorStop(1.0f, Vec4(1, 1, 1, 0.2f));
+    cluts.push_back(monochrome);
+    
+    renderer.setCLUT(&cluts[activeCLUT = 0]);
 }
 
-HistogramController::~HistogramController()
+Transfer1DController::~Transfer1DController()
 {
     if (transfer1DPixels)
         delete transfer1DPixels;
 }
 
-HistogramRenderer* HistogramController::getRenderer()
+Transfer1DRenderer* Transfer1DController::getRenderer()
 {
     return &renderer;
 }
 
-void HistogramController::setVolume(VolumeData* volume)
+void Transfer1DController::setVolume(VolumeData* volume)
 {
     this->volume = volume;
     
@@ -52,7 +89,29 @@ void HistogramController::setVolume(VolumeData* volume)
     transfer1DPixels = new GLubyte[histogram->getNumBins() * 256]; // 256 is height (shouldn't be hardcoded)
 }
 
-bool HistogramController::mouseMotion(GLFWwindow* window, double x, double y)
+void Transfer1DController::setVolumeRenderer(VolumeRenderer* volumeRenderer)
+{
+    this->volumeRenderer = volumeRenderer;
+    volumeRenderer->setCLUTTexture(renderer.getCLUTTexture());
+}
+
+void Transfer1DController::setSliceRenderer(SliceRenderer* sliceRenderer)
+{
+    this->sliceRenderer = sliceRenderer;
+    sliceRenderer->setCLUTTexture(renderer.getCLUTTexture());
+}
+
+bool Transfer1DController::keyboardInput(GLFWwindow* window, int key, int action, int mods)
+{
+    if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+        activeCLUT = (activeCLUT + 1) % cluts.size();
+        renderer.setCLUT(&cluts[activeCLUT]);
+    }
+    
+    return true;
+}
+
+bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
 {
     if (!renderer.getViewport().contains(x, y)) {
         renderer.setDrawCursor(false);
@@ -79,7 +138,7 @@ bool HistogramController::mouseMotion(GLFWwindow* window, double x, double y)
     return true;
 }
 
-bool HistogramController::mouseButton(GLFWwindow* window, int button, int action, int mods)
+bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int action, int mods)
 {
     lMouseDrag = button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS;
     rMouseDrag = button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS;
@@ -88,7 +147,7 @@ bool HistogramController::mouseButton(GLFWwindow* window, int button, int action
     return true;
 }
 
-void HistogramController::updateTransferTex1D()
+void Transfer1DController::updateTransferTex1D()
 {
     gl::Texture* tex = renderer.getTransferFn();
     tex->bind();

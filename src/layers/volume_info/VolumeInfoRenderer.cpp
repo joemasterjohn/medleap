@@ -84,6 +84,9 @@ void VolumeInfoRenderer::draw()
         case VolumeRenderer::VR:
             drawText("Rendering: VR", textRow++);
             break;
+        case VolumeRenderer::ISOSURFACE:
+            drawText("Rendering: Isosurface", textRow++);
+            break;
         default:
             drawText("Rendering: Unknown", textRow++);
     }
@@ -99,8 +102,10 @@ void VolumeInfoRenderer::draw()
     drawText(textBuf, textRow++);
     
     // Slice Index (2D)
-    sprintf(textBuf, "Slice: %d/%d", sliceRenderer->getCurrentSlice()+1, volume->getDepth());
-    drawText(textBuf, textRow++);
+    if (MainController::getInstance().getMode() == MainController::MODE_2D) {
+        sprintf(textBuf, "Slice: %d/%d", sliceRenderer->getCurrentSlice()+1, volume->getDepth());
+        drawText(textBuf, textRow++);
+    }
     
     text.end();
 }

@@ -175,9 +175,9 @@ private:
         for (int z = 0; z < depth; z++) {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    int gx = (getVoxelValue<T>(x+1, y, z) - getVoxelValue<T>(x-1, y, z)) / (2 * voxelSize.x);
-                    int gy = (getVoxelValue<T>(x, y+1, z) - getVoxelValue<T>(x, y-1, z)) / (2 * voxelSize.y);
-                    int gz = (getVoxelValue<T>(x, y, z+1) - getVoxelValue<T>(x, y, z-1)) / (2 * voxelSize.z);
+                    int gx = (getVoxelValue<T>(x-1, y, z) - getVoxelValue<T>(x+1, y, z)) / (2 * voxelSize.x);
+                    int gy = (getVoxelValue<T>(x, y-1, z) - getVoxelValue<T>(x, y+1, z)) / (2 * voxelSize.y);
+                    int gz = (getVoxelValue<T>(x, y, z-1) - getVoxelValue<T>(x, y, z+1)) / (2 * voxelSize.z);
                     Vec3 g(gx, gy, gz);
 
                     float mag = g.length();

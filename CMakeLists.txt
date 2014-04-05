@@ -3,16 +3,16 @@ project(medleap)
 
 
 # output the executable in the build directory (not Debug/Release subdir)
-# -----------------------------------------------------------------------------------------------------------------------
+# ******************************************
 foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_CURRENT_BINARY_DIR})
 endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
-# -----------------------------------------------------------------------------------------------------------------------
+
 
 
 # make sure resources are copied into the build directory
-# -----------------------------------------------------------------------------------------------------------------------
+# ******************************************
 set(DATA_SHADERS
     shaders/color.vert
     shaders/color.frag
@@ -24,11 +24,12 @@ set(DATA_SHADERS
     shaders/histogram.frag
     shaders/histo_line.vert
     shaders/histo_line.frag
-    shaders/texture_1D.vert
-    shaders/texture_1D.frag
+    shaders/clut_strip.vert
+    shaders/clut_strip.frag
     shaders/texture_2D.vert
     shaders/texture_2D.frag
 )
+
 set(DATA_FONTS
     fonts/menlo14.bmp
     fonts/menlo14.dat
@@ -37,6 +38,7 @@ set(DATA_FONTS
     fonts/menlo24.bmp
     fonts/menlo24.dat
 )
+
 foreach(item IN LISTS DATA_SHADERS DATA_FONTS)
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${item}" 
@@ -45,11 +47,11 @@ foreach(item IN LISTS DATA_SHADERS DATA_FONTS)
     ) 
 endforeach()
 add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS} ${DATA_FONTS})
-# -----------------------------------------------------------------------------------------------------------------------
+
 
 
 # source group naming for IDEs
-# -----------------------------------------------------------------------------------------------------------------------
+# ******************************************
 source_group("shaders" FILES ${DATA_SHADERS})
 
 file(GLOB SOURCE_GL src/gl/*.cpp src/gl/*.c src/gl/*.h)
@@ -88,12 +90,9 @@ source_group("layers\\volume_info" FILES ${SOURCE_LAYER_VOLINFO})
 file(GLOB SOURCE_LAYER_VOLORNT src/layers/volume_orientation/*.cpp src/layers/volume_orientation/*.h)
 source_group("layers\\volume_orientation" FILES ${SOURCE_LAYER_VOLORNT})
 
-# -----------------------------------------------------------------------------------------------------------------------
-
-
 # main executable
-# -----------------------------------------------------------------------------------------------------------------------
-add_executable(${PROJECT_NAME}
+add_executable(
+    ${PROJECT_NAME}
     ${SOURCE_MAIN}
     ${SOURCE_DATA}
     ${SOURCE_LAYERS}
@@ -109,23 +108,28 @@ add_executable(${PROJECT_NAME}
     ${DATA_SHADERS}
 )
 add_dependencies(${PROJECT_NAME} SHADER_COPY)
-# -----------------------------------------------------------------------------------------------------------------------
 
-
-# libraries
-# -----------------------------------------------------------------------------------------------------------------------
+# set root of source directory for finding headers
 include_directories(src)
 
+# GDCM and GLFW should be installed on the system and are not included in source
 find_package(GDCM REQUIRED)
 include_directories(${GDCM_INCLUDE_DIRS})
 find_package(GLFW REQUIRED)
 include_directories(${GLFW_INCLUDE_DIR})
 
 if (APPLE)
+
+    # for C++11
+    set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+
+    # GLFW needs OpenGL, Cocoa, IOKit, and CoreVideo frameworks linked
     find_library(OPENGL_LIBRARY OpenGL)
     find_library(COCOA_LIBRARY Cocoa)
     find_library(IOKIT_LIBRARY IOKit)
     find_library(COREVIDEO_LIBRARY CoreVideo)
+
+    # Link all the libraries
     target_link_libraries(
         ${PROJECT_NAME}
         gdcmMSFF
@@ -136,4 +140,3 @@ if (APPLE)
         ${COREVIDEO_LIBRARY}
     )
 endif(APPLE)
-# -----------------------------------------------------------------------------------------------------------------------

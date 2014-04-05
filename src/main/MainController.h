@@ -5,15 +5,21 @@
 #include "layers/slice/SliceController.h"
 #include "layers/volume/VolumeController.h"
 #include "layers/volume_info/VolumeInfoController.h"
-#include "layers/transfer_1D/HistogramController.h"
-#include "layers/transfer_1D/CLUTController.h"
+#include "layers/transfer_1D/Transfer1DController.h"
 #include "util/TextRenderer.h"
+#include "data/VolumeLoader.h"
 #include <list>
 
 /** Main class (singleton) that controls the UI events and owns the rendering. */
 class MainController
 {
 public:
+    enum Mode
+    {
+        MODE_2D,
+        MODE_3D
+    };
+    
     ~MainController();
     void init();
     void startLoop();
@@ -28,14 +34,13 @@ public:
     
     TextRenderer& getText();
     
+    Mode getMode();
+    
     static MainController& getInstance();
     
+    void setVolumeToLoad(const char* directory);
+    
 private:
-    enum Mode
-    {
-        MODE_2D,
-        MODE_3D
-    };
     
     class Docking
     {
@@ -63,13 +68,19 @@ private:
     SliceController sliceController;
     VolumeController volumeController;
     VolumeInfoController volumeInfoController;
-    HistogramController histogramController;
-    CLUTController clutController;
+    Transfer1DController histogramController;
     std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;
     bool showHistogram;
     TextRenderer text;
+    
+    // if (something to load) : launch task in thread
+    // else if (something is loaded and waiting) : setVolume
+    // else : render as normal
+    VolumeLoader loader;
+    
+    void loadVolume();
 };
 
 #endif /* defined(__medleap__MainController__) */

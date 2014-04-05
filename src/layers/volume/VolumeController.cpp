@@ -26,6 +26,12 @@ void VolumeController::setVolume(VolumeData* volume)
 
 bool VolumeController::keyboardInput(GLFWwindow* window, int key, int action, int mods)
 {
+    if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+        renderer.setOpacityScale(renderer.getOpacityScale() + 0.1f);
+    }
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+        renderer.setOpacityScale(renderer.getOpacityScale() - 0.1f);
+    }
     return true;
 }
 

@@ -5,9 +5,17 @@
 #include "gdcmScanner.h"
 #include "gdcmIPPSorter.h"
 #include "util/Util.h"
+#include <thread>
 
 using namespace std;
 using namespace gdcm;
+
+VolumeLoader::VolumeLoader()
+{
+    volume = NULL;
+    state = READY;
+    stateMessage = "Idle";
+}
 
 vector<VolumeLoader::ID> VolumeLoader::search(const char* directoryPath)
 {
@@ -32,13 +40,13 @@ vector<VolumeLoader::ID> VolumeLoader::search(const char* directoryPath)
         if (files.size() > 1) {
             string strModality = scanner.GetValue(files[0].c_str(), modality);
             if (strModality == "CT") {
-                ID id = { seriesID, directoryPath, VolumeData::CT, files.size() };
+                ID id = { seriesID, directoryPath, VolumeData::CT, (unsigned)files.size() };
                 ids.push_back(id);
             } else if (strModality == "MR") {
-                ID id = { seriesID, directoryPath, VolumeData::MR, files.size() };
+                ID id = { seriesID, directoryPath, VolumeData::MR, (unsigned)files.size() };
                 ids.push_back(id);
             } else {
-                ID id = { seriesID, directoryPath, VolumeData::UNKNOWN, files.size() };
+                ID id = { seriesID, directoryPath, VolumeData::UNKNOWN, (unsigned)files.size() };
                 ids.push_back(id);
             }
         }
@@ -75,20 +83,46 @@ void VolumeLoader::sortFiles(VolumeLoader::ID id, vector<string>& fileNames, dou
     *zSpacing = sorter.GetZSpacing();
 }
 
-VolumeData* VolumeLoader::load(const char* directoryPath)
+void VolumeLoader::setSource(const char* directoryPath)
 {
     std::vector<ID> ids = search(directoryPath);
-    return (ids.size() == 0 ? NULL : load(ids[0]));
+    if (!ids.empty())
+        setSource(ids[0]);
 }
 
-VolumeData* VolumeLoader::load(VolumeLoader::ID id)
+void VolumeLoader::setSource(VolumeLoader::ID id)
 {
+    if (state == READY) {
+        this->id = id;
+        
+        thread t(&VolumeLoader::load, this);
+        t.detach();
+    }
+}
+
+VolumeLoader::State VolumeLoader::getState()
+{
+    return state;
+}
+
+std::string VolumeLoader::getStateMessage()
+{
+    return stateMessage;
+}
+
+void VolumeLoader::load()
+{
+    this->state = LOADING;
+    
     // sort DCM files so they are ordered correctly along Z
+    stateMessage = "Scanning DICOM files";
     vector<string> files;
     double zSpacing;
     sortFiles(id, files, &zSpacing);
-    if (files.size() < 2)
-        return NULL;
+    if (files.size() < 2) {
+        this->volume = NULL;
+        return;
+    }
     
     
     // using the first image to read dimensions that shouldn't change
@@ -126,11 +160,12 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
             break;
         default:
             delete volume;
-            return NULL;
-            break;
+            volume = NULL;
+            return;
     }
     
     // now that the type and dimensions are known, allocate memory for voxels
+    stateMessage = "Reading DICOM Images";
     volume->data = new char[volume->width * volume->height * volume->depth * gl::sizeOf(volume->type)];
     
     // load first image (already in reader memory)
@@ -163,6 +198,7 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
                 calculateMinMax<GLbyte>();
             else
                 applyModalityLUT<GLbyte>(img.GetSlope(), img.GetIntercept());
+            stateMessage = "Calculating Gradients";
             volume->computeGradients<GLbyte>();
             break;
         case GL_UNSIGNED_BYTE:
@@ -170,6 +206,7 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
                 calculateMinMax<GLubyte>();
             else
                 applyModalityLUT<GLubyte>(img.GetSlope(), img.GetIntercept());
+            stateMessage = "Calculating Gradients";
             volume->computeGradients<GLubyte>();
             break;
         case GL_SHORT:
@@ -177,6 +214,7 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
                 calculateMinMax<GLshort>();
             else
                 applyModalityLUT<GLshort>(img.GetSlope(), img.GetIntercept());
+            stateMessage = "Calculating Gradients";
             volume->computeGradients<GLshort>();
             break;
         case GL_UNSIGNED_SHORT:
@@ -184,16 +222,15 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
                 calculateMinMax<GLushort>();
             else
                 applyModalityLUT<GLushort>(img.GetSlope(), img.GetIntercept());
+            stateMessage = "Calculating Gradients";
             volume->computeGradients<GLushort>();
             break;
         default:
-            return NULL;
-            break;
+            break; // should not happen
     }
     
-    
-    
     // store value of interest LUTs as windows
+    stateMessage = "Calculating Gradients";
     if (volume->modality != VolumeData::UNKNOWN) {
         int numWindows;
         double* centers;
@@ -229,5 +266,15 @@ VolumeData* VolumeLoader::load(VolumeLoader::ID id)
         volume->windows.push_back(Window(volume->type));
     }
     
-    return volume;
+    state = FINISHED;
+    stateMessage = "Finished";
+}
+
+VolumeData* VolumeLoader::getVolume()
+{
+    VolumeData* result = volume;
+    volume = NULL;
+    state = READY;
+    stateMessage = "Idle";
+    return result;
 }

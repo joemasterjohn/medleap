@@ -1,4 +1,5 @@
 #include "MainController.h"
+#include "data/VolumeLoader.h"
 
 using namespace std;
 
@@ -69,13 +70,12 @@ void MainController::init()
     volumeController.getRenderer()->init();
     volumeInfoController.getRenderer()->init();
     histogramController.getRenderer()->init();
-    clutController.getRenderer()->init();
     
     volumeInfoController.getRenderer()->setVolumeRenderer(volumeController.getRenderer());
     volumeInfoController.getRenderer()->setSliceRenderer(sliceController.getRenderer());
     
-    clutController.setVolumeRenderer(volumeController.getRenderer());
-    clutController.setSliceRenderer(sliceController.getRenderer());
+    histogramController.setVolumeRenderer(volumeController.getRenderer());
+    histogramController.setSliceRenderer(sliceController.getRenderer());
 }
 
 void MainController::setMode(MainController::Mode mode)
@@ -88,8 +88,7 @@ void MainController::setMode(MainController::Mode mode)
             pushController(&sliceController);
             pushController(&volumeInfoController);
             if (showHistogram)
-                pushController(&histogramController, Docking(MainController::Docking::BOTTOM, 0.2));
-            pushController(&clutController, Docking(Docking::TOP, 0.075));
+                pushController(&histogramController, Docking(Docking::BOTTOM, 0.2));
             break;
         case MODE_3D:
             renderer.clearLayers();
@@ -98,9 +97,13 @@ void MainController::setMode(MainController::Mode mode)
             pushController(&volumeInfoController);
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.2));
-            pushController(&clutController, Docking(Docking::TOP, 0.075));
             break;
     }
+}
+
+MainController::Mode MainController::getMode()
+{
+    return mode;
 }
 
 void MainController::setVolume(VolumeData* volume)
@@ -120,11 +123,35 @@ void MainController::setVolume(VolumeData* volume)
     setMode(mode);
 }
 
+void MainController::setVolumeToLoad(const char* directory)
+{
+    loader.setSource(directory);
+}
+
 void MainController::startLoop()
 {
+    static float f = 0;
     while (!glfwWindowShouldClose(renderer.getWindow())) {
-        renderer.draw();
-        glfwPollEvents();
+
+        if (loader.getState() == VolumeLoader::LOADING) {
+            // draw load screen
+            float c = (std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
+            glClearColor(c, c, c, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+            getText().setColor(0, 0, 0);
+            getText().begin(renderer.getWidth(), renderer.getHeight());
+            getText().add("Loading...", renderer.getWidth()/2, renderer.getHeight()/2, TextRenderer::CENTER, TextRenderer::CENTER);
+            getText().add(loader.getStateMessage().c_str(), renderer.getWidth()/2, renderer.getHeight()/2-36, TextRenderer::CENTER, TextRenderer::CENTER);
+            getText().end();
+            glfwSwapBuffers(renderer.getWindow());
+            glfwPollEvents();
+        } else if (loader.getState() == VolumeLoader::FINISHED) {
+            setVolume(loader.getVolume());
+        } else {
+            renderer.draw();
+            glfwPollEvents();
+        }
+        
     }
     glfwTerminate();
 }
