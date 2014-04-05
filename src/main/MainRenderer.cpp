@@ -56,6 +56,9 @@ bool MainRenderer::init(int width, int height, const char* title)
         return false;
     }
     
+    // use sRGB default framebuffer for gamma correction
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    
     this->width = width;
     this->height = height;
     
