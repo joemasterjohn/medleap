@@ -22,6 +22,5 @@ void main()
     value = max(min(1.0, value), 0.0);
     
     // color/opacity from look-up table using windowed data value
-//    display_color = pow(texture(tex_clut, value).rgba, vec4(1.0/2.2, 1.0/2.2, 1.0/2.2, 1.0));
     display_color = texture(tex_clut, value).rgba;
 }

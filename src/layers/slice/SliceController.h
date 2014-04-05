@@ -21,6 +21,11 @@ public:
 private:
     SliceRenderer renderer;
     VolumeData* volume;
+    
+    bool mouseLeftDrag;
+    double mouseAnchorX;
+    double mouseAnchorY;
+    int anchorSliceIndex;
 };
 
 #endif /* defined(__medleap__SliceController__) */

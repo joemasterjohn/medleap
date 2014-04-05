@@ -2,6 +2,7 @@
 
 SliceController::SliceController()
 {
+    mouseLeftDrag = false;
 }
 
 SliceController::~SliceController()
@@ -36,11 +37,36 @@ bool SliceController::keyboardInput(GLFWwindow* window, int key, int action, int
 
 bool SliceController::mouseButton(GLFWwindow* window, int button, int action, int mods)
 {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+            mouseLeftDrag = true;
+            glfwGetCursorPos(window, &mouseAnchorX, &mouseAnchorY);
+            anchorSliceIndex = renderer.getCurrentSlice();
+        } else if (action == GLFW_RELEASE) {
+            mouseLeftDrag = false;
+        }
+    }
+    
     return true;
 }
 
 bool SliceController::mouseMotion(GLFWwindow* window, double x, double y)
 {
+    if (!renderer.getViewport().contains(x,y))
+        return true;
+    
+    // move through slices by dragging left and right
+    if (mouseLeftDrag) {
+        double dx = x - mouseAnchorX;
+        int slice = anchorSliceIndex + dx * 0.1;
+        if (slice < 0)
+            slice = volume->getDepth() - ((-1*slice) % volume->getDepth());
+        else
+            slice = slice % volume->getDepth();
+        
+        renderer.setCurrentSlice(slice);
+    }
+    
     return true;
 }
 
