@@ -1,5 +1,6 @@
 #include "Util.h"
 #include <cstring>
+#include <vector>
 
 int gl::sizeOf(GLenum typeEnum)
 {
@@ -44,11 +45,16 @@ void gl::flipImage(void* buffer, int width, int height, int pixelSize)
 {
     char* buf = (char*)buffer;
     int rowSize = pixelSize * width;
-    char temp[rowSize];
-    
+
+	std::vector<char> temp(rowSize);    
     for (int i = 0; i < height/2; i++) {
-        memcpy(temp, buf + i * rowSize, rowSize);
-        memcpy(buf + i * rowSize, buf + (height - 1 - i) * rowSize, rowSize);
-        memcpy(buf + (height - 1 - i) * rowSize, temp, rowSize);
+
+		// swap rows A and B
+		char* a = buf + i * rowSize;
+		char* b = buf + (height - 1 - i) * rowSize;
+		std::copy(a, a + rowSize, temp.begin());
+		std::copy(b, b + rowSize, a);
+		std::copy(temp.begin(), temp.end(), b);
+
     }
 }

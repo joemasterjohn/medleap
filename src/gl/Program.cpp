@@ -7,7 +7,7 @@ Program::Program()
 {
 }
 
-Program::Program(GLuint id, Shader* vShader, Shader* fShader) : 
+Program::Program(GLuint id, gl::Shader* vShader, gl::Shader* fShader) :
 	id(id),
 	vShader(vShader),
 	fShader(fShader)
@@ -86,7 +86,7 @@ Program* Program::createFromSrc(const char* vsrc, const char* fsrc)
     return create(vShader, fShader);
 }
 
-Program* Program::create(Shader* vShader, Shader* fShader)
+Program* Program::create(gl::Shader* vShader, gl::Shader* fShader)
 {
     GLuint id = glCreateProgram();
 	glAttachShader(id, vShader->getID());

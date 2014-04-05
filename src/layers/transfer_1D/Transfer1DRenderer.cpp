@@ -294,17 +294,13 @@ void Transfer1DRenderer::setHistogram(Histogram* histogram)
     int drawWidth = histogram->getNumBins();
     int drawHeight = 256;
     
-    unsigned char pixels[drawWidth * drawHeight];
-    std::fill(pixels, pixels + drawWidth * drawHeight, 0);
+	std::vector<unsigned char> pixels(drawWidth * drawHeight);
+    std::fill(pixels.begin(), pixels.end(), 0);
     
     double logMaxFreq = std::log(histogram->getMaxFrequency()+1);
     
     for (int bin = 0; bin < histogram->getNumBins(); bin++) {
         int size = histogram->getSize(bin);
-        
-        // linear y scale:
-//        double sizeNorm = (double)size / histogram->getMaxFrequency();
-        // logarithmic y scale:
         double sizeNorm = std::log(size+1) / logMaxFreq;
         
         int binHeight = (int)(sizeNorm * drawHeight);
@@ -320,7 +316,7 @@ void Transfer1DRenderer::setHistogram(Histogram* histogram)
     histo1D->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     histo1D->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    histo1D->setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, pixels);
+    histo1D->setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, &pixels[0]);
 }
 
 void Transfer1DRenderer::setCursor(int x, int y)

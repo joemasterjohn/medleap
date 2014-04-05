@@ -140,3 +140,14 @@ if (APPLE)
         ${COREVIDEO_LIBRARY}
     )
 endif(APPLE)
+
+if (MSVC)
+	#set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+	add_definitions(-DGLEW_STATIC)
+    target_link_libraries(
+        ${PROJECT_NAME}
+        gdcmMSFF
+		opengl32
+        ${GLFW_LIBRARY}
+    )	
+endif(MSVC)
