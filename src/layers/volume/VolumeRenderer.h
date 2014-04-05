@@ -3,7 +3,6 @@
 
 #include "gl/glew.h"
 #include "math/Matrix4.h"
-#include "gl/Viewport.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
 #include "gl/Buffer.h"
@@ -50,12 +49,12 @@ private:
     int numSamples;
     float movingSampleScale;
     bool dirty;
+    bool drawnHighRes;
     bool moving;
     gl::Texture* volumeTexture;
     gl::Texture* gradientTexture;
     VolumeData* volume;
     Camera camera;
-    gl::Viewport viewport;
     Mat4 model;
     float opacityScale;
     
@@ -74,13 +73,17 @@ private:
     gl::Buffer* proxyVertices;
     gl::Buffer* proxyIndices;
     
-    // render to texture (downscaling)
-    gl::Framebuffer* sceneFramebuffer;
-    gl::Texture* sceneTexture;
+    // render to texture 
+    gl::Framebuffer* lowResFBO;
+    gl::Texture* lowResTexture;
+    gl::Framebuffer* fullResFBO;
+    gl::Texture* fullResTexture;
     gl::Program* sceneProgram;
     gl::Buffer* sceneBuffer;
     
-    void updateSlices();
+    void updateSlices(int numSlices);
+    
+    void draw(int numSlices);
 };
 
 #endif /* defined(__medleap__VolumeRenderer__) */

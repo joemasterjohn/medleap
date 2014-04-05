@@ -106,6 +106,7 @@ bool Transfer1DController::keyboardInput(GLFWwindow* window, int key, int action
     if (key == GLFW_KEY_C && action == GLFW_PRESS) {
         activeCLUT = (activeCLUT + 1) % cluts.size();
         renderer.setCLUT(&cluts[activeCLUT]);
+        volumeRenderer->markDirty();
     }
     
     return true;
@@ -126,11 +127,13 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
         double wc = (double)x / renderer.getViewport().width * histogram->getRange() + histogram->getMin();
         double ww = volume->getCurrentWindow().getWidthReal();
         volume->getCurrentWindow().setReal(wc, ww);
+        volumeRenderer->markDirty();
     } else if (rMouseDrag) {
         double cursorVal = (double)x / renderer.getViewport().width * histogram->getRange() + histogram->getMin();
         double wc = volume->getCurrentWindow().getCenterReal();
         double ww = 2 * std::abs(cursorVal - wc);
         volume->getCurrentWindow().setReal(wc, ww);
+        volumeRenderer->markDirty();
     }
     
 
