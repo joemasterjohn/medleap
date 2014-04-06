@@ -53,6 +53,7 @@ add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS} ${DATA_FONTS})
 # source group naming for IDEs
 # ******************************************
 source_group("shaders" FILES ${DATA_SHADERS})
+source_group("fonts" FILES ${DATA_FONTS})
 
 file(GLOB SOURCE_GL src/gl/*.cpp src/gl/*.c src/gl/*.h)
 source_group("gl" FILES ${SOURCE_GL})
@@ -90,9 +91,7 @@ source_group("layers\\volume_info" FILES ${SOURCE_LAYER_VOLINFO})
 file(GLOB SOURCE_LAYER_VOLORNT src/layers/volume_orientation/*.cpp src/layers/volume_orientation/*.h)
 source_group("layers\\volume_orientation" FILES ${SOURCE_LAYER_VOLORNT})
 
-# main executable
-add_executable(
-    ${PROJECT_NAME}
+set(SOURCE_AND_RESOURCES
     ${SOURCE_MAIN}
     ${SOURCE_DATA}
     ${SOURCE_LAYERS}
@@ -106,8 +105,8 @@ add_executable(
     ${SOURCE_MATH}
     ${SOURCE_UTIL}
     ${DATA_SHADERS}
+    ${DATA_FONTS}
 )
-add_dependencies(${PROJECT_NAME} SHADER_COPY)
 
 # set root of source directory for finding headers
 include_directories(src)
@@ -119,6 +118,23 @@ find_package(GLFW REQUIRED)
 include_directories(${GLFW_INCLUDE_DIR})
 
 if (APPLE)
+
+    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_AND_RESOURCES})
+
+    # Copy resources to the right place in the app bundle
+    SET_SOURCE_FILES_PROPERTIES(
+        ${DATA_SHADERS} 
+        PROPERTIES 
+        MACOSX_PACKAGE_LOCATION
+        Resources/shaders
+    )
+    SET_SOURCE_FILES_PROPERTIES(
+        ${DATA_FONTS} 
+        PROPERTIES 
+        MACOSX_PACKAGE_LOCATION
+        Resources/fonts
+    )
+
 
     # for C++11
     set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
@@ -142,6 +158,8 @@ if (APPLE)
 endif(APPLE)
 
 if (MSVC)
+    add_executable(${PROJECT_NAME} ${SOURCE_AND_RESOURCES})
+
 	#set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
 	add_definitions(-DGLEW_STATIC)
     target_link_libraries(
@@ -151,3 +169,6 @@ if (MSVC)
         ${GLFW_LIBRARY}
     )	
 endif(MSVC)
+
+# Ensure shaders are copied whenever modified
+add_dependencies(${PROJECT_NAME} SHADER_COPY)
