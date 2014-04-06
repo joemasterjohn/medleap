@@ -147,7 +147,7 @@ void CLUT::saveTexture(Texture* texture)
     ColorStop* left = &stops[l];
     ColorStop* right = &stops[r];
     
-    unsigned char buf[255*4];
+    unsigned char buf[256*4];
     long ptr = 0;
     for (int i = 0; i < 256; i++) {
         float p = i/255.0f;
