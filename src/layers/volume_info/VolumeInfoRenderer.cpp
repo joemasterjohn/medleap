@@ -31,7 +31,7 @@ void VolumeInfoRenderer::resize(int width, int height)
     this->windowHeight = height;
 }
 
-void VolumeInfoRenderer::drawText(std::string& s, int row)
+void VolumeInfoRenderer::drawText(const std::string& s, int row)
 {
     TextRenderer& textRenderer = MainController::getInstance().getText();
     

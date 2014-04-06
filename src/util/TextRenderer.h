@@ -28,10 +28,10 @@ public:
      * fonts/menlo14.bmp and fonts/menlo14.dat. The first font to be loaded will be used
      * by default. Multiple fonts may be loaded.
      */
-    bool loadFont(std::string fontName);
+    bool loadFont(const std::string& fontName);
     
     /** Use a font that has already been loaded. This must be set before begin(). */
-    void setFont(std::string fontName);
+    void setFont(const std::string& fontName);
     
     /** Sets the text color. This must be set before begin(). */
     void setColor(float r, float g, float b);
@@ -40,7 +40,7 @@ public:
     void begin(int width, int height);
     
     /** Adds text to be rendered */
-    void add(std::string& text, int x, int y, Alignment hAlign = LEFT, Alignment vAlign = BOTTOM);
+    void add(const std::string& text, int x, int y, Alignment hAlign = LEFT, Alignment vAlign = BOTTOM);
     
     /** Performs actual drawing */
     void end();
@@ -49,7 +49,7 @@ public:
     int fontHeight();
     
     /** Returns width of text */
-    int fontWidth(std::string& text);
+    int fontWidth(const std::string& text);
   
 private:
     
@@ -65,7 +65,7 @@ private:
         unsigned texWidth;
         unsigned texHeight;
         
-        unsigned int width(std::string& s);
+        unsigned int width(const std::string& s);
         bool load(const char* bmpFileName, const char* metricsFileName);
     };
     

@@ -26,7 +26,7 @@ private:
     VolumeRenderer* volumeRenderer;
     SliceRenderer* sliceRenderer;
     
-    void drawText(std::string& str, int row);
+    void drawText(const std::string& str, int row);
 };
 
 #endif /* defined(__medleap__VolumeInfoRenderer__) */

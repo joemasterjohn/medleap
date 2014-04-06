@@ -55,7 +55,7 @@ void TextRenderer::setColor(float r, float g, float b)
     this->b = b;
 }
 
-void TextRenderer::setFont(std::string fontName)
+void TextRenderer::setFont(const std::string& fontName)
 {
     if (fonts.find(fontName) != fonts.end())
         currentFont = fonts[fontName];
@@ -77,7 +77,7 @@ void TextRenderer::addVertex(int x, int y, float u, float v)
     vertices.push_back(v);
 }
 
-void TextRenderer::add(std::string& text, int x, int y, Alignment hAlign, Alignment vAlign)
+void TextRenderer::add(const std::string& text, int x, int y, Alignment hAlign, Alignment vAlign)
 {
     if (hAlign == CENTER) {
         x -= currentFont->width(text) / 2;
@@ -91,7 +91,7 @@ void TextRenderer::add(std::string& text, int x, int y, Alignment hAlign, Alignm
         y -= currentFont->glyphHeight;
     }
     
-	for (char& c : text) {
+	for (const char& c : text) {
 		int glyphWidth = currentFont->glyphWidths[static_cast<unsigned>(c)];
 		int glyphHeight = currentFont->glyphHeight;
 
@@ -149,12 +149,12 @@ int TextRenderer::fontHeight()
     return currentFont->glyphHeight;
 }
 
-int TextRenderer::fontWidth(std::string& text)
+int TextRenderer::fontWidth(const std::string& text)
 {
 	return currentFont->width(text);
 }
 
-bool TextRenderer::loadFont(std::string fontName)
+bool TextRenderer::loadFont(const std::string& fontName)
 {
     // create shader program and vertex buffer if first load
     if (!program) {
@@ -188,10 +188,10 @@ TextRenderer::Font::~Font()
         glDeleteTextures(1, &texture);
 }
 
-unsigned int TextRenderer::Font::width(std::string& s)
+unsigned int TextRenderer::Font::width(const std::string& s)
 {
 	int width = 0;
-	for (char& c : s)
+	for (const char& c : s)
 		width += glyphWidths[static_cast<unsigned>(c)];
 	return width;
 }
