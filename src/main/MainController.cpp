@@ -44,6 +44,7 @@ MainController::MainController() :
 {
     mode = MODE_2D;
     showHistogram = true;
+	menuOn = false;
 }
 
 MainController::~MainController()
@@ -70,10 +71,10 @@ void MainController::init()
     volumeController.getRenderer()->init();
     volumeInfoController.getRenderer()->init();
     histogramController.getRenderer()->init();
+	menuController.getRenderer()->init();
     
     volumeInfoController.getRenderer()->setVolumeRenderer(volumeController.getRenderer());
     volumeInfoController.getRenderer()->setSliceRenderer(sliceController.getRenderer());
-    
     histogramController.setVolumeRenderer(volumeController.getRenderer());
     histogramController.setSliceRenderer(sliceController.getRenderer());
 }
@@ -164,27 +165,35 @@ void MainController::toggleHistogram()
 
 void MainController::keyboardInput(GLFWwindow *window, int key, int action, int mods)
 {
-    if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-        setMode((mode == MODE_2D) ? MODE_3D : MODE_2D);
-    }
-    
-    if (key == GLFW_KEY_V && action == GLFW_PRESS) {
-        volumeController.getRenderer()->cycleMode();
-    }
-    
-    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
-        volumeController.getRenderer()->toggleShading();
-    }
-    
-    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-        volume->setNextWindow();
-    }
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		if (menuOn) {
+			popController();
+			menuOn = false;
+		} else {
+			pushController(&menuController);
+			menuOn = true;
+		}
+	}
 
-    if (key == GLFW_KEY_H && action == GLFW_PRESS)
-        toggleHistogram();
+	if (!menuOn) {
+		if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+			setMode((mode == MODE_2D) ? MODE_3D : MODE_2D);
+		}
+
+		if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+			volume->setNextWindow();
+		}
+
+		if (key == GLFW_KEY_H && action == GLFW_PRESS)
+			toggleHistogram();
+	}
     
-    for (Controller* c : activeControllers)
-        c->keyboardInput(window, key, action, mods);
+	for (Controller* c : activeControllers) {
+		bool passThrough = c->keyboardInput(window, key, action, mods);
+		if (!passThrough) {
+			break;
+		}
+	}
 }
 
 void MainController::resize(int width, int height)
@@ -215,6 +224,14 @@ void MainController::scroll(GLFWwindow *window, double dx, double dy)
 {
     for (Controller* c : activeControllers)
         c->scroll(window, dx, dy);
+}
+
+void MainController::popController()
+{
+	Controller* c = activeControllers.front();
+	if (c->getRenderer())
+		renderer.popLayer();
+	activeControllers.pop_front();
 }
 
 void MainController::pushController(Controller* controller)

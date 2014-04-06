@@ -6,6 +6,7 @@
 #include "layers/volume/VolumeController.h"
 #include "layers/volume_info/VolumeInfoController.h"
 #include "layers/transfer_1D/Transfer1DController.h"
+#include "layers/menu/MenuController.h"
 #include "util/TextRenderer.h"
 #include "data/VolumeLoader.h"
 #include <list>
@@ -23,22 +24,16 @@ public:
     ~MainController();
     void init();
     void startLoop();
-    
     void setVolume(VolumeData* volume);
-    
     void resize(int width, int height);
     void keyboardInput(GLFWwindow* window, int key, int action, int mods);
     void mouseButton(GLFWwindow* window, int button, int action, int mods);
     void mouseMotion(GLFWwindow* window, double x, double y);
     void scroll(GLFWwindow* window, double dx, double dy);
-    
     TextRenderer& getText();
-    
     Mode getMode();
-    
+	void setVolumeToLoad(const char* directory);
     static MainController& getInstance();
-    
-    void setVolumeToLoad(const char* directory);
     
 private:
     
@@ -52,16 +47,14 @@ private:
     };
     
     MainController();
-    
     // copy constructor and assignment operators are not implemented as this class is a singleton
     MainController(const MainController& copy);
     MainController& operator=(const MainController& copy);
-    
+
+	void popController();
     void pushController(Controller* controller);
     void pushController(Controller* controller, Docking docking);
-
     void setMode(Mode mode);
-    
     void toggleHistogram();
     
     MainRenderer renderer;
@@ -69,18 +62,14 @@ private:
     VolumeController volumeController;
     VolumeInfoController volumeInfoController;
     Transfer1DController histogramController;
+	MenuController menuController;
     std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;
     bool showHistogram;
     TextRenderer text;
-    
-    // if (something to load) : launch task in thread
-    // else if (something is loaded and waiting) : setVolume
-    // else : render as normal
     VolumeLoader loader;
-    
-    void loadVolume();
+	bool menuOn;
 };
 
 #endif /* defined(__medleap__MainController__) */

@@ -91,6 +91,9 @@ source_group("layers\\volume_info" FILES ${SOURCE_LAYER_VOLINFO})
 file(GLOB SOURCE_LAYER_VOLORNT src/layers/volume_orientation/*.cpp src/layers/volume_orientation/*.h)
 source_group("layers\\volume_orientation" FILES ${SOURCE_LAYER_VOLORNT})
 
+file(GLOB SOURCE_LAYER_MENU src/layers/menu/*.cpp src/layers/menu/*.h)
+source_group("layers\\menu" FILES ${SOURCE_LAYER_MENU})
+
 set(SOURCE_AND_RESOURCES
     ${SOURCE_MAIN}
     ${SOURCE_DATA}
@@ -101,6 +104,7 @@ set(SOURCE_AND_RESOURCES
     ${SOURCE_LAYER_VOLUME}
     ${SOURCE_LAYER_VOLINFO}
     ${SOURCE_LAYER_VOLORNT}
+	${SOURCE_LAYER_MENU}
     ${SOURCE_GL}
     ${SOURCE_MATH}
     ${SOURCE_UTIL}
@@ -160,8 +164,9 @@ endif(APPLE)
 if (MSVC)
     add_executable(${PROJECT_NAME} ${SOURCE_AND_RESOURCES})
 
-	#set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+	# is this still needed? check
 	add_definitions(-DGLEW_STATIC)
+
     target_link_libraries(
         ${PROJECT_NAME}
         gdcmMSFF
