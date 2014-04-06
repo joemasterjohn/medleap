@@ -89,33 +89,33 @@ void MainRenderer::updateViewport(Renderer* renderer, int layer)
     int h = height;
     
     if (layer == bottomDocking.layerIndex) {
-        h *= bottomDocking.percent;
+		h = static_cast<int>(h * bottomDocking.percent);
     } else if (layer == topDocking.layerIndex) {
-        y += height * (1.0 - topDocking.percent);
-        h *= topDocking.percent;
+        y += static_cast<int>(height * (1.0 - topDocking.percent));
+		h = static_cast<int>(h * topDocking.percent);
     } else if (layer == leftDocking.layerIndex) {
-        w *= leftDocking.percent;
+		w = static_cast<int>(w * leftDocking.percent);
     } else if (layer == rightDocking.layerIndex) {
-        x += width * (1.0 - rightDocking.percent);
-        w *= rightDocking.percent;
+		x += static_cast<int>(width * (1.0 - rightDocking.percent));
+		w = static_cast<int>(w * rightDocking.percent);
     }
     
     if (layer < bottomDocking.layerIndex) {
-        y += height * bottomDocking.percent;
-        h *= 1.0 - bottomDocking.percent;
+		y += static_cast<int>(height * bottomDocking.percent);
+		h = static_cast<int>(h * (1.0 - bottomDocking.percent));
     }
     
     if (layer < topDocking.layerIndex) {
-        h *= 1.0 - topDocking.percent;
+		h = static_cast<int>(h * (1.0 - topDocking.percent));
     }
     
     if (layer < leftDocking.layerIndex) {
-        x += width * leftDocking.percent;
-        w *= 1.0 - leftDocking.percent;
+		x += static_cast<int>(width * leftDocking.percent);
+		w = static_cast<int>(w * (1.0 - leftDocking.percent));
     }
     
     if (layer < rightDocking.layerIndex) {
-        w *= 1.0 - leftDocking.percent;
+		w = static_cast<int>(w * (1.0 - leftDocking.percent));
     }
     
     renderer->setViewport(x, y, w, h);
@@ -130,28 +130,28 @@ void MainRenderer::pushLayer(Renderer* layer)
 void MainRenderer::dockLeft(Renderer* layer, double percent)
 {
     leftDocking.percent = percent;
-    leftDocking.layerIndex = activeLayers.size();
+    leftDocking.layerIndex = static_cast<int>(activeLayers.size());
     pushLayer(layer);
 }
 
 void MainRenderer::dockRight(Renderer* layer, double percent)
 {
     rightDocking.percent = percent;
-    rightDocking.layerIndex = activeLayers.size();
+    rightDocking.layerIndex = static_cast<int>(activeLayers.size());
     pushLayer(layer);
 }
 
 void MainRenderer::dockBottom(Renderer* layer, double percent)
 {
     bottomDocking.percent = percent;
-    bottomDocking.layerIndex = activeLayers.size();
+	bottomDocking.layerIndex = static_cast<int>(activeLayers.size());
     pushLayer(layer);
 }
 
 void MainRenderer::dockTop(Renderer* layer, double percent)
 {
     topDocking.percent = percent;
-    topDocking.layerIndex = activeLayers.size();
+	topDocking.layerIndex = static_cast<int>(activeLayers.size());
     pushLayer(layer);
 }
 

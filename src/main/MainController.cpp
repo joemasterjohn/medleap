@@ -130,12 +130,12 @@ void MainController::setVolumeToLoad(const char* directory)
 
 void MainController::startLoop()
 {
-    static float f = 0;
+    static double f = 0;
     while (!glfwWindowShouldClose(renderer.getWindow())) {
 
         if (loader.getState() == VolumeLoader::LOADING) {
             // draw load screen
-            float c = (std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5;
+            GLclampf c = static_cast<GLclampf>((std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5);
             glClearColor(c, c, c, 1);
             glClear(GL_COLOR_BUFFER_BIT);
             getText().setColor(0, 0, 0);
