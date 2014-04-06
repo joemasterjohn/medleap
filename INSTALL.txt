@@ -1,4 +1,5 @@
-
+OS X NOTES
+**************************
 
 1) Install GDCM (tested with 2.4)
 
@@ -27,3 +28,37 @@ Download tar archive from http://glew.sourceforge.net/index.html
 $ cd glew
 $ make
 $ make install
+
+
+
+WINDOWS NOTES
+**************************
+
+MSVC will complain if mixing release mode libraries with debug mode Medleap. Build both configurations, but make sure the debug libraries have _d postfix added to them.
+
+GLFW needs the MSVC runtime dll to execute, so distribute that with the executable. There is a CMAKE options to turn it off as well, maybe use this?
+
+Install GLFW (http://www.glfw.org/).
+- Download GLFW 3.0.4 archive and extract it (ex. C:\Users\justin\Projects\glfw-3.0.4)
+- Run CMake GUI
+	- Set source code path (ex. C:\Users\justin\Projects\glfw-3.0.4)
+	- Set build binaries path to to its own directory (ex. C:\Users\justin\Projects\glfw-3.0.4_build)
+	- Configure using VS12 (if using VS 2013)
+	- Add Entry: Name=CMAKE_DEBUG_POSTFIX, Type=String, Value="_d"
+	- Configure again to update variables, then Generate
+
+
+Install GDCM (http://sourceforge.net/projects/gdcm/).
+- Download GDCM 2.4.0 archive and extract it (ex. C:\Users\justin\Projects\gdcm-2.4.0)
+- Run CMake GUI
+	- Set source code path (ex. C:\Users\justin\Projects\gdcm-2.4.0)
+	- Set build binaries path to its own directory (ex. C:\Users\justin\Projects\gdcm-2.4.0_build)
+	- Configure using VS12 (if using VS 2013)
+	- Make sure "Advanced" option is checked in GUI
+	- Change GDCM_DEBUG_POSTFIX to _d 
+	- Change CMAKE_INSTALL_PREFIX to desired path (ex. C:\Users\Justin\libs\GDCM)
+	- Configure again to update variables, then Generate
+- Build the BUILD_ALL target (for both DEBUG and RELEASE configs if needed)
+- Build the INSTALL target (for both DEBUG and RELEASE configs if needed)
+- I needed to add #include <algorithm> to a couple of files for std::min to be located. (NOT ON LATEST VERSION)
+- Set Windows environment variable GDCM_DIR to the lib/gdcm-2.4 directory inside the install directory. (ex. C:\Users\justin\libs\GDCM\lib\gdcm-2.4).
