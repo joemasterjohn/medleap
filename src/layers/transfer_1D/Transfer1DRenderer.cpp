@@ -2,11 +2,13 @@
 #include "math/Transform.h"
 #include "main/MainController.h"
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 using namespace gl;
 
 // this only applies to CT modality
-const char* hounsfield(int value)
+const char* hounsfield(float value)
 {
     if (value <= -900)
         return "AIR";
@@ -172,10 +174,10 @@ void Transfer1DRenderer::draw()
         glEnableVertexAttribArray(loc);
         glVertexAttribPointer(loc, 1, GL_FLOAT, false, clutStripStride, (GLvoid*)(4 * sizeof(GLfloat)));
         
-        double wc = volume->getCurrentWindow().getCenterReal();
-        double ww = volume->getCurrentWindow().getWidthReal();
-        double markL = (wc - ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-        double markR = (wc + ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+		float wc = volume->getCurrentWindow().getCenterReal();
+		float ww = volume->getCurrentWindow().getWidthReal();
+        float markL = (wc - ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+		float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
         glUniform2f(clutStripShader->getUniform("x_offsets"), markL, markR);
         
         glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, 0);
@@ -225,11 +227,11 @@ void Transfer1DRenderer::drawWindowMarkers()
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
     
     
-    double wc = volume->getCurrentWindow().getCenterReal();
-    double ww = volume->getCurrentWindow().getWidthReal();
-    double markL = (wc - ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
-    double markC = (wc - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
-    double markR = (wc + ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
+	float wc = volume->getCurrentWindow().getCenterReal();
+	float ww = volume->getCurrentWindow().getWidthReal();
+	float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
+	float markC = (wc - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
+	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
 
     glUniform4f(colorShader->getUniform("color"), 0.5f, 0.5f, 1.0f, 1.0f);
     glUniform1f(colorShader->getUniform("offset"), markL * 2.0f);
@@ -255,17 +257,17 @@ void Transfer1DRenderer::drawCursorValue()
     TextRenderer& text = MainController::getInstance().getText();
     text.setColor(.5f, 1, .5f);
     text.begin(viewport.width, viewport.height);
-    char buf[120];
     
-    if (volume->getModality() == VolumeData::CT)
-        sprintf(buf, "%.1f %s", cursorValue, hounsfield(cursorValue));
-    else
-        sprintf(buf, "%.1f", cursorValue);
+	std::ostringstream os;
+	os << std::setprecision(1) << std::fixed;
+	os << cursorValue;
+	if (volume->getModality() == VolumeData::CT)
+		os << " " << hounsfield(cursorValue);
     
     if (cursorX > viewport.width / 2)
-        text.add(buf, cursorX - 5, cursorY, TextRenderer::RIGHT);
+        text.add(os.str(), cursorX - 5, cursorY, TextRenderer::RIGHT);
     else
-        text.add(buf, cursorX + 5, cursorY, TextRenderer::LEFT);
+		text.add(os.str(), cursorX + 5, cursorY, TextRenderer::LEFT);
     text.end();
 }
 
@@ -326,7 +328,7 @@ void Transfer1DRenderer::setCursor(int x, int y)
     }
     cursorX = x;
     cursorY = y;
-    double px = (double)x / viewport.width;
+    float px = static_cast<float>(x) / viewport.width;
     cursorValue = px * (histogram->getMax() - histogram->getMin()) + histogram->getMin();
-    cursorShaderOffset = px * 2.0;
+    cursorShaderOffset = px * 2.0f;
 }

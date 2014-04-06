@@ -31,7 +31,7 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
     CLUT yellowToWhite;
     yellowToWhite.clearStops();
     yellowToWhite.addColorStop(0.0f, Vec4(1, 0, 0, 1));
-    yellowToWhite.addColorStop(1.0f, Vec4(0, 1, 0, 0.1));
+    yellowToWhite.addColorStop(1.0f, Vec4(0, 1, 0, 0.1f));
     cluts.push_back(yellowToWhite);
     
     CLUT monochrome;
@@ -121,17 +121,17 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
     
     renderer.setDrawCursor(true);
     
-    renderer.setCursor(x, y);
+    renderer.setCursor(static_cast<int>(x), static_cast<int>(y));
     
     if (lMouseDrag) {
-        double wc = (double)x / renderer.getViewport().width * histogram->getRange() + histogram->getMin();
-        double ww = volume->getCurrentWindow().getWidthReal();
+		float wc = static_cast<float>(x) / renderer.getViewport().width * histogram->getRange() + histogram->getMin();
+		float ww = volume->getCurrentWindow().getWidthReal();
         volume->getCurrentWindow().setReal(wc, ww);
         volumeRenderer->markDirty();
     } else if (rMouseDrag) {
-        double cursorVal = (double)x / renderer.getViewport().width * histogram->getRange() + histogram->getMin();
-        double wc = volume->getCurrentWindow().getCenterReal();
-        double ww = 2 * std::abs(cursorVal - wc);
+		float cursorVal = static_cast<float>(x) / renderer.getViewport().width * histogram->getRange() + histogram->getMin();
+		float wc = volume->getCurrentWindow().getCenterReal();
+		float ww = 2 * std::abs(cursorVal - wc);
         volume->getCurrentWindow().setReal(wc, ww);
         volumeRenderer->markDirty();
     }

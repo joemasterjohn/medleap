@@ -67,7 +67,7 @@ void BoxSlicer::slice(const BoundingBox& bounds, const Camera& camera, int slice
     vertices.clear();
     indices.clear();
     Vec3 planePoint = camera.getEye() + camera.getForward() * maxDistance;
-    Vec3 step = camera.getForward() * samplingLength / (slices + 1);
+    Vec3 step = camera.getForward() * samplingLength / (slices + 1.0f);
     for (int i = 0; i < slices; ++i) {
         planePoint -= step;
         slicePlane(planePoint, bounds);
@@ -77,7 +77,7 @@ void BoxSlicer::slice(const BoundingBox& bounds, const Camera& camera, int slice
 void BoxSlicer::slicePlane(const Vec3& p, const BoundingBox& bounds)
 {
     // number of indices appearing before this polygon
-    int polyIndexOffset = indices.size();
+    unsigned short polyIndexOffset = static_cast<unsigned short>(indices.size());
     
     // to avoid duplicate vertices at corners, only the first vertex that
     // intersects a corner vertex i will be added (i.e. corners[i] == false)
@@ -97,17 +97,17 @@ void BoxSlicer::slicePlane(const Vec3& p, const BoundingBox& bounds)
                 if (t == 0.0f && !corners[e.first]) {
                     Vec3 v = a + d * t;
                     corners[e.first] = true;
-                    indices.push_back(vertices.size());
+                    indices.push_back(static_cast<unsigned short>(vertices.size()));
                     vertices.push_back(v);
                 } else if (t == 1.0f && !corners[e.second]) {
                     Vec3 v = a + d * t;
                     corners[e.second] = true;
-                    indices.push_back(vertices.size());
-                    vertices.push_back(v);
+					indices.push_back(static_cast<unsigned short>(vertices.size()));
+					vertices.push_back(v);
                 } else {
                     Vec3 v = a + d * t;
-                    indices.push_back(vertices.size());
-                    vertices.push_back(v);
+					indices.push_back(static_cast<unsigned short>(vertices.size()));
+					vertices.push_back(v);
                 }
             }
         }

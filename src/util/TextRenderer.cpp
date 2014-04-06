@@ -77,12 +77,12 @@ void TextRenderer::addVertex(int x, int y, float u, float v)
     vertices.push_back(v);
 }
 
-void TextRenderer::add(const char* text, int x, int y, Alignment hAlign, Alignment vAlign)
+void TextRenderer::add(std::string& text, int x, int y, Alignment hAlign, Alignment vAlign)
 {
     if (hAlign == CENTER) {
-        x -= currentFont->measure(text) / 2;
+        x -= currentFont->width(text) / 2;
     } else if (hAlign == RIGHT) {
-        x -= currentFont->measure(text);
+		x -= currentFont->width(text);
     }
     
     if (vAlign == CENTER) {
@@ -91,25 +91,24 @@ void TextRenderer::add(const char* text, int x, int y, Alignment hAlign, Alignme
         y -= currentFont->glyphHeight;
     }
     
-    for (; *text; text++) {
-        const char c = *text;
-        int glyphWidth = currentFont->glyphWidths[(unsigned)c];
-        int glyphHeight = currentFont->glyphHeight;
-        
-        GLfloat u = GLYPH_STEP * (c % 16);
-        GLfloat v = 1.0f - GLYPH_STEP * (c / 16 + 1);
-        float uStep = (float)glyphWidth / currentFont->texWidth;
-        
-        addVertex(x, y, u, v);
-        addVertex(x + glyphWidth, y, u + uStep, v);
-        addVertex(x + glyphWidth, y + glyphHeight, u + uStep, v + GLYPH_STEP);
+	for (char& c : text) {
+		int glyphWidth = currentFont->glyphWidths[static_cast<unsigned>(c)];
+		int glyphHeight = currentFont->glyphHeight;
 
-        addVertex(x, y, u, v);
-        addVertex(x + glyphWidth, y + glyphHeight, u + uStep, v + GLYPH_STEP);
-        addVertex(x, y + glyphHeight, u, v + GLYPH_STEP);
-        
-        x += glyphWidth;
-    }
+		GLfloat u = GLYPH_STEP * (c % 16);
+		GLfloat v = 1.0f - GLYPH_STEP * (c / 16 + 1);
+		float uStep = (float)glyphWidth / currentFont->texWidth;
+
+		addVertex(x, y, u, v);
+		addVertex(x + glyphWidth, y, u + uStep, v);
+		addVertex(x + glyphWidth, y + glyphHeight, u + uStep, v + GLYPH_STEP);
+
+		addVertex(x, y, u, v);
+		addVertex(x + glyphWidth, y + glyphHeight, u + uStep, v + GLYPH_STEP);
+		addVertex(x, y + glyphHeight, u, v + GLYPH_STEP);
+
+		x += glyphWidth;
+	}
 }
 
 void TextRenderer::end()
@@ -138,23 +137,21 @@ void TextRenderer::end()
     glBindTexture(GL_TEXTURE_2D, currentFont->texture);
     
     // render
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 4);
+	GLsizei count = static_cast<GLsizei>(vertices.size() / 4);
+	glDrawArrays(GL_TRIANGLES, 0, count);
     
     // reset state
     glDisable(GL_BLEND);
 }
 
-int TextRenderer::measureHeight(const char *text)
+int TextRenderer::fontHeight()
 {
     return currentFont->glyphHeight;
 }
 
-int TextRenderer::measureWidth(const char *text)
+int TextRenderer::fontWidth(std::string& text)
 {
-    int length = 0;
-    while (*text)
-        length += currentFont->glyphWidths[(unsigned)*text++];
-    return length;
+	return currentFont->width(text);
 }
 
 bool TextRenderer::loadFont(std::string fontName)
@@ -178,7 +175,7 @@ bool TextRenderer::loadFont(std::string fontName)
     if (!currentFont)
         currentFont = font;
     
-    return font;
+    return (font != 0);
 }
 
 TextRenderer::Font::Font()
@@ -191,12 +188,12 @@ TextRenderer::Font::~Font()
         glDeleteTextures(1, &texture);
 }
 
-int TextRenderer::Font::measure(const char* s)
+unsigned int TextRenderer::Font::width(std::string& s)
 {
-    int width = 0;
-    for (; *s; s++)
-        width += glyphWidths[(unsigned)*s];
-    return width;
+	int width = 0;
+	for (char& c : s)
+		width += glyphWidths[static_cast<unsigned>(c)];
+	return width;
 }
 
 bool TextRenderer::Font::load(const char* bmpFileName, const char* metricsFileName)

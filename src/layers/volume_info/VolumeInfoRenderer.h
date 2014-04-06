@@ -6,6 +6,7 @@
 #include "data/VolumeData.h"
 #include "layers/volume/VolumeRenderer.h"
 #include "layers/slice/SliceRenderer.h"
+#include <string>
 
 /** Draws informational text for the volume data */
 class VolumeInfoRenderer : public Renderer
@@ -25,7 +26,7 @@ private:
     VolumeRenderer* volumeRenderer;
     SliceRenderer* sliceRenderer;
     
-    void drawText(const char* text, int row);
+    void drawText(std::string& str, int row);
 };
 
 #endif /* defined(__medleap__VolumeInfoRenderer__) */

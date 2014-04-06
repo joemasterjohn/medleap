@@ -219,7 +219,7 @@ void SliceRenderer::drawOrientationOverlay()
         
         TextRenderer::Alignment hAlign = x < viewport.width / 2 ? TextRenderer::LEFT : TextRenderer::RIGHT;
         TextRenderer::Alignment vAlign = y < viewport.height / 2 ? TextRenderer::BOTTOM : TextRenderer::TOP;
-        text.add(labels[i].text.c_str(), x, y, hAlign, vAlign);
+        text.add(labels[i].text, x, y, hAlign, vAlign);
     }
     
     text.end();

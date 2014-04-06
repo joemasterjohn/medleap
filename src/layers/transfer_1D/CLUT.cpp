@@ -53,7 +53,7 @@ CLUT::~CLUT()
 
 int CLUT::findLeftStop(float position)
 {
-    int i = stops.size() - 1;
+    unsigned int i = static_cast<unsigned int>(stops.size() - 1);
     while (stops[i].getPosition() > position) { i--; }
     return i;
 }

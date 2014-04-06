@@ -44,9 +44,9 @@ void VolumeData::loadGradientTexture(Texture* texture)
     
     unsigned char* p = data;
     for (Vec3 g : gradients) {
-        *p++ = ((g.x - minGradient.x) / rangeGradient.x) * 255;
-        *p++ = ((g.y - minGradient.y) / rangeGradient.y) * 255;
-        *p++ = ((g.z - minGradient.z) / rangeGradient.z) * 255;
+        *p++ = static_cast<unsigned char>(((g.x - minGradient.x) / rangeGradient.x) * 255);
+		*p++ = static_cast<unsigned char>(((g.y - minGradient.y) / rangeGradient.y) * 255);
+		*p++ = static_cast<unsigned char>(((g.z - minGradient.z) / rangeGradient.z) * 255);
     }
     
     texture->bind();
@@ -214,9 +214,9 @@ void VolumeData::setNextWindow()
 void VolumeData::setPrevWindow()
 {
     if (activeWindow == 0)
-        activeWindow = windows.size() - 1;
+        activeWindow = static_cast<unsigned>(windows.size() - 1);
     else
-        activeWindow = (activeWindow - 1) % windows.size();
+		activeWindow = static_cast<unsigned>((activeWindow - 1) % windows.size());
 }
 
 

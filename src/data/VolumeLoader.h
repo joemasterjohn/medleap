@@ -65,7 +65,7 @@ private:
         volume->minVoxelValue = std::numeric_limits<int>::infinity();
         volume->maxVoxelValue = -std::numeric_limits<int>::infinity();
         for (int i = 0; i < volume->getNumVoxels(); i++) {
-            *buffer = (*buffer) * slope + intercept;
+            *buffer = static_cast<T>((*buffer) * slope + intercept);
             if (*buffer > volume->maxVoxelValue) volume->maxVoxelValue = *buffer;
             if (*buffer < volume->minVoxelValue) volume->minVoxelValue = *buffer;
             buffer++;

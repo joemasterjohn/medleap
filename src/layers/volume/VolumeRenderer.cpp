@@ -9,7 +9,6 @@ using namespace glmath;
 VolumeRenderer::VolumeRenderer()
 {
     dirty = true;
-    moving = false;
     proxyVertices = NULL;
     proxyIndices = NULL;
     lowResFBO = NULL;
@@ -19,7 +18,6 @@ VolumeRenderer::VolumeRenderer()
     sceneProgram = NULL;
     sceneBuffer = NULL;
     numSamples = 256;
-    movingSampleScale = 0.5f;
     opacityScale = 1.0f;
     renderMode = VR;
     shading = true;
@@ -57,11 +55,6 @@ void VolumeRenderer::setVolume(VolumeData* volume)
     this->volume = volume;
     volume->loadTexture3D(volumeTexture);
     volume->loadGradientTexture(gradientTexture);
-}
-
-void VolumeRenderer::setMoving(bool moving)
-{
-    this->moving = moving;
 }
 
 void VolumeRenderer::markDirty()
@@ -153,6 +146,8 @@ void VolumeRenderer::init()
     lowResTexture->bind();
     lowResTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     lowResTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	lowResTexture->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	lowResTexture->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     lowResTexture->setData2D(GL_RGB, 512, 512, GL_RGB, GL_UNSIGNED_BYTE, 0);
     lowResFBO->bind();
     lowResFBO->setColorTarget(0, lowResTexture);
@@ -163,6 +158,8 @@ void VolumeRenderer::init()
     fullResTexture->bind();
     fullResTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     fullResTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	fullResTexture->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	fullResTexture->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     fullResTexture->setData2D(GL_RGB, viewport.width, viewport.height, GL_RGB, GL_UNSIGNED_BYTE, 0);
     fullResFBO->bind();
     fullResFBO->setColorTarget(0, fullResTexture);
@@ -202,14 +199,14 @@ void VolumeRenderer::resize(int width, int height)
     lowResTexture->setData2D(GL_RGB, viewport.width/2, viewport.height/2, GL_RGB, GL_UNSIGNED_BYTE, 0);
     fullResTexture->bind();
     fullResTexture->setData2D(GL_RGB, viewport.width, viewport.height, GL_RGB, GL_UNSIGNED_BYTE, 0);
-    camera.setProjection(perspective(1.0471975512, viewport.aspect(), 0.1f, 100.0f));
+    camera.setProjection(perspective(1.047197f, viewport.aspect(), 0.1f, 100.0f));
     markDirty();
 }
 
 void VolumeRenderer::updateSlices(int numSlices)
 {
     BoxSlicer slicer;
-    slicer.slice(volume->getBounds(), camera, moving ? numSlices * movingSampleScale : numSlices);
+    slicer.slice(volume->getBounds(), camera, numSlices);
     
     proxyIndices->bind();
     proxyIndices->setData(&slicer.getIndices()[0],
@@ -219,7 +216,7 @@ void VolumeRenderer::updateSlices(int numSlices)
     proxyVertices->setData(&slicer.getVertices()[0],
                            slicer.getVertices().size() * sizeof(slicer.getVertices()[0]));
     
-    numSliceIndices = slicer.getIndices().size();
+    numSliceIndices = static_cast<int>(slicer.getIndices().size());
 }
 
 void VolumeRenderer::draw(int numSlices)

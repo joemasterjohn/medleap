@@ -136,7 +136,7 @@ void VolumeLoader::load()
     volume->modality = id.modality;
     volume->width = img.GetColumns();
     volume->height = img.GetRows();
-    volume->depth = files.size();
+    volume->depth = static_cast<unsigned int>(files.size());
     
     
     // only supporting 8/16-bit monochrome images (CT and MR)
@@ -188,7 +188,10 @@ void VolumeLoader::load()
     
     // Z spacing should be regular between images (this is NOT slice thickness attribute)
     const double* pixelSpacing = volume->getValues<const double*, 0x0028, 0x0030>();
-    volume->setVoxelSize(pixelSpacing[0], pixelSpacing[1], zSpacing);
+    volume->setVoxelSize(
+		static_cast<float>(pixelSpacing[0]), 
+		static_cast<float>(pixelSpacing[1]),
+		static_cast<float>(zSpacing));
     
     // Apply modality LUT (if possible) and update min/max values
     switch (volume->type)
@@ -250,7 +253,7 @@ void VolumeLoader::load()
         }
         for (int i = 0; i < numWindows; i++) {
             Window window(volume->type);
-            window.setReal(centers[i], widths[i]);
+            window.setReal(static_cast<float>(centers[i]), static_cast<float>(widths[i]));
             volume->windows.push_back(window);
         }
         delete[] centers;
@@ -258,9 +261,9 @@ void VolumeLoader::load()
         
         // patient orientation
         const double* cosines = img.GetDirectionCosines();
-        Vec3 x(cosines[0], cosines[1], cosines[2]);
-        Vec3 y(cosines[3], cosines[4], cosines[5]);
-        Vec3 z = x.cross(y);
+		Vec3 x(static_cast<float>(cosines[0]), static_cast<float>(cosines[1]), static_cast<float>(cosines[2]));
+		Vec3 y(static_cast<float>(cosines[3]), static_cast<float>(cosines[4]), static_cast<float>(cosines[5]));
+		Vec3 z = x.cross(y);
         volume->orientation = Mat3(x, y, z);
     } else {
         volume->windows.push_back(Window(volume->type));

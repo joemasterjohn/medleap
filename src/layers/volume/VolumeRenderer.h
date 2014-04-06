@@ -28,7 +28,6 @@ public:
     Camera& getCamera();
     
     void markDirty();
-    void setMoving(bool moving);
     
     void setMode(RenderMode mode);
     void cycleMode();
@@ -47,10 +46,8 @@ private:
     bool shading;
     RenderMode renderMode;
     int numSamples;
-    float movingSampleScale;
     bool dirty;
     bool drawnHighRes;
-    bool moving;
     gl::Texture* volumeTexture;
     gl::Texture* gradientTexture;
     VolumeData* volume;

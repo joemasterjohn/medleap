@@ -140,8 +140,8 @@ void MainController::startLoop()
             glClear(GL_COLOR_BUFFER_BIT);
             getText().setColor(0, 0, 0);
             getText().begin(renderer.getWidth(), renderer.getHeight());
-            getText().add("Loading...", renderer.getWidth()/2, renderer.getHeight()/2, TextRenderer::CENTER, TextRenderer::CENTER);
-            getText().add(loader.getStateMessage().c_str(), renderer.getWidth()/2, renderer.getHeight()/2-36, TextRenderer::CENTER, TextRenderer::CENTER);
+            getText().add(string("Loading"), renderer.getWidth()/2, renderer.getHeight()/2, TextRenderer::CENTER, TextRenderer::CENTER);
+            getText().add(loader.getStateMessage(), renderer.getWidth()/2, renderer.getHeight()/2-36, TextRenderer::CENTER, TextRenderer::CENTER);
             getText().end();
             glfwSwapBuffers(renderer.getWindow());
             glfwPollEvents();

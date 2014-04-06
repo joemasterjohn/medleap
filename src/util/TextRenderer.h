@@ -40,16 +40,16 @@ public:
     void begin(int width, int height);
     
     /** Adds text to be rendered */
-    void add(const char* text, int x, int y, Alignment hAlign = LEFT, Alignment vAlign = BOTTOM);
+    void add(std::string& text, int x, int y, Alignment hAlign = LEFT, Alignment vAlign = BOTTOM);
     
     /** Performs actual drawing */
     void end();
     
     /** Returns height of text */
-    int measureHeight(const char* text);
+    int fontHeight();
     
     /** Returns width of text */
-    int measureWidth(const char* text);
+    int fontWidth(std::string& text);
   
 private:
     
@@ -65,7 +65,7 @@ private:
         unsigned texWidth;
         unsigned texHeight;
         
-        int measure(const char* s);
+        unsigned int width(std::string& s);
         bool load(const char* bmpFileName, const char* metricsFileName);
     };
     

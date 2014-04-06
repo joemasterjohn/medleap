@@ -238,7 +238,7 @@ public:
         if (det == 0)
             return Matrix4<T>();
         
-        det = 1.0 / det;
+        det = static_cast<T>(1.0 / det);
         
         for (i = 0; i < 16; i++)
             invOut[i] = inv[i] * det;

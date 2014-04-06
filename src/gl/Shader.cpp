@@ -58,7 +58,7 @@ bool Shader::compile(const char* src, GLenum type)
     GLint status;
     glGetShaderiv(id, GL_COMPILE_STATUS, &status);
 
-    return status;
+    return (status != 0);
 }
 
 bool Shader::compileFile(const char* fileName, GLenum type)

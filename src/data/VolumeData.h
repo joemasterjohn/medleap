@@ -100,11 +100,11 @@ public:
     }
     
     /** Returns the value of a voxel (as a signed integer, not the type of the underlying data) */
-    template <typename T> int getVoxelValue(int x, int y, int z)
+	template <typename T> int getVoxelValue(unsigned int x, unsigned int y, unsigned int z)
     {
-        x = std::min(std::max(0, x), width-1);
-        y = std::min(std::max(0, y), height-1);
-        z = std::min(std::max(0, z), depth-1);
+        x = std::min(std::max(0u, x), width-1);
+        y = std::min(std::max(0u, y), height-1);
+        z = std::min(std::max(0u, z), depth-1);
         return (int)(((T*)(data))[z * width * height + y * width + x]);
     }
     
@@ -144,9 +144,9 @@ private:
     Vec3 maxGradient;
     float minGradientMag;
     float maxGradientMag;
-    int width;
-    int height;
-    int depth;
+    unsigned int width;
+    unsigned int height;
+    unsigned int depth;
     GLenum format;
     GLenum type;
     int minVoxelValue;
@@ -157,7 +157,7 @@ private:
     Modality modality;
     Mat3 orientation;
     std::vector<Window> windows;
-    int activeWindow;
+    unsigned int activeWindow;
 
     /** Private constructor since loading is complex and done by the Loader class */
     VolumeData();
@@ -175,9 +175,9 @@ private:
         for (int z = 0; z < depth; z++) {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    int gx = (getVoxelValue<T>(x-1, y, z) - getVoxelValue<T>(x+1, y, z)) / (2 * voxelSize.x);
-                    int gy = (getVoxelValue<T>(x, y-1, z) - getVoxelValue<T>(x, y+1, z)) / (2 * voxelSize.y);
-                    int gz = (getVoxelValue<T>(x, y, z-1) - getVoxelValue<T>(x, y, z+1)) / (2 * voxelSize.z);
+                    float gx = (getVoxelValue<T>(x-1, y, z) - getVoxelValue<T>(x+1, y, z)) / (2.0f * voxelSize.x);
+					float gy = (getVoxelValue<T>(x, y - 1, z) - getVoxelValue<T>(x, y + 1, z)) / (2.0f * voxelSize.y);
+					float gz = (getVoxelValue<T>(x, y, z - 1) - getVoxelValue<T>(x, y, z + 1)) / (2.0f * voxelSize.z);
                     Vec3 g(gx, gy, gz);
 
                     float mag = g.length();

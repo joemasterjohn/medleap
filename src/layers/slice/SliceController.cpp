@@ -58,7 +58,7 @@ bool SliceController::mouseMotion(GLFWwindow* window, double x, double y)
     // move through slices by dragging left and right
     if (mouseLeftDrag) {
         double dx = x - mouseAnchorX;
-        int slice = anchorSliceIndex + dx * 0.1;
+        int slice = static_cast<int>(anchorSliceIndex + dx * 0.1);
         if (slice < 0)
             slice = volume->getDepth() - ((-1*slice) % volume->getDepth());
         else

@@ -25,7 +25,7 @@ namespace gl
         
         bool operator!=(const Viewport&) const;
         
-        bool contains(int x, int y) const;
+        bool contains(double x, double y) const;
     };
     
 } // namespace cgl
