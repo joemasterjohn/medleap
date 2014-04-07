@@ -5,6 +5,8 @@
 
 namespace gl
 {
+	#define PI 3.14159265359
+
     /**
      * Returns the number of bytes given an OpenGL enum such as GL_SHORT or GL_UNSIGNED_BYTE.
      */

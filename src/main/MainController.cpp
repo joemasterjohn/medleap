@@ -207,8 +207,11 @@ void MainController::resize(int width, int height)
 
 void MainController::mouseButton(GLFWwindow *window, int button, int action, int mods)
 {
-    for (Controller* c : activeControllers)
-        c->mouseButton(window, button, action, mods);
+	for (Controller* c : activeControllers) {
+		bool passThrough = c->mouseButton(window, button, action, mods);
+		if (!passThrough)
+			break;
+	}
 }
 
 void MainController::mouseMotion(GLFWwindow *window, double x, double y)
@@ -216,14 +219,19 @@ void MainController::mouseMotion(GLFWwindow *window, double x, double y)
     // convert y to bottom up
     y = renderer.getHeight() - y - 1;
     for (Controller* c : activeControllers) {
-        c->mouseMotion(window, x, y);
+        bool passThrough = c->mouseMotion(window, x, y);
+		if (!passThrough)
+			break;
     }
 }
 
 void MainController::scroll(GLFWwindow *window, double dx, double dy)
 {
-    for (Controller* c : activeControllers)
-        c->scroll(window, dx, dy);
+	for (Controller* c : activeControllers) {
+		bool passThrough = c->scroll(window, dx, dy);
+		if (!passThrough)
+			break;
+	}
 }
 
 void MainController::popController()

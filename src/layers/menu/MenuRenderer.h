@@ -7,15 +7,19 @@
 class MenuRenderer : public Renderer
 {
 public:
-	MenuRenderer();
+	MenuRenderer(MenuManager* menuManager);
 	~MenuRenderer();
 
 	void init();
 	void draw();
 	void resize(int width, int height);
+	void highlight(int menuIndex);
 
 private:
-	MenuManager* menu;
+	MenuManager* menuManager;
+	int highlighted;
+
+	void drawMenu(Menu& menu);
 };
 
 #endif /* defined(__medleap__MenuRenderer__) */

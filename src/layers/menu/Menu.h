@@ -7,17 +7,23 @@
 class Menu
 {
 public:
-	/** Creates a named menu screen */
+	/** Creates a named menu */
 	Menu(std::string name);
 
-	/** Destructor for menu screen */
+	/** Destructor for menu */
 	~Menu();
 	
 	/** Creates a new menu item and returns a reference to it. */
 	MenuItem& createItem(std::string name);
 
+	/** Creates a new menu item with an action and returns a reference to it. */
+	MenuItem& createItem(std::string name, MenuItem::Action action);
+
 	/** Returns the menu items stored in the menu */
 	std::vector<MenuItem>& getItems();
+
+	/** Returns the menu's name */
+	const std::string& getName() const;
 
 private:
 	std::string name;
