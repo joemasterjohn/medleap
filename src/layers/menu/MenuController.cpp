@@ -2,6 +2,8 @@
 
 MenuController::MenuController()
 {
+	MenuScreen& mainMenu = manager.createScreen("Main Menu");
+
 }
 
 MenuController::~MenuController()

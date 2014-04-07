@@ -1,9 +1,15 @@
-#include "MenuManager.h"
+#include "Menu.h"
 
-MenuManager::MenuManager()
+Menu::Menu()
 {
 }
 
-MenuManager::~MenuManager()
+Menu::~Menu()
 {
+}
+
+MenuScreen& Menu::createScreen(std::string name)
+{
+	screens.push_back(MenuScreen(name));
+	return screens.back();
 }

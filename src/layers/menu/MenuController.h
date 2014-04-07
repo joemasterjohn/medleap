@@ -3,6 +3,7 @@
 
 #include "layers/Controller.h"
 #include "MenuRenderer.h"
+#include "Menu.h"
 
 class MenuController : public Controller
 {
@@ -17,6 +18,7 @@ public:
 
 private:
 	MenuRenderer renderer;
+	Menu manager;
 };
 
 #endif /* defined(__medleap__MenuController__) */

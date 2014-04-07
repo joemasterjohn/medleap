@@ -23,7 +23,7 @@ bool MainRenderer::init(int width, int height, const char* title)
         return false;
     
     // Use 32-bit color (in sRGB) and 24-bit for depth buffer
-    glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE);
+    //glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE);
     glfwWindowHint(GLFW_RED_BITS, 8);
     glfwWindowHint(GLFW_GREEN_BITS, 8);
     glfwWindowHint(GLFW_BLUE_BITS, 8);
@@ -56,8 +56,8 @@ bool MainRenderer::init(int width, int height, const char* title)
         return false;
     }
     
-    // use sRGB default framebuffer for gamma correction
-    glEnable(GL_FRAMEBUFFER_SRGB);
+    // For now I'm leaving sRGB / gamma correction off, because other DICOM viewers don't use it.
+    //glEnable(GL_FRAMEBUFFER_SRGB);
     
     this->width = width;
     this->height = height;

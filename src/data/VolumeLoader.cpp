@@ -76,11 +76,14 @@ void VolumeLoader::sortFiles(VolumeLoader::ID id, vector<string>& fileNames, dou
     
     // weak error checking
     if (!sorter.Sort(unsorted)) {
-        cerr << "Problem sorting images!" << endl;
-    }
-    
-    fileNames = sorter.GetFilenames();
-    *zSpacing = sorter.GetZSpacing();
+        cerr << "Warning: could not sort using IPP/IOP." << endl;
+		// use slicethickness or 1 and default order of files
+		fileNames = directory.GetFilenames();
+		*zSpacing = 1;
+	} else {
+		fileNames = sorter.GetFilenames();
+		*zSpacing = sorter.GetZSpacing();
+	}
 }
 
 void VolumeLoader::setSource(const char* directoryPath)

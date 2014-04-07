@@ -2,6 +2,7 @@
 #define __medleap__MenuRenderer__
 
 #include "layers/Renderer.h"
+#include "MenuManager.h"
 
 class MenuRenderer : public Renderer
 {
@@ -14,7 +15,7 @@ public:
 	void resize(int width, int height);
 
 private:
-
+	MenuManager* menu;
 };
 
 #endif /* defined(__medleap__MenuRenderer__) */
