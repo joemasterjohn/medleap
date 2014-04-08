@@ -69,7 +69,7 @@ public:
         double a1 = anglePositive();
         double a2 = v.anglePositive();
 		if (a2 < a1)
-			a2 += PI2;
+			a2 += gl::PI2;
         return a2 - a1;
     }
     

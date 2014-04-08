@@ -2,11 +2,11 @@
 # This will define:
 # LEAP_INCLUDE_DIR
 # LEAP_LIBRARY_DIR
-# LEAP_DLL_RELEASE
-# LEAP_DLL_DEBUG
-# LEAP_LIB_RELEASE - library to link against in RELEASE config
-# LEAP_LIB_DEBUG - library to link against in DEBUG config
-# LEAP_LIBRARY - library to link against for either config (mac)
+# LEAP_DLL_RELEASE - runtime library for Windows RELEASE config
+# LEAP_DLL_DEBUG - runtime library for Windows DEBUG config
+# LEAP_LIB_RELEASE - library to link against in Windows RELEASE config
+# LEAP_LIB_DEBUG - library to link against in Windows DEBUG config
+# LEAP_LIBRARY - library to link against for OS X
 
 if(WIN32)
 	find_path(LEAP_INCLUDE_DIR
@@ -44,7 +44,25 @@ if(WIN32)
 	endif(LEAP_INCLUDE_DIR)
 
 else(WIN32)
-	# TODO: not windows (doesn't depend on arch for OS X)
+	find_path(LEAP_INCLUDE_DIR
+		NAMES
+			Leap.h
+		PATHS
+			$ENV{LEAP_DIR}/include
+		DOC "The directory where Leap.h resides"
+	)
+
+	find_path(LEAP_LIBRARY_DIR
+		NAMES
+			libLeap.dylib
+		PATHS
+			$ENV{LEAP_DIR}/lib/libc++/
+		DOC "The directory where Leap libraries are stored"
+	)
+
+	if(LEAP_INCLUDE_DIR)
+		set(LEAP_LIBRARY "${LEAP_LIBRARY_DIR}/libLeap.dylib")
+	endif(LEAP_INCLUDE_DIR)
 endif(WIN32)
 
 if(LEAP_INCLUDE_DIR)

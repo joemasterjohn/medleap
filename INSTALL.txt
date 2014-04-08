@@ -22,7 +22,7 @@ $ cmake ..
 $ make -j
 $ sudo make install
 
-
+Set an environment variable LEAP_DIR. For example, in .bash_profile: export LEAP_DIR=/usr/local/LeapDIR
 
 WINDOWS NOTES
 **************************

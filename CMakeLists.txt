@@ -123,6 +123,8 @@ include_directories(${GLFW_INCLUDE_DIR})
 find_package(Leap REQUIRED)
 include_directories(${LEAP_INCLUDE_DIR})
 
+message(STATUS ${LEAP_INCLUDE_DIR})
+
 if (APPLE)
 
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_AND_RESOURCES})
@@ -140,7 +142,6 @@ if (APPLE)
         MACOSX_PACKAGE_LOCATION
         Resources/fonts
     )
-
 
     # for C++11
     set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
@@ -160,7 +161,18 @@ if (APPLE)
         ${COCOA_LIBRARY}
         ${IOKIT_LIBRARY}
         ${COREVIDEO_LIBRARY}
+        ${LEAP_LIBRARY}
     )
+
+    # Copy libLeap.dylib to output directory
+    add_custom_command(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} ARGS -E copy
+        ${LEAP_LIBRARY}
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+
 endif(APPLE)
 
 if (WIN32)
