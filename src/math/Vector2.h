@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include "Math.h"
 #include "Vector3.h"
 
 template <typename T> class Vector3;
@@ -59,7 +60,7 @@ public:
     T anglePositive() const
     {
         T rads = angle();
-        return rads < 0 ? 2 * M_PI + rads : rads;
+        return rads < 0 ? gl::PI2 + rads : rads;
     }
     
     /// Computes the angle from this vector to v (always positive).
@@ -67,8 +68,8 @@ public:
     {
         double a1 = anglePositive();
         double a2 = v.anglePositive();
-        if (a2 < a1)
-            a2 += M_PI * 2.0;
+		if (a2 < a1)
+			a2 += PI2;
         return a2 - a1;
     }
     

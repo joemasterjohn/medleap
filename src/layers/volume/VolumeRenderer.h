@@ -43,6 +43,7 @@ public:
     float getOpacityScale();
     
 private:
+	bool lightBackground;
     bool shading;
     RenderMode renderMode;
     int numSamples;

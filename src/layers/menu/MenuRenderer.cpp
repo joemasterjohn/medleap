@@ -41,7 +41,7 @@ void MenuRenderer::drawMenu(Menu& menu)
 
 	double radius = std::min(viewport.width, viewport.height) * 0.35;
 	double angle = 0.0;
-	double angleStep = PI * 2.0 / menu.getItems().size();
+	double angleStep = gl::PI2 / menu.getItems().size();
 	for (MenuItem& item : menu.getItems()) {
 		int x = static_cast<int>(std::cos(angle) * radius + viewport.width / 2);
 		int y = static_cast<int>(std::sin(angle) * radius + viewport.height / 2);

@@ -159,9 +159,11 @@ void CLUT::saveTexture(Texture* texture)
         float pn = (p - left->getPosition()) / (right->getPosition() - left->getPosition());
         
         Vec4 lc = left->getColor();
-//        lc *= Vec4(lc.w, lc.w, lc.w, 1);
         Vec4 rc = right->getColor();
-//        rc *= Vec4(rc.w, rc.w, rc.w, 1);
+
+		// pre-multiply alpha
+		//lc *= Vec4(lc.w, lc.w, lc.w, 1);
+        //rc *= Vec4(rc.w, rc.w, rc.w, 1);
         
         Vec4 color = lc * (1.0f - pn) + rc * pn;
         buf[ptr++] = (unsigned char)(color.x * 255);

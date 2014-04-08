@@ -1,12 +1,12 @@
-#ifndef CGL_MATH_H_
-#define CGL_MATH_H_
+#ifndef CGL_TRANSFORM_H_
+#define CGL_TRANSFORM_H_
 
 #include <cmath>
 #include <algorithm>
 #include "Matrix4.h"
 #include "Vector3.h"
 
-namespace glmath {
+namespace gl {
   
   /// Returns the value clamped to be in [min, max].
   template <typename T> T clamp(T value, T min, T max)

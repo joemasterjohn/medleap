@@ -4,7 +4,6 @@
 
 using namespace gl;
 using namespace std;
-using namespace glmath;
 
 VolumeRenderer::VolumeRenderer()
 {
@@ -23,6 +22,7 @@ VolumeRenderer::VolumeRenderer()
     shading = true;
     clutTexture = NULL;
     drawnHighRes = false;
+	lightBackground = true;
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -106,7 +106,7 @@ void VolumeRenderer::init()
     volumeTexture = new Texture(GL_TEXTURE_3D);
     gradientTexture = new Texture(GL_TEXTURE_3D);
 
-    camera.setView(lookAt(0, 0, 2, 0, 0, 0, 0, 1, 0));
+    camera.setView(lookAt(1, 1, 1, 0, 0, 0, 0, 1, 0));
     
     lineShader = Program::create("shaders/color.vert", "shaders/color.frag");
     
@@ -199,7 +199,7 @@ void VolumeRenderer::resize(int width, int height)
     lowResTexture->setData2D(GL_RGB, viewport.width/2, viewport.height/2, GL_RGB, GL_UNSIGNED_BYTE, 0);
     fullResTexture->bind();
     fullResTexture->setData2D(GL_RGB, viewport.width, viewport.height, GL_RGB, GL_UNSIGNED_BYTE, 0);
-    camera.setProjection(perspective(1.047197f, viewport.aspect(), 0.1f, 100.0f));
+	camera.setProjection(perspective(0.8726388f, viewport.aspect(), 0.1f, 100.0f));
     markDirty();
 }
 
@@ -243,12 +243,13 @@ void VolumeRenderer::draw(int numSlices)
     glUniform1i(boxShader->getUniform("use_shading"), (renderMode != MIP && shading));
     glUniform1f(boxShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
     glUniform1f(boxShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
-    
-    glUniform1f(boxShader->getUniform("opacity_correction"), (float)numSamples / numSlices);
+
+	glUniform1i(boxShader->getUniform("render_mode"), renderMode);
+
+	glUniform1f(boxShader->getUniform("opacity_correction"), static_cast<float>(numSamples) / numSlices);
     glUniform3f(boxShader->getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
     
     glUniform3f(boxShader->getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
-    glUniform1i(boxShader->getUniform("use_isosurface"), renderMode == ISOSURFACE ? 1 : 0);
     glUniform1f(boxShader->getUniform("opacity_scale"), opacityScale);
     Vec3 r = volume->getMaxGradient() - volume->getMinGradient();
     glUniform3f(boxShader->getUniform("rangeGradient"), r.x, r.y, r.z);
@@ -258,15 +259,16 @@ void VolumeRenderer::draw(int numSlices)
     glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
     
     
-    glEnable(GL_BLEND);
     
     switch (renderMode)
     {
         case MIP:
+			glEnable(GL_BLEND);
             glBlendEquation(GL_MAX);
             glBlendFunc(GL_ONE, GL_ONE);
             break;
         case VR:
+			glEnable(GL_BLEND);
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             break;
@@ -287,9 +289,6 @@ void VolumeRenderer::draw(int numSlices)
     
     
     
-    // MIP:
-    // DVR:
-    glDisable(GL_ALPHA_TEST);
     glDisable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendEquation(GL_FUNC_ADD);

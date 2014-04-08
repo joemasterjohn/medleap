@@ -42,7 +42,7 @@ MainController& MainController::getInstance()
 MainController::MainController() :
     volume(NULL)
 {
-    mode = MODE_2D;
+    mode = MODE_3D;
     showHistogram = true;
 	menuOn = false;
 }
@@ -58,7 +58,7 @@ void MainController::init()
         cout << "Failed to initialize renderer." << endl;
         return;
     }
-    
+
     glfwSetFramebufferSizeCallback(renderer.getWindow(), resizeCB);
 	glfwSetKeyCallback(renderer.getWindow(), keyboardCB);
 	glfwSetMouseButtonCallback(renderer.getWindow(), mouseCB);
@@ -149,12 +149,26 @@ void MainController::startLoop()
         } else if (loader.getState() == VolumeLoader::FINISHED) {
             setVolume(loader.getVolume());
         } else {
+			pollInputDevices();
             renderer.draw();
-            glfwPollEvents();
         }
         
     }
     glfwTerminate();
+}
+
+void MainController::pollInputDevices()
+{
+	glfwPollEvents();
+	if (leapController.isConnected()) {
+		Leap::Frame currentFrame = leapController.frame();
+		for (Controller* c : activeControllers) {
+			bool passThrough = c->leapInput(leapController, currentFrame);
+			if (!passThrough) {
+				break;
+			}
+		}
+	}
 }
 
 void MainController::toggleHistogram()
@@ -240,6 +254,8 @@ void MainController::popController()
 	if (c->getRenderer())
 		renderer.popLayer();
 	activeControllers.pop_front();
+
+	chooseTrackedGestures();
 }
 
 void MainController::pushController(Controller* controller)
@@ -271,4 +287,27 @@ void MainController::pushController(Controller* controller, MainController::Dock
                 renderer.pushLayer(controller->getRenderer());
         }
     }
+	chooseTrackedGestures();
+}
+
+void MainController::chooseTrackedGestures()
+{
+	leapController.enableGesture(Leap::Gesture::TYPE_CIRCLE, false);
+	leapController.enableGesture(Leap::Gesture::TYPE_KEY_TAP, false);
+	leapController.enableGesture(Leap::Gesture::TYPE_SCREEN_TAP, false);
+	leapController.enableGesture(Leap::Gesture::TYPE_SWIPE, false);
+
+	// enable any requested gestures from all controllers
+	set<Leap::Gesture::Type> allRequired;
+	for (Controller* c : activeControllers) {
+		for (const Leap::Gesture::Type t : c->requiredGestures())
+			leapController.enableGesture(t, true);
+	}
+
+	// debug (Remove this)
+	cout << "Circle Tracked     : " << leapController.isGestureEnabled(Leap::Gesture::TYPE_CIRCLE) << endl;
+	cout << "Key Tap Tracked    : " << leapController.isGestureEnabled(Leap::Gesture::TYPE_KEY_TAP) << endl;
+	cout << "Screen Tap Tracked : " << leapController.isGestureEnabled(Leap::Gesture::TYPE_SCREEN_TAP) << endl;
+	cout << "Swipe Tracked      : " << leapController.isGestureEnabled(Leap::Gesture::TYPE_SWIPE) << endl;
+	cout << endl;
 }

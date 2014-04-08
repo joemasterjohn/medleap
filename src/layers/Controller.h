@@ -4,8 +4,10 @@
 #include "gl/glew.h"
 #include <GLFW/glfw3.h>
 #include "Renderer.h"
+#include "Leap.h"
+#include <set>
 
-/** User interface controller. Controllers operate on a single render layer. Controllers process user input top-to-bottom starting with the highest-level render layer. The user input may pass through this controller to the next layer only if the respective functions allow it (by returning TRUE); otherwise, the input is "consumed" and will not reach lower-level layers. A controller may have "children" controllers. */
+/** User interface controller. Controllers process input in the reverse order they were pushed onto the MainController stack. The controller may allow input to pass through to the next layer, or it may block/consume it such that no lower-level layers can take action. */
 class Controller
 {
 public:
@@ -38,6 +40,19 @@ public:
     {
         return true;
     }
+
+	/** Leap input handler. Returns TRUE if input should pass through to next controller; false if consumed in this controller. */
+	virtual bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
+	{
+		return true;
+	}
+
+	/** Returns a set of all the Leap gestures this controller would like activated. The MainController will only track the required gestures from active controllers. */
+	virtual std::set<Leap::Gesture::Type> requiredGestures()
+	{
+		// empty set unless overriden
+		return std::set<Leap::Gesture::Type>();
+	}
 };
 
 #endif

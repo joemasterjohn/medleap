@@ -12497,7 +12497,8 @@ GLboolean __GLXEW_EXT_import_context = GL_FALSE;
 GLboolean __GLXEW_EXT_scene_marker = GL_FALSE;
 GLboolean __GLXEW_EXT_swap_control = GL_FALSE;
 GLboolean __GLXEW_EXT_swap_control_tear = GL_FALSE;
-GLboolean __GLXEW_EXT_texture_from_pixmap = GL_FALSE;
+GLboolean __GLXEW_EXT_texture_fro
+xmap = GL_FALSE;
 GLboolean __GLXEW_EXT_visual_info = GL_FALSE;
 GLboolean __GLXEW_EXT_visual_rating = GL_FALSE;
 GLboolean __GLXEW_INTEL_swap_event = GL_FALSE;

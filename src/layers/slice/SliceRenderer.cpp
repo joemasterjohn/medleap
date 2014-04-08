@@ -3,7 +3,6 @@
 #include "main/MainController.h"
 
 using namespace gl;
-using namespace glmath;
 
 // Patient orientation axes with respective labels
 // -----------------------------------------------------------------

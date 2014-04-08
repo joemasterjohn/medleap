@@ -9,6 +9,7 @@
 #include "layers/menu/MenuController.h"
 #include "util/TextRenderer.h"
 #include "data/VolumeLoader.h"
+#include "Leap.h"
 #include <list>
 
 /** Main class (singleton) that controls the UI events and owns the rendering. */
@@ -51,12 +52,15 @@ private:
     MainController(const MainController& copy);
     MainController& operator=(const MainController& copy);
 
+	void pollInputDevices();
 	void popController();
     void pushController(Controller* controller);
     void pushController(Controller* controller, Docking docking);
     void setMode(Mode mode);
     void toggleHistogram();
-    
+	void chooseTrackedGestures();
+
+	Leap::Controller leapController;
     MainRenderer renderer;
     SliceController sliceController;
     VolumeController volumeController;

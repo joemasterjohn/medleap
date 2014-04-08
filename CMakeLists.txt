@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 project(medleap)
+
+# Directory for cmake modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 
 # output the executable in the build directory (not Debug/Release subdir)
-# ******************************************
 foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_CURRENT_BINARY_DIR})
@@ -12,7 +14,6 @@ endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 
 
 # make sure resources are copied into the build directory
-# ******************************************
 set(DATA_SHADERS
     shaders/color.vert
     shaders/color.frag
@@ -51,7 +52,6 @@ add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS} ${DATA_FONTS})
 
 
 # source group naming for IDEs
-# ******************************************
 source_group("shaders" FILES ${DATA_SHADERS})
 source_group("fonts" FILES ${DATA_FONTS})
 
@@ -115,11 +115,13 @@ set(SOURCE_AND_RESOURCES
 # set root of source directory for finding headers
 include_directories(src)
 
-# GDCM and GLFW should be installed on the system and are not included in source
-find_package(GDCM REQUIRED)
+# Find the libraries (must have LEAP_DIR and possibly GDCM_DIR/GLFW_DIR env variables)
+find_package(GDCM CONFIG REQUIRED)
 include_directories(${GDCM_INCLUDE_DIRS})
-find_package(GLFW REQUIRED)
+find_package(GLFW CONFIG REQUIRED)
 include_directories(${GLFW_INCLUDE_DIR})
+find_package(Leap REQUIRED)
+include_directories(${LEAP_INCLUDE_DIR})
 
 if (APPLE)
 
@@ -161,7 +163,7 @@ if (APPLE)
     )
 endif(APPLE)
 
-if (MSVC)
+if (WIN32)
     add_executable(${PROJECT_NAME} ${SOURCE_AND_RESOURCES})
 
 	# is this still needed? check
@@ -172,8 +174,20 @@ if (MSVC)
         gdcmMSFF
 		opengl32
         ${GLFW_LIBRARY}
-    )	
-endif(MSVC)
+    )
+
+    # use Leap.lib for RELEASE or Leapd.lib for DEBUG
+    target_link_libraries (${PROJECT_NAME} optimized ${LEAP_LIB_RELEASE} debug ${LEAP_LIB_DEBUG})
+
+    # copy Leap.dll for RELEASE or Leapd.dll for DEBUG into output directory
+    add_custom_command(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} ARGS -E copy
+        "$<$<CONFIG:debug>:${LEAP_DLL_DEBUG}>$<$<CONFIG:release>:${LEAP_DLL_RELEASE}>"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+endif(WIN32)
 
 # Ensure shaders are copied whenever modified
 add_dependencies(${PROJECT_NAME} SHADER_COPY)

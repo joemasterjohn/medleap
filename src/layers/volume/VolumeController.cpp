@@ -1,8 +1,6 @@
 #include "VolumeController.h"
 #include "math/Transform.h"
 
-using namespace glmath;
-
 VolumeController::VolumeController()
 {
     mouseDragLeftButton = false;
@@ -81,8 +79,8 @@ bool VolumeController::mouseMotion(GLFWwindow* window, double x, double y)
         double pitch = dy * 0.01;
         double yaw = dx * 0.01;
         
-        Mat4 m1 = rotation(static_cast<float>(pitch), dragStartView.row(0));
-        Mat4 m2 = rotation(static_cast<float>(yaw), dragStartView.row(1));
+        Mat4 m1 = gl::rotation(static_cast<float>(pitch), dragStartView.row(0));
+        Mat4 m2 = gl::rotation(static_cast<float>(yaw), dragStartView.row(1));
         renderer.getCamera().setView(dragStartView * m1 * m2);
         renderer.markDirty();
     } else if (mouseDragRightButton) {

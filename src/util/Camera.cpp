@@ -1,8 +1,6 @@
 #include "camera.h"
 #include "math/Transform.h"
 
-using namespace glmath;
-
 Camera::Camera()
 {}
 
@@ -38,36 +36,36 @@ const Mat4& Camera::getProjection() const
 
 void Camera::rotateX(float radians)
 {
-    view = view * rotationX(radians);
-    viewInverse = rotationX(-radians) * viewInverse;
+	view = view * gl::rotationX(radians);
+	viewInverse = gl::rotationX(-radians) * viewInverse;
     update();
 }
 
 void Camera::rotateY(float radians)
 {
-    view = view * rotationY(radians);
-    viewInverse = rotationY(-radians) * viewInverse;
+	view = view * gl::rotationY(radians);
+	viewInverse = gl::rotationY(-radians) * viewInverse;
     update();
 }
 
 void Camera::rotateZ(float radians)
 {
-    view = view * rotationZ(radians);
-    viewInverse = rotationZ(-radians) * viewInverse;
+	view = view * gl::rotationZ(radians);
+	viewInverse = gl::rotationZ(-radians) * viewInverse;
     update();
 }
 
 void Camera::rotate(float radians, Vec3 axis)
 {
-    view = view * rotation(radians, axis);
-    viewInverse = rotation(-radians, axis) * viewInverse;
+	view = view * gl::rotation(radians, axis);
+	viewInverse = gl::rotation(-radians, axis) * viewInverse;
     update();
 }
 
 void Camera::translate(float x, float y, float z)
 {
-    view = view * translation(x, y, z);
-    viewInverse = translation(-x, -y, -z) * viewInverse;
+	view = view * gl::translation(x, y, z);
+	viewInverse = gl::translation(-x, -y, -z) * viewInverse;
     update();
 }
 

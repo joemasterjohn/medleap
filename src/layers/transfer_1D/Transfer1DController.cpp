@@ -20,7 +20,24 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
     test.addColorStop(0.4f, Vec4(1, 1, 0, .9f));
     test.addColorStop(0.6f, Vec4(1, 0, 0, 1));
     cluts.push_back(test);
+
+	CLUT ryw;
+	ryw.clearStops();
+	ryw.addColorStop(0.0f, Vec4(0, 0, 0, 0.0f));
+	ryw.addColorStop(0.2f, Vec4(0.8f, 0, 0, 0.7f));
+	ryw.addColorStop(0.5f, Vec4(1, 1, 0, 0.8f));
+	ryw.addColorStop(1.0f, Vec4(1, 1, 1, 1.0f));
+	cluts.push_back(ryw);
     
+	CLUT foo;
+	foo.clearStops();
+	foo.addColorStop(0.0f, Vec4(0, 0, 0, 0.0f));
+	foo.addColorStop(0.2f, Vec4(0, 0, 0.8f, 0.2f));
+	foo.addColorStop(0.8f, Vec4(1, 1, 0, 0.8f));
+	foo.addColorStop(1.0f, Vec4(1, 1, 1, 0.9f));
+	cluts.push_back(foo);
+
+
     CLUT mid;
     mid.clearStops();
     mid.addColorStop(0.0f, Vec4(0, 0, 0, 0));
