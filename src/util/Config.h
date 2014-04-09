@@ -4,52 +4,42 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <sstream>
 #include "math/Vector3.h"
 
-/** Stores/loads configuration values in a file. Doubles, Itnegers, Booleans, Strings */
+/** Stores/loads configuration values in a file. */
 class Config
 {
 public:
-	enum Event
-	{
-		BG_COLOR,
-		DCM_DIRECTORY
-	};
-
-	class Listener
-	{
-	public:
-		virtual ~Listener() {}
-		virtual void configChanged(Event evt, const Config& config) = 0;
-	};
-
-	void addListener(Event evt, Listener& listener);
-
-	const std::string& getDicomDir();
-	const Vec3& getBackgroundColor();
-
-	void setDicomDir(const std::string& dir);
-	void setBackgroundColor(float r, float g, float b);
-
-	// config.getValue<float>(
-
-	template <typename T> T getValue<T>(const std::string& paramName);
-
-	std::string getValue(const std::string& paramName);
-
-	void getValue(const std::string& paramName);
-
-
-
-
+    
+    template <typename T>
+    void putValue(const std::string& name, const T& value)
+    {
+        std::stringstream ss;
+        ss << value;
+        values[name] = ss.str();
+    }
+    
+    template <typename T>
+    T getValue(const std::string& paramName)
+    {
+        T result;
+        std::unordered_map<std::string, std::string>::iterator it = values.find(paramName);
+        if (it != values.end()) {
+            std::stringstream ss(it->second);
+            std::cout << it->second << std::endl;
+            ss >> result;
+            return result;
+        }
+        return result;
+    }
+    
+    void clear();
+    void load(const std::string& fileName);
+    void save(const std::string& fileName);
+    
 private:
-	std::unordered_map<Event, std::vector<Listener*>> listeners;
-	std::string dcmDirectory;
-	Vec3 bgColor;
-
-	// multisampling, numSamples, sRGB, 
-
-	void fireEvent(Event evt);
+    std::unordered_map<std::string, std::string> values;
 };
 
 #endif // __medleap_Config__
