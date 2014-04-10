@@ -24,6 +24,9 @@ public:
 
 	/** Returns the menu's name */
 	const std::string& getName() const;
+    
+    /** Returns the menu at index i */
+    MenuItem& operator[](int i);
 
 private:
 	std::string name;

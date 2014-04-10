@@ -28,3 +28,8 @@ const std::string& Menu::getName() const
 {
 	return name;
 }
+
+MenuItem& Menu::operator[](int i)
+{
+    return items[i];
+}

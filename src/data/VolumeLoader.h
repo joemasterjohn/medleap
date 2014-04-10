@@ -26,13 +26,13 @@ public:
     VolumeLoader();
     
     /** This will search a directory to find all unique CT or MT image series. */
-    std::vector<ID> search(const char* directoryPath);
+    std::vector<ID> search(const std::string& directoryPath);
     
     /** Loads the specified image series. */
     void setSource(ID seriesID);
     
     /** This will load the first image series found in a directory */
-    void setSource(const char* directoryPath);
+    void setSource(const std::string& directoryPath);
     
     /** Stores file names sorted by Z into the fileNames parameter. Also stores the computed Z spacing into zSpacing parameter. */
     void sortFiles(ID seriesID, std::vector<std::string>& fileNames, double* zSpacing);

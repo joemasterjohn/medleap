@@ -124,7 +124,7 @@ void MainController::setVolume(VolumeData* volume)
     setMode(mode);
 }
 
-void MainController::setVolumeToLoad(const char* directory)
+void MainController::setVolumeToLoad(const std::string& directory)
 {
     loader.setSource(directory);
 }
@@ -303,11 +303,4 @@ void MainController::chooseTrackedGestures()
 		for (const Leap::Gesture::Type t : c->requiredGestures())
 			leapController.enableGesture(t, true);
 	}
-
-	// debug (Remove this)
-	cout << "Circle Tracked     : " << leapController.isGestureEnabled(Leap::Gesture::TYPE_CIRCLE) << endl;
-	cout << "Key Tap Tracked    : " << leapController.isGestureEnabled(Leap::Gesture::TYPE_KEY_TAP) << endl;
-	cout << "Screen Tap Tracked : " << leapController.isGestureEnabled(Leap::Gesture::TYPE_SCREEN_TAP) << endl;
-	cout << "Swipe Tracked      : " << leapController.isGestureEnabled(Leap::Gesture::TYPE_SWIPE) << endl;
-	cout << endl;
 }

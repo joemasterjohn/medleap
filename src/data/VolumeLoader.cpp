@@ -17,7 +17,7 @@ VolumeLoader::VolumeLoader()
     stateMessage = "Idle";
 }
 
-vector<VolumeLoader::ID> VolumeLoader::search(const char* directoryPath)
+vector<VolumeLoader::ID> VolumeLoader::search(const std::string& directoryPath)
 {
     vector<ID> ids;
     
@@ -86,11 +86,13 @@ void VolumeLoader::sortFiles(VolumeLoader::ID id, vector<string>& fileNames, dou
 	}
 }
 
-void VolumeLoader::setSource(const char* directoryPath)
+void VolumeLoader::setSource(const std::string& directoryPath)
 {
     std::vector<ID> ids = search(directoryPath);
     if (!ids.empty())
         setSource(ids[0]);
+    else
+        std::cout << "WARNING: directory does not seem to contain DICOM images" << std::endl;
 }
 
 void VolumeLoader::setSource(VolumeLoader::ID id)

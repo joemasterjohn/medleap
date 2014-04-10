@@ -20,11 +20,15 @@ public:
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame);
 
 private:
-	MenuManager menuManager;
+    std::string currentDir;
+	MenuManager menus;
 	MenuRenderer* renderer;
 
 	int calcHighlightedMenu(double x, double y);
 	int calcHighlightedMenu(double radians);
+    
+    void createMainMenu();
+    void createLoadMenu(const std::string& dir);
 };
 
 #endif /* defined(__medleap__MenuController__) */

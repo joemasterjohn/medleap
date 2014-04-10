@@ -3,28 +3,36 @@
 
 #include "Menu.h"
 #include <stack>
-#include <unordered_map>
+#include <memory>
 
 class MenuManager
 {
 public:
+    
 	MenuManager();
+    
 	~MenuManager();
+    
+    /** Returns a reference to the menu on top of the stack */
+	Menu& top();
+    
+    /** Pushes a new menu on top */
+	void push(std::shared_ptr<Menu> menu);
+    
+    /** Pops the top menu from the stack */
+	void pop();
 
-	Menu& createMenu(std::string name);
-
-	const std::vector<Menu*>& getMenus() const;
-
-	Menu& topMenu();
-	void pushMenu(const std::string& name);
-	void popMenu();
-
-	//void update();
-
+    /** Updates menu transitions */
+	void update();
+    
+    /** No active windows */
+    bool isEmpty();
+    
 private:
-	std::vector<Menu*> menus;
-	std::stack<Menu*> menuStack;
-	std::unordered_map<std::string, Menu*> menuMap;
+	std::stack<std::shared_ptr<Menu> > menuStack;
+    std::shared_ptr<Menu> newTop;
+    double transitionProgress;
+    double transitionDelta;
 };
 
 #endif /* defined(__medleap__MenuManager__) */

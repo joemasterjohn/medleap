@@ -1,42 +1,51 @@
 #include "MenuManager.h"
 
-MenuManager::MenuManager()
+MenuManager::MenuManager() :
+    newTop(nullptr),
+    transitionProgress(0),
+    transitionDelta(0.01)
 {
 }
 
 MenuManager::~MenuManager()
 {
-	for (Menu* menu : menus)
-		delete menu;
 }
 
-Menu& MenuManager::createMenu(std::string name)
+Menu& MenuManager::top()
 {
-	// not sure if I like this... maybe get rid of it and have new menus pushed/popped only
-	Menu* menu = new Menu(name);
-	menus.push_back(menu);
-	menuMap[name] = menu;
-	return *menu;
+    
+    return *(menuStack.top().get());
 }
 
-Menu& MenuManager::topMenu()
+void MenuManager::push(std::shared_ptr<Menu> menu)
 {
-	return *(menuStack.top());
+//    newTop = menu;
+    menuStack.push(menu);
 }
 
-const std::vector<Menu*>& MenuManager::getMenus() const
-{
-	return menus;
-}
-
-void MenuManager::pushMenu(const std::string& name)
-{
-	// not checking for errors bad
-	Menu* menu = menuMap[name];
-	menuStack.push(menu);
-}
-
-void MenuManager::popMenu()
+void MenuManager::pop()
 {
 	menuStack.pop();
+//    newTop = menuStack.top();
+}
+
+void MenuManager::update()
+{
+//    if (newTop) {
+//        transitionProgress -= transitionDelta;
+//        if (transitionProgress <= 0) {
+//            transitionProgress = 0;
+//            menuStack.push(newTop);
+//            newTop = nullptr;
+//        }
+//    } else if (transitionProgress < 1.0) {
+//        transitionProgress += transitionDelta;
+//        if (transitionProgress > 1.0)
+//            transitionProgress = 1.0;
+//    }
+}
+
+bool MenuManager::isEmpty()
+{
+    return menuStack.empty();
 }

@@ -22,7 +22,7 @@ VolumeRenderer::VolumeRenderer()
     shading = true;
     clutTexture = NULL;
     drawnHighRes = false;
-	lightBackground = true;
+	lightBackground = false;
 }
 
 VolumeRenderer::~VolumeRenderer()

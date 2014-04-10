@@ -22,7 +22,12 @@ void MenuRenderer::highlight(int menuIndex)
 void MenuRenderer::draw()
 {
 	// TODO: draw background
-	drawMenu(menuManager->topMenu());
+    menuManager->update();
+    if (menuManager->isEmpty())
+        return;
+    
+    
+	drawMenu(menuManager->top());
 }
 
 void MenuRenderer::drawMenu(Menu& menu)
@@ -31,7 +36,7 @@ void MenuRenderer::drawMenu(Menu& menu)
 
 	text.begin(viewport.width, viewport.height);
 
-	text.setColor(.5f, .5f, .5f);
+	text.setColor(1, 1, 1);
 	text.add(
 		menu.getName(),
 		viewport.width / 2,
@@ -57,7 +62,7 @@ void MenuRenderer::drawMenu(Menu& menu)
 		int x = static_cast<int>(std::cos(angle) * radius + viewport.width / 2);
 		int y = static_cast<int>(std::sin(angle) * radius + viewport.height / 2);
 
-		text.setColor(1, 1, 1);
+		text.setColor(0.5f, 1, 1);
 		text.begin(viewport.width, viewport.height);
 		text.add(menu.getItems()[highlighted].getName(), x, y, 
 			TextRenderer::CENTER, TextRenderer::CENTER);
