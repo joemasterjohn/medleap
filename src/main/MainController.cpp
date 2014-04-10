@@ -114,14 +114,14 @@ void MainController::setVolume(VolumeData* volume)
     
     if (this->volume != NULL)
         delete this->volume;
+    else
+        setMode(mode);
     
     this->volume = volume;
     sliceController.setVolume(volume);
     volumeController.setVolume(volume);
     volumeInfoController.setVolume(volume);
     histogramController.setVolume(volume);
-    
-    setMode(mode);
 }
 
 void MainController::setVolumeToLoad(const std::string& directory)
@@ -136,18 +136,23 @@ void MainController::startLoop()
 
         if (loader.getState() == VolumeLoader::LOADING) {
             // draw load screen
+
             GLclampf c = static_cast<GLclampf>((std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5);
             glClearColor(c, c, c, 1);
             glClear(GL_COLOR_BUFFER_BIT);
+
             getText().setColor(0, 0, 0);
             getText().begin(renderer.getWidth(), renderer.getHeight());
             getText().add(string("Loading"), renderer.getWidth()/2, renderer.getHeight()/2, TextRenderer::CENTER, TextRenderer::CENTER);
             getText().add(loader.getStateMessage(), renderer.getWidth()/2, renderer.getHeight()/2-36, TextRenderer::CENTER, TextRenderer::CENTER);
             getText().end();
+            
             glfwSwapBuffers(renderer.getWindow());
             glfwPollEvents();
+
         } else if (loader.getState() == VolumeLoader::FINISHED) {
             setVolume(loader.getVolume());
+            volumeController.getRenderer()->markDirty();
         } else {
 			pollInputDevices();
             renderer.draw();
