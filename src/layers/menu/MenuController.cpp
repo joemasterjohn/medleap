@@ -3,7 +3,8 @@
 #include "util/Util.h"
 #include "math/Vector2.h"
 #include "main/MainController.h"
-#include <dirent.h>
+
+#include "DirectoryMenu.h"
 
 typedef std::shared_ptr<Menu> MenuPtr;
 
@@ -121,92 +122,23 @@ class MenuDirItem
     
 };
 
-void MenuController::createLoadMenu(const std::string& path)
-{
-    std::cout << "OPen menu at : " << path << std::endl;
-    MenuPtr menu(new Menu(path));
-    
-    DIR* dir = opendir(path.c_str());
-    struct dirent* entry = readdir(dir);
-    while (entry != NULL)
-    {
-        if (entry->d_type == DT_DIR) {
-            // this is a directory, so create a menu with the directory's name
-            std::string dirName(entry->d_name);
-            MenuItem& mi = menu.get()->createItem(dirName);
-
-            if (dirName == ".") {
-                // if user presses on . menu item, use this directory to load a volume
-                std::string toLoad = currentDir;
-                mi.setAction([this, dirName, toLoad] {
-                    MainController::getInstance().setVolumeToLoad(toLoad);
-                    this->menus.pop();
-                });
-            } else if (dirName == "..") {
-                // if user presses on .. menu item, go up one directory
-                mi.setAction([this, dirName] {
-                    int i = currentDir.rfind("/");
-                    currentDir = (i == 0) ? "/" : currentDir.substr(0, i);
-                    this->menus.pop();
-                    this->createLoadMenu(currentDir);
-                });
-            } else {
-                // otherwise, go deeper into the file system
-                mi.setAction([this, dirName] {
-                    currentDir += "/" + dirName;
-                    this->menus.pop();
-                    this->createLoadMenu(currentDir);
-                });
-            }
-            
- 
-        }
-        entry = readdir(dir);
-    }
-    closedir(dir);
-
-    menu.get()->createItem("<CANCEL>", [this]{this->menus.pop();});
-
-    menus.push(menu);
-}
-
 void MenuController::createMainMenu()
 {
     MenuPtr mainMenu(new Menu("Main"));
     
     MenuItem& miRender = mainMenu.get()->createItem("Render");
     MenuItem& miLoad = mainMenu.get()->createItem("Load");
-    miLoad.setAction([this]{this->createLoadMenu(currentDir);});
+
+	std::string& wd = workingDir;
+	MenuManager& menus = this->menus;
+
+	miLoad.setAction([&wd, &menus]{menus.push(MenuPtr(new DirectoryMenu(wd, menus))); });
+    //miLoad.setAction([this]{this->createLoadMenu(currentDir);});
 
     MenuItem& miHide = mainMenu.get()->createItem("Hide Menu");
     MenuItem& miExit = mainMenu.get()->createItem("Exit");
     
-    currentDir = "/Users/justin";
+    workingDir = "/Users/justin";
     
     menus.push(mainMenu);
-
-    
-    // REMOVE THIS
-    // make this a list view instead of pie
-//    Menu& dataDirsMenu = menuManager.createMenu("Load");
-    
-    // -----
-    
-//
-//	mainMenu.createItem("Load",
-//                        [this] {
-//                            this->getMenuManager().pushMenu("Load");
-//                        }
-//                        );
-//    
-//    
-//	mainMenu.createItem("Render",
-//                        [this] {
-//                            this->getMenuManager().pushMenu("Render");
-//                        }
-//                        );
-//    
-//	menuManager.pushMenu("Main Menu");
-//    
-//	// load, exit
 }

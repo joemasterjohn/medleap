@@ -20,7 +20,7 @@ public:
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame);
 
 private:
-    std::string currentDir;
+    std::string workingDir;
 	MenuManager menus;
 	MenuRenderer* renderer;
 

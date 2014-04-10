@@ -11,7 +11,7 @@ public:
 	Menu(std::string name);
 
 	/** Destructor for menu */
-	~Menu();
+	virtual ~Menu();
 	
 	/** Creates a new menu item and returns a reference to it. */
 	MenuItem& createItem(std::string name);
