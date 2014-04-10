@@ -8,50 +8,50 @@
 #endif
 
 
-DirectoryMenu::DirectoryMenu(std::string& workingDir, MenuManager& menus) : Menu(workingDir)
+DirectoryMenu::DirectoryMenu(std::string* workingDir, MenuManager* menus) : Menu(*workingDir), workingDir(workingDir), menus(menus)
 {
 	// add all the subdirectories as items in this menu
-	DIR* dir = opendir(workingDir.c_str());
+	DIR* dir = opendir(workingDir->c_str());
 	struct dirent* entry = readdir(dir);
 	while (entry != NULL)
 	{
 		if (entry->d_type == DT_DIR) {
-			std::string subdir(entry->d_name);
+            std::string subdir(entry->d_name);
 			MenuItem& mi = this->createItem(subdir);
-
 			if (subdir == ".") {
-				// if user presses on . menu item, use this directory to load a volume
-				std::string toLoad = workingDir;
-				mi.setAction([&menus, toLoad] {
-					MainController::getInstance().setVolumeToLoad(toLoad);
-					menus.pop();
-				});
+                mi.setAction([this]{this->loadDirectory();});
+			} else if (subdir == "..") {
+                mi.setAction([this]{this->goUpDirectory();});
+			} else {
+                mi.setAction([this, subdir]{this->goIntoDirectory(subdir);});
 			}
-			else if (subdir == "..") {
-				// if user presses on .. menu item, go up one directory
-				mi.setAction([&workingDir, &menus] {
-					int i = workingDir.rfind("/");
-					workingDir = (i == 0) ? "/" : workingDir.substr(0, i);
-					menus.pop();
-					menus.push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(workingDir, menus)));
-				});
-			}
-			else {
-				// otherwise, go deeper into the file system
-				mi.setAction([&menus, subdir, &workingDir] {
-					workingDir += "/" + subdir;
-					menus.pop();
-					menus.push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(workingDir, menus)));
-				});
-			}
-
-
 		}
 		entry = readdir(dir);
 	}
 	closedir(dir);
 
-	createItem("<CANCEL>", [&menus]{menus.pop(); });
+	//createItem("<CANCEL>", [&menus]{menus.pop(); });
+}
+
+void DirectoryMenu::loadDirectory()
+{
+    MainController::getInstance().setVolumeToLoad(*workingDir);
+    menus->pop();
+}
+
+void DirectoryMenu::goUpDirectory()
+{
+    int i = workingDir->rfind("/");
+    *workingDir = (i == 0) ? "/" : workingDir->substr(0, i);
+    menus->pop();
+    menus->push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(workingDir, menus)));
+}
+
+void DirectoryMenu::goIntoDirectory(const std::string& subdir)
+{
+    *workingDir = *workingDir + "/" + subdir;
+    menus->pop();
+    menus->push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(workingDir, menus)));
 }
 
 DirectoryMenu::~DirectoryMenu()

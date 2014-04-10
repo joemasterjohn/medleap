@@ -129,10 +129,7 @@ void MenuController::createMainMenu()
     MenuItem& miRender = mainMenu.get()->createItem("Render");
     MenuItem& miLoad = mainMenu.get()->createItem("Load");
 
-	std::string& wd = workingDir;
-	MenuManager& menus = this->menus;
-
-	miLoad.setAction([&wd, &menus]{menus.push(MenuPtr(new DirectoryMenu(wd, menus))); });
+	miLoad.setAction([this]{this->menus.push(MenuPtr(new DirectoryMenu(&(this->workingDir), &(this->menus)))); });
     //miLoad.setAction([this]{this->createLoadMenu(currentDir);});
 
     MenuItem& miHide = mainMenu.get()->createItem("Hide Menu");
