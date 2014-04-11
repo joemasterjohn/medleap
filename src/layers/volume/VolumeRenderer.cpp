@@ -297,6 +297,8 @@ void VolumeRenderer::draw(int numSlices)
 
 void VolumeRenderer::draw()
 {
+    glClearColor(1, 1, 1, 1);
+
     glBindVertexArray(vao);
  
     static int cleanFrames = 0;

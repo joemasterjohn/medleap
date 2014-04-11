@@ -67,8 +67,10 @@ bool  MenuController::scroll(GLFWwindow* window, double dx, double dy)
 
 int MenuController::calcHighlightedMenu(double x, double y)
 {
-	x = 2.0 * x / renderer->getViewport().width - 1.0;
-	y = 2.0 * y / renderer->getViewport().height - 1.0;
+    x = (x - renderer->getViewport().width / 2.0);
+    y = (y - renderer->getViewport().height / 2.0);
+//	x = 2.0 * x / renderer->getViewport().width - 1.0;
+//	y = 2.0 * y / renderer->getViewport().height - 1.0;
 	double radians = Vec2d(x, y).anglePositive();
 	return calcHighlightedMenu(radians);
 
@@ -78,7 +80,7 @@ int MenuController::calcHighlightedMenu(double radians)
 {
 	size_t numItems = menus.top().getItems().size();
 	double angleStep = gl::PI2/ numItems;
-	return static_cast<int>(radians / angleStep + 0.5) % numItems;
+	return static_cast<int>(radians / angleStep) % numItems;
 }
 
 bool MenuController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)

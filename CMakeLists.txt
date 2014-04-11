@@ -29,6 +29,8 @@ set(DATA_SHADERS
     shaders/clut_strip.frag
     shaders/texture_2D.vert
     shaders/texture_2D.frag
+    shaders/menu.vert
+    shaders/menu.frag
 )
 
 set(DATA_FONTS

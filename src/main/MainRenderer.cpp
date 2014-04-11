@@ -1,4 +1,5 @@
 #include "MainRenderer.h"
+#include "MainConfig.h"
 
 MainRenderer::MainRenderer()
 {
@@ -22,14 +23,18 @@ bool MainRenderer::init(int width, int height, const char* title)
     if (!glfwInit())
         return false;
     
+    MainConfig cfg;
+    
     // Use 32-bit color (in sRGB) and 24-bit for depth buffer
-    //glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE);
+    if (cfg.getValue<bool>(MainConfig::USE_SRGB))
+        glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE);
     glfwWindowHint(GLFW_RED_BITS, 8);
     glfwWindowHint(GLFW_GREEN_BITS, 8);
     glfwWindowHint(GLFW_BLUE_BITS, 8);
     glfwWindowHint(GLFW_ALPHA_BITS, 8);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
-//    glfwWindowHint(GLFW_SAMPLES, 8);
+    if (cfg.getValue<bool>(MainConfig::MULTISAMPLING))
+        glfwWindowHint(GLFW_SAMPLES, cfg.getValue<unsigned>(MainConfig::SAMPLES));
     
     // Use OpenGL 3.2 core profile
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -56,8 +61,8 @@ bool MainRenderer::init(int width, int height, const char* title)
         return false;
     }
     
-    // For now I'm leaving sRGB / gamma correction off, because other DICOM viewers don't use it.
-    //glEnable(GL_FRAMEBUFFER_SRGB);
+    if (cfg.getValue<bool>(MainConfig::USE_SRGB))
+        glEnable(GL_FRAMEBUFFER_SRGB);
     
     this->width = width;
     this->height = height;

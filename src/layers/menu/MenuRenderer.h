@@ -3,6 +3,10 @@
 
 #include "layers/Renderer.h"
 #include "MenuManager.h"
+#include "gl/Buffer.h"
+#include "gl/Program.h"
+#include "math/Matrix4.h"
+#include <functional>
 
 class MenuRenderer : public Renderer
 {
@@ -18,6 +22,19 @@ public:
 private:
 	MenuManager* menuManager;
 	int highlighted;
+    
+    Mat4 modelViewProjection;
+    gl::Buffer* menuVBO;
+    gl::Buffer* menuIBO;
+    gl::Program* menuShader;
+    std::function<void(void)> setShaderState;
+    GLsizei indexCount;
+    GLenum indexType;
+    
+    // cache the geometry until the menu changes
+    
+    void createRingGeometry();
+    void createListGeometry();
 
 	void drawMenu(Menu& menu);
 };

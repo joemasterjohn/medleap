@@ -12,6 +12,8 @@ class Config
 {
 public:
     
+    virtual ~Config();
+    
     template <typename T>
     void putValue(const std::string& name, const T& value)
     {

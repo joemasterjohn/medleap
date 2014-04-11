@@ -3,6 +3,10 @@
 
 using namespace std;
 
+Config::~Config()
+{
+}
+
 void Config::clear()
 {
     values.clear();
