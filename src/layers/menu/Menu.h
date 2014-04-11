@@ -28,7 +28,7 @@ public:
     /** Returns the menu at index i */
     MenuItem& operator[](int i);
 
-private:
+protected:
 	std::string name;
 	std::vector<MenuItem> items;
 };

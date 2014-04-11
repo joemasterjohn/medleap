@@ -8,48 +8,58 @@
 #endif
 
 
-DirectoryMenu::DirectoryMenu(std::string workingDir, MenuManager* menus) : Menu(workingDir)
+DirectoryMenu::DirectoryMenu(std::string workingDir, MenuManager& menus) : 
+		Menu(workingDir), 
+		workingDir(workingDir),
+		menus(menus)
 {
+	goIntoDir(workingDir);
+}
+
+DirectoryMenu::~DirectoryMenu()
+{
+}
+
+void DirectoryMenu::goIntoDir(const std::string& directory)
+{
+	workingDir = directory;
+	name = workingDir;
+
+	// modify working dir, set new items
+	items.clear();
+
 	// add all the subdirectories as items in this menu
 	DIR* dir = opendir(workingDir.c_str());
 	struct dirent* entry = readdir(dir);
 	while (entry != NULL)
 	{
 		if (entry->d_type == DT_DIR) {
-            std::string subdir(entry->d_name);
+			std::string subdir(entry->d_name);
 			if (subdir == ".") {
-                // use working directory as a volume data source
-                MenuItem& mi = this->createItem("<LOAD>");
-                mi.setAction([=]{
-                    MainController::getInstance().setVolumeToLoad(workingDir);
-                    menus->pop();
-                });
+				MenuItem& mi = this->createItem("<LOAD>");
+				mi.setAction([this]{loadDir();});
 			} else if (subdir == "..") {
-                // go up one directory
-                MenuItem& mi = this->createItem("<BACK>");
-                mi.setAction([=]{
-                    int i = workingDir.rfind("/");
-                    std::string upDir = (i == 0) ? "/" : workingDir.substr(0, i);
-                    menus->pop();
-                    menus->push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(upDir, menus)));
-                });
+				MenuItem& mi = this->createItem("<UP>");
+				mi.setAction([this]{goUpDir();});
 			} else {
-                // go into subdir
-                MenuItem& mi = this->createItem(subdir);
-                mi.setAction([=]{
-                    std::string fullSubDir = workingDir + "/" + subdir;
-                    menus->pop();
-                    menus->push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(fullSubDir, menus)));
-                });
+				MenuItem& mi = createItem(subdir);
+				mi.setAction([this,subdir]{goIntoDir(workingDir + "/" + subdir);});
 			}
 		}
 		entry = readdir(dir);
 	}
 	closedir(dir);
-
-	//createItem("<CANCEL>", [&menus]{menus.pop(); });
 }
 
-DirectoryMenu::~DirectoryMenu()
+void DirectoryMenu::goUpDir()
 {
+	int i = workingDir.rfind("/");
+	std::string upDir = (i == 0) ? "/" : workingDir.substr(0, i);
+	goIntoDir(upDir);
+}
+
+void DirectoryMenu::loadDir()
+{
+	MainController::getInstance().setVolumeToLoad(workingDir);
+	menus.pop();
 }

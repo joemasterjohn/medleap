@@ -11,7 +11,7 @@ MainMenu::MainMenu(MenuManager* menuManager) : Menu("Main Menu")
     
     MenuItem& miLoad = createItem("Load");
     miLoad.setAction([=]{
-        menuManager->push(MenuPtr(new DirectoryMenu(workingDir, menuManager)));
+        menuManager->push(MenuPtr(new DirectoryMenu(workingDir, *menuManager)));
     });
     
     MenuItem& miRender = createItem("Render");
