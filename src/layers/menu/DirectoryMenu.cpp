@@ -8,10 +8,10 @@
 #endif
 
 
-DirectoryMenu::DirectoryMenu(std::string* workingDir, MenuManager* menus) : Menu(*workingDir), workingDir(workingDir), menus(menus)
+DirectoryMenu::DirectoryMenu(std::string workingDir, MenuManager* menus) : Menu(workingDir)
 {
 	// add all the subdirectories as items in this menu
-	DIR* dir = opendir(workingDir->c_str());
+	DIR* dir = opendir(workingDir.c_str());
 	struct dirent* entry = readdir(dir);
 	while (entry != NULL)
 	{
@@ -19,11 +19,26 @@ DirectoryMenu::DirectoryMenu(std::string* workingDir, MenuManager* menus) : Menu
             std::string subdir(entry->d_name);
 			MenuItem& mi = this->createItem(subdir);
 			if (subdir == ".") {
-                mi.setAction([this]{this->loadDirectory();});
+                // use working directory as a volume data source
+                mi.setAction([=]{
+                    MainController::getInstance().setVolumeToLoad(workingDir);
+                    menus->pop();
+                });
 			} else if (subdir == "..") {
-                mi.setAction([this]{this->goUpDirectory();});
+                // go up one directory
+                mi.setAction([=]{
+                    int i = workingDir.rfind("/");
+                    std::string upDir = (i == 0) ? "/" : workingDir.substr(0, i);
+                    menus->pop();
+                    menus->push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(upDir, menus)));
+                });
 			} else {
-                mi.setAction([this, subdir]{this->goIntoDirectory(subdir);});
+                // go into subdir
+                mi.setAction([=]{
+                    std::string fullSubDir = workingDir + "/" + subdir;
+                    menus->pop();
+                    menus->push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(fullSubDir, menus)));
+                });
 			}
 		}
 		entry = readdir(dir);
@@ -31,27 +46,6 @@ DirectoryMenu::DirectoryMenu(std::string* workingDir, MenuManager* menus) : Menu
 	closedir(dir);
 
 	//createItem("<CANCEL>", [&menus]{menus.pop(); });
-}
-
-void DirectoryMenu::loadDirectory()
-{
-    MainController::getInstance().setVolumeToLoad(*workingDir);
-    menus->pop();
-}
-
-void DirectoryMenu::goUpDirectory()
-{
-    int i = workingDir->rfind("/");
-    *workingDir = (i == 0) ? "/" : workingDir->substr(0, i);
-    menus->pop();
-    menus->push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(workingDir, menus)));
-}
-
-void DirectoryMenu::goIntoDirectory(const std::string& subdir)
-{
-    *workingDir = *workingDir + "/" + subdir;
-    menus->pop();
-    menus->push(std::shared_ptr<DirectoryMenu>(new DirectoryMenu(workingDir, menus)));
 }
 
 DirectoryMenu::~DirectoryMenu()

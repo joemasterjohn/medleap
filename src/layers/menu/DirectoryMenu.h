@@ -7,16 +7,13 @@
 class DirectoryMenu : public Menu
 {
 public:
-	DirectoryMenu(std::string* workingDir, MenuManager* menus);
+	DirectoryMenu(std::string workingDir, MenuManager* menus);
 	~DirectoryMenu();
     
-private:
-    std::string* workingDir;
-    MenuManager* menus;
+//    const std::string& getFullPath();
     
-    void loadDirectory();
-    void goUpDirectory();
-    void goIntoDirectory(const std::string& subdir);
+private:
+//    std::string fullPath;
 };
 
 #endif // __medleap_DirectoryMenu__

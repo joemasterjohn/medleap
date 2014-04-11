@@ -5,14 +5,12 @@
 #include "main/MainController.h"
 
 #include "DirectoryMenu.h"
-
-typedef std::shared_ptr<Menu> MenuPtr;
-
+#include "MainMenu.h"
 
 MenuController::MenuController()
 {
 	renderer = new MenuRenderer(&menus);
-    createMainMenu();
+    menus.push(std::shared_ptr<Menu>(new MainMenu(&menus)));
 }
 
 MenuController::~MenuController()
@@ -115,27 +113,4 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 	}
 
 	return false;
-}
-
-class MenuDirItem
-{
-    
-};
-
-void MenuController::createMainMenu()
-{
-    MenuPtr mainMenu(new Menu("Main"));
-    
-    MenuItem& miRender = mainMenu.get()->createItem("Render");
-    MenuItem& miLoad = mainMenu.get()->createItem("Load");
-
-	miLoad.setAction([this]{this->menus.push(MenuPtr(new DirectoryMenu(&(this->workingDir), &(this->menus)))); });
-    //miLoad.setAction([this]{this->createLoadMenu(currentDir);});
-
-    MenuItem& miHide = mainMenu.get()->createItem("Hide Menu");
-    MenuItem& miExit = mainMenu.get()->createItem("Exit");
-    
-    workingDir = "/Users/justin";
-    
-    menus.push(mainMenu);
 }

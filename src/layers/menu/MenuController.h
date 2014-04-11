@@ -25,10 +25,7 @@ private:
 	MenuRenderer* renderer;
 
 	int calcHighlightedMenu(double x, double y);
-	int calcHighlightedMenu(double radians);
-    
-    void createMainMenu();
-    void createLoadMenu(const std::string& dir);
+	int calcHighlightedMenu(double radians);    
 };
 
 #endif /* defined(__medleap__MenuController__) */

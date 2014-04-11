@@ -7,12 +7,15 @@ void Config::clear()
 {
     values.clear();
 }
-void Config::load(const std::string& fileName)
+
+bool Config::load(const std::string& fileName)
 {
     ifstream fs(fileName);
     string line;
+    bool foundFile = false;
     
     if (fs.is_open()) {
+        foundFile = true;
         while (getline(fs, line)) {
             int splitPos = line.find("=");
             string key = line.substr(0, splitPos);
@@ -22,6 +25,7 @@ void Config::load(const std::string& fileName)
     }
     
     fs.close();
+    return foundFile;
 }
 
 void Config::save(const std::string& fileName)

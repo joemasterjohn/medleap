@@ -21,21 +21,19 @@ public:
     }
     
     template <typename T>
-    T getValue(const std::string& paramName)
+    T getValue(const std::string& name)
     {
         T result;
-        std::unordered_map<std::string, std::string>::iterator it = values.find(paramName);
+        std::unordered_map<std::string, std::string>::iterator it = values.find(name);
         if (it != values.end()) {
             std::stringstream ss(it->second);
-            std::cout << it->second << std::endl;
             ss >> result;
-            return result;
         }
         return result;
     }
     
     void clear();
-    void load(const std::string& fileName);
+    bool load(const std::string& fileName);
     void save(const std::string& fileName);
     
 private:
