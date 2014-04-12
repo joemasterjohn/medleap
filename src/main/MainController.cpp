@@ -166,7 +166,7 @@ void MainController::startLoop()
 
 void MainController::update()
 {
-	static chrono::system_clock::time_point prevTime = chrono::high_resolution_clock::now();
+    static auto prevTime = chrono::high_resolution_clock::now();
 	
 	auto curTime = chrono::high_resolution_clock::now();
 	chrono::milliseconds elapsed = chrono::duration_cast<chrono::milliseconds>(curTime - prevTime);
