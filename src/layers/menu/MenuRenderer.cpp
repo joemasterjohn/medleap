@@ -64,7 +64,14 @@ void MenuRenderer::draw()
     glDrawElements(GL_TRIANGLES, indexCount, indexType, 0);
 
     if (highlighted >= 0) {
-		glUniform4f(menuShader->getUniform("color"), 0.8f, 1.0 * menuManager->getLeapProgress(), 0.8f, alpha * 0.7f);
+
+		float lp = menuManager->getLeapProgress();
+		Vec3 a(0.8f, 0.8f, 0.8f);
+		Vec3 b(0.3f, 1.0f, 0.3f);
+		Vec3 c = a * (1 - lp) + b * lp;
+		
+
+		glUniform4f(menuShader->getUniform("color"), c.x, c.y, c.z, alpha * 0.7f);
         void* offset = (void*)(indicesPerMenuItem * highlighted * sizeof(GLushort));
 		glDrawElements(GL_TRIANGLES, indicesPerMenuItem, indexType, offset);
     }

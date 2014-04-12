@@ -93,10 +93,10 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 
 	static long howLong = 0;
 	static int lastHighlighted = -1;
-	renderer->highlight(-1);
 
 	Leap::FingerList fingers = currentFrame.fingers();
 	if (!fingers.isEmpty()) {
+
 		Leap::Finger pointerFinger = fingers.frontmost();
 		
 		Leap::Vector tip = pointerFinger.tipPosition();
