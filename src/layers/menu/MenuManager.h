@@ -4,7 +4,10 @@
 #include "Menu.h"
 #include <stack>
 #include <memory>
+#include <chrono>
+#include <queue>
 
+/** Manages transitions between menus in a stack */
 class MenuManager
 {
 public:
@@ -23,14 +26,32 @@ public:
 	void pop();
 
     /** Updates menu transitions */
-	void update();
+	void update(std::chrono::milliseconds elapsed);
     
     /** No active windows */
     bool isEmpty();
+
+	/** 0 (invisible) to 1 (fully visible) */
+	double visibility();
+
+	void reset();
+
+	void flash();
+
+	void fadeAway();
+
+	void fadeIn();
+
+	float getLeapProgress();
+	void setLeapProgress(float p);
     
 private:
-	std::stack<std::shared_ptr<Menu> > menuStack;
-    std::shared_ptr<Menu> newTop;
+	/** A task that is updated over time. Returns TRUE if complete. */
+	typedef std::function<bool(std::chrono::milliseconds elapsed)> Task;
+
+	float leapProgress;
+	std::queue<Task> tasks;
+	std::stack<std::shared_ptr<Menu>> menuStack;
     double transitionProgress;
     double transitionDelta;
 };

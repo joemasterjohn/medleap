@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include "Leap.h"
 #include <set>
+#include <chrono>
 
 /** User interface controller. Controllers process input in the reverse order they were pushed onto the MainController stack. The controller may allow input to pass through to the next layer, or it may block/consume it such that no lower-level layers can take action. */
 class Controller
@@ -52,6 +53,11 @@ public:
 	{
 		// empty set unless overriden
 		return std::set<Leap::Gesture::Type>();
+	}
+
+	/** Called before rendering with the elapsed milliseconds since previous update */
+	virtual void update(std::chrono::milliseconds elapsed)
+	{
 	}
 };
 

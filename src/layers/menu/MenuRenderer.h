@@ -30,9 +30,8 @@ private:
     std::function<void(void)> setShaderState;
     GLsizei indexCount;
     GLenum indexType;
-    
-    // cache the geometry until the menu changes
-    
+	GLsizei indicesPerMenuItem;
+        
     void createRingGeometry();
     void createListGeometry();
 

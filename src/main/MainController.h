@@ -52,7 +52,7 @@ private:
     MainController(const MainController& copy);
     MainController& operator=(const MainController& copy);
 
-	void pollInputDevices();
+	void update();
 	void popController();
     void pushController(Controller* controller);
     void pushController(Controller* controller, Docking docking);

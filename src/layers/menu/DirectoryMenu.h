@@ -16,7 +16,7 @@ private:
     std::string workingDir;
 	MenuManager& menus;
 
-	void goIntoDir(const std::string& subDir);
+	void goIntoDir(const std::string& subDir, bool flash);
 	void goUpDir();
 	void loadDir();
 };

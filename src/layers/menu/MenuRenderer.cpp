@@ -38,12 +38,17 @@ void MenuRenderer::highlight(int menuIndex)
 
 void MenuRenderer::draw()
 {
-    createRingGeometry();//REMOVEREIOJIERJIOEJROIJEROIEJREMOVE
+	if (menuManager->isEmpty())
+		return;
+
+	static int lastKnown = -1;
+	if (menuManager->top().getItems().size() != lastKnown) {
+		lastKnown = menuManager->top().getItems().size();
+		createRingGeometry();
+	}
+
     
-	// TODO: draw background
-    menuManager->update();
-    if (menuManager->isEmpty())
-        return;
+
     
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -53,14 +58,15 @@ void MenuRenderer::draw()
     menuIBO->bind();    
     setShaderState();
     
-    glUniform4f(menuShader->getUniform("color"), 1.0f, 1.0f, 1.0f, 0.7f);
+	float alpha = this->menuManager->visibility();
+
+    glUniform4f(menuShader->getUniform("color"), 0.2f, 0.2f, 0.2f, alpha * 0.7f);
     glDrawElements(GL_TRIANGLES, indexCount, indexType, 0);
 
     if (highlighted >= 0) {
-        glUniform4f(menuShader->getUniform("color"), 0.0f, 0.0f, 0.f, 0.7f);
-        int indicesPerItem = static_cast<int>(menuManager->top().getItems().size() * 8.0 * 6 / menuManager->top().getItems().size());
-        void* offset = (void*)(indicesPerItem * highlighted * sizeof(GLushort));
-        glDrawElements(GL_TRIANGLES, indicesPerItem, indexType, offset);
+		glUniform4f(menuShader->getUniform("color"), 0.8f, 1.0 * menuManager->getLeapProgress(), 0.8f, alpha * 0.7f);
+        void* offset = (void*)(indicesPerMenuItem * highlighted * sizeof(GLushort));
+		glDrawElements(GL_TRIANGLES, indicesPerMenuItem, indexType, offset);
     }
     glDisable(GL_BLEND);
     
@@ -73,7 +79,7 @@ void MenuRenderer::drawMenu(Menu& menu)
 
 	text.begin(viewport.width, viewport.height);
 
-	text.setColor(0, 0, 0);
+	text.setColor(1, 1, 1);
 	text.add(
 		menu.getName(),
 		viewport.width / 2,
@@ -99,7 +105,7 @@ void MenuRenderer::drawMenu(Menu& menu)
 		int x = static_cast<int>(std::cos(angle) * radius + viewport.width / 2);
 		int y = static_cast<int>(std::sin(angle) * radius + viewport.height / 2);
 
-		text.setColor(1, 1, 1);
+		text.setColor(0, 0, 0);
 		text.begin(viewport.width, viewport.height);
 		text.add(menu.getItems()[highlighted].getName(), x, y, 
 			TextRenderer::CENTER, TextRenderer::CENTER);
@@ -127,7 +133,12 @@ void MenuRenderer::createRingGeometry()
         indices.push_back(k);
     };
     
-    unsigned numSteps = menuManager->top().getItems().size() * 8;
+	// I want a consistent number of segments for a smooth circle regardless of the number of menu items.
+	// However, I also need the segments to align with the boundaries of the menu items.
+	unsigned stepsPerItem = std::max(1u, static_cast<unsigned>(128u / menuManager->top().getItems().size()));
+	unsigned numSteps = stepsPerItem * menuManager->top().getItems().size();
+	this->indicesPerMenuItem = stepsPerItem * 6;
+
     unsigned jmod = 2 * numSteps;
     float step = PI2 / numSteps;
     float angle = 0.0f;
@@ -163,6 +174,5 @@ void MenuRenderer::createListGeometry()
 void MenuRenderer::resize(int width, int height)
 {
     modelViewProjection = ortho2D(0, width, 0, height) * translation(width/2.0f, height/2.0f, 0);
-    createRingGeometry();
-
+	createRingGeometry();
 }

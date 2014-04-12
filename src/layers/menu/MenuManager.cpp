@@ -1,9 +1,12 @@
 #include "MenuManager.h"
+#include <algorithm>
+#include <iostream>
+
+using namespace std;
 
 MenuManager::MenuManager() :
-    newTop(nullptr),
     transitionProgress(0),
-    transitionDelta(0.01)
+    transitionDelta(0.008)
 {
 }
 
@@ -11,41 +14,101 @@ MenuManager::~MenuManager()
 {
 }
 
+void MenuManager::reset()
+{
+	transitionProgress = 0;
+	fadeIn();
+}
+
 Menu& MenuManager::top()
 {
-    
     return *(menuStack.top().get());
+}
+
+void MenuManager::fadeAway()
+{
+	tasks.push([this](std::chrono::milliseconds elapsed)->bool{
+		transitionProgress -= transitionDelta * elapsed.count();
+		if (transitionProgress <= 0.0) {
+			transitionProgress = 0.0;
+			return true;
+		}
+		return false;
+	});
+}
+
+void MenuManager::fadeIn()
+{
+	tasks.push([this](std::chrono::milliseconds elapsed)->bool{
+		transitionProgress += transitionDelta * elapsed.count();
+		if (transitionProgress >= 1.0) {
+			transitionProgress = 1.0;
+			return true;
+		}
+		return false;
+	});
+}
+
+void MenuManager::flash()
+{
+	fadeAway();
+	fadeIn();
 }
 
 void MenuManager::push(std::shared_ptr<Menu> menu)
 {
-//    newTop = menu;
-    menuStack.push(menu);
+	if (menuStack.empty()) {
+		menuStack.push(menu);
+		fadeIn();
+	} else {
+		fadeAway();
+		tasks.push([this, menu](std::chrono::milliseconds elapsed)->bool{
+			menuStack.push(menu);
+			return true;
+		});
+		fadeIn();
+	}
 }
 
 void MenuManager::pop()
 {
-	menuStack.pop();
-//    newTop = menuStack.top();
+	if (menuStack.empty())
+		return;
+
+	fadeAway();
+	tasks.push([this](std::chrono::milliseconds elapsed)->bool{
+		menuStack.pop();
+		return true;
+	});
+	fadeIn();
 }
 
-void MenuManager::update()
+void MenuManager::update(std::chrono::milliseconds elapsed)
 {
-//    if (newTop) {
-//        transitionProgress -= transitionDelta;
-//        if (transitionProgress <= 0) {
-//            transitionProgress = 0;
-//            menuStack.push(newTop);
-//            newTop = nullptr;
-//        }
-//    } else if (transitionProgress < 1.0) {
-//        transitionProgress += transitionDelta;
-//        if (transitionProgress > 1.0)
-//            transitionProgress = 1.0;
-//    }
+	// perform any tasks waiting to be done
+	if (!tasks.empty()) {
+		bool done = tasks.front()(elapsed);
+		if (done)
+			tasks.pop();
+	}
 }
 
 bool MenuManager::isEmpty()
 {
     return menuStack.empty();
+}
+
+double MenuManager::visibility()
+{
+	return transitionProgress;
+}
+
+void MenuManager::setLeapProgress(float p)
+{
+	this->leapProgress = p;
+}
+
+float MenuManager::getLeapProgress()
+{
+	return leapProgress;
 }

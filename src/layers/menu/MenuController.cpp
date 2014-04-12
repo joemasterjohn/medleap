@@ -11,6 +11,8 @@ MenuController::MenuController()
 {
 	renderer = new MenuRenderer(&menus);
     menus.push(std::shared_ptr<Menu>(new MainMenu(&menus)));
+	leapCenter.x = 0;
+	leapCenter.y = 250;
 }
 
 MenuController::~MenuController()
@@ -27,13 +29,11 @@ MenuManager& MenuController::getMenuManager()
 	return menus;
 }
 
-std::set<Leap::Gesture::Type> MenuController::requiredGestures()
+void MenuController::setLeapCenter(const Vec2& center)
 {
-	std::set<Leap::Gesture::Type> gestures;
-	gestures.insert(Leap::Gesture::TYPE_SCREEN_TAP);
-	gestures.insert(Leap::Gesture::TYPE_KEY_TAP);
-	return gestures;
+	this->leapCenter = center;
 }
+
 
 bool MenuController::keyboardInput(GLFWwindow* window, int key, int action, int mods)
 {
@@ -42,6 +42,8 @@ bool MenuController::keyboardInput(GLFWwindow* window, int key, int action, int 
 
 bool MenuController::mouseButton(GLFWwindow* window, int button, int action, int mods)
 {
+	if (menus.visibility() < 1.0) return false;
+
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		double x, y;
 		glfwGetCursorPos(window, &x, &y);
@@ -54,6 +56,8 @@ bool MenuController::mouseButton(GLFWwindow* window, int button, int action, int
 
 bool MenuController::mouseMotion(GLFWwindow* window, double x, double y)
 {
+	if (menus.visibility() < 1.0) return false;
+
 	int item = calcHighlightedMenu(x, y);
 	renderer->highlight(item);
 
@@ -85,34 +89,40 @@ int MenuController::calcHighlightedMenu(double radians)
 
 bool MenuController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
-	// Idea: maybe the tap gestures aren't teh greatest since they're insensitive. I can adjust the sensitivity or
-	// instead use hold to press. Have a timer that checks how long finger hasn't moved (or velocity over last several frames). If
-	// small, start pressing. If pressing for a second or so trigger.
+	if (menus.visibility() < 1.0) return false;
+
+	static long howLong = 0;
+	static int lastHighlighted = -1;
+	renderer->highlight(-1);
 
 	Leap::FingerList fingers = currentFrame.fingers();
 	if (!fingers.isEmpty()) {
 		Leap::Finger pointerFinger = fingers.frontmost();
 		
-		// if the menu opened by gesture, the central point will have been set
-		// otherwise, we need to assume something directly over the leap
-		Vec2 ctr(0, 250);
 		Leap::Vector tip = pointerFinger.tipPosition();
-		Vec2 v = Vec2(tip.x, tip.y) - ctr;
+		Vec2 v = Vec2(tip.x, tip.y) - leapCenter;
 		float radians = v.anglePositive();
+
 		int highlightedItem = calcHighlightedMenu(radians);
 		renderer->highlight(highlightedItem);
 
-		// check if a tap gesture was made to trigger menu
-		Leap::GestureList gestures = currentFrame.gestures();
-		if (!gestures.isEmpty()) {
-			for (const Leap::Gesture& g : gestures) {
-				if (g.type() == Leap::Gesture::TYPE_KEY_TAP || g.type() == Leap::Gesture::TYPE_SCREEN_TAP) {
-					menus.top()[highlightedItem].trigger();
-				}
-			}
+		if (pointerFinger.tipVelocity().magnitudeSquared() > 8000 || highlightedItem != lastHighlighted) {
+			howLong = 0;
 		}
 
+		menus.setLeapProgress(howLong / 50.0f);
+		if (howLong++ > 50) {
+			menus.top()[highlightedItem].trigger();
+			howLong = 0;
+		}
+
+		lastHighlighted = highlightedItem;
 	}
 
 	return false;
+}
+
+void MenuController::update(std::chrono::milliseconds elapsed)
+{
+	menus.update(elapsed);
 }

@@ -1,5 +1,6 @@
 #include "MainController.h"
 #include "data/VolumeLoader.h"
+#include <chrono>
 
 using namespace std;
 
@@ -132,10 +133,11 @@ void MainController::setVolumeToLoad(const std::string& directory)
 void MainController::startLoop()
 {
     static double f = 0;
+
     while (!glfwWindowShouldClose(renderer.getWindow())) {
 
         if (loader.getState() == VolumeLoader::LOADING) {
-            // draw load screen
+            // draw load screen PUSH and POP layer
 
             GLclampf c = static_cast<GLclampf>((std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5);
             glClearColor(c, c, c, 1);
@@ -154,7 +156,7 @@ void MainController::startLoop()
             setVolume(loader.getVolume());
             volumeController.getRenderer()->markDirty();
         } else {
-			pollInputDevices();
+			update();
             renderer.draw();
         }
         
@@ -162,11 +164,35 @@ void MainController::startLoop()
     glfwTerminate();
 }
 
-void MainController::pollInputDevices()
+void MainController::update()
 {
+	static chrono::system_clock::time_point prevTime = chrono::high_resolution_clock::now();
+	
+	auto curTime = chrono::high_resolution_clock::now();
+	chrono::milliseconds elapsed = chrono::duration_cast<chrono::milliseconds>(curTime - prevTime);
+	prevTime = curTime;
+
 	glfwPollEvents();
+
+	for (Controller* c : activeControllers) {
+		c->update(elapsed);
+	}
+
 	if (leapController.isConnected()) {
 		Leap::Frame currentFrame = leapController.frame();
+
+		if (!menuOn) {
+			Leap::GestureList gestures = currentFrame.gestures();
+			for (const Leap::Gesture& g : gestures) {
+				if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
+					Leap::Vector tp = Leap::CircleGesture(g).center();
+					menuController.setLeapCenter(Vec2(tp.x, tp.y));
+					pushController(&menuController);
+					menuOn = true;
+				}
+			}
+		}
+
 		for (Controller* c : activeControllers) {
 			bool passThrough = c->leapInput(leapController, currentFrame);
 			if (!passThrough) {
@@ -187,6 +213,7 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		if (menuOn) {
 			popController();
+			menuController.getMenuManager().reset();
 			menuOn = false;
 		} else {
 			pushController(&menuController);
@@ -297,7 +324,9 @@ void MainController::pushController(Controller* controller, MainController::Dock
 
 void MainController::chooseTrackedGestures()
 {
-	leapController.enableGesture(Leap::Gesture::TYPE_CIRCLE, false);
+	// MainController uses the CIRCLE gesutre to toggle the menu
+	leapController.enableGesture(Leap::Gesture::TYPE_CIRCLE, true);
+
 	leapController.enableGesture(Leap::Gesture::TYPE_KEY_TAP, false);
 	leapController.enableGesture(Leap::Gesture::TYPE_SCREEN_TAP, false);
 	leapController.enableGesture(Leap::Gesture::TYPE_SWIPE, false);

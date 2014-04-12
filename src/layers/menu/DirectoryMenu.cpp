@@ -6,31 +6,35 @@
 #else
 #include <dirent.h>
 #endif
-
+#include <errno.h>
 
 DirectoryMenu::DirectoryMenu(std::string workingDir, MenuManager& menus) : 
 		Menu(workingDir), 
 		workingDir(workingDir),
 		menus(menus)
 {
-	goIntoDir(workingDir);
+	goIntoDir(workingDir, false);
 }
 
 DirectoryMenu::~DirectoryMenu()
 {
 }
 
-void DirectoryMenu::goIntoDir(const std::string& directory)
+void DirectoryMenu::goIntoDir(const std::string& directory, bool flash)
 {
 	workingDir = directory;
 	name = workingDir;
-
-	// modify working dir, set new items
 	items.clear();
 
-	// add all the subdirectories as items in this menu
+	if (flash)
+		menus.flash();
+
+	MenuItem& mi = createItem("<CANCEL>");
+	mi.setAction([this]{ menus.pop(); });
+
 	DIR* dir = opendir(workingDir.c_str());
 	struct dirent* entry = readdir(dir);
+	
 	while (entry != NULL)
 	{
 		if (entry->d_type == DT_DIR) {
@@ -43,7 +47,7 @@ void DirectoryMenu::goIntoDir(const std::string& directory)
 				mi.setAction([this]{goUpDir();});
 			} else {
 				MenuItem& mi = createItem(subdir);
-				mi.setAction([this,subdir]{goIntoDir(workingDir + "/" + subdir);});
+				mi.setAction([this,subdir]{goIntoDir(workingDir + "/" + subdir, true);});
 			}
 		}
 		entry = readdir(dir);
@@ -55,7 +59,7 @@ void DirectoryMenu::goUpDir()
 {
 	int i = workingDir.rfind("/");
 	std::string upDir = (i == 0) ? "/" : workingDir.substr(0, i);
-	goIntoDir(upDir);
+	goIntoDir(upDir, true);
 }
 
 void DirectoryMenu::loadDir()
