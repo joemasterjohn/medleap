@@ -164,6 +164,22 @@ void MainController::startLoop()
     glfwTerminate();
 }
 
+void MainController::showMenu(bool show)
+{
+	if ((show && menuOn) || (!show && !menuOn))
+		return;
+
+	if (show) {
+		pushController(&menuController);
+		menuOn = true;
+	}
+	else {
+		popController();
+		menuController.getMenuManager().reset();
+		menuOn = false;
+	}
+}
+
 void MainController::update()
 {
     static auto prevTime = chrono::high_resolution_clock::now();
@@ -187,8 +203,7 @@ void MainController::update()
 				if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
 					Leap::Vector tp = Leap::CircleGesture(g).center();
 					menuController.setLeapCenter(Vec2(tp.x, tp.y));
-					pushController(&menuController);
-					menuOn = true;
+					showMenu(true);
 				}
 			}
 		}
@@ -211,14 +226,7 @@ void MainController::toggleHistogram()
 void MainController::keyboardInput(GLFWwindow *window, int key, int action, int mods)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		if (menuOn) {
-			popController();
-			menuController.getMenuManager().reset();
-			menuOn = false;
-		} else {
-			pushController(&menuController);
-			menuOn = true;
-		}
+		showMenu(!menuOn);
 	}
 
 	if (!menuOn) {

@@ -35,6 +35,8 @@ public:
     Mode getMode();
 	void setVolumeToLoad(const std::string& directory);
     static MainController& getInstance();
+
+	void showMenu(bool show);
     
 private:
     

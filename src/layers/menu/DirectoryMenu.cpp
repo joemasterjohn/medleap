@@ -66,4 +66,5 @@ void DirectoryMenu::loadDir()
 {
 	MainController::getInstance().setVolumeToLoad(workingDir);
 	menus.pop();
+	MainController::getInstance().showMenu(false);
 }

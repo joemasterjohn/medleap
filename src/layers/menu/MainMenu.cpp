@@ -1,6 +1,7 @@
 #include "MainMenu.h"
 #include "DirectoryMenu.h"
 #include "main/MainConfig.h"
+#include "main/MainController.h"
 
 typedef std::shared_ptr<Menu> MenuPtr;
 
@@ -15,7 +16,10 @@ MainMenu::MainMenu(MenuManager* menuManager) : Menu("Main Menu")
     });
     
     MenuItem& miRender = createItem("Render");
+
     MenuItem& miHide = createItem("Hide Menu");
+	miHide.setAction([]{ MainController::getInstance().showMenu(false); });
+
     MenuItem& miExit = createItem("Exit");
 }
 
