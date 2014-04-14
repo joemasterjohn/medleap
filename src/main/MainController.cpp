@@ -69,10 +69,10 @@ void MainController::init()
     text.loadFont("menlo14");
     
     sliceController.getRenderer()->init();
-   /* volumeController.getRenderer()->init();
+    volumeController.getRenderer()->init();
     volumeInfoController.getRenderer()->init();
     histogramController.getRenderer()->init();
-	menuController.getRenderer()->init();*/
+	menuController.getRenderer()->init();
     
     volumeInfoController.getRenderer()->setVolumeRenderer(volumeController.getRenderer());
     volumeInfoController.getRenderer()->setSliceRenderer(sliceController.getRenderer());
@@ -88,9 +88,9 @@ void MainController::setMode(MainController::Mode mode)
             renderer.clearLayers();
             activeControllers.clear();
             pushController(&sliceController);
-            //pushController(&volumeInfoController);
-            //if (showHistogram)
-            //    pushController(&histogramController, Docking(Docking::BOTTOM, 0.2));
+            pushController(&volumeInfoController);
+            if (showHistogram)
+                pushController(&histogramController, Docking(Docking::BOTTOM, 0.2));
             break;
         case MODE_3D:
             renderer.clearLayers();

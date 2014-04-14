@@ -60,7 +60,8 @@ Transfer1DRenderer::~Transfer1DRenderer()
 void Transfer1DRenderer::setCLUT(CLUT* clut)
 {
     this->clut = clut;
-	clut->saveTexture(clutTexture);
+    if (clutTexture.id())
+        clut->saveTexture(clutTexture);
 }
 
 Texture& Transfer1DRenderer::getCLUTTexture()
@@ -72,7 +73,6 @@ void Transfer1DRenderer::init()
 {
 	histo1D.generate(GL_TEXTURE_2D);
 	transferFn.generate(GL_TEXTURE_2D);
-	clutTexture.generate(GL_TEXTURE_2D);
 
     shader = Program::create("shaders/histogram.vert", "shaders/histogram.frag");
     colorShader = Program::create("shaders/histo_line.vert", "shaders/histo_line.frag");
@@ -104,6 +104,7 @@ void Transfer1DRenderer::init()
     stride = 4 * sizeof(GLfloat);
     
     // initialize clut strip
+    clutTexture.generate(GL_TEXTURE_1D);
     clut->saveTexture(clutTexture);
     clutStripShader = Program::create("shaders/clut_strip.vert",
                                       "shaders/clut_strip.frag");
