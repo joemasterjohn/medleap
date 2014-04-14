@@ -1,7 +1,7 @@
 #include "MenuController.h"
 #include <iostream>
 #include "util/Util.h"
-#include "math/Vector2.h"
+#include "gl/math/Vector2.h"
 #include "main/MainController.h"
 
 #include "DirectoryMenu.h"
@@ -98,7 +98,7 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 	if (!fingers.isEmpty()) {
 
 		Leap::Finger pointerFinger = fingers.frontmost();
-		
+
 		Leap::Vector tip = pointerFinger.tipPosition();
 		Vec2 v = Vec2(tip.x, tip.y) - leapCenter;
 		float radians = v.anglePositive();
@@ -110,10 +110,14 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 			howLong = 0;
 		}
 
-		menus.setLeapProgress(howLong / 50.0f);
-		if (howLong++ > 50) {
-			menus.top()[highlightedItem].trigger();
-			howLong = 0;
+		menus.setLeapProgress(0);
+		if (howLong++ >= 25) {
+			menus.setLeapProgress((howLong-25) / 50.0f);
+			if (howLong >= 75) {
+				menus.top()[highlightedItem].trigger();
+				howLong = 0;
+				menus.setLeapProgress(0);
+			}
 		}
 
 		lastHighlighted = highlightedItem;

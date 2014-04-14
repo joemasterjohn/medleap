@@ -1,5 +1,5 @@
 #include "Transfer1DRenderer.h"
-#include "math/Transform.h"
+#include "gl/math/Transform.h"
 #include "main/MainController.h"
 #include <string>
 #include <sstream>
@@ -49,52 +49,37 @@ const char* hounsfield(float value)
     return "";
 }
 
-Transfer1DRenderer::Transfer1DRenderer() :
-    histo1D(NULL),
-    transferFn(NULL),
-    shader(NULL),
-    colorShader(NULL)
+Transfer1DRenderer::Transfer1DRenderer()
 {
 }
 
 Transfer1DRenderer::~Transfer1DRenderer()
 {
-    if (histo1D)
-        delete histo1D;
-    if (transferFn)
-        delete transferFn;
-    if (shader)
-        delete shader;
-    if (colorShader)
-        delete colorShader;
 }
 
 void Transfer1DRenderer::setCLUT(CLUT* clut)
 {
     this->clut = clut;
-    if (clutTexture)
-        clut->saveTexture(clutTexture);
+	clut->saveTexture(clutTexture);
 }
 
-Texture* Transfer1DRenderer::getCLUTTexture()
+Texture& Transfer1DRenderer::getCLUTTexture()
 {
     return clutTexture;
 }
 
 void Transfer1DRenderer::init()
 {
-    histo1D = new Texture(GL_TEXTURE_2D);
-    
-    transferFn = new Texture(GL_TEXTURE_2D);
-    
-    
-    
+	histo1D.generate(GL_TEXTURE_2D);
+	transferFn.generate(GL_TEXTURE_2D);
+	clutTexture.generate(GL_TEXTURE_2D);
+
     shader = Program::create("shaders/histogram.vert", "shaders/histogram.frag");
     colorShader = Program::create("shaders/histo_line.vert", "shaders/histo_line.frag");
     
-    shader->enable();
-    glUniform1i(shader->getUniform("tex_histogram"), 0);
-    glUniform1i(shader->getUniform("tex_transfer"), 1);
+    shader.enable();
+    glUniform1i(shader.getUniform("tex_histogram"), 0);
+    glUniform1i(shader.getUniform("tex_transfer"), 1);
     
     // vertex buffer for geometry: contains vertices for
     // 1) the histogram quad (drawn as a texture)
@@ -118,11 +103,7 @@ void Transfer1DRenderer::init()
     
     stride = 4 * sizeof(GLfloat);
     
-    
-    
-    
     // initialize clut strip
-    clutTexture = new Texture(GL_TEXTURE_1D);
     clut->saveTexture(clutTexture);
     clutStripShader = Program::create("shaders/clut_strip.vert",
                                       "shaders/clut_strip.frag");
@@ -148,29 +129,29 @@ void Transfer1DRenderer::init()
         2, 7, 6
     };
     
-    clutStripVBO = new gl::Buffer(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-    clutStripVBO->bind();
-    clutStripVBO->setData(clutVerts, sizeof(clutVerts));
+	clutStripVBO = Buffer::genVertexBuffer();
+    clutStripVBO.bind();
+    clutStripVBO.setData(clutVerts, sizeof(clutVerts));
     
-    clutStripIBO = Buffer::createIBO();
-    clutStripIBO->bind();
-    clutStripIBO->setData(clutIndices, sizeof(clutIndices));
+    clutStripIBO = Buffer::genIndexBuffer();
+    clutStripIBO.bind();
+    clutStripIBO.setData(clutIndices, sizeof(clutIndices));
 }
 
 void Transfer1DRenderer::draw()
 {
     // clut strip
     {
-        clutStripShader->enable();
-        clutStripVBO->bind();
-        clutStripIBO->bind();
-        clutTexture->bind();
+        clutStripShader.enable();
+        clutStripVBO.bind();
+        clutStripIBO.bind();
+        clutTexture.bind();
         
-        int loc = clutStripShader->getAttribute("vs_position");
+        int loc = clutStripShader.getAttribute("vs_position");
         glEnableVertexAttribArray(loc);
         glVertexAttribPointer(loc, 4, GL_FLOAT, false, clutStripStride, 0);
         
-        loc = clutStripShader->getAttribute("vs_texcoord");
+        loc = clutStripShader.getAttribute("vs_texcoord");
         glEnableVertexAttribArray(loc);
         glVertexAttribPointer(loc, 1, GL_FLOAT, false, clutStripStride, (GLvoid*)(4 * sizeof(GLfloat)));
         
@@ -178,38 +159,30 @@ void Transfer1DRenderer::draw()
 		float ww = volume->getCurrentWindow().getWidthReal();
         float markL = (wc - ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
 		float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-        glUniform2f(clutStripShader->getUniform("x_offsets"), markL, markR);
+        glUniform2f(clutStripShader.getUniform("x_offsets"), markL, markR);
         
         glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, 0);
     }
     
     
     
-    shader->enable();
+    shader.enable();
 
     glActiveTexture(GL_TEXTURE1);
-    transferFn->bind();
+    transferFn.bind();
     glActiveTexture(GL_TEXTURE0);
-    histo1D->bind();
+    histo1D.bind();
     
-    glUniformMatrix4fv(shader->getUniform("model"), 1, false, histoModelMatrix);
+    glUniformMatrix4fv(shader.getUniform("model"), 1, false, histoModelMatrix);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    int loc = shader->getAttribute("vs_position");
+    int loc = shader.getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    loc = shader->getAttribute("vs_texcoord");
+    loc = shader.getAttribute("vs_texcoord");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
-    histo1D->bind();
+    histo1D.bind();
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    
-    
-
-    
-    
-    
-    
-    
     
     
     
@@ -221,8 +194,8 @@ void Transfer1DRenderer::draw()
 
 void Transfer1DRenderer::drawWindowMarkers()
 {
-    colorShader->enable();
-    int loc = colorShader->getAttribute("vs_position");
+    colorShader.enable();
+    int loc = colorShader.getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
     
@@ -233,22 +206,22 @@ void Transfer1DRenderer::drawWindowMarkers()
 	float markC = (wc - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
 	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
 
-    glUniform4f(colorShader->getUniform("color"), 0.5f, 0.5f, 1.0f, 1.0f);
-    glUniform1f(colorShader->getUniform("offset"), markL * 2.0f);
+    glUniform4f(colorShader.getUniform("color"), 0.5f, 0.5f, 1.0f, 1.0f);
+    glUniform1f(colorShader.getUniform("offset"), markL * 2.0f);
     glDrawArrays(GL_LINES, 6, 2);
-    glUniform1f(colorShader->getUniform("offset"), markR * 2.0f);
+    glUniform1f(colorShader.getUniform("offset"), markR * 2.0f);
     glDrawArrays(GL_LINES, 6, 2);
-    glUniform1f(colorShader->getUniform("offset"), markC * 2.0f);
+    glUniform1f(colorShader.getUniform("offset"), markC * 2.0f);
     glDrawArrays(GL_LINES, 6, 2);
 }
 
 void Transfer1DRenderer::drawCursorValue()
 {
     // cursor line
-    colorShader->enable();
-    glUniform4f(colorShader->getUniform("color"), 0.5f, 1.0f, 0.5f, 1.0f);
-    glUniform1f(colorShader->getUniform("offset"), cursorShaderOffset);
-    int loc = colorShader->getAttribute("vs_position");
+    colorShader.enable();
+    glUniform4f(colorShader.getUniform("color"), 0.5f, 1.0f, 0.5f, 1.0f);
+    glUniform1f(colorShader.getUniform("offset"), cursorShaderOffset);
+    int loc = colorShader.getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
     glDrawArrays(GL_LINES, 6, 2);
@@ -280,7 +253,7 @@ void Transfer1DRenderer::setVolume(VolumeData* volume)
     this->volume = volume;
 }
 
-Texture* Transfer1DRenderer::getTransferFn()
+Texture& Transfer1DRenderer::getTransferFn()
 {
     return transferFn;
 }
@@ -312,13 +285,13 @@ void Transfer1DRenderer::setHistogram(Histogram* histogram)
         }
     }
     
-    histo1D->bind();
-    histo1D->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    histo1D->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    histo1D->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    histo1D->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    histo1D.bind();
+    histo1D.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    histo1D.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    histo1D.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    histo1D.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    histo1D->setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, &pixels[0]);
+    histo1D.setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, &pixels[0]);
 }
 
 void Transfer1DRenderer::setCursor(int x, int y)

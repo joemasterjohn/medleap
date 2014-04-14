@@ -43,7 +43,7 @@ MainController& MainController::getInstance()
 MainController::MainController() :
     volume(NULL)
 {
-    mode = MODE_3D;
+    mode = MODE_2D;
     showHistogram = true;
 	menuOn = false;
 }
@@ -69,10 +69,10 @@ void MainController::init()
     text.loadFont("menlo14");
     
     sliceController.getRenderer()->init();
-    volumeController.getRenderer()->init();
+   /* volumeController.getRenderer()->init();
     volumeInfoController.getRenderer()->init();
     histogramController.getRenderer()->init();
-	menuController.getRenderer()->init();
+	menuController.getRenderer()->init();*/
     
     volumeInfoController.getRenderer()->setVolumeRenderer(volumeController.getRenderer());
     volumeInfoController.getRenderer()->setSliceRenderer(sliceController.getRenderer());
@@ -88,9 +88,9 @@ void MainController::setMode(MainController::Mode mode)
             renderer.clearLayers();
             activeControllers.clear();
             pushController(&sliceController);
-            pushController(&volumeInfoController);
-            if (showHistogram)
-                pushController(&histogramController, Docking(Docking::BOTTOM, 0.2));
+            //pushController(&volumeInfoController);
+            //if (showHistogram)
+            //    pushController(&histogramController, Docking(Docking::BOTTOM, 0.2));
             break;
         case MODE_3D:
             renderer.clearLayers();
@@ -136,30 +136,27 @@ void MainController::startLoop()
 
     while (!glfwWindowShouldClose(renderer.getWindow())) {
 
-        if (loader.getState() == VolumeLoader::LOADING) {
-            // draw load screen PUSH and POP layer
-
-            GLclampf c = static_cast<GLclampf>((std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5);
-            glClearColor(c, c, c, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            getText().setColor(0, 0, 0);
-            getText().begin(renderer.getWidth(), renderer.getHeight());
-            getText().add(string("Loading"), renderer.getWidth()/2, renderer.getHeight()/2, TextRenderer::CENTER, TextRenderer::CENTER);
-            getText().add(loader.getStateMessage(), renderer.getWidth()/2, renderer.getHeight()/2-36, TextRenderer::CENTER, TextRenderer::CENTER);
-            getText().end();
-            
-            glfwSwapBuffers(renderer.getWindow());
-            glfwPollEvents();
-
-        } else if (loader.getState() == VolumeLoader::FINISHED) {
+		if (loader.getState() == VolumeLoader::FINISHED) {
             setVolume(loader.getVolume());
             volumeController.getRenderer()->markDirty();
-        } else {
-			update();
-            renderer.draw();
         }
-        
+
+		update();
+        renderer.draw();
+
+		if (loader.getState() == VolumeLoader::LOADING) {
+			// draw load screen PUSH and POP layer
+			GLclampf c = static_cast<GLclampf>((std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5);
+			//glClearColor(c, c, c, 1);
+			glViewport(0, 0, renderer.getWidth(), renderer.getHeight());
+			getText().setColor(1, c, c);
+			getText().begin(renderer.getWidth(), renderer.getHeight());
+			getText().add(string("Loading"), renderer.getWidth() / 2, renderer.getHeight() / 2, TextRenderer::CENTER, TextRenderer::CENTER);
+			getText().add(loader.getStateMessage(), renderer.getWidth() / 2, renderer.getHeight() / 2 - 36, TextRenderer::CENTER, TextRenderer::CENTER);
+			getText().end();
+		}
+
+		glfwSwapBuffers(renderer.getWindow());
     }
     glfwTerminate();
 }
@@ -200,7 +197,7 @@ void MainController::update()
 		if (!menuOn) {
 			Leap::GestureList gestures = currentFrame.gestures();
 			for (const Leap::Gesture& g : gestures) {
-				if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
+				if (g.type() == Leap::Gesture::TYPE_CIRCLE && currentFrame.tools().count() == 0) {
 					Leap::Vector tp = Leap::CircleGesture(g).center();
 					menuController.setLeapCenter(Vec2(tp.x, tp.y));
 					showMenu(true);

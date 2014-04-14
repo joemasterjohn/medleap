@@ -58,6 +58,7 @@ private:
     GLFWwindow* window;
     int width;
     int height;
+	GLuint vao;
     
     /** A docked layer */
     struct Docking

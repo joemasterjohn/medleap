@@ -5,7 +5,7 @@
 #include "MenuManager.h"
 #include "gl/Buffer.h"
 #include "gl/Program.h"
-#include "math/Matrix4.h"
+#include "gl/math/Matrix4.h"
 #include <functional>
 
 class MenuRenderer : public Renderer
@@ -24,9 +24,9 @@ private:
 	int highlighted;
     
     Mat4 modelViewProjection;
-    gl::Buffer* menuVBO;
-    gl::Buffer* menuIBO;
-    gl::Program* menuShader;
+    gl::Buffer menuVBO;
+    gl::Buffer menuIBO;
+    gl::Program menuShader;
     std::function<void(void)> setShaderState;
     GLsizei indexCount;
     GLenum indexType;

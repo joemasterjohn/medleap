@@ -4,18 +4,18 @@
 
 using namespace gl;
 
-Shader::Shader() : id(0), type(0)
+Shader::Shader() : handle(nullptr), type(GL_INVALID_ENUM)
 {
 }
 
-Shader::~Shader()
+GLuint Shader::id() const
 {
-    release();
+	return handle ? *(handle.get()) : 0;
 }
 
-GLuint Shader::getID() const
+void Shader::release()
 {
-    return id;
+	handle = nullptr;
 }
 
 GLenum Shader::getType() const
@@ -25,19 +25,19 @@ GLenum Shader::getType() const
 
 std::string Shader::getSource() const
 {
-    return (id ? source : std::string());
+    return (id() ? source : std::string());
 }
 
 std::string Shader::log() const
 {
-    if (!id)
+    if (!id())
         return std::string();
     
     GLint maxLength = 0;
-    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &maxLength);
+    glGetShaderiv(id(), GL_INFO_LOG_LENGTH, &maxLength);
     GLchar* buf = new GLchar[maxLength];
     
-    glGetShaderInfoLog(id, maxLength, &maxLength, buf);
+    glGetShaderInfoLog(id(), maxLength, &maxLength, buf);
     std::string log(buf);
     delete[] buf;
     
@@ -46,17 +46,16 @@ std::string Shader::log() const
 
 bool Shader::compile(const char* src, GLenum type)
 {
-    if (!id)
-        id = glCreateShader(type);
+	generate(type);
     
     this->type = type;
     this->source = std::string(src);
     
-    glShaderSource(id, 1, &src, NULL);
-    glCompileShader(id);
+    glShaderSource(id(), 1, &src, NULL);
+	glCompileShader(id());
     
     GLint status;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &status);
+	glGetShaderiv(id(), GL_COMPILE_STATUS, &status);
 
     return (status != 0);
 }
@@ -69,10 +68,17 @@ bool Shader::compileFile(const char* fileName, GLenum type)
     return compile(src.c_str(), type);
 }
 
-void Shader::release()
+void Shader::generate(GLenum type)
 {
-    if (id) {
-        glDeleteShader(id);
-        id = 0;
-    }
+	this->type = type;
+
+	auto deleteFunction = [=](GLuint* p) {
+		if (p) {
+			glDeleteShader(*p);
+			delete p;
+		}
+	};
+
+	GLuint* p = new GLuint(glCreateShader(type));
+	handle = std::shared_ptr<GLuint>(p, deleteFunction);
 }

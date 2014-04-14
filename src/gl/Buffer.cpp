@@ -2,22 +2,44 @@
 
 using namespace gl;
 
-Buffer::Buffer(GLenum target, GLenum usage) : target(target), usage(usage)
+Buffer::Buffer() : handle(nullptr), target(GL_INVALID_ENUM), usage(GL_INVALID_ENUM)
 {
-    glGenBuffers(1, &id);
 }
 
-Buffer::~Buffer()
+GLuint Buffer::id() const
 {
-    glDeleteBuffers(1, &id);
+	return handle ? *(handle.get()) : 0;
 }
 
-void Buffer::bind()
+void Buffer::generate(GLenum target, GLenum usage)
 {
-    glBindBuffer(target, id);
+	this->target = target;
+	this->usage = usage;
+
+	auto deleteFunction = [=](GLuint* p) {
+		if (p) {
+			glDeleteBuffers(1, p);
+			delete p;
+		}
+	};
+
+	GLuint* p = new GLuint;
+	glGenBuffers(1, p);
+	handle = std::shared_ptr<GLuint>(p, deleteFunction);
 }
 
-void Buffer::unbind()
+void Buffer::release()
+{
+	handle = nullptr;
+}
+
+void Buffer::bind() const
+{
+	if (handle)
+		glBindBuffer(target, id());
+}
+
+void Buffer::unbind() const
 {
     glBindBuffer(target, 0);
 }
@@ -42,12 +64,16 @@ void Buffer::setSubData(const GLvoid* data, GLsizeiptr size, GLintptr offset)
     glBufferSubData(target, offset, size, data);
 }
 
-Buffer* Buffer::createVBO(GLenum usage)
+Buffer Buffer::genVertexBuffer(GLenum usage)
 {
-    return new Buffer(GL_ARRAY_BUFFER, usage);
+	Buffer buf;
+	buf.generate(GL_ARRAY_BUFFER, usage);
+	return buf;
 }
 
-Buffer* Buffer::createIBO(GLenum usage)
+Buffer Buffer::genIndexBuffer(GLenum usage)
 {
-    return new Buffer(GL_ELEMENT_ARRAY_BUFFER, usage);
+	Buffer buf;
+	buf.generate(GL_ELEMENT_ARRAY_BUFFER, usage);
+	return buf;
 }

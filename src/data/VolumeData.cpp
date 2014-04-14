@@ -23,9 +23,9 @@ VolumeData::~VolumeData()
 {
 }
 
-void VolumeData::loadTexture3D(Texture* texture)
+void VolumeData::loadTexture3D(Texture& texture)
 {
-    texture->bind();
+    texture.bind();
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -35,7 +35,7 @@ void VolumeData::loadTexture3D(Texture* texture)
     glTexImage3D(GL_TEXTURE_3D, 0, internalFormat(), width, height, depth, 0, format, type, data);
 }
 
-void VolumeData::loadGradientTexture(Texture* texture)
+void VolumeData::loadGradientTexture(Texture& texture)
 {
     // gradient texture will be 8-bits per channel
     unsigned char* data = new unsigned char[width * height * depth * 3];
@@ -49,7 +49,7 @@ void VolumeData::loadGradientTexture(Texture* texture)
 		*p++ = static_cast<unsigned char>(((g.z - minGradient.z) / rangeGradient.z) * 255);
     }
     
-    texture->bind();
+    texture.bind();
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

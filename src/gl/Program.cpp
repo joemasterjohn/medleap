@@ -3,44 +3,58 @@
 
 using namespace gl;
 
-Program::Program()
-{
-}
-
-Program::Program(GLuint id, gl::Shader* vShader, gl::Shader* fShader) :
-	id(id),
-	vShader(vShader),
-	fShader(fShader)
+Program::Program() : handle(nullptr)
 {
 }
 
 Program::~Program()
 {
-	glDetachShader(id, vShader->getID());
-	glDetachShader(id, fShader->getID());
-	glDeleteProgram(id);
-	delete vShader;
-	delete fShader;
+	if (handle.use_count() == 1) {
+		for (Shader& shader : attached) {
+			if (shader.id()) {
+				glDetachShader(id(), shader.id());
+			}
+		}
+	}
 }
 
-GLuint Program::getID() const
+GLuint Program::id() const
 {
-	return id;
+	return handle ? *(handle.get()) : 0;
+}
+
+void Program::generate()
+{
+	auto deleteFunction = [=](GLuint* p) {
+		if (p) {
+			glDeleteProgram(*p);
+			delete p;
+		}
+	};
+
+	GLuint* p = new GLuint(glCreateProgram());
+	handle = std::shared_ptr<GLuint>(p, deleteFunction);
+}
+
+void Program::release()
+{
+	handle = nullptr;
+	attached.clear();
 }
 
 GLint Program::getUniform(const GLchar* name) const
 {
-	return glGetUniformLocation(id, name);
+	return glGetUniformLocation(id(), name);
 }
 
 GLint Program::getAttribute(const GLchar* name) const
 {
-	return glGetAttribLocation(id, name);
+	return glGetAttribLocation(id(), name);
 }
 
 void Program::enable()
 {
-	glUseProgram(id);
+	glUseProgram(id());
 }
 
 void Program::disable()
@@ -48,70 +62,76 @@ void Program::disable()
 	glUseProgram(0);
 }
 
-Program* Program::create(const char* vsrc, const char* fsrc)
+void Program::attach(const Shader& shader)
 {
-	Shader* vShader = new Shader;
-	if (!vShader->compileFile(vsrc, GL_VERTEX_SHADER)) {
-		std::cerr << "ERROR compiling vertex shader:" << std::endl << vShader->log() << std::endl;
-		delete vShader;
-		return NULL;
-	}
-
-	Shader* fShader = new Shader;
-	if (!fShader->compileFile(fsrc, GL_FRAGMENT_SHADER)) {
-		std::cerr << "ERROR compiling vertex shader:" << std::endl << fShader->log() << std::endl;
-		delete fShader;
-		return NULL;
-	}
-
-    return create(vShader, fShader);
+	glAttachShader(id(), shader.id());
+	attached.push_back(shader);
 }
 
-Program* Program::createFromSrc(const char* vsrc, const char* fsrc)
+bool Program::link()
 {
-	Shader* vShader = new Shader;
-	if (!vShader->compile(vsrc, GL_VERTEX_SHADER)) {
-		std::cerr << "ERROR compiling vertex shader:" << std::endl << vShader->log() << std::endl;
-		delete vShader;
-		return NULL;
-	}
-    
-	Shader* fShader = new Shader;
-	if (!fShader->compile(fsrc, GL_FRAGMENT_SHADER)) {
-		std::cerr << "ERROR compiling vertex shader:" << std::endl << fShader->log() << std::endl;
-		delete fShader;
-		return NULL;
-	}
-    
-    return create(vShader, fShader);
-}
+	glLinkProgram(id());
 
-Program* Program::create(gl::Shader* vShader, gl::Shader* fShader)
-{
-    GLuint id = glCreateProgram();
-	glAttachShader(id, vShader->getID());
-	glAttachShader(id, fShader->getID());
-    
-	glLinkProgram(id);
 	GLint status = 0;
-	glGetProgramiv(id, GL_LINK_STATUS, &status);
+	glGetProgramiv(id(), GL_LINK_STATUS, &status);
 	if (!status) {
 		std::cerr << "ERROR linking shader program:" << std::endl;
-        
+
 		GLint maxLength = 0;
-		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &maxLength);
+		glGetProgramiv(id(), GL_INFO_LOG_LENGTH, &maxLength);
 		GLchar* buf = new GLchar[maxLength];
-        
-		glGetProgramInfoLog(id, maxLength, &maxLength, buf);
+
+		glGetProgramInfoLog(id(), maxLength, &maxLength, buf);
 		std::string log(buf);
 		std::cerr << log << std::endl;
-        
+
 		delete[] buf;
-		glDeleteProgram(id);
-		delete vShader;
-		delete fShader;
-		return NULL;
+		return false;
 	}
-    
-    return new Program(id, vShader, fShader);
+
+	return true;
+}
+
+Program Program::create(const char* vsrc, const char* fsrc)
+{
+	Shader vShader;
+	if (!vShader.compileFile(vsrc, GL_VERTEX_SHADER)) {
+		std::cerr << "ERROR compiling vertex shader:" << std::endl << vShader.log() << std::endl;
+		return Program();
+	}
+
+	Shader fShader;
+	if (!fShader.compileFile(fsrc, GL_FRAGMENT_SHADER)) {
+		std::cerr << "ERROR compiling fragment shader:" << std::endl << fShader.log() << std::endl;
+		return Program();
+	}
+
+    return create(vShader, fShader);
+}
+
+Program Program::createFromSrc(const char* vsrc, const char* fsrc)
+{
+	Shader vShader;
+	if (!vShader.compile(vsrc, GL_VERTEX_SHADER)) {
+		std::cerr << "ERROR compiling vertex shader:" << std::endl << vShader.log() << std::endl;
+		return Program();
+	}
+
+	Shader fShader;
+	if (!fShader.compile(fsrc, GL_FRAGMENT_SHADER)) {
+		std::cerr << "ERROR compiling fragment shader:" << std::endl << fShader.log() << std::endl;
+		return Program();
+	}
+
+	return create(vShader, fShader);
+}
+
+Program Program::create(const Shader& vShader, const Shader& fShader)
+{
+	Program prog;
+	prog.generate();
+	prog.attach(vShader);
+	prog.attach(fShader); 
+	prog.link();
+	return prog;
 }

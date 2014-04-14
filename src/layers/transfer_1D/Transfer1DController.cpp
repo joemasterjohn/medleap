@@ -190,12 +190,12 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 
 void Transfer1DController::updateTransferTex1D()
 {
-    gl::Texture* tex = renderer.getTransferFn();
-    tex->bind();
-    tex->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    tex->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    tex->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    tex->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    gl::Texture& tex = renderer.getTransferFn();
+    tex.bind();
+    tex.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    tex.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    tex.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    tex.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     
 //    tex->setData2D(GL_RGB, texWidth, texHeight, GL_RGB, GL_UNSIGNED_BYTE, transfer1DPixels);

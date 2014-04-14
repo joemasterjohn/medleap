@@ -1,7 +1,7 @@
 #include "BoxSlicer.h"
 #include <limits>
 #include <algorithm>
-#include "math/Vector4.h"
+#include "gl/math/Vector4.h"
 
 using namespace std;
 

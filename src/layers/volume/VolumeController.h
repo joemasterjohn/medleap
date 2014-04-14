@@ -17,7 +17,8 @@ public:
     bool mouseButton(GLFWwindow* window, int button, int action, int mods);
     bool mouseMotion(GLFWwindow* window, double x, double y);
     bool scroll(GLFWwindow* window, double dx, double dy);
-    
+	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame);
+
 private:
     VolumeRenderer renderer;
     VolumeData* volume;

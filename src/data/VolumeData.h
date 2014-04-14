@@ -6,9 +6,9 @@
 #include <string>
 #include "Window.h"
 #include "BoundingBox.h"
-#include "math/Vector3.h"
+#include "gl/math/Vector3.h"
 #include "gl/Texture.h"
-#include "math/Matrix3.h"
+#include "gl/math/Matrix3.h"
 #include "gdcmReader.h"
 #include "gdcmAttribute.h"
 
@@ -118,10 +118,10 @@ public:
     void setPrevWindow();
     
     /** Stores all images/slices into a 3D texture (single channel per voxel) */
-    void loadTexture3D(gl::Texture* texture);
+    void loadTexture3D(gl::Texture& texture);
     
     /** Stores normalized gradient vectors in a 3D texture */
-    void loadGradientTexture(gl::Texture* texture);
+    void loadGradientTexture(gl::Texture& texture);
     
     /** Pointer to the raw data bytes */
     char* getData();

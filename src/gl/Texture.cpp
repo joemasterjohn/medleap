@@ -2,20 +2,34 @@
 
 using namespace gl;
 
-Texture::Texture(GLenum target) : id(0), target(target), width(0), height(0), depth(0)
+Texture::Texture() : handle(nullptr), target(GL_INVALID_ENUM), width(0), height(0), depth(0)
 {
-    glGenTextures(1, &id);
 }
 
-Texture::~Texture()
+GLuint Texture::id() const
 {
-    if (id)
-        glDeleteTextures(1, &id);
+	return handle ? *(handle.get()) : 0;
 }
 
-GLuint Texture::getID() const
+void Texture::generate(GLenum target)
 {
-    return id;
+	this->target = target;
+
+	auto deleteFunction = [=](GLuint* p) {
+		if (p) {
+			glDeleteTextures(1, p);
+			delete p;
+		}
+	};
+
+	GLuint* p = new GLuint;
+	glGenTextures(1, p);
+	handle = std::shared_ptr<GLuint>(p, deleteFunction);
+}
+
+void Texture::release()
+{
+	handle = nullptr;
 }
 
 GLuint Texture::getWidth() const
@@ -40,7 +54,8 @@ GLenum Texture::getTarget() const
 
 void Texture::bind() const
 {
-    glBindTexture(target, id);
+	if (handle)
+		glBindTexture(target, id());
 }
 
 void Texture::unbind() const

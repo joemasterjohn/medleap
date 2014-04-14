@@ -7,7 +7,7 @@
 #include "gl/Texture.h"
 #include "gl/Buffer.h"
 #include "data/VolumeData.h"
-#include "math/Matrix4.h"
+#include "gl/math/Matrix4.h"
 
 /** Renders a 2D slice of the volume */
 class SliceRenderer : public Renderer
@@ -19,10 +19,10 @@ public:
     void setVolume(VolumeData* volume);
     void draw();
     void resize(int width, int height);
-    
     int getCurrentSlice();
     void setCurrentSlice(int sliceIndex);
-    void setCLUTTexture(gl::Texture* texture);
+    void setCLUTTexture(gl::Texture& texture);
+
 private:
     class OrientationLabel
     {
@@ -33,12 +33,12 @@ private:
     };
     
     VolumeData* volume;
-    gl::Program* sliceShader;
-    gl::Program* axisShader;
-    gl::Texture* clutTexture;
-    gl::Texture* sliceTexture;
-    gl::Buffer* sliceVBO;
-    gl::Buffer* axisVBO;
+    gl::Program sliceShader;
+    gl::Program axisShader;
+    gl::Texture clutTexture;
+    gl::Texture sliceTexture;
+    gl::Buffer sliceVBO;
+    gl::Buffer axisVBO;
     
     int numOrientationVertices;
     int currentSlice;

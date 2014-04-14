@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <utility>
-#include "math/Vector4.h"
-#include "math/Vector2.h"
+#include "gl/math/Vector4.h"
+#include "gl/math/Vector2.h"
 
 /** Contains vertex positions and edges (indices) for an axis-aligned bounding box */
 class BoundingBox

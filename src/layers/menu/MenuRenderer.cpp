@@ -1,7 +1,7 @@
 #include "MenuRenderer.h"
 #include "main/MainController.h"
 #include "util/Util.h"
-#include "math/Transform.h"
+#include "gl/math/Transform.h"
 #include <vector>
 
 using namespace std;
@@ -9,9 +9,6 @@ using namespace gl;
 
 MenuRenderer::MenuRenderer(MenuManager* menuManager) : menuManager(menuManager), highlighted(-1)
 {
-    menuVBO = NULL;
-    menuIBO = NULL;
-    menuShader = NULL;
     indexCount = 0;
     indexType = 0;
     setShaderState = nullptr;
@@ -19,15 +16,12 @@ MenuRenderer::MenuRenderer(MenuManager* menuManager) : menuManager(menuManager),
 
 MenuRenderer::~MenuRenderer()
 {
-    if (menuVBO) delete menuVBO;
-    if (menuIBO) delete menuIBO;
-    if (menuShader) delete menuShader;
 }
 
 void MenuRenderer::init()
 {
-    menuVBO = Buffer::createVBO();
-    menuIBO = Buffer::createIBO();
+    menuVBO = Buffer::genVertexBuffer();
+    menuIBO = Buffer::genIndexBuffer();
     menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 }
 
@@ -52,26 +46,26 @@ void MenuRenderer::draw()
     
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    menuShader->enable();
-    glUniformMatrix4fv(menuShader->getUniform("modelViewProjection"), 1, false, modelViewProjection);
-    menuVBO->bind();
-    menuIBO->bind();    
+    menuShader.enable();
+    glUniformMatrix4fv(menuShader.getUniform("modelViewProjection"), 1, false, modelViewProjection);
+    menuVBO.bind();
+    menuIBO.bind();    
     setShaderState();
     
 	float alpha = this->menuManager->visibility();
 
-    glUniform4f(menuShader->getUniform("color"), 0.2f, 0.2f, 0.2f, alpha * 0.7f);
+    glUniform4f(menuShader.getUniform("color"), 0.7f, 0.7f, 0.7f, alpha * 0.7f);
     glDrawElements(GL_TRIANGLES, indexCount, indexType, 0);
 
     if (highlighted >= 0) {
 
 		float lp = menuManager->getLeapProgress();
-		Vec3 a(0.8f, 0.8f, 0.8f);
-		Vec3 b(0.3f, 1.0f, 0.3f);
+		Vec3 a(0.1f, 0.1f, 0.1f);
+		Vec3 b(0.1f, 0.75f, 1.0f);
 		Vec3 c = a * (1 - lp) + b * lp;
 		
 
-		glUniform4f(menuShader->getUniform("color"), c.x, c.y, c.z, alpha * 0.7f);
+		glUniform4f(menuShader.getUniform("color"), c.x, c.y, c.z, alpha);
         void* offset = (void*)(indicesPerMenuItem * highlighted * sizeof(GLushort));
 		glDrawElements(GL_TRIANGLES, indicesPerMenuItem, indexType, offset);
     }
@@ -86,7 +80,7 @@ void MenuRenderer::drawMenu(Menu& menu)
 
 	text.begin(viewport.width, viewport.height);
 
-	text.setColor(1, 1, 1);
+	text.setColor(0, 0, 0);
 	text.add(
 		menu.getName(),
 		viewport.width / 2,
@@ -112,7 +106,7 @@ void MenuRenderer::drawMenu(Menu& menu)
 		int x = static_cast<int>(std::cos(angle) * radius + viewport.width / 2);
 		int y = static_cast<int>(std::sin(angle) * radius + viewport.height / 2);
 
-		text.setColor(0, 0, 0);
+		text.setColor(1, 1, 1);
 		text.begin(viewport.width, viewport.height);
 		text.add(menu.getItems()[highlighted].getName(), x, y, 
 			TextRenderer::CENTER, TextRenderer::CENTER);
@@ -158,16 +152,16 @@ void MenuRenderer::createRingGeometry()
         angle += step;
     }
     
-    menuVBO->bind();
-    menuVBO->setData(&verts[0], verts.size() * sizeof(GLfloat));
+    menuVBO.bind();
+    menuVBO.setData(&verts[0], verts.size() * sizeof(GLfloat));
     
-    menuIBO->bind();
-    menuIBO->setData(&indices[0], indices.size() * sizeof(GLushort));
+    menuIBO.bind();
+    menuIBO.setData(&indices[0], indices.size() * sizeof(GLushort));
     indexCount = indices.size();
     indexType = GL_UNSIGNED_SHORT;
     
     setShaderState = [this] {
-        int loc = menuShader->getAttribute("vs_position");
+        int loc = menuShader.getAttribute("vs_position");
         glEnableVertexAttribArray(loc);
         glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
     };

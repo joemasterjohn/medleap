@@ -60,6 +60,9 @@ bool MainRenderer::init(int width, int height, const char* title)
         glfwTerminate();
         return false;
     }
+
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
     
     if (cfg.getValue<bool>(MainConfig::USE_SRGB))
         glEnable(GL_FRAMEBUFFER_SRGB);
@@ -82,8 +85,6 @@ void MainRenderer::draw()
         r->draw();
         layer++;
     }
-    
-    glfwSwapBuffers(window);
 }
 
 void MainRenderer::updateViewport(Renderer* renderer, int layer)

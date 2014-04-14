@@ -31,7 +31,7 @@ void main()\n\
 // texture coordinate stepping based on a 16x16 grid of glyphs
 static const float GLYPH_STEP = 0.0625f;
 
-TextRenderer::TextRenderer() : program(0), vbo(0), r(0), g(0), b(0), currentFont(0), dirty(true)
+TextRenderer::TextRenderer() : vbo(0), r(0), g(0), b(0), currentFont(0), dirty(true)
 {
 }
 
@@ -40,9 +40,6 @@ TextRenderer::~TextRenderer()
     for (map<string, Font*>::iterator it = fonts.begin(); it != fonts.end(); it++) {
         delete it->second;
     }
-    
-    if (program)
-        delete program;
     
     if (vbo)
         glDeleteBuffers(1, &vbo);
@@ -124,14 +121,14 @@ void TextRenderer::end()
     
     // set state
     GLsizei stride = 4 * sizeof(GLfloat);
-    int loc = program->getAttribute("vs_position");
+    int loc = program.getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    loc = program->getAttribute("vs_texcoord");
+    loc = program.getAttribute("vs_texcoord");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
-    program->enable();
-    glUniform3f(program->getUniform("color"), r, g, b);
+    program.enable();
+    glUniform3f(program.getUniform("color"), r, g, b);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, currentFont->texture);
@@ -157,7 +154,7 @@ int TextRenderer::fontWidth(const std::string& text)
 bool TextRenderer::loadFont(const std::string& fontName)
 {
     // create shader program and vertex buffer if first load
-    if (!program) {
+    if (!program.id()) {
         program = Program::createFromSrc(vSrc, fSrc);
         glGenBuffers(1, &vbo);
     }

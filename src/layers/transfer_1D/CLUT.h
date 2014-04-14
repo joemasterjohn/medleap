@@ -1,7 +1,7 @@
 #ifndef __medleap__CLUT__
 #define __medleap__CLUT__
 
-#include "math/Vector4.h"
+#include "gl/math/Vector4.h"
 #include "gl/Texture.h"
 #include <vector>
 
@@ -37,7 +37,7 @@ public:
     void addColorStop(float position, Vec4 color);
     void clearStops();
     
-    void saveTexture(gl::Texture* texture);
+    void saveTexture(gl::Texture& texture);
     
 private:
     std::vector<ColorStop> stops;

@@ -1,5 +1,5 @@
 #include "SliceRenderer.h"
-#include "math/Transform.h"
+#include "gl/math/Transform.h"
 #include "main/MainController.h"
 
 using namespace gl;
@@ -24,12 +24,6 @@ static const AxisLabel axes[] = {
 
 SliceRenderer::SliceRenderer() :
     volume(NULL),
-    sliceShader(NULL),
-    axisShader(NULL),
-    clutTexture(NULL),
-    sliceTexture(NULL),
-    sliceVBO(NULL),
-    axisVBO(NULL),
     numOrientationVertices(0),
     currentSlice(0)
 {
@@ -39,19 +33,19 @@ SliceRenderer::~SliceRenderer()
 {
 }
 
-void SliceRenderer::setCLUTTexture(gl::Texture* texture)
+void SliceRenderer::setCLUTTexture(gl::Texture& texture)
 {
     this->clutTexture = texture;
 }
 
 void SliceRenderer::updateTexture()
 {
-    sliceTexture->bind();
-    sliceTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    sliceTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    sliceTexture.bind();
+    sliceTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    sliceTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     
-    sliceTexture->setData2D(0,
+    sliceTexture.setData2D(0,
                             volume->internalFormat(),
                             volume->getWidth(),
                             volume->getHeight(),
@@ -100,9 +94,9 @@ void SliceRenderer::setVolume(VolumeData* volume)
         }
     }
     
-    axisVBO = Buffer::createVBO();
-    axisVBO->bind();
-    axisVBO->setData(&vertexData[0], vertexData.size() * sizeof(GLfloat));
+    axisVBO = Buffer::genVertexBuffer();
+    axisVBO.bind();
+    axisVBO.setData(&vertexData[0], vertexData.size() * sizeof(GLfloat));
     
     resize(viewport.width, viewport.height);
 }
@@ -124,12 +118,12 @@ void SliceRenderer::init()
     sliceShader = Program::create("shaders/slice_clut.vert", "shaders/slice_clut.frag");
     axisShader = Program::create("shaders/color.vert", "shaders/color.frag");
     
-    sliceShader->enable();
-    glUniform1i(sliceShader->getUniform("tex_slice"), 0);
-    glUniform1i(sliceShader->getUniform("tex_clut"), 1);
+    sliceShader.enable();
+    glUniform1i(sliceShader.getUniform("tex_slice"), 0);
+    glUniform1i(sliceShader.getUniform("tex_clut"), 1);
     
     // create a texture to store the current slice
-    sliceTexture = new Texture(GL_TEXTURE_2D);
+	sliceTexture.generate(GL_TEXTURE_2D);
     
     // vertex buffer for the slice image geometry
     GLfloat vertexData[] = {
@@ -141,35 +135,35 @@ void SliceRenderer::init()
         -1,  1, 0, 1
     };
     
-    sliceVBO = Buffer::createVBO();
-    sliceVBO->bind();
-    sliceVBO->setData(vertexData, sizeof(vertexData));
+    sliceVBO = Buffer::genVertexBuffer();
+    sliceVBO.bind();
+    sliceVBO.setData(vertexData, sizeof(vertexData));
 }
 
 void SliceRenderer::drawSlice()
 {
-    sliceShader->enable();
+    sliceShader.enable();
     
     glActiveTexture(GL_TEXTURE1);
-    clutTexture->bind();
+    clutTexture.bind();
     glActiveTexture(GL_TEXTURE0);
-    sliceTexture->bind();
+    sliceTexture.bind();
     
     // set the uniforms
-    glUniform1i(sliceShader->getUniform("signed_normalized"), volume->isSigned());
-    glUniform1f(sliceShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
-    glUniform1f(sliceShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
-    glUniformMatrix4fv(sliceShader->getUniform("model"), 1, false, modelMatrix);
+    glUniform1i(sliceShader.getUniform("signed_normalized"), volume->isSigned());
+    glUniform1f(sliceShader.getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
+    glUniform1f(sliceShader.getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
+    glUniformMatrix4fv(sliceShader.getUniform("model"), 1, false, modelMatrix);
     
     // set state and shader for drawing medical stuff
     GLsizei stride = 4 * sizeof(GLfloat);
-    sliceVBO->bind();
+    sliceVBO.bind();
     
-    int loc = sliceShader->getAttribute("vs_position");
+    int loc = sliceShader.getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
     
-    loc = sliceShader->getAttribute("vs_texcoord");
+    loc = sliceShader.getAttribute("vs_texcoord");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
     
@@ -181,22 +175,22 @@ void SliceRenderer::drawOrientationOverlay()
     TextRenderer& text = MainController::getInstance().getText();
     
     // draw lines
-    axisShader->enable();
+    axisShader.enable();
     float aspect = viewport.aspect();
     if (aspect >= 1) {
-        glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, scale(1.0f/aspect, 1, 1));
+        glUniformMatrix4fv(axisShader.getUniform("modelViewProjection"), 1, false, scale(1.0f/aspect, 1, 1));
     } else {
-        glUniformMatrix4fv(axisShader->getUniform("modelViewProjection"), 1, false, scale(1, aspect, 1));
+        glUniformMatrix4fv(axisShader.getUniform("modelViewProjection"), 1, false, scale(1, aspect, 1));
     }
     GLsizei stride = 5 * sizeof(GLfloat);
 
-    axisVBO->bind();
+    axisVBO.bind();
 
-    int loc = axisShader->getAttribute("vs_position");
+    int loc = axisShader.getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
     
-    loc = axisShader->getAttribute("vs_color");
+    loc = axisShader.getAttribute("vs_color");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 3, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
     

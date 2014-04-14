@@ -1,8 +1,8 @@
 #ifndef CGL_CAMERA_H_
 #define CGL_CAMERA_H_
 
-#include "math/Matrix4.h"
-#include "math/Vector3.h"
+#include "gl/math/Matrix4.h"
+#include "gl/math/Vector3.h"
 
 class Camera
 {

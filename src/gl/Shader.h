@@ -3,24 +3,22 @@
 
 #include "gl/glew.h"
 #include <string>
+#include <memory>
 
 namespace gl
 {
-    /** GLSL shader object reference. */
+    /** Pointer to an OpenGL shader object. */
     class Shader
     {
     public:
         /** Creates a new empty shader reference. */
         Shader();
         
-        /**  Deletes the shader object; also calls release. */
-        ~Shader();
-        
-        /** Creates a new shader reference. */
-        Shader(GLuint id);
-        
-        /** Returns the referenced shader's ID (0 if no shader referenced). */
-        GLuint getID() const;
+		/** Returns the handle to the OpenGL resource, or 0 if none. */
+		GLuint id() const;
+
+		/** Clears this pointer. If no other objects point to the OpenGL resource, it will be destroyed. */
+		void release();
         
         /** Returns the type of the referenced shader (0 if no shader referenced). */
         GLenum getType() const;
@@ -37,13 +35,12 @@ namespace gl
         /** Assigns source from a file and compiles. Returns false if compiler errors. If this object does not yet reference a shader, a new one will be created. */
         bool compileFile(const char* fileName, GLenum type);
         
-        /** Deletes the referenced shader from the OpenGL context. */
-        void release();
-        
     private:
-        GLuint id;
+		std::shared_ptr<GLuint> handle;
         GLenum type;
         std::string source;
+
+		void generate(GLenum type);
     };
     
 }

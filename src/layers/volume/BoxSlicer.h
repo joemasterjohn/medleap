@@ -2,8 +2,8 @@
 #define BOXSLICER_H
 
 #include <vector>
-#include "math/Vector2.h"
-#include "math/Vector3.h"
+#include "gl/math/Vector2.h"
+#include "gl/math/Vector3.h"
 #include "util/Camera.h"
 #include "data/BoundingBox.h"
 #include "gl/glew.h"

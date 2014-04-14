@@ -140,7 +140,7 @@ void CLUT::clearStops()
     stops.clear();
 }
 
-void CLUT::saveTexture(Texture* texture)
+void CLUT::saveTexture(Texture& texture)
 {
     int l = 0;
     int r = 1;
@@ -172,9 +172,9 @@ void CLUT::saveTexture(Texture* texture)
         buf[ptr++] = (unsigned char)(color.w * 255);
     }
     
-    texture->bind();
-    texture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    texture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    texture->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    texture->setData1D(0, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, buf);
+    texture.bind();
+    texture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    texture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    texture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    texture.setData1D(0, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, buf);
 }

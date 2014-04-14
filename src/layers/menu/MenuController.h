@@ -4,7 +4,7 @@
 #include "layers/Controller.h"
 #include "MenuRenderer.h"
 #include "MenuManager.h"
-#include "math/Vector2.h"
+#include "gl/math/Vector2.h"
 
 class MenuController : public Controller
 {

@@ -2,20 +2,24 @@
 #define CGL_TEXTURE_H_
 
 #include "gl/glew.h"
+#include <memory>
 
 namespace gl
 {
     class Texture
     {
     public:
-        /** Creates a new texture */
-        Texture(GLenum target);
+        /** Creates an empty texture pointer */
+        Texture();
         
-        /** Releases the texture resources */
-        ~Texture();
-        
-        /** Returns the OpenGL texture handle */
-        GLuint getID() const;
+		/** Returns the handle to the OpenGL resource, or 0 if none. */
+		GLuint id() const;
+
+		/** Creates a new OpenGL resource. This object will point to it. */
+		void generate(GLenum target);
+
+		/** Clears this pointer. If no other objects point to the OpenGL resource, it will be destroyed. */
+		void release();
         
         /** Returns the texture width. */
         GLuint getWidth() const;
@@ -65,7 +69,7 @@ namespace gl
         void setParameter(GLenum pname, GLfloat param);
         
     private:
-        GLuint id;
+		std::shared_ptr<GLuint> handle;
         GLenum target;
         GLuint width;
         GLuint height;

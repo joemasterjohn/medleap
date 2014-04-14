@@ -1,5 +1,5 @@
 #include "VolumeController.h"
-#include "math/Transform.h"
+#include "gl/math/Transform.h"
 
 VolumeController::VolumeController()
 {
@@ -105,4 +105,60 @@ bool VolumeController::scroll(GLFWwindow* window, double dx, double dy)
         renderer.markDirty();
     }
     return true;
+}
+
+bool VolumeController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
+{
+	Leap::FingerList fingers = currentFrame.fingers();
+	Leap::ToolList tools = currentFrame.tools();
+
+
+	static Vec3 toolStart;
+	static int framesSlow = 0;
+	static Vec3 oldCursorPos;
+
+	if (tools.count() > 0) {
+		Leap::Tool p = tools.frontmost();
+
+		if (!renderer.cursorActive && p.tipVelocity().magnitude() < 100) {
+			framesSlow++;
+			if (framesSlow > 40) {
+				renderer.cursorActive = true;
+				toolStart.x = p.tipPosition().x;
+				toolStart.y = p.tipPosition().y;
+				toolStart.z = p.tipPosition().z;
+				oldCursorPos = renderer.cursor3D;
+				framesSlow = 0;
+			}
+		}
+
+		if (renderer.cursorActive) {
+
+			if (p.tipVelocity().magnitude() > 1200) {
+				framesSlow = 0;
+				renderer.cursorActive = false;
+
+			}
+			else {
+	
+				Vec3 d = Vec3(p.tipPosition().x, p.tipPosition().y, p.tipPosition().z) - toolStart;
+
+				Camera& cam = renderer.getCamera();
+				Vec3 offset;
+				offset += cam.getRight() * d.x * 0.003;
+				offset += cam.getUp() * d.y* 0.003;
+				offset += cam.getForward() * -d.z* 0.003;
+
+				renderer.cursor3D = oldCursorPos + offset;
+				renderer.markDirty();
+			}
+		}
+	}
+
+	if (tools.count() == 0) {
+		framesSlow = 0;
+		renderer.cursorActive = false;
+	}
+
+	return true;
 }

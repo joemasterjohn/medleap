@@ -1,6 +1,8 @@
 #include "VolumeRenderer.h"
-#include "math/Transform.h"
+#include "gl/math/Transform.h"
 #include "BoxSlicer.h"
+#include "gl/geom/Box.h"
+#include "gl/util/Draw.h"
 
 using namespace gl;
 using namespace std;
@@ -8,41 +10,18 @@ using namespace std;
 VolumeRenderer::VolumeRenderer()
 {
     dirty = true;
-    proxyVertices = NULL;
-    proxyIndices = NULL;
-    lowResFBO = NULL;
-    fullResFBO = NULL;
-    lowResFBO = NULL;
-    fullResTexture = NULL;
-    sceneProgram = NULL;
-    sceneBuffer = NULL;
     numSamples = 256;
     opacityScale = 1.0f;
     renderMode = VR;
     shading = true;
-    clutTexture = NULL;
     drawnHighRes = false;
 	lightBackground = false;
+	cursorActive = false;
+	cursorRadius = 0.05;
 }
 
 VolumeRenderer::~VolumeRenderer()
 {
-    if (proxyVertices)
-        delete proxyVertices;
-    if (proxyIndices)
-        delete proxyIndices;
-    if (lowResFBO)
-        delete lowResFBO;
-    if (fullResFBO)
-        delete fullResFBO;
-    if (lowResTexture)
-        delete lowResTexture;
-    if (fullResTexture)
-        delete fullResTexture;
-    if (sceneProgram)
-        delete sceneProgram;
-    if (sceneBuffer)
-        delete sceneBuffer;
 }
 
 Camera& VolumeRenderer::getCamera()
@@ -95,7 +74,7 @@ bool VolumeRenderer::useShading()
     return shading;
 }
 
-void VolumeRenderer::setCLUTTexture(Texture* texture)
+void VolumeRenderer::setCLUTTexture(Texture& texture)
 {
     this->clutTexture = texture;
     markDirty();
@@ -103,83 +82,28 @@ void VolumeRenderer::setCLUTTexture(Texture* texture)
 
 void VolumeRenderer::init()
 {
-    volumeTexture = new Texture(GL_TEXTURE_3D);
-    gradientTexture = new Texture(GL_TEXTURE_3D);
+	volumeTexture.generate(GL_TEXTURE_3D);
+	gradientTexture.generate(GL_TEXTURE_3D);
+
+	proxyVertices = Buffer::genVertexBuffer(GL_DYNAMIC_DRAW);
+	proxyIndices = Buffer::genIndexBuffer(GL_DYNAMIC_DRAW);
 
     camera.setView(lookAt(1, 1, 1, 0, 0, 0, 0, 1, 0));
-    
-    lineShader = Program::create("shaders/color.vert", "shaders/color.frag");
-    
-    sceneProgram = Program::create("shaders/texture_2D.vert", "shaders/texture_2D.frag");
-    
-    GLfloat vertexData[] = {
-        0, 0, 0, 1, 0, 0,
-        1, 0, 0, 1, 0, 0,
-        
-        0, 0, 0, 0, 1, 0,
-        0, 1, 0, 0, 1, 0,
-        
-        0, 0, 0, 0, 0, 1,
-        0, 0, 1, 0, 0, 1
-    };
-    numGridVerts = 6;
-    
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-    
-    proxyVertices = new Buffer(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    proxyIndices = new Buffer(GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    
+     
     boxShader = Program::create("shaders/volume_clut.vert", "shaders/volume_clut.frag");
-    boxShader->enable();
-    glUniform1i(boxShader->getUniform("tex_volume"), 0);
-    glUniform1i(boxShader->getUniform("tex_gradients"), 1);
-    glUniform1i(boxShader->getUniform("tex_clut"), 2);
+    boxShader.enable();
+    glUniform1i(boxShader.getUniform("tex_volume"), 0);
+    glUniform1i(boxShader.getUniform("tex_gradients"), 1);
+    glUniform1i(boxShader.getUniform("tex_clut"), 2);
 
-    
-    lowResFBO = new Framebuffer;
-    lowResTexture = new Texture(GL_TEXTURE_2D);
-    lowResTexture->bind();
-    lowResTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    lowResTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	lowResTexture->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	lowResTexture->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    lowResTexture->setData2D(GL_RGB, 512, 512, GL_RGB, GL_UNSIGNED_BYTE, 0);
-    lowResFBO->bind();
-    lowResFBO->setColorTarget(0, lowResTexture);
-    lowResFBO->unbind();
-    
-    fullResFBO = new Framebuffer;
-    fullResTexture = new Texture(GL_TEXTURE_2D);
-    fullResTexture->bind();
-    fullResTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    fullResTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	fullResTexture->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	fullResTexture->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    fullResTexture->setData2D(GL_RGB, viewport.width, viewport.height, GL_RGB, GL_UNSIGNED_BYTE, 0);
-    fullResFBO->bind();
-    fullResFBO->setColorTarget(0, fullResTexture);
-    fullResFBO->unbind();
-    
-    sceneBuffer = new Buffer(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    {
-        GLfloat vdata[] = {
-            -1, -1, 0, 0,
-            1, -1, 1, 0,
-            1, 1, 1, 1,
-            
-            -1, -1, 0, 0,
-            1, 1, 1, 1,
-            -1, 1, 0, 1
-        };
-        sceneBuffer->bind();
-        sceneBuffer->setData(vdata, sizeof(vdata));
-    }
-    
+	fullResRT.generate(viewport.width, viewport.height, true);
+	lowResRT.generate(viewport.width/2, viewport.height/2, true);
+	fullScreenQuad.generate();
+
+	cursor3DShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
+	cursor3DVBO = Buffer::genVertexBuffer();
+	cursor3DVBO.bind();
+	Box(cursorRadius*2).fill(cursor3DVBO);
 }
 
 float VolumeRenderer::getOpacityScale()
@@ -195,10 +119,8 @@ void VolumeRenderer::setOpacityScale(float scale)
 
 void VolumeRenderer::resize(int width, int height)
 {
-    lowResTexture->bind();
-    lowResTexture->setData2D(GL_RGB, viewport.width/2, viewport.height/2, GL_RGB, GL_UNSIGNED_BYTE, 0);
-    fullResTexture->bind();
-    fullResTexture->setData2D(GL_RGB, viewport.width, viewport.height, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	fullResRT.resize(width, height);
+	lowResRT.resize(width, height);
 	camera.setProjection(perspective(0.8726388f, viewport.aspect(), 0.1f, 100.0f));
     markDirty();
 }
@@ -208,53 +130,94 @@ void VolumeRenderer::updateSlices(int numSlices)
     BoxSlicer slicer;
     slicer.slice(volume->getBounds(), camera, numSlices);
     
-    proxyIndices->bind();
-    proxyIndices->setData(&slicer.getIndices()[0],
-                          slicer.getIndices().size() * sizeof(GLushort));
+    proxyIndices.bind();
+    proxyIndices.setData(&slicer.getIndices()[0], slicer.getIndices().size() * sizeof(GLushort));
     
-    proxyVertices->bind();
-    proxyVertices->setData(&slicer.getVertices()[0],
-                           slicer.getVertices().size() * sizeof(slicer.getVertices()[0]));
+    proxyVertices.bind();
+    proxyVertices.setData(&slicer.getVertices()[0], slicer.getVertices().size() * sizeof(slicer.getVertices()[0]));
     
     numSliceIndices = static_cast<int>(slicer.getIndices().size());
 }
 
 void VolumeRenderer::draw(int numSlices)
 {
+	glEnable(GL_DEPTH_TEST);
+	{
+		cursor3DShader.enable();
+		cursor3DVBO.bind();
+		glUniform4f(cursor3DShader.getUniform("color"), 0.0f, cursorActive ? 1.0f : 0.0f, 1.0f, 1.0f);
+		glUniformMatrix4fv(cursor3DShader.getUniform("modelViewProjection"), 1, false, camera.getProjection() * camera.getView() * translation(cursor3D));
+		int loc = cursor3DShader.getAttribute("vs_position");
+		glEnableVertexAttribArray(loc);
+		glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+
     // proxy geometry
     glActiveTexture(GL_TEXTURE2);
-    clutTexture->bind();
+    clutTexture.bind();
     glActiveTexture(GL_TEXTURE1);
-    gradientTexture->bind();
+    gradientTexture.bind();
     glActiveTexture(GL_TEXTURE0);
-    volumeTexture->bind();
+    volumeTexture.bind();
     
     updateSlices(numSlices);
     
     
-    boxShader->enable();
+    boxShader.enable();
     
     Mat4 mvp = camera.getProjection() * camera.getView();
-    glUniformMatrix4fv(boxShader->getUniform("modelViewProjection"), 1, false, mvp);
-    
-    glUniform3fv(boxShader->getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
-    glUniform3fv(boxShader->getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
-    glUniform1i(boxShader->getUniform("signed_normalized"), volume->isSigned());
-    glUniform1i(boxShader->getUniform("use_shading"), (renderMode != MIP && shading));
-    glUniform1f(boxShader->getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
-    glUniform1f(boxShader->getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
+    glUniformMatrix4fv(boxShader.getUniform("modelViewProjection"), 1, false, mvp);
+	glUniformMatrix4fv(boxShader.getUniform("modelView"), 1, false, camera.getView());
 
-	glUniform1i(boxShader->getUniform("render_mode"), renderMode);
+    glUniform3fv(boxShader.getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
+    glUniform3fv(boxShader.getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
+    glUniform1i(boxShader.getUniform("signed_normalized"), volume->isSigned());
+    glUniform1i(boxShader.getUniform("use_shading"), (renderMode != MIP && shading));
+    glUniform1f(boxShader.getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
+    glUniform1f(boxShader.getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
 
-	glUniform1f(boxShader->getUniform("opacity_correction"), static_cast<float>(numSamples) / numSlices);
-    glUniform3f(boxShader->getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
+	glUniform1i(boxShader.getUniform("render_mode"), renderMode);
+
+	glUniform1f(boxShader.getUniform("opacity_correction"), static_cast<float>(numSamples) / numSlices);
+    glUniform3f(boxShader.getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
     
-    glUniform3f(boxShader->getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
-    glUniform1f(boxShader->getUniform("opacity_scale"), opacityScale);
+    glUniform3f(boxShader.getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
+    glUniform1f(boxShader.getUniform("opacity_scale"), opacityScale);
     Vec3 r = volume->getMaxGradient() - volume->getMinGradient();
-    glUniform3f(boxShader->getUniform("rangeGradient"), r.x, r.y, r.z);
+    glUniform3f(boxShader.getUniform("rangeGradient"), r.x, r.y, r.z);
     
-    int loc = boxShader->getAttribute("vs_position");
+	glUniform3f(boxShader.getUniform("cursor_position"), cursor3D.x, cursor3D.y, cursor3D.z);
+
+
+
+
+	
+
+	Vec4 cpss = mvp * Vec4(cursor3D.x, cursor3D.y, cursor3D.z, 1.0);
+	cpss /= cpss.w;
+	cpss.x = (cpss.x + 1.0) * (viewport.width / 2.0);
+	cpss.y = (cpss.y + 1.0) * (viewport.height / 2.0);
+	glUniform3f(boxShader.getUniform("cursor_position_ss"), cpss.x, cpss.y, cpss.z);
+
+
+
+
+	Vec4 cpee = camera.getView() * Vec4(cursor3D.x, cursor3D.y, cursor3D.z, 1.0f);
+	glUniform3f(boxShader.getUniform("cursor_position_es"), cpee.x, cpee.y, cpee.z);
+
+
+	glUniform1f(boxShader.getUniform("cursor_radius_ws"), cursorRadius);
+	float cursorRadiusSS = gl::projectedRadius(0.8726388, (cursor3D - camera.getEye()).length(), cursorRadius) * viewport.height / 2.0f;
+	std::cout << cursorRadiusSS << std::endl;
+	glUniform1f(boxShader.getUniform("cursor_radius_ss"), cursorRadius);
+
+	glUniform2f(boxShader.getUniform("window_size"), viewport.width, viewport.height);
+
+
+	glUniform1i(boxShader.getUniform("cursor_on"), true);
+
+    int loc = boxShader.getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
     
@@ -274,7 +237,7 @@ void VolumeRenderer::draw(int numSlices)
             break;
         case ISOSURFACE:
             glDisable(GL_BLEND);
-            glUniform1f(boxShader->getUniform("isoValue"), volume->getCurrentWindow().getCenterNorm());
+            glUniform1f(boxShader.getUniform("isoValue"), volume->getCurrentWindow().getCenterNorm());
             break;
         default:
             break;
@@ -288,83 +251,49 @@ void VolumeRenderer::draw(int numSlices)
     glDisable(GL_PRIMITIVE_RESTART);
     
     
-    
+	glDisable(GL_DEPTH_TEST);
+
     glDisable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendEquation(GL_FUNC_ADD);
     
+	static Draw d;
+	d.setModelViewProj(gl::ortho2D(0, viewport.width, 0, viewport.height));
+	d.begin(GL_LINES);
+	d.color(1, 0, 0);
+	d.circle(cpss.x, cpss.y, cursorRadiusSS, 32);
+	d.end();
+	d.draw();
+
 }
 
 void VolumeRenderer::draw()
 {
     glClearColor(1, 1, 1, 1);
-
-    glBindVertexArray(vao);
  
     static int cleanFrames = 0;
     
     // draw to texture
-    static gl::Texture* currentTexture = NULL;
+    gl::Texture currentTexture;
     if (dirty) {
-        lowResFBO->bind();
-        glViewport(0, 0, lowResTexture->getWidth(), lowResTexture->getHeight());
-        glClear(GL_COLOR_BUFFER_BIT);
+		lowResRT.bind();
+		lowResRT.clear();
         draw(numSamples);
-        lowResFBO->unbind();
+		lowResRT.unbind();
         dirty = false;
         drawnHighRes = false;
         cleanFrames = 1;
-        currentTexture = lowResTexture;
+        currentTexture = lowResRT.getColorTarget();
     } else if (!drawnHighRes && cleanFrames++ > 30) {
-        fullResFBO->bind();
-        glViewport(0, 0, fullResTexture->getWidth(), fullResTexture->getHeight());
-        glClear(GL_COLOR_BUFFER_BIT);
+		fullResRT.bind();
+		fullResRT.clear();
         draw(numSamples * 8);
-        fullResFBO->unbind();
+		fullResRT.unbind();
         drawnHighRes = true;
-        currentTexture = fullResTexture;
+        currentTexture = fullResRT.getColorTarget();
     }
 
-    
     // draw from texture to screen
     viewport.apply();
-    sceneBuffer->bind();
-    sceneProgram->enable();
-    currentTexture->bind();
-    GLsizei stride = sizeof(GLfloat) * 4;
-    int loc = sceneProgram->getAttribute("vs_position");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    loc = sceneProgram->getAttribute("vs_texcoord");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    
-    
-    
-    
-    
-    
-//    // axes
-//    {
-//        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-//        
-//        lineShader->enable();
-//        
-//        Mat4 mvp = camera.getProjection() * camera.getView();
-//        glUniformMatrix4fv(lineShader->getUniform("modelViewProjection"), 1, false, mvp);
-//        
-//        GLsizei stride = sizeof(GLfloat) * 6;
-//        
-//        int loc = lineShader->getAttribute("vs_position");
-//        glEnableVertexAttribArray(loc);
-//        glVertexAttribPointer(loc, 3, GL_FLOAT, false, stride, 0);
-//        
-//        loc = lineShader->getAttribute("vs_color");
-//        glEnableVertexAttribArray(loc);
-//        glVertexAttribPointer(loc, 3, GL_FLOAT, false, stride, (GLvoid*)(3 * sizeof(GLfloat)));
-//        
-//        glDrawArrays(GL_LINES, 0, numGridVerts);
-//    }
+	fullScreenQuad.draw(currentTexture);
 }

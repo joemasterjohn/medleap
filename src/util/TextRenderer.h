@@ -69,7 +69,7 @@ private:
         bool load(const char* bmpFileName, const char* metricsFileName);
     };
     
-    gl::Program* program;
+    gl::Program program;
     GLuint vbo;
     float r, g, b;
     std::vector<GLfloat> vertices;

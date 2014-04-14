@@ -16,13 +16,26 @@ uniform float opacity_correction;    // current sampling rate divided by referen
 uniform float opacity_scale;         // scales overall opacity
 uniform int render_mode;
 
+uniform vec2 window_size;
+uniform bool cursor_on;
+uniform vec3 cursor_position;
+uniform vec3 cursor_position_es;
+uniform vec3 cursor_position_ss;
+uniform float cursor_radius_ws;
+uniform float cursor_radius_ss;
+
 #define RENDER_MODE_MIP 0
 #define RENDER_MODE_VR 1
 #define RENDER_MODE_ISO 2
 #define AMBIENT 0.3
 
 in vec3 fs_texcoord;
+in vec3 fs_voxel_position_ws;
+in vec3 fs_voxel_position_es;
+in vec3 fs_voxel_position_ss;
+
 out vec4 display_color;
+
 
 float shading()
 {
@@ -35,6 +48,21 @@ float shading()
 	// use normalized gradient as lighting normal
 	vec3 n = normalize(g);
 	return max(min(1.0, dot(n, lightDirection)), AMBIENT);
+}
+
+float cursorAlpha()
+{
+	float x_w = (fs_voxel_position_ss.x + 1.0) * (window_size.x * 0.5);
+	float y_w = (fs_voxel_position_ss.y + 1.0) * (window_size.y * 0.5);
+
+	float d = length(vec2(x_w, y_w) - cursor_position_ss.xy);
+
+	bool outsideAOI = length(fs_voxel_position_ws - cursor_position) > cursor_radius_ws;
+
+	if ((cursor_position_es.z < fs_voxel_position_es.z) && (d < cursor_radius_ss) && outsideAOI) {
+		return 0.0;	
+	}
+	return 1.0;
 }
 
 void main()
@@ -57,9 +85,15 @@ void main()
 
 	} else if (render_mode == RENDER_MODE_VR) {
 		// opacity correction
-		float alpha_stored = color.a;
+		float alpha_stored = color.a * cursorAlpha();
+
+	
+
 		float alpha_corrected = 1.0 - pow(1.0 - alpha_stored * opacity_scale, opacity_correction);
 		color.a = alpha_corrected;
+
+
+
 
 		// Pre-multiplied alpha, but I have to compensate for change in alpha
 		//color.rgb *= alpha_corrected / alpha_stored;
@@ -76,6 +110,8 @@ void main()
 		}
 
 		color.rgb = vec3(1.0);
+
+
 
 		// apply lighting
 		if (use_shading) {

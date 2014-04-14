@@ -2,7 +2,7 @@
 #define __medleap__VolumeRenderer__
 
 #include "gl/glew.h"
-#include "math/Matrix4.h"
+#include "gl/math/Matrix4.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
 #include "gl/Buffer.h"
@@ -10,6 +10,9 @@
 #include "data/VolumeData.h"
 #include "util/Camera.h"
 #include "layers/Renderer.h"
+#include "gl/Renderbuffer.h"
+#include "gl/util/RenderTarget.h"
+#include "gl/util/FullScreenQuad.h"
 
 class VolumeRenderer : public Renderer
 {
@@ -37,10 +40,18 @@ public:
     void toggleShading();
     int getNumSamples();
     
-    void setCLUTTexture(gl::Texture* texture);
+    void setCLUTTexture(gl::Texture& texture);
     
     void setOpacityScale(float scale);
     float getOpacityScale();
+
+
+	// TODO: cleanup
+	float cursorRadius;
+	bool cursorActive;
+	gl::Buffer cursor3DVBO;
+	gl::Program cursor3DShader;
+	Vec3 cursor3D;
     
 private:
 	bool lightBackground;
@@ -49,35 +60,25 @@ private:
     int numSamples;
     bool dirty;
     bool drawnHighRes;
-    gl::Texture* volumeTexture;
-    gl::Texture* gradientTexture;
+    gl::Texture volumeTexture;
+    gl::Texture gradientTexture;
     VolumeData* volume;
     Camera camera;
     Mat4 model;
     float opacityScale;
     
-    // color look-up table texture
-    gl::Texture* clutTexture;
-    
-    // grid
-    gl::Program* lineShader;
-    GLuint vao;
-    GLuint vbo;
-    int numGridVerts;
-    
+    gl::Texture clutTexture;
+        
     // proxy geometry
-    gl::Program* boxShader;
+    gl::Program boxShader;
     int numSliceIndices;
-    gl::Buffer* proxyVertices;
-    gl::Buffer* proxyIndices;
+    gl::Buffer proxyVertices;
+    gl::Buffer proxyIndices;
     
     // render to texture 
-    gl::Framebuffer* lowResFBO;
-    gl::Texture* lowResTexture;
-    gl::Framebuffer* fullResFBO;
-    gl::Texture* fullResTexture;
-    gl::Program* sceneProgram;
-    gl::Buffer* sceneBuffer;
+	gl::RenderTarget fullResRT;
+	gl::RenderTarget lowResRT;
+	gl::FullScreenQuad fullScreenQuad;
     
     void updateSlices(int numSlices);
     

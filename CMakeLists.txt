@@ -60,14 +60,20 @@ source_group("fonts" FILES ${DATA_FONTS})
 file(GLOB SOURCE_GL src/gl/*.cpp src/gl/*.c src/gl/*.h)
 source_group("gl" FILES ${SOURCE_GL})
 
+file(GLOB SOURCE_GL_GEOM src/gl/geom/*.cpp src/gl/geom/*.h)
+source_group("gl\\geom" FILES ${SOURCE_GL_GEOM})
+
+file(GLOB SOURCE_GL_UTIL src/gl/util/*.cpp src/gl/util/*.h)
+source_group("gl\\util" FILES ${SOURCE_GL_UTIL})
+
+file(GLOB SOURCE_GL_MATH src/gl/math/*.cpp src/gl/math/*.h)
+source_group("gl\\math" FILES ${SOURCE_GL_MATH})
+
 file(GLOB SOURCE_MAIN src/main/*.cpp src/main/*.h)
 source_group("main" FILES ${SOURCE_MAIN})
 
 file(GLOB SOURCE_DATA src/data/*.cpp src/data/*.h)
 source_group("data" FILES ${SOURCE_DATA})
-
-file(GLOB SOURCE_MATH src/math/*.cpp src/math/*.h)
-source_group("math" FILES ${SOURCE_MATH})
 
 file(GLOB SOURCE_UTIL src/util/*.cpp src/util/*.h)
 source_group("util" FILES ${SOURCE_UTIL})
@@ -108,7 +114,9 @@ set(SOURCE_AND_RESOURCES
     ${SOURCE_LAYER_VOLORNT}
 	${SOURCE_LAYER_MENU}
     ${SOURCE_GL}
-    ${SOURCE_MATH}
+	${SOURCE_GL_MATH}
+    ${SOURCE_GL_GEOM}
+    ${SOURCE_GL_UTIL}
     ${SOURCE_UTIL}
     ${DATA_SHADERS}
     ${DATA_FONTS}
