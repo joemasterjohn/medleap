@@ -5,7 +5,6 @@
 #include <iomanip>
 #include <cmath>
 
-
 /// 4D Vector with X, Y, Z, and W components.
 template <typename T> class Vector4
 {
@@ -28,7 +27,7 @@ public:
     
     /// Constructs a 4D vector with components set to given values.
     Vector4<T>(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
-    
+
     /// Constructs a 4D vector by copying the values from v.
     Vector4<T>(const Vector4<T>& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
     

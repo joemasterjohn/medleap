@@ -1,13 +1,12 @@
 #include "VolumeRenderer.h"
 #include "gl/math/Transform.h"
 #include "BoxSlicer.h"
-#include "gl/geom/Box.h"
 #include "gl/util/Draw.h"
 
 using namespace gl;
 using namespace std;
 
-VolumeRenderer::VolumeRenderer()
+VolumeRenderer::VolumeRenderer() : cursorGeom(1, 2)
 {
     dirty = true;
     numSamples = 256;
@@ -17,7 +16,7 @@ VolumeRenderer::VolumeRenderer()
     drawnHighRes = false;
 	lightBackground = false;
 	cursorActive = false;
-	cursorRadius = 0.05;
+	cursorRadius = 0.1;
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -103,7 +102,7 @@ void VolumeRenderer::init()
 	cursor3DShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 	cursor3DVBO = Buffer::genVertexBuffer();
 	cursor3DVBO.bind();
-	Box(cursorRadius*2).fill(cursor3DVBO);
+	cursorGeom.fill(cursor3DVBO);
 }
 
 float VolumeRenderer::getOpacityScale()
@@ -120,7 +119,7 @@ void VolumeRenderer::setOpacityScale(float scale)
 void VolumeRenderer::resize(int width, int height)
 {
 	fullResRT.resize(width, height);
-	lowResRT.resize(width, height);
+	lowResRT.resize(width/2, height/2);
 	camera.setProjection(perspective(0.8726388f, viewport.aspect(), 0.1f, 100.0f));
     markDirty();
 }
@@ -141,16 +140,22 @@ void VolumeRenderer::updateSlices(int numSlices)
 
 void VolumeRenderer::draw(int numSlices)
 {
+
 	glEnable(GL_DEPTH_TEST);
 	{
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		cursor3DShader.enable();
 		cursor3DVBO.bind();
 		glUniform4f(cursor3DShader.getUniform("color"), 0.0f, cursorActive ? 1.0f : 0.0f, 1.0f, 1.0f);
-		glUniformMatrix4fv(cursor3DShader.getUniform("modelViewProjection"), 1, false, camera.getProjection() * camera.getView() * translation(cursor3D));
+		glUniformMatrix4fv(cursor3DShader.getUniform("modelViewProjection"), 1, false, camera.getProjection() * camera.getView() * translation(cursor3D) * scale(cursorRadius, cursorRadius, cursorRadius));
 		int loc = cursor3DShader.getAttribute("vs_position");
 		glEnableVertexAttribArray(loc);
 		glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, cursorGeom.getIndices().size());
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDisable(GL_CULL_FACE);
 	}
 
     // proxy geometry
@@ -209,8 +214,7 @@ void VolumeRenderer::draw(int numSlices)
 
 	glUniform1f(boxShader.getUniform("cursor_radius_ws"), cursorRadius);
 	float cursorRadiusSS = gl::projectedRadius(0.8726388, (cursor3D - camera.getEye()).length(), cursorRadius) * viewport.height / 2.0f;
-	std::cout << cursorRadiusSS << std::endl;
-	glUniform1f(boxShader.getUniform("cursor_radius_ss"), cursorRadius);
+	glUniform1f(boxShader.getUniform("cursor_radius_ss"), cursorRadiusSS);
 
 	glUniform2f(boxShader.getUniform("window_size"), viewport.width, viewport.height);
 

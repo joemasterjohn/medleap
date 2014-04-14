@@ -43,7 +43,7 @@ MainController& MainController::getInstance()
 MainController::MainController() :
     volume(NULL)
 {
-    mode = MODE_2D;
+    mode = MODE_3D;
     showHistogram = true;
 	menuOn = false;
 }

@@ -57,11 +57,16 @@ float cursorAlpha()
 
 	float d = length(vec2(x_w, y_w) - cursor_position_ss.xy);
 
+	bool frontAOI = cursor_position_es.z < fs_voxel_position_es.z;
+	bool inCursorZone = d < cursor_radius_ss;
 	bool outsideAOI = length(fs_voxel_position_ws - cursor_position) > cursor_radius_ws;
 
-	if ((cursor_position_es.z < fs_voxel_position_es.z) && (d < cursor_radius_ss) && outsideAOI) {
-		return 0.0;	
+	if (inCursorZone && frontAOI) {
+		//float dd = length(fs_voxel_position_ws - cursor_position) - cursor_radius_ws;
+		//return max(1.0 - dd / cursor_radius_ws, 0.0);
+		return max(0.0, 1.0 - (length(fs_voxel_position_ws - cursor_position) - cursor_radius_ws) * 4.0);
 	}
+
 	return 1.0;
 }
 
@@ -85,12 +90,12 @@ void main()
 
 	} else if (render_mode == RENDER_MODE_VR) {
 		// opacity correction
-		float alpha_stored = color.a * cursorAlpha();
+		float alpha_stored = color.a;
 
 	
 
 		float alpha_corrected = 1.0 - pow(1.0 - alpha_stored * opacity_scale, opacity_correction);
-		color.a = alpha_corrected;
+		color.a = alpha_corrected * cursorAlpha();
 
 
 

@@ -13,6 +13,7 @@
 #include "gl/Renderbuffer.h"
 #include "gl/util/RenderTarget.h"
 #include "gl/util/FullScreenQuad.h"
+#include "gl/geom/Sphere.h"
 
 class VolumeRenderer : public Renderer
 {
@@ -52,6 +53,7 @@ public:
 	gl::Buffer cursor3DVBO;
 	gl::Program cursor3DShader;
 	Vec3 cursor3D;
+	gl::Sphere cursorGeom;
     
 private:
 	bool lightBackground;
