@@ -272,9 +272,9 @@ void VolumeRenderer::draw()
     glClearColor(1, 1, 1, 1);
  
     static int cleanFrames = 0;
-    
+	static gl::Texture currentTexture;
+
     // draw to texture
-    gl::Texture currentTexture;
     if (dirty) {
 		lowResRT.bind();
 		lowResRT.clear();
