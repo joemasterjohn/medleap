@@ -42,6 +42,12 @@ bool VolumeController::keyboardInput(GLFWwindow* window, int key, int action, in
 		if (action == GLFW_PRESS)
 			renderer.toggleShading();
 		break;
+	case GLFW_KEY_J:
+		if (action == GLFW_PRESS) {
+			renderer.useJitter = !renderer.useJitter;
+			renderer.markDirty();
+		}
+		break;
 	}
 
     return true;

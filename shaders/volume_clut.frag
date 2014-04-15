@@ -26,6 +26,10 @@ uniform vec3 cursor_position_ss;
 uniform float cursor_radius_ws;
 uniform float cursor_radius_ss;
 
+uniform float sampling_length;
+uniform bool use_jitter;
+uniform float jitter_size;
+
 #define RENDER_MODE_MIP 0
 #define RENDER_MODE_VR 1
 #define RENDER_MODE_ISO 2
@@ -39,10 +43,10 @@ in vec3 fs_voxel_position_ss;
 out vec4 display_color;
 
 
-float shading()
+float shading(vec3 samplePos)
 {
 	// get gradient vector and scale it back to original
-	vec3 g = texture(tex_gradients, fs_texcoord).rgb;
+	vec3 g = texture(tex_gradients, samplePos).rgb;
 	g.x = g.x * rangeGradient.x + minGradient.x;
 	g.y = g.y * rangeGradient.y + minGradient.y;
 	g.z = g.z * rangeGradient.z + minGradient.z;
@@ -74,16 +78,21 @@ float cursorAlpha()
 
 void main()
 {
-	// stochastic jittering of sample position (need window position of frag) (MOVE WPOS TO VERTEX SHADER)
-	vec2 WPOS = fs_voxel_position_ss.x * window_size;
-	vec3 rayDir = fs_voxel_position_es;
-	vec3 samplePos = fs_texcoord + rayDir * texture(tex_jitter, WPOS / vec2(32.0)).x;
-
+	vec3 samplePos = fs_texcoord;
+	if (use_jitter)
+	{
+		// stochastic jittering of sample position (need window position of frag) (MOVE WPOS TO VERTEX SHADER)
+		vec2 WPOS = (vec2(1.0) + fs_voxel_position_ss.xy) * window_size * 0.5;
+		samplePos += texture(tex_jitter, WPOS / jitter_size).x * normalize(fs_voxel_position_ws) * sampling_length;
+	}
+	
     // get raw value stored in volume (normalized to [0, 1])
     float value = texture(tex_volume, samplePos).r;
     if (signed_normalized) {
         value = value * 0.5 + 0.5;
     }
+
+
 
 	// apply value-of-interest (window) LUT
     value = (value - window_min) * window_multiplier;
@@ -113,7 +122,7 @@ void main()
 
 		// apply lighting
 		if (use_shading) {
-			color.rgb *= shading();
+			color.rgb *= shading(samplePos);
 		}
 	} else if (render_mode == RENDER_MODE_ISO) {
 		if (value < isoValue) {
@@ -126,7 +135,7 @@ void main()
 
 		// apply lighting
 		if (use_shading) {
-			color.rgb *= shading();
+			color.rgb *= shading(samplePos);
 		}
 	}
 

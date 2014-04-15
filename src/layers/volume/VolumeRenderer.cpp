@@ -17,6 +17,7 @@ VolumeRenderer::VolumeRenderer() : cursorGeom(1, 2)
 	lightBackground = false;
 	cursorActive = false;
 	cursorRadius = 0.1;
+	useJitter = false;
 	bgColor = Vec3(1, 1, 1);
 }
 
@@ -116,6 +117,10 @@ void VolumeRenderer::init()
 		
 		jitterTexture.generate(GL_TEXTURE_2D);
 		jitterTexture.bind();
+		jitterTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		jitterTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		jitterTexture.setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+		jitterTexture.setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 		jitterTexture.setData2D(GL_RED, size, size, GL_RED, GL_UNSIGNED_BYTE, &buf[0]);
 	}
 }
@@ -165,6 +170,8 @@ void VolumeRenderer::updateSlices(double samplingScale, bool limitSamples)
 		currentNumSlices = min(max(currentNumSlices, minSlices), maxSlices);
 
 	glUniform1f(boxShader.getUniform("opacity_correction"), static_cast<float>(idealNumSamples) / currentNumSlices);
+	glUniform1f(boxShader.getUniform("sampling_length"), 1.0f / currentNumSlices);
+	glUniform1f(boxShader.getUniform("jitter_size"),  32.0f);
 
 	// upload geometry
     BoxSlicer slicer;
@@ -176,7 +183,7 @@ void VolumeRenderer::updateSlices(double samplingScale, bool limitSamples)
     numSliceIndices = static_cast<int>(slicer.getIndices().size());
 }
 
-void VolumeRenderer::draw(double samplingScale, bool limitSamples)
+void VolumeRenderer::draw(double samplingScale, bool limitSamples, int w, int h)
 {
 
 
@@ -229,6 +236,7 @@ void VolumeRenderer::draw(double samplingScale, bool limitSamples)
 
 	glUniform1i(boxShader.getUniform("render_mode"), renderMode);
 
+	glUniform1i(boxShader.getUniform("use_jitter"), useJitter);
 
 
 
@@ -264,7 +272,7 @@ void VolumeRenderer::draw(double samplingScale, bool limitSamples)
 	float cursorRadiusSS = gl::projectedRadius(0.8726388, (cursor3D - camera.getEye()).length(), cursorRadius) * viewport.height / 2.0f;
 	glUniform1f(boxShader.getUniform("cursor_radius_ss"), cursorRadiusSS);
 
-	glUniform2f(boxShader.getUniform("window_size"), viewport.width, viewport.height);
+	glUniform2f(boxShader.getUniform("window_size"), w, h);
 
 
 	glUniform1i(boxShader.getUniform("cursor_on"), true);
@@ -333,7 +341,7 @@ void VolumeRenderer::draw()
     if (dirty) {
 		lowResRT.bind();
 		lowResRT.clear();
-        draw(0.5, true);
+        draw(0.5, true, lowResRT.getColorTarget().getWidth(), lowResRT.getColorTarget().getHeight());
 		lowResRT.unbind();
         dirty = false;
         drawnHighRes = false;
@@ -342,7 +350,7 @@ void VolumeRenderer::draw()
     } else if (!drawnHighRes && cleanFrames++ > 30) {
 		fullResRT.bind();
 		fullResRT.clear();
-        draw(2.0, false);
+		draw(2.0, false, fullResRT.getColorTarget().getWidth(), fullResRT.getColorTarget().getHeight());
 		fullResRT.unbind();
         drawnHighRes = true;
         currentTexture = fullResRT.getColorTarget();

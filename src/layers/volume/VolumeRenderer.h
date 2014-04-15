@@ -55,6 +55,7 @@ public:
 	gl::Program cursor3DShader;
 	Vec3 cursor3D;
 	gl::Sphere cursorGeom;
+	bool useJitter;
     
 private:
 	bool lightBackground;
@@ -89,7 +90,7 @@ private:
     
     void updateSlices(double samplingScale, bool limitSamples);
     
-    void draw(double samplingScale, bool limitSamples);
+    void draw(double samplingScale, bool limitSamples, int width, int height);
 };
 
 #endif /* defined(__medleap__VolumeRenderer__) */

@@ -113,6 +113,11 @@ void VolumeInfoRenderer::draw()
 	os.str("");
 	os << "Samples: " << volumeRenderer->getCurrentNumSlices();
 	drawText(os.str(), textRow++);
+
+	// Stochastic Jitter
+	os.str("");
+	os << "Jitter: " << (volumeRenderer->useJitter ? "true" : "false");
+	drawText(os.str(), textRow++);
     
     // VOI LUT (window) values
     float wc = volume->getCurrentWindow().getCenterReal();
