@@ -39,13 +39,14 @@ public:
     
     bool useShading();
     void toggleShading();
-    int getNumSamples();
     
     void setCLUTTexture(gl::Texture& texture);
     
     void setOpacityScale(float scale);
     float getOpacityScale();
+	Vec3 getBackgroundColor();
 
+	unsigned getCurrentNumSlices();
 
 	// TODO: cleanup
 	float cursorRadius;
@@ -59,15 +60,19 @@ private:
 	bool lightBackground;
     bool shading;
     RenderMode renderMode;
-    int numSamples;
     bool dirty;
     bool drawnHighRes;
     gl::Texture volumeTexture;
     gl::Texture gradientTexture;
+	gl::Texture jitterTexture;
     VolumeData* volume;
     Camera camera;
     Mat4 model;
     float opacityScale;
+	unsigned minSlices;
+	unsigned maxSlices;
+	unsigned currentNumSlices;
+	Vec3 bgColor;
     
     gl::Texture clutTexture;
         
@@ -82,9 +87,9 @@ private:
 	gl::RenderTarget lowResRT;
 	gl::FullScreenQuad fullScreenQuad;
     
-    void updateSlices(int numSlices);
+    void updateSlices(double samplingScale, bool limitSamples);
     
-    void draw(int numSlices);
+    void draw(double samplingScale, bool limitSamples);
 };
 
 #endif /* defined(__medleap__VolumeRenderer__) */

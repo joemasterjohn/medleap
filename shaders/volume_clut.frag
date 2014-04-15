@@ -3,6 +3,8 @@
 uniform sampler3D tex_volume;
 uniform sampler3D tex_gradients;
 uniform sampler1D tex_clut;
+uniform sampler2D tex_jitter;
+
 uniform float window_min;
 uniform float window_multiplier;
 uniform vec3 volumeDimensions;
@@ -72,8 +74,13 @@ float cursorAlpha()
 
 void main()
 {
+	// stochastic jittering of sample position (need window position of frag) (MOVE WPOS TO VERTEX SHADER)
+	vec2 WPOS = fs_voxel_position_ss.x * window_size;
+	vec3 rayDir = fs_voxel_position_es;
+	vec3 samplePos = fs_texcoord + rayDir * texture(tex_jitter, WPOS / vec2(32.0)).x;
+
     // get raw value stored in volume (normalized to [0, 1])
-    float value = texture(tex_volume, fs_texcoord).r;
+    float value = texture(tex_volume, samplePos).r;
     if (signed_normalized) {
         value = value * 0.5 + 0.5;
     }
@@ -85,9 +92,8 @@ void main()
 	// color/opacity from look-up table using windowed data value
 	vec4 color = texture(tex_clut, value).rgba;
 
-
 	if (render_mode == RENDER_MODE_MIP) {
-
+	
 	} else if (render_mode == RENDER_MODE_VR) {
 		// opacity correction
 		float alpha_stored = color.a;
@@ -95,7 +101,7 @@ void main()
 	
 
 		float alpha_corrected = 1.0 - pow(1.0 - alpha_stored * opacity_scale, opacity_correction);
-		color.a = alpha_corrected * cursorAlpha();
+		color.a = alpha_corrected;// * cursorAlpha();
 
 
 

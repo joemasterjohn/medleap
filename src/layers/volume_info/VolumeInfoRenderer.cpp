@@ -43,7 +43,16 @@ void VolumeInfoRenderer::drawText(const std::string& s, int row)
 void VolumeInfoRenderer::draw()
 {
     TextRenderer& text = MainController::getInstance().getText();
-    text.setColor(1, 1, 1);
+
+	if (MainController::getInstance().getMode() == MainController::MODE_3D) {
+		Vec3 c = Vec3(1.0f) - volumeRenderer->getBackgroundColor();
+		text.setColor(c.x, c.y, c.z);
+	}
+	else {
+		text.setColor(1, 1, 1);
+	}
+
+    
     text.begin(windowWidth, windowHeight);
     
 	ostringstream os;
@@ -102,7 +111,7 @@ void VolumeInfoRenderer::draw()
     
     // Rendering sample rate
 	os.str("");
-	os << "Samples: " << volumeRenderer->getNumSamples();
+	os << "Samples: " << volumeRenderer->getCurrentNumSlices();
 	drawText(os.str(), textRow++);
     
     // VOI LUT (window) values

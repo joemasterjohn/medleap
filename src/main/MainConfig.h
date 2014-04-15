@@ -14,6 +14,8 @@ public:
     static const std::string USE_SRGB;
     static const std::string MULTISAMPLING;
     static const std::string SAMPLES;
+	static const std::string MIN_SLICES;
+	static const std::string MAX_SLICES;
 };
 
 #endif /* defined(__medleap__MainConfig__) */

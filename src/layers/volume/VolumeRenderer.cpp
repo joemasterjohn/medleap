@@ -2,6 +2,7 @@
 #include "gl/math/Transform.h"
 #include "BoxSlicer.h"
 #include "gl/util/Draw.h"
+#include "main/MainConfig.h"
 
 using namespace gl;
 using namespace std;
@@ -9,7 +10,6 @@ using namespace std;
 VolumeRenderer::VolumeRenderer() : cursorGeom(1, 2)
 {
     dirty = true;
-    numSamples = 256;
     opacityScale = 1.0f;
     renderMode = VR;
     shading = true;
@@ -17,6 +17,7 @@ VolumeRenderer::VolumeRenderer() : cursorGeom(1, 2)
 	lightBackground = false;
 	cursorActive = false;
 	cursorRadius = 0.1;
+	bgColor = Vec3(1, 1, 1);
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -57,11 +58,6 @@ VolumeRenderer::RenderMode VolumeRenderer::getMode()
     return renderMode;
 }
 
-int VolumeRenderer::getNumSamples()
-{
-    return numSamples;
-}
-
 void VolumeRenderer::toggleShading()
 {
     shading = !shading;
@@ -94,6 +90,7 @@ void VolumeRenderer::init()
     glUniform1i(boxShader.getUniform("tex_volume"), 0);
     glUniform1i(boxShader.getUniform("tex_gradients"), 1);
     glUniform1i(boxShader.getUniform("tex_clut"), 2);
+	glUniform1i(boxShader.getUniform("tex_jitter"), 3);
 
 	fullResRT.generate(viewport.width, viewport.height, true);
 	lowResRT.generate(viewport.width/2, viewport.height/2, true);
@@ -103,6 +100,24 @@ void VolumeRenderer::init()
 	cursor3DVBO = Buffer::genVertexBuffer();
 	cursor3DVBO.bind();
 	cursorGeom.fill(cursor3DVBO);
+
+	MainConfig cfg;
+	minSlices = cfg.getValue<unsigned>(MainConfig::MIN_SLICES);
+	maxSlices = cfg.getValue<unsigned>(MainConfig::MAX_SLICES);
+
+
+	// stochastic jittering texture
+	{
+		unsigned size = 32;
+		vector<unsigned char> buf;
+		srand((unsigned)time(NULL));
+		for (unsigned i = 0; i < size*size; ++i)
+			buf.push_back(static_cast<unsigned char>(rand() * 255.0 / RAND_MAX));
+		
+		jitterTexture.generate(GL_TEXTURE_2D);
+		jitterTexture.bind();
+		jitterTexture.setData2D(GL_RED, size, size, GL_RED, GL_UNSIGNED_BYTE, &buf[0]);
+	}
 }
 
 float VolumeRenderer::getOpacityScale()
@@ -124,41 +139,68 @@ void VolumeRenderer::resize(int width, int height)
     markDirty();
 }
 
-void VolumeRenderer::updateSlices(int numSlices)
+unsigned VolumeRenderer::getCurrentNumSlices()
 {
+	return currentNumSlices;
+}
+
+Vec3 VolumeRenderer::getBackgroundColor()
+{
+	return renderMode == MIP ? Vec3(0.0f) : bgColor;
+}
+
+void VolumeRenderer::updateSlices(double samplingScale, bool limitSamples)
+{
+	// calculate ideal number of samples as twice the number of voxels along view direction
+	float ax = abs(camera.getForward().x);
+	float ay = abs(camera.getForward().y);
+	float az = abs(camera.getForward().z);
+	Vec3 forwardRay(ax, ay, az);
+	Vec3 volumeDim(volume->getWidth(), volume->getHeight(), volume->getDepth());
+	int idealNumSamples = forwardRay.dot(volumeDim);
+
+	// calculate number of slices to use, but don't go over max
+	currentNumSlices = idealNumSamples * samplingScale;
+	if (limitSamples)
+		currentNumSlices = min(max(currentNumSlices, minSlices), maxSlices);
+
+	glUniform1f(boxShader.getUniform("opacity_correction"), static_cast<float>(idealNumSamples) / currentNumSlices);
+
+	// upload geometry
     BoxSlicer slicer;
-    slicer.slice(volume->getBounds(), camera, numSlices);
-    
+	slicer.slice(volume->getBounds(), camera, currentNumSlices);
     proxyIndices.bind();
     proxyIndices.setData(&slicer.getIndices()[0], slicer.getIndices().size() * sizeof(GLushort));
-    
     proxyVertices.bind();
     proxyVertices.setData(&slicer.getVertices()[0], slicer.getVertices().size() * sizeof(slicer.getVertices()[0]));
-    
     numSliceIndices = static_cast<int>(slicer.getIndices().size());
 }
 
-void VolumeRenderer::draw(int numSlices)
+void VolumeRenderer::draw(double samplingScale, bool limitSamples)
 {
 
-	glEnable(GL_DEPTH_TEST);
-	{
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		cursor3DShader.enable();
-		cursor3DVBO.bind();
-		glUniform4f(cursor3DShader.getUniform("color"), 0.0f, cursorActive ? 1.0f : 0.0f, 1.0f, 1.0f);
-		glUniformMatrix4fv(cursor3DShader.getUniform("modelViewProjection"), 1, false, camera.getProjection() * camera.getView() * translation(cursor3D) * scale(cursorRadius, cursorRadius, cursorRadius));
-		int loc = cursor3DShader.getAttribute("vs_position");
-		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
-		glDrawArrays(GL_TRIANGLES, 0, cursorGeom.getIndices().size());
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDisable(GL_CULL_FACE);
-	}
+
+
+	//glEnable(GL_DEPTH_TEST);
+	//{
+	//	glEnable(GL_CULL_FACE);
+	//	glCullFace(GL_FRONT);
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//	cursor3DShader.enable();
+	//	cursor3DVBO.bind();
+	//	glUniform4f(cursor3DShader.getUniform("color"), 0.0f, cursorActive ? 1.0f : 0.0f, 1.0f, 1.0f);
+	//	glUniformMatrix4fv(cursor3DShader.getUniform("modelViewProjection"), 1, false, camera.getProjection() * camera.getView() * translation(cursor3D) * scale(cursorRadius, cursorRadius, cursorRadius));
+	//	int loc = cursor3DShader.getAttribute("vs_position");
+	//	glEnableVertexAttribArray(loc);
+	//	glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
+	//	glDrawArrays(GL_TRIANGLES, 0, cursorGeom.getIndices().size());
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//	glDisable(GL_CULL_FACE);
+	//}
 
     // proxy geometry
+	glActiveTexture(GL_TEXTURE3);
+	jitterTexture.bind();
     glActiveTexture(GL_TEXTURE2);
     clutTexture.bind();
     glActiveTexture(GL_TEXTURE1);
@@ -166,10 +208,13 @@ void VolumeRenderer::draw(int numSlices)
     glActiveTexture(GL_TEXTURE0);
     volumeTexture.bind();
     
-    updateSlices(numSlices);
+
     
     
     boxShader.enable();
+
+	updateSlices(samplingScale, limitSamples);
+
     
     Mat4 mvp = camera.getProjection() * camera.getView();
     glUniformMatrix4fv(boxShader.getUniform("modelViewProjection"), 1, false, mvp);
@@ -184,7 +229,10 @@ void VolumeRenderer::draw(int numSlices)
 
 	glUniform1i(boxShader.getUniform("render_mode"), renderMode);
 
-	glUniform1f(boxShader.getUniform("opacity_correction"), static_cast<float>(numSamples) / numSlices);
+
+
+
+
     glUniform3f(boxShader.getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
     
     glUniform3f(boxShader.getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
@@ -261,19 +309,22 @@ void VolumeRenderer::draw(int numSlices)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendEquation(GL_FUNC_ADD);
     
-	static Draw d;
-	d.setModelViewProj(gl::ortho2D(0, viewport.width, 0, viewport.height));
-	d.begin(GL_LINES);
-	d.color(1, 0, 0);
-	d.circle(cpss.x, cpss.y, cursorRadiusSS, 32);
-	d.end();
-	d.draw();
+	//static Draw d;
+	//d.setModelViewProj(gl::ortho2D(0, viewport.width, 0, viewport.height));
+	//d.begin(GL_LINES);
+	//d.color(1, 0, 0);
+	//d.circle(cpss.x, cpss.y, cursorRadiusSS, 32);
+	//d.end();
+	//d.draw();
 
 }
 
 void VolumeRenderer::draw()
 {
-    glClearColor(1, 1, 1, 1);
+	if (renderMode == MIP)
+		glClearColor(0, 0, 0, 0);
+	else
+		glClearColor(bgColor.x, bgColor.y, bgColor.z, 1);
  
     static int cleanFrames = 0;
 	static gl::Texture currentTexture;
@@ -282,7 +333,7 @@ void VolumeRenderer::draw()
     if (dirty) {
 		lowResRT.bind();
 		lowResRT.clear();
-        draw(numSamples);
+        draw(0.5, true);
 		lowResRT.unbind();
         dirty = false;
         drawnHighRes = false;
@@ -291,7 +342,7 @@ void VolumeRenderer::draw()
     } else if (!drawnHighRes && cleanFrames++ > 30) {
 		fullResRT.bind();
 		fullResRT.clear();
-        draw(numSamples * 8);
+        draw(2.0, false);
 		fullResRT.unbind();
         drawnHighRes = true;
         currentTexture = fullResRT.getColorTarget();
