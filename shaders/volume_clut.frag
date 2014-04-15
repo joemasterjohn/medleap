@@ -29,6 +29,7 @@ uniform float cursor_radius_ss;
 uniform float sampling_length;
 uniform bool use_jitter;
 uniform float jitter_size;
+uniform vec3 camera_pos;
 
 #define RENDER_MODE_MIP 0
 #define RENDER_MODE_VR 1
@@ -82,8 +83,9 @@ void main()
 	if (use_jitter)
 	{
 		// stochastic jittering of sample position (need window position of frag) (MOVE WPOS TO VERTEX SHADER)
+		// rayDir is NOT the world position; it should be world_pos - eye_pos_ws
 		vec2 WPOS = (vec2(1.0) + fs_voxel_position_ss.xy) * window_size * 0.5;
-		samplePos += texture(tex_jitter, WPOS / jitter_size).x * normalize(fs_voxel_position_ws) * sampling_length;
+		samplePos += texture(tex_jitter, WPOS / jitter_size).x * normalize(fs_voxel_position_ws - camera_pos) * sampling_length * 3.0;
 	}
 	
     // get raw value stored in volume (normalized to [0, 1])

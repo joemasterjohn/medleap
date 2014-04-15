@@ -244,7 +244,8 @@ void VolumeRenderer::draw(double samplingScale, bool limitSamples, int w, int h)
 
 
     glUniform3f(boxShader.getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
-    
+	glUniform3f(boxShader.getUniform("camera_pos"), camera.getEye().x, camera.getEye().y, camera.getEye().z);
+
     glUniform3f(boxShader.getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
     glUniform1f(boxShader.getUniform("opacity_scale"), opacityScale);
     Vec3 r = volume->getMaxGradient() - volume->getMinGradient();
