@@ -2,12 +2,16 @@
 
 using namespace gl;
 
-RenderTarget::RenderTarget() : colorFormat(GL_RGB), colorType(GL_UNSIGNED_BYTE), depthFormat(GL_DEPTH_COMPONENT16)
+RenderTarget::RenderTarget() : intColorFormat(GL_RGB), colorFormat(GL_RGB), colorType(GL_UNSIGNED_BYTE), depthFormat(GL_DEPTH_COMPONENT16)
 {
 }
 
 void RenderTarget::setColorFormat(GLenum format) {
 	colorFormat = format;
+}
+
+void RenderTarget::setInternalColorFormat(GLenum format) {
+	intColorFormat = format;
 }
 
 void RenderTarget::setColorType(GLenum type) {
@@ -42,7 +46,7 @@ void RenderTarget::generate(GLsizei width, GLsizei height, bool useDepth) {
 	colorTarget.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	colorTarget.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	colorTarget.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	colorTarget.setData2D(colorFormat, width, height, colorFormat, colorType, 0);
+	colorTarget.setData2D(intColorFormat, width, height, colorFormat, colorType, 0);
 	colorTarget.unbind();
 	framebuffer.setColorTarget(0, colorTarget);
 
@@ -59,7 +63,7 @@ void RenderTarget::generate(GLsizei width, GLsizei height, bool useDepth) {
 
 void RenderTarget::resize(GLsizei width, GLsizei height) {
 	colorTarget.bind();
-	colorTarget.setData2D(colorFormat, width, height, colorFormat, colorType, 0);
+	colorTarget.setData2D(intColorFormat, width, height, colorFormat, colorType, 0);
 	colorTarget.unbind();
 	if (useDepth) {
 		depthTarget.bind();

@@ -16,6 +16,7 @@ namespace gl
 		RenderTarget();
 		void clear();
 		void setColorFormat(GLenum format);
+		void setInternalColorFormat(GLenum format);
 		void setColorType(GLenum type);
 		void setDepthFormat(GLenum format);
 		const gl::Texture& getColorTarget();
@@ -28,6 +29,7 @@ namespace gl
 		gl::Framebuffer framebuffer;
 		gl::Texture colorTarget;
 		gl::Renderbuffer depthTarget;
+		GLenum intColorFormat;
 		GLenum colorFormat;
 		GLenum colorType;
 		GLenum depthFormat;

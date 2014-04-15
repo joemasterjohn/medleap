@@ -93,7 +93,9 @@ void VolumeRenderer::init()
     glUniform1i(boxShader.getUniform("tex_clut"), 2);
 	glUniform1i(boxShader.getUniform("tex_jitter"), 3);
 
+	fullResRT.setInternalColorFormat(GL_RGB16F);
 	fullResRT.generate(viewport.width, viewport.height, true);
+	lowResRT.setInternalColorFormat(GL_RGB16F);
 	lowResRT.generate(viewport.width/2, viewport.height/2, true);
 	fullScreenQuad.generate();
 
