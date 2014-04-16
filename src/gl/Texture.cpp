@@ -100,6 +100,29 @@ void Texture::setData2D(GLint internalFormat,
     setData2D(0, internalFormat, width, height, format, type, data);
 }
 
+void Texture::setData3D(GLint level,
+				GLint internalFormat,
+			    GLsizei width,
+			    GLsizei height,
+			    GLsizei depth,
+			    GLenum format,
+			    GLenum type,
+			    const GLvoid* data)
+{
+	glTexImage3D(target, level, internalFormat, width, height, depth, 0, format, type, data);
+}
+
+void Texture::setData3D(GLint internalFormat,
+			    GLsizei width,
+			    GLsizei height,
+			    GLsizei depth,
+			    GLenum format,
+			    GLenum type,
+			    const GLvoid* data)
+{
+	setData3D(0, internalFormat, width, height, depth, format, type, data);
+}
+
 void Texture::setParameter(GLenum pname, GLint param)
 {
     glTexParameteri(target, pname, param);

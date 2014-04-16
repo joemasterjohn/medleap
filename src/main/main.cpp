@@ -8,7 +8,8 @@ int main(int argc, char** argv)
     controller.init();
     
     if (argc > 1) {
-        controller.setVolumeToLoad(argv[1]);
+		VolumeLoader::Source src = { argv[1], VolumeLoader::Source::DICOM_DIR };
+        controller.setVolumeToLoad(src);
     }
     
     controller.startLoop();

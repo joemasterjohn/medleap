@@ -86,13 +86,18 @@ void VolumeLoader::sortFiles(VolumeLoader::ID id, vector<string>& fileNames, dou
 	}
 }
 
-void VolumeLoader::setSource(const std::string& directoryPath)
+void VolumeLoader::setSource(const Source& source)
 {
-    std::vector<ID> ids = search(directoryPath);
-    if (!ids.empty())
-        setSource(ids[0]);
-    else
-        std::cout << "WARNING: directory does not seem to contain DICOM images" << std::endl;
+	if (source.type == Source::DICOM_DIR) {
+		std::vector<ID> ids = search(source.name);
+		if (!ids.empty())
+			setSource(ids[0]);
+		else
+			std::cout << "WARNING: directory does not seem to contain DICOM images" << std::endl;
+	}
+	else {
+		loadRAW(source.name);
+	}
 }
 
 void VolumeLoader::setSource(VolumeLoader::ID id)
@@ -113,6 +118,62 @@ VolumeLoader::State VolumeLoader::getState()
 std::string VolumeLoader::getStateMessage()
 {
     return stateMessage;
+}
+
+void VolumeLoader::loadRAW(const std::string& fileName)
+{
+	string datName = fileName.substr(0, fileName.size() - 4) + ".txt";
+	ifstream f(datName);
+	string line;
+
+	if (f.is_open()) {
+		this->state = LOADING;
+		stateMessage = "Reading RAW";
+
+		this->volume = new VolumeData;
+
+		getline(f, line);
+		volume->width = std::stoi(line);
+		getline(f, line);
+		volume->height = std::stoi(line);
+		getline(f, line);
+		volume->depth = std::stoi(line);
+
+		getline(f, line);
+		unsigned pixelBytes = std::stoi(line);
+
+		getline(f, line);
+		float x = std::stof(line);
+		getline(f, line);
+		float y = std::stof(line);
+		getline(f, line);
+		float z = std::stof(line);
+		f.close();
+
+		ifstream binary(fileName, ios::in | ios::binary);
+		volume->data = new char[volume->getNumVoxels()*pixelBytes];
+		binary.read(volume->data, volume->getNumVoxels()*pixelBytes);
+		binary.close();
+
+		volume->setVoxelSize(x, y, z);
+
+		if (pixelBytes == 1) {
+			volume->type = GL_UNSIGNED_BYTE;
+			calculateMinMax<GLubyte>();
+			volume->computeGradients<GLubyte>();
+		}
+		else {
+			volume->type = GL_UNSIGNED_SHORT;
+			calculateMinMax<GLushort>();
+			volume->computeGradients<GLushort>();
+		}
+		volume->format = GL_RED;
+		volume->name = fileName;
+		volume->windows.push_back(Window(volume->type));
+
+		this->state = FINISHED;
+		stateMessage = "Finished";
+	}
 }
 
 void VolumeLoader::load()
@@ -175,28 +236,28 @@ void VolumeLoader::load()
     
     // load first image (already in reader memory)
     img.GetBuffer(volume->data);
-    gl::flipImage(volume->data, volume->width, volume->height, volume->getPixelSize());
+    gl::flipImage(volume->data, volume->width, volume->height, volume->getPixelSizeBytes());
     
     // load all other images
     for (int i = 1; i < volume->depth; i++) {
-        size_t offset = i * volume->getImageSize();
+        size_t offset = i * volume->getSliceSizeBytes();
         ImageReader reader;
         reader.SetFileName(files[i].c_str());
         reader.Read();
         reader.GetImage().GetBuffer(volume->data + offset);
-        gl::flipImage(volume->data + offset, volume->width, volume->height, volume->getPixelSize());
+		gl::flipImage(volume->data + offset, volume->width, volume->height, volume->getPixelSizeBytes());
     }
-    
-    // give the series a reader to the first image so it can get meta data
-    volume->reader.SetFileName(files[0].c_str());
-    volume->reader.Read();
-    
-    // Z spacing should be regular between images (this is NOT slice thickness attribute)
-    const double* pixelSpacing = volume->getValues<const double*, 0x0028, 0x0030>();
-    volume->setVoxelSize(
-		static_cast<float>(pixelSpacing[0]), 
-		static_cast<float>(pixelSpacing[1]),
-		static_cast<float>(zSpacing));
+
+	// Z spacing should be regular between images (this is NOT slice thickness attribute)
+	{
+		Attribute<0x0028, 0x0030> at;
+		at.SetFromDataSet(dataSet);
+		const double* pixelSpacing = at.GetValues();
+		volume->setVoxelSize(
+			static_cast<float>(pixelSpacing[0]),
+			static_cast<float>(pixelSpacing[1]),
+			static_cast<float>(zSpacing));
+	}
     
     // Apply modality LUT (if possible) and update min/max values
     switch (volume->type)
@@ -273,6 +334,15 @@ void VolumeLoader::load()
     } else {
         volume->windows.push_back(Window(volume->type));
     }
+
+
+	{
+		Attribute<0x0010, 0x0010> at;
+		at.SetFromDataSet(dataSet);
+		std::string name = at.GetValue();
+		replace(name.begin(), name.end(), '^', ' ');
+		volume->name = name;
+	}
     
     state = FINISHED;
     stateMessage = "Finished";

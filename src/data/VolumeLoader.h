@@ -9,6 +9,14 @@
 class VolumeLoader
 {
 public:
+
+	struct Source
+	{
+		enum Type { DICOM_DIR, RAW };
+		std::string name;
+		Type type;
+	};
+
     /** Identifies a DICOM image series on disk */
     struct ID
     {
@@ -32,10 +40,12 @@ public:
     void setSource(ID seriesID);
     
     /** This will load the first image series found in a directory */
-    void setSource(const std::string& directoryPath);
+    void setSource(const Source& source);
     
     /** Stores file names sorted by Z into the fileNames parameter. Also stores the computed Z spacing into zSpacing parameter. */
     void sortFiles(ID seriesID, std::vector<std::string>& fileNames, double* zSpacing);
+
+	void loadRAW(const std::string& fileName);
 
     /** Retrieves the previously loaded volume, or NULL if it failed. The caller now owns the volume memory and is responsible for deleting it. After calling once this will return NULL until the next load is called. Resets the state to READY. */
     VolumeData* getVolume();

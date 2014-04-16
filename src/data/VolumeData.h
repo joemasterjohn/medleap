@@ -9,10 +9,8 @@
 #include "gl/math/Vector3.h"
 #include "gl/Texture.h"
 #include "gl/math/Matrix3.h"
-#include "gdcmReader.h"
-#include "gdcmAttribute.h"
 
-/** Volumetric data loaded from a DICOM image series. Stored in a regular grid of voxels. All voxel values are assumed to be an integer  format, 8 or 16 bits, signed or unsigned. */
+/** Volumetric data stored in a regular grid of voxels. All voxel values are assumed to be an integer format (8 or 16 bits) either signed or unsigned. */
 class VolumeData
 {
 public:
@@ -27,86 +25,78 @@ public:
     
     /** Clean up resources */
     ~VolumeData();
+
+	/** Name of the volume data */
+	const std::string& getName() const;
     
-    /** Dimensions of each voxel in real world units (ex. millimeters) */
-    const Vec3& getVoxelSize() const;
+    /** Returns a bounding box of the normalized real world size of the volume. */
+    const BoundingBox& getBounds() const;
     
-    /** Dimensions of the entire volume in millimeters */
-    Vec3 getDimensionsMM() const;
+	/** Size of each voxel in millimeters. Default is (1,1,1) for unknown modalities. */
+	Vec3 getVoxelSizeMillimeters() const;
+
+	/** Size of the volume in number of voxels */
+	Vector3<unsigned> getSizeVoxels() const;
+
+	/** Size of the volume in millimeters */
+	Vec3 getSizeMillimeters() const;
+
+	/** Size in bytes of the entire volume */
+	size_t getSizeBytes() const;
+
+	/** Size in bytes of a single slice in the volume (width * height * pixelSizeBytes) */
+	size_t getSliceSizeBytes() const;
+
+	/** Size in bytes of a single voxel */
+	size_t getPixelSizeBytes() const;
+
+    /** Number of voxels in X direction */
+    unsigned int getWidth() const;
     
-    /** Returns a bounding box of the normalized real world dimensions of the volume. */
-    const BoundingBox& getBounds();
+    /** Number of voxels in Y direction */
+    unsigned int getHeight() const;
     
-    /** Number of pixels horizontally in each slice */
-    unsigned int getWidth();
+    /** Number of voxels in Z direction */
+    unsigned int getDepth() const;
     
-    /** Number of pixels vertically in each slice */
-    unsigned int getHeight();
+    /** Total number of voxels in the volume (width * height * depth) */
+    unsigned int getNumVoxels() const;
     
-    /** Number of slices */
-    unsigned int getDepth();
+    /** Stored pixel type (GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, etc.) */
+    GLenum getType() const;
     
-    /** Size in bytes of a single slice/image */
-    unsigned int getImageSize();
-    
-    /** Size in bytes of a single pixel */
-    unsigned int getPixelSize();
-    
-    /** Size in bytes of all slices */
-    unsigned int getVolumeSize();
-    
-    /** Total number of voxels in the volume (WxHxD) */
-    unsigned int getNumVoxels();
-    
-    /** Type for channels in the images */
-    GLenum getType();
-    
+	/** Stored pixel format (currently always GL_RED / single channel) */
+	GLenum getFormat() const;
+
     /** Data is stored in a signed format */
-    bool isSigned();
+    bool isSigned() const;
     
     /** The minimum voxel value stored in the data */
-    int getMinValue();
+    int getMinValue() const;
     
     /** The maximum voxel value stored in the data */
-    int getMaxValue();
+    int getMaxValue() const;
 
     /** Returns the modality of the data */
-    Modality getModality();
+    Modality getModality() const;
     
+	/** Matrix that transforms DICOM image space (+X right, +Y down) to patient space (+X = left, +Y = posterior, +Z = superior) */
+	const Mat3& getPatientBasis() const;
+
+	/** Returns all gradient vectors */
+	const std::vector<Vec3>& getGradients() const;
+
+	/** Vector storing minimum x, y, and z components of all gradient vectors */
+	Vec3 getMinGradient() const;
+
+	/** Vector storing maximum x, y, and z components of all gradient vectors */
+	Vec3 getMaxGradient() const;
+
     /** Windows that store values of interest */
     std::vector<Window>& getWindows();
     
     /** The currently active voxel value window (determines which values are displayed) */
     Window& getCurrentWindow();
-    
-    /** Matrix that transforms DICOM image space (+X right, +Y down) to patient space (+X = left, +Y = posterior, +Z = superior) */
-    const Mat3& getPatientBasis() const;
-    
-    /** Checks if the DICOM tag <G,E> exists in the data set */
-    bool hasValue(uint16_t G, uint16_t E);
-    
-    /** Returns a value of type T with the DICOM tag <G,E>. */
-    template <typename T, uint16_t G, uint16_t E> T getValue() {
-        gdcm::Attribute<G,E> at;
-        at.SetFromDataSet(reader.GetFile().GetDataSet());
-        return at.GetValue();
-    }
-    
-    /** Returns a value of type T with the DICOM tag <G,E>. */
-    template <typename T, uint16_t G, uint16_t E> T getValues() {
-        gdcm::Attribute<G,E> at;
-        at.SetFromDataSet(reader.GetFile().GetDataSet());
-        return at.GetValues();
-    }
-    
-    /** Returns the value of a voxel (as a signed integer, not the type of the underlying data) */
-	template <typename T> int getVoxelValue(unsigned int x, unsigned int y, unsigned int z)
-    {
-        x = std::min(std::max(0u, x), width-1);
-        y = std::min(std::max(0u, y), height-1);
-        z = std::min(std::max(0u, z), depth-1);
-        return (int)(((T*)(data))[z * width * height + y * width + x]);
-    }
     
     /** Sets the size of each voxel in real world units */
     void setVoxelSize(float x, float y, float z);
@@ -117,28 +107,13 @@ public:
     /** Sets the current window to the previous available window */
     void setPrevWindow();
     
-    /** Stores all images/slices into a 3D texture (single channel per voxel) */
-    void loadTexture3D(gl::Texture& texture);
-    
-    /** Stores normalized gradient vectors in a 3D texture */
-    void loadGradientTexture(gl::Texture& texture);
-    
     /** Pointer to the raw data bytes */
     char* getData();
     
-    /** Vector storing minimum x, y, and z components of all gradient vectors */
-    const Vec3& getMinGradient();
-    
-    /** Vector storing maximum x, y, and z components of all gradient vectors */
-    const Vec3& getMaxGradient();
-    
-    /** Stored pixel format */
-    GLenum getFormat();
-    
-    GLenum internalFormat();
-    
 private:
+
     char* data;
+	std::string name;
     std::vector<Vec3> gradients;
     Vec3 minGradient;
     Vec3 maxGradient;
@@ -153,7 +128,6 @@ private:
     int maxVoxelValue;
     Vec3 voxelSize;
     BoundingBox* bounds;
-    gdcm::Reader reader;
     Modality modality;
     Mat3 orientation;
     std::vector<Window> windows;
@@ -162,6 +136,15 @@ private:
     /** Private constructor since loading is complex and done by the Loader class */
     VolumeData();
     
+	/** Returns the value of a voxel (as a signed integer, not the type of the underlying data) */
+	template <typename T> int value(unsigned int x, unsigned int y, unsigned int z)
+	{
+		x = std::min(std::max(0u, x), width - 1);
+		y = std::min(std::max(0u, y), height - 1);
+		z = std::min(std::max(0u, z), depth - 1);
+		return (int)(((T*)(data))[z * width * height + y * width + x]);
+	}
+
     /** Computes gradient vectors for this volume. Gradients are always stored as floats, regardless of the volume data type. */
     template<typename T> void computeGradients()
     {
@@ -170,14 +153,15 @@ private:
         minGradient = Vec3(minGradientMag);
         maxGradientMag = -std::numeric_limits<float>::infinity();
         maxGradient = Vec3(maxGradientMag);
-        
+
         // compute gradient vectors
+		Vec3 scale = Vec3(1.0f) / voxelSize * 2.0f;
         for (int z = 0; z < depth; z++) {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    float gx = (getVoxelValue<T>(x-1, y, z) - getVoxelValue<T>(x+1, y, z)) / (2.0f * voxelSize.x);
-					float gy = (getVoxelValue<T>(x, y - 1, z) - getVoxelValue<T>(x, y + 1, z)) / (2.0f * voxelSize.y);
-					float gz = (getVoxelValue<T>(x, y, z - 1) - getVoxelValue<T>(x, y, z + 1)) / (2.0f * voxelSize.z);
+					float gx = (value<T>(x - 1, y, z) - value<T>(x + 1, y, z)) * scale.x;
+					float gy = (value<T>(x, y - 1, z) - value<T>(x, y + 1, z)) * scale.y;
+					float gz = (value<T>(x, y, z - 1) - value<T>(x, y, z + 1)) * scale.z;
                     Vec3 g(gx, gy, gz);
 
                     float mag = g.length();

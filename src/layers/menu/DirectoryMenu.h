@@ -3,6 +3,7 @@
 
 #include "Menu.h"
 #include "MenuManager.h"
+#include "data/VolumeLoader.h"
 
 class DirectoryMenu : public Menu
 {
@@ -18,7 +19,7 @@ private:
 
 	void goIntoDir(const std::string& subDir, bool flash);
 	void goUpDir();
-	void loadDir();
+	void load(const VolumeLoader::Source& source);
 };
 
 #endif // __medleap_DirectoryMenu__

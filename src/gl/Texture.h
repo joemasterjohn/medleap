@@ -46,6 +46,13 @@ namespace gl
                        GLenum format,
                        GLenum type,
                        const GLvoid* data);
+
+		/** Set 1D texture data (glTexImage1D) at MIP level 0 */
+		void setData1D(GLint internalFormat,
+                       GLsizei width,
+                       GLenum format,
+                       GLenum type,
+                       const GLvoid* data);
         
         /** Set 2D texture data (glTexImage2D) */
         void setData2D(GLint level,
@@ -63,6 +70,26 @@ namespace gl
                        GLenum format,
                        GLenum type,
                        const GLvoid* data);
+
+		/** Set 3D texture data (glTexImage3D) */
+		void setData3D(GLint level,
+					   GLint internalFormat,
+			           GLsizei width,
+			           GLsizei height,
+			           GLsizei depth,
+			           GLenum format,
+			           GLenum type,
+			           const GLvoid* data);
+
+		/** Set 3D texture data (glTexImage3D) at MIP level 0 */
+		void setData3D(GLint internalFormat,
+			           GLsizei width,
+			           GLsizei height,
+			           GLsizei depth,
+			           GLenum format,
+			           GLenum type,
+			           const GLvoid* data);
+
         
         void setParameter(GLenum pname, GLint param);
         

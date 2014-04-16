@@ -33,9 +33,66 @@ Camera& VolumeRenderer::getCamera()
 void VolumeRenderer::setVolume(VolumeData* volume)
 {
     this->volume = volume;
-    volume->loadTexture3D(volumeTexture);
-    volume->loadGradientTexture(gradientTexture);
+
+	GLenum internalFormat;
+	switch (volume->getType()) {
+	case GL_BYTE: internalFormat = GL_R8_SNORM; break;
+	case GL_SHORT: internalFormat = GL_R16_SNORM; break;
+	default: internalFormat = GL_RED; break;
+	}
+
+	volumeTexture.bind();
+	volumeTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	volumeTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	volumeTexture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP);
+	volumeTexture.setParameter(GL_TEXTURE_WRAP_R, GL_CLAMP);
+	volumeTexture.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	volumeTexture.setData3D(
+		internalFormat,
+		volume->getWidth(),
+		volume->getHeight(), 
+		volume->getDepth(), 
+		volume->getFormat(), 
+		volume->getType(),
+		volume->getData());
+
+	// gradient texture will be 8-bits per channel (RGB format)
+	{
+		Vec3 minG = volume->getMinGradient();
+		Vec3 maxG = volume->getMaxGradient();
+		Vec3 dG = maxG - minG;
+		const std::vector<Vec3>& gradients = volume->getGradients();
+
+		unsigned char* data = new unsigned char[gradients.size() * 3];
+		unsigned char* p = data;
+
+		for (const Vec3& g : gradients) {
+			*p++ = static_cast<unsigned char>(((g.x - minG.x) / dG.x) * 255);
+			*p++ = static_cast<unsigned char>(((g.y - minG.y) / dG.y) * 255);
+			*p++ = static_cast<unsigned char>(((g.z - minG.z) / dG.z) * 255);
+		}
+
+		gradientTexture.bind();
+		gradientTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		gradientTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		gradientTexture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		gradientTexture.setParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		gradientTexture.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		gradientTexture.setData3D(
+			GL_RGB,
+			volume->getWidth(),
+			volume->getHeight(),
+			volume->getDepth(),
+			GL_RGB,
+			GL_UNSIGNED_BYTE,
+			data);
+
+		delete[] data;
+	}
 }
+
 
 void VolumeRenderer::markDirty()
 {

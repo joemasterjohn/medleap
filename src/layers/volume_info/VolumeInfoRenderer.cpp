@@ -59,10 +59,8 @@ void VolumeInfoRenderer::draw()
 
     int textRow = 0;
     
-    // Patient Name (replace ^ characters with empty spaces)
-    string name = volume->getValue<std::string, 0x0010, 0x0010>();
-    replace(name.begin(), name.end(), '^', ' ');
-	os << "Patient: " << name;
+    // Name
+	os << "Data: " << volume->getName();
     drawText(os.str(), textRow++);
     
     // Modality
@@ -84,7 +82,7 @@ void VolumeInfoRenderer::draw()
     drawText(os.str(), textRow++);
     
     // Dimensions (mm)
-    Vec3 v = volume->getDimensionsMM();
+    Vec3 v = volume->getSizeMillimeters();
 	os.str("");
 	os << setprecision(1) << fixed;
 	os << "Size (mm): " << v.x << " x " << v.y << " x " << v.z;

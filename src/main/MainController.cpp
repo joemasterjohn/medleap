@@ -125,9 +125,9 @@ void MainController::setVolume(VolumeData* volume)
     histogramController.setVolume(volume);
 }
 
-void MainController::setVolumeToLoad(const std::string& directory)
+void MainController::setVolumeToLoad(const VolumeLoader::Source& source)
 {
-    loader.setSource(directory);
+    loader.setSource(source);
 }
 
 void MainController::startLoop()

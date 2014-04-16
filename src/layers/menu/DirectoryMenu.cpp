@@ -41,13 +41,21 @@ void DirectoryMenu::goIntoDir(const std::string& directory, bool flash)
 			std::string subdir(entry->d_name);
 			if (subdir == ".") {
 				MenuItem& mi = this->createItem("<LOAD>");
-				mi.setAction([this]{loadDir();});
+				VolumeLoader::Source src = { workingDir, VolumeLoader::Source::DICOM_DIR };
+				mi.setAction([this, src]{load(src);});
 			} else if (subdir == "..") {
 				MenuItem& mi = this->createItem("<UP>");
 				mi.setAction([this]{goUpDir();});
 			} else {
 				MenuItem& mi = createItem(subdir);
 				mi.setAction([this,subdir]{goIntoDir(workingDir + "/" + subdir, true);});
+			}
+		} else {
+			std::string fileName(entry->d_name);
+			if (fileName.size() > 3 && fileName.substr(fileName.size() - 4, 4) == ".raw") {
+				MenuItem& mi = this->createItem(fileName);
+				VolumeLoader::Source src = { workingDir + "/" + fileName, VolumeLoader::Source::RAW };
+				mi.setAction([this, src]{load(src); });
 			}
 		}
 		entry = readdir(dir);
@@ -62,9 +70,9 @@ void DirectoryMenu::goUpDir()
 	goIntoDir(upDir, true);
 }
 
-void DirectoryMenu::loadDir()
+void DirectoryMenu::load(const VolumeLoader::Source& source)
 {
-	MainController::getInstance().setVolumeToLoad(workingDir);
+	MainController::getInstance().setVolumeToLoad(source);
 	menus.pop();
 	MainController::getInstance().showMenu(false);
 }

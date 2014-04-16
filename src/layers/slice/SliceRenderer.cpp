@@ -45,13 +45,20 @@ void SliceRenderer::updateTexture()
     sliceTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     
+	GLenum internalFormat;
+	switch (volume->getType()) {
+		case GL_BYTE: internalFormat = GL_R8_SNORM; break;
+		case GL_SHORT: internalFormat = GL_R16_SNORM; break;
+		default: internalFormat = GL_RED; break;
+	}
+
     sliceTexture.setData2D(0,
-                            volume->internalFormat(),
+                            internalFormat,
                             volume->getWidth(),
                             volume->getHeight(),
                             volume->getFormat(),
                             volume->getType(),
-                            volume->getData() + currentSlice * volume->getImageSize());
+                            volume->getData() + currentSlice * volume->getSliceSizeBytes());
 }
 
 void SliceRenderer::setVolume(VolumeData* volume)

@@ -33,7 +33,7 @@ public:
     void scroll(GLFWwindow* window, double dx, double dy);
     TextRenderer& getText();
     Mode getMode();
-	void setVolumeToLoad(const std::string& directory);
+	void setVolumeToLoad(const VolumeLoader::Source& source);
     static MainController& getInstance();
 
 	void showMenu(bool show);
