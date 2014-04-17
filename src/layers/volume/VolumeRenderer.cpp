@@ -199,6 +199,7 @@ void VolumeRenderer::resize(int width, int height)
 {
 	fullResRT.resize(width, height);
 	lowResRT.resize(width/2, height/2);
+	//camera.setProjection(ortho(-0.5f, 0.5f, -0.5f/viewport.aspect(), 0.5f/viewport.aspect(), 0, 200));
 	camera.setProjection(perspective(0.8726388f, viewport.aspect(), 0.1f, 100.0f));
     markDirty();
 }
@@ -401,7 +402,7 @@ void VolumeRenderer::draw()
     if (dirty) {
 		lowResRT.bind();
 		lowResRT.clear();
-        draw(0.5, true, lowResRT.getColorTarget().getWidth(), lowResRT.getColorTarget().getHeight());
+        draw(0.25, true, lowResRT.getColorTarget().getWidth(), lowResRT.getColorTarget().getHeight());
 		lowResRT.unbind();
         dirty = false;
         drawnHighRes = false;

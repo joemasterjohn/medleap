@@ -185,7 +185,7 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
     rMouseDrag = button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS;
     
     
-    return true;
+	return true;
 }
 
 void Transfer1DController::updateTransferTex1D()

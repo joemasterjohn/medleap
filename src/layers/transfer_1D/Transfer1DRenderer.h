@@ -47,6 +47,10 @@ private:
     float cursorShaderOffset;
     float cursorValue;
     
+	// BG panel
+	gl::Program bgShader;
+	gl::Buffer bgBuffer;
+
     // CLUT
     gl::Program clutStripShader;
     gl::Buffer clutStripVBO;
@@ -55,7 +59,9 @@ private:
     GLsizei clutStripStride;
     CLUT* clut;
     
-    
+	void drawBackground();
+	void drawHistogram();
+	void drawColorBar();
     void drawWindowMarkers();
     void drawCursorValue();
 };

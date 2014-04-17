@@ -4,7 +4,10 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <vector>
+#include "gl/util/Draw.h"
 
+using namespace std;
 using namespace gl;
 
 // this only applies to CT modality
@@ -74,132 +77,234 @@ void Transfer1DRenderer::init()
 	histo1D.generate(GL_TEXTURE_2D);
 	transferFn.generate(GL_TEXTURE_2D);
 
-    shader = Program::create("shaders/histogram.vert", "shaders/histogram.frag");
-    colorShader = Program::create("shaders/histo_line.vert", "shaders/histo_line.frag");
-    
-    shader.enable();
-    glUniform1i(shader.getUniform("tex_histogram"), 0);
-    glUniform1i(shader.getUniform("tex_transfer"), 1);
-    
-    // vertex buffer for geometry: contains vertices for
-    // 1) the histogram quad (drawn as a texture)
-    // 2) the cursor / value marker line
-    GLfloat vertexData[] = {
-        // start of texture quad vertices
-        -1, -0.5, 0, 0,
-        1, -0.5, 1, 0,
-        1,  1, 1, 1,
-        -1, -0.5, 0, 0,
-        1,  1, 1, 1,
-        -1,  1, 0, 1,
-        // start of cursor line vertices
-        -1, -1, 0, 0,
-        -1, 1, 0, 0
-        
-    };
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-    
-    stride = 4 * sizeof(GLfloat);
-    
-    // initialize clut strip
-    clutTexture.generate(GL_TEXTURE_1D);
-    clut->saveTexture(clutTexture);
-    clutStripShader = Program::create("shaders/clut_strip.vert",
-                                      "shaders/clut_strip.frag");
-    
-    GLfloat clutVerts[] = {
-        -1, -1, 0, 0, 0,
-        0, -1, 1, 0, 0,
-        0, -1, 0, 1, 1,
-        1, -1, 0, 0, 1,
-        -1,  -0.5, 0, 0, 0,
-        0,  -0.5, 1, 0, 0,
-        0,  -0.5, 0, 1, 1,
-        1,  -0.5, 0, 0, 1
-    };
-    clutStripStride = 5 * sizeof(GLfloat);
-    
-    GLushort clutIndices[] = {
-        0, 1, 5,
-        0, 5, 4,
-        1, 2, 6,
-        1, 6, 5,
-        2, 3, 7,
-        2, 7, 6
-    };
-    
+	shader = Program::create("shaders/histogram.vert", "shaders/histogram.frag");
+	colorShader = Program::create("shaders/histo_line.vert", "shaders/histo_line.frag");
+
+	shader.enable();
+	glUniform1i(shader.getUniform("tex_histogram"), 0);
+	glUniform1i(shader.getUniform("tex_transfer"), 1);
+
+	// vertex buffer for geometry: contains vertices for
+	// 1) the histogram quad (drawn as a texture)
+	// 2) the cursor / value marker line
+	GLfloat vertexData[] = {
+		// start of texture quad vertices
+		-1, -0.5, 0, 0,
+		1, -0.5, 1, 0,
+		1, 1, 1, 1,
+		-1, -0.5, 0, 0,
+		1, 1, 1, 1,
+		-1, 1, 0, 1,
+		// start of cursor line vertices
+		-1, -1, 0, 0,
+		-1, 1, 0, 0
+
+	};
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+
+	stride = 4 * sizeof(GLfloat);
+
+	// initialize clut strip
+	clutTexture.generate(GL_TEXTURE_1D);
+	clut->saveTexture(clutTexture);
+	clutStripShader = Program::create("shaders/clut_strip.vert",
+		"shaders/clut_strip.frag");
+
+	GLfloat clutVerts[] = {
+		-1, -1, 0, 0, 0,
+		0, -1, 1, 0, 0,
+		0, -1, 0, 1, 1,
+		1, -1, 0, 0, 1,
+		-1, 1, 0, 0, 0,
+		0, 1, 1, 0, 0,
+		0, 1, 0, 1, 1,
+		1, 1, 0, 0, 1
+	};
+	clutStripStride = 5 * sizeof(GLfloat);
+
+	GLushort clutIndices[] = {
+		0, 1, 5,
+		0, 5, 4,
+		1, 2, 6,
+		1, 6, 5,
+		2, 3, 7,
+		2, 7, 6
+	};
+
 	clutStripVBO = Buffer::genVertexBuffer();
-    clutStripVBO.bind();
-    clutStripVBO.setData(clutVerts, sizeof(clutVerts));
-    
-    clutStripIBO = Buffer::genIndexBuffer();
-    clutStripIBO.bind();
-    clutStripIBO.setData(clutIndices, sizeof(clutIndices));
+	clutStripVBO.bind();
+	clutStripVBO.setData(clutVerts, sizeof(clutVerts));
+
+	clutStripIBO = Buffer::genIndexBuffer();
+	clutStripIBO.bind();
+	clutStripIBO.setData(clutIndices, sizeof(clutIndices));
+
+	{
+		bgShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
+		bgShader.enable();
+
+		GLfloat vertices[] = {
+			-1, -1,
+			+1, -1,
+			+1, +1,
+			-1, -1,
+			+1, +1,
+			-1, +1
+		};
+
+		bgBuffer.generate(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+		bgBuffer.bind();
+		bgBuffer.setData(vertices, sizeof(vertices));
+	}
 }
 
 void Transfer1DRenderer::draw()
 {
-    // clut strip
-    {
-        clutStripShader.enable();
-        clutStripVBO.bind();
-        clutStripIBO.bind();
-        clutTexture.bind();
-        
-        int loc = clutStripShader.getAttribute("vs_position");
-        glEnableVertexAttribArray(loc);
-        glVertexAttribPointer(loc, 4, GL_FLOAT, false, clutStripStride, 0);
-        
-        loc = clutStripShader.getAttribute("vs_texcoord");
-        glEnableVertexAttribArray(loc);
-        glVertexAttribPointer(loc, 1, GL_FLOAT, false, clutStripStride, (GLvoid*)(4 * sizeof(GLfloat)));
-        
-		float wc = volume->getCurrentWindow().getCenterReal();
-		float ww = volume->getCurrentWindow().getWidthReal();
-        float markL = (wc - ww/2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-		float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-        glUniform2f(clutStripShader.getUniform("x_offsets"), markL, markR);
-        
-        glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, 0);
-    }
-    
-    
-    
-    shader.enable();
+	static const int totalHeight = 80;
+	static const int colorBarHeight = 30;
+	static const int histoHeight = totalHeight;
 
-    glActiveTexture(GL_TEXTURE1);
-    transferFn.bind();
-    glActiveTexture(GL_TEXTURE0);
-    histo1D.bind();
+	glViewport(viewport.x, viewport.y, viewport.width, totalHeight);
+	//drawBackground();
+
+	//glViewport(viewport.x, viewport.y, viewport.width, colorBarHeight);
+	//drawColorBar();
+
+	glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+	drawHistogram();
     
-    glUniformMatrix4fv(shader.getUniform("model"), 1, false, histoModelMatrix);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    int loc = shader.getAttribute("vs_position");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    loc = shader.getAttribute("vs_texcoord");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, (GLvoid*)(2 * sizeof(GLfloat)));
-    histo1D.bind();
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    
-    
-    
-    drawWindowMarkers();
+	//glViewport(viewport.x, viewport.y + colorBarHeight, viewport.width, histoHeight);
+    //drawWindowMarkers();
     
     if (drawCursor)
         drawCursorValue();
 }
 
+void Transfer1DRenderer::drawBackground()
+{
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	bgBuffer.bind();
+
+	bgShader.enable();
+	glUniform4f(bgShader.getUniform("color"), 1.0f, 1.0f, 1.0f, 0.8f);
+	glUniformMatrix4fv(bgShader.getUniform("modelViewProjection"), 1, false, Mat4());
+
+	GLint loc = bgShader.getAttribute("vs_position");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 2, GL_FLOAT, false, 2*sizeof(GLfloat), 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisable(GL_BLEND);
+}
+
+void Transfer1DRenderer::drawHistogram()
+{
+	static Draw d;
+	double logMaxFreq = std::log(histogram->getMaxFrequency() + 1);
+
+	float wc = volume->getCurrentWindow().getCenterReal();
+	float ww = volume->getCurrentWindow().getWidthReal();
+	float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+
+	d.begin(GL_TRIANGLE_STRIP);
+	for (unsigned i = 0; i < histogram->getNumBins(); ++i) {
+		float x = (float)i / histogram->getNumBins();
+		float y = std::log(histogram->getSize(i) + 1) / logMaxFreq;
+
+		x = (x - 0.5f) * 2.0f;
+		y = (y - 0.5f) * 2.0f;
+
+
+		Vec4 c = this->clut->getColor((x - markL) / (markR - markL));
+		d.color(c.x, c.y, c.z);
+
+		d.vertex(x, -1);
+		d.vertex(x, y);
+	}
+	d.vertex(1, -1);
+	d.vertex(1, -1);
+	d.end();
+	d.draw();
+
+
+	d.begin(GL_LINE_STRIP);
+	d.color(0, 0, 0);
+	for (unsigned i = 0; i < histogram->getNumBins(); ++i) {
+		float x = (float)i / histogram->getNumBins();
+		float y = std::log(histogram->getSize(i) + 1) / logMaxFreq;
+		x = (x - 0.5f) * 2.0f;
+		y = (y - 0.5f) * 2.0f;
+
+		d.vertex(x, y);
+	}
+	d.vertex(1, -1);
+	d.vertex(1, -1);
+	d.end();
+	d.draw();
+
+	d.begin(GL_LINES);
+	d.color(0, 0, 0);
+	d.vertex(-1, 1);
+	d.vertex(1, 1);
+
+	d.color(0, 0, 0);
+	d.vertex(markL, -1);
+	d.vertex(markL, 1);
+
+	d.vertex(markR, -1);
+	d.vertex(markR, 1);
+
+	if (drawCursor) {
+		d.color(0.5f, 0.5f, 0.5f);
+		float x = ((float)cursorX / viewport.width - 0.5f) * 2.0f;
+		d.vertex(x, -1);
+		d.vertex(x, 1);
+	}
+
+	d.end();
+	d.draw();
+
+
+
+}
+
+void Transfer1DRenderer::drawColorBar()
+{
+	clutStripShader.enable();
+	clutStripVBO.bind();
+	clutStripIBO.bind();
+	clutTexture.bind();
+
+	int loc = clutStripShader.getAttribute("vs_position");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 4, GL_FLOAT, false, clutStripStride, 0);
+
+	loc = clutStripShader.getAttribute("vs_texcoord");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 1, GL_FLOAT, false, clutStripStride, (GLvoid*)(4 * sizeof(GLfloat)));
+
+	float wc = volume->getCurrentWindow().getCenterReal();
+	float ww = volume->getCurrentWindow().getWidthReal();
+	float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	glUniform2f(clutStripShader.getUniform("x_offsets"), markL, markR);
+
+	glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, 0);
+}
+
 void Transfer1DRenderer::drawWindowMarkers()
 {
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
     colorShader.enable();
     int loc = colorShader.getAttribute("vs_position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    
     
 	float wc = volume->getCurrentWindow().getCenterReal();
 	float ww = volume->getCurrentWindow().getWidthReal();
@@ -218,18 +323,9 @@ void Transfer1DRenderer::drawWindowMarkers()
 
 void Transfer1DRenderer::drawCursorValue()
 {
-    // cursor line
-    colorShader.enable();
-    glUniform4f(colorShader.getUniform("color"), 0.5f, 1.0f, 0.5f, 1.0f);
-    glUniform1f(colorShader.getUniform("offset"), cursorShaderOffset);
-    int loc = colorShader.getAttribute("vs_position");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    glDrawArrays(GL_LINES, 6, 2);
-    
     // cursor histogram value
     TextRenderer& text = MainController::getInstance().getText();
-    text.setColor(.5f, 1, .5f);
+    text.setColor(0, 0, 0);
     text.begin(viewport.width, viewport.height);
     
 	std::ostringstream os;

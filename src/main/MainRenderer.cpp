@@ -75,7 +75,7 @@ bool MainRenderer::init(int width, int height, const char* title)
 
 void MainRenderer::draw()
 {
-    glClearColor(0, 0, 0, 0);
+    glClearColor(1, 1, 1, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     
     // draw from stack
