@@ -88,7 +88,7 @@ void MenuRenderer::drawMenu(Menu& menu)
 		TextRenderer::CENTER,
 		TextRenderer::TOP);
 
-	double radius = std::min(viewport.width, viewport.height) * 0.5 * 0.8;
+	double radius = std::min(viewport.width, viewport.height) * 0.5 * 0.7;
 	double angleStep = gl::PI2 / menu.getItems().size();
     double angle = angleStep/2.0;
 	for (MenuItem& item : menu.getItems()) {
@@ -117,8 +117,8 @@ void MenuRenderer::drawMenu(Menu& menu)
 
 void MenuRenderer::createRingGeometry()
 {
-    GLfloat innerRadius = min(viewport.width, viewport.height) * 0.5 * 0.6;
-    GLfloat outerRadius = 0.5 * sqrt(viewport.width * viewport.width + viewport.height * viewport.height);
+    GLfloat innerRadius = min(viewport.width, viewport.height) * 0.5 * 0.55;
+	GLfloat outerRadius = min(viewport.width, viewport.height) * 0.5 * 0.85;// 0.5 * sqrt(viewport.width * viewport.width + viewport.height * viewport.height);
     
     vector<GLfloat> verts;
     vector<GLushort> indices;
