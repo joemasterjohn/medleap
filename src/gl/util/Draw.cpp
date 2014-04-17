@@ -26,12 +26,14 @@ void main()\n\
 
 Draw::Draw()
 {
-	lineShader = Program::createFromSrc(vSrc, fSrc);
-	lineBuffer = Buffer::genVertexBuffer(GL_DYNAMIC_DRAW);
 }
 
 void Draw::begin(GLenum mode)
 {
+	if (lineShader.id() == 0 || lineBuffer.id() == 0) {
+		lineShader = Program::createFromSrc(vSrc, fSrc);
+		lineBuffer = Buffer::genVertexBuffer(GL_DYNAMIC_DRAW);
+	}
 	this->mode = mode;
 	vertices.clear();
 }

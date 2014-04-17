@@ -15,7 +15,14 @@ MainMenu::MainMenu(MenuManager* menuManager) : Menu("Main Menu")
         menuManager->push(MenuPtr(new DirectoryMenu(workingDir, *menuManager)));
     });
     
+	Menu* mRender = new Menu("Render");
+	//mRender->createItem("2D Mode", [=]{volumeRenderer->cycleMode(); });
+
+	mRender->createItem("3D Mode");
+	mRender->createItem("<Back>", [=]{menuManager->pop(); });
+
     MenuItem& miRender = createItem("Render");
+	miRender.setAction([=]{menuManager->push(MenuPtr(mRender)); });
 
     MenuItem& miHide = createItem("Hide Menu");
 	miHide.setAction([]{ MainController::getInstance().showMenu(false); });

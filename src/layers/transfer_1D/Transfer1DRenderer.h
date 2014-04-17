@@ -10,6 +10,7 @@
 #include "Histogram.h"
 #include "CLUT.h"
 #include "util/TextRenderer.h"
+#include "gl/util/Draw.h"
 
 class Transfer1DRenderer : public Renderer
 {
@@ -58,7 +59,11 @@ private:
     gl::Texture clutTexture;
     GLsizei clutStripStride;
     CLUT* clut;
+
+	// color stops
+	gl::Draw colorStops;
     
+	void drawColorStopBar();
 	void drawBackground();
 	void drawHistogram();
 	void drawColorBar();

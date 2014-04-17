@@ -26,6 +26,11 @@ Vec4 CLUT::ColorStop::getColor()
     return color;
 }
 
+std::vector<CLUT::ColorStop>& CLUT::getStops()
+{
+	return stops;
+}
+
 void CLUT::ColorStop::setColor(float r, float g, float b, float a)
 {
     color.x = r;

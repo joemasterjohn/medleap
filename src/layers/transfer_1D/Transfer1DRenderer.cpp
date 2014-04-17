@@ -163,10 +163,11 @@ void Transfer1DRenderer::init()
 void Transfer1DRenderer::draw()
 {
 	static const int totalHeight = 80;
-	static const int colorBarHeight = 30;
+	static const float colorBarHeight = 0.3f;
 	static const int histoHeight = totalHeight;
 
-	glViewport(viewport.x, viewport.y, viewport.width, totalHeight);
+
+
 	//drawBackground();
 
 	//glViewport(viewport.x, viewport.y, viewport.width, colorBarHeight);
@@ -174,12 +175,58 @@ void Transfer1DRenderer::draw()
 
 	glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
 	drawHistogram();
+
+	glViewport(viewport.x, viewport.y, viewport.width, colorBarHeight * viewport.height);
+	drawColorStopBar();
     
 	//glViewport(viewport.x, viewport.y + colorBarHeight, viewport.width, histoHeight);
     //drawWindowMarkers();
     
+
+
     if (drawCursor)
         drawCursorValue();
+
+
+
+}
+
+void Transfer1DRenderer::drawColorStopBar()
+{
+	float wc = volume->getCurrentWindow().getCenterReal();
+	float ww = volume->getCurrentWindow().getWidthReal();
+	float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	colorStops.begin(GL_TRIANGLES);
+	for (CLUT::ColorStop& stop : clut->getStops()) {
+		float x = markL + stop.getPosition() * (markR - markL);
+		colorStops.color(stop.getColor().x, stop.getColor().y, stop.getColor().z);
+		colorStops.vertex(x - 0.035, -1);
+		colorStops.vertex(x + 0.035, -1);
+		colorStops.vertex(x, 1);
+	}
+	colorStops.end();
+
+	// instead of end updating buffer, have draw update buffer if things have changed
+	// keep track of where modes change and have a clear option
+
+	colorStops.draw();
+	colorStops.begin(GL_LINES);
+	for (CLUT::ColorStop& stop : clut->getStops()) {
+		float x = markL + stop.getPosition() * (markR - markL);
+		colorStops.color(.5f, .5f, .5f);
+		colorStops.vertex(x - 0.035, -1);
+		colorStops.vertex(x + 0.035, -1);
+
+		colorStops.vertex(x + 0.035, -1);
+		colorStops.vertex(x, 1);
+
+		colorStops.vertex(x, 1);
+		colorStops.vertex(x - 0.035, -1);
+
+	}
+	colorStops.end();
+	colorStops.draw();
 }
 
 void Transfer1DRenderer::drawBackground()
@@ -222,6 +269,7 @@ void Transfer1DRenderer::drawHistogram()
 
 
 		Vec4 c = this->clut->getColor((x - markL) / (markR - markL));
+		c *= c.w;
 		d.color(c.x, c.y, c.z);
 
 		d.vertex(x, -1);
@@ -252,11 +300,11 @@ void Transfer1DRenderer::drawHistogram()
 	d.vertex(-1, 1);
 	d.vertex(1, 1);
 
-	d.vertex(markL, -1);
-	d.vertex(markL, 1);
+	//d.vertex(markL, -1);
+	//d.vertex(markL, 1);
 
-	d.vertex(markR, -1);
-	d.vertex(markR, 1);
+	//d.vertex(markR, -1);
+	//d.vertex(markR, 1);
 
 	if (drawCursor) {
 		d.color(0.5f, 0.5f, 0.5f);

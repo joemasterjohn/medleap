@@ -38,6 +38,8 @@ public:
     void clearStops();
     
     void saveTexture(gl::Texture& texture);
+
+	std::vector<ColorStop>& getStops();
     
 private:
     std::vector<ColorStop> stops;

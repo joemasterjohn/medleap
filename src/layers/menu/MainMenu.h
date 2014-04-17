@@ -3,6 +3,7 @@
 
 #include "Menu.h"
 #include "MenuManager.h"
+#include "layers/volume/VolumeRenderer.h"
 
 class MainMenu : public Menu
 {
