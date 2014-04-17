@@ -44,7 +44,6 @@ public:
     
     void setOpacityScale(float scale);
     float getOpacityScale();
-	Vec3 getBackgroundColor();
 
 	unsigned getCurrentNumSlices();
 
@@ -58,7 +57,6 @@ public:
 	bool useJitter;
     
 private:
-	bool lightBackground;
     bool shading;
     RenderMode renderMode;
     bool dirty;
@@ -73,7 +71,6 @@ private:
 	unsigned minSlices;
 	unsigned maxSlices;
 	unsigned currentNumSlices;
-	Vec3 bgColor;
     
     gl::Texture clutTexture;
         

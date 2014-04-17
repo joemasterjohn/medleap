@@ -35,6 +35,7 @@ public:
     Mode getMode();
 	void setVolumeToLoad(const VolumeLoader::Source& source);
     static MainController& getInstance();
+	const MainRenderer& getRenderer() const;
 
 	void showMenu(bool show);
     

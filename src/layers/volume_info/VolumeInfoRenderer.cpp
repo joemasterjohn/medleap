@@ -43,14 +43,8 @@ void VolumeInfoRenderer::drawText(const std::string& s, int row)
 void VolumeInfoRenderer::draw()
 {
     TextRenderer& text = MainController::getInstance().getText();
-
-	if (MainController::getInstance().getMode() == MainController::MODE_3D) {
-		Vec3 c = Vec3(1.0f) - volumeRenderer->getBackgroundColor();
-		text.setColor(c.x, c.y, c.z);
-	}
-	else {
-		text.setColor(1, 1, 1);
-	}
+	Vec3 c = MainController::getInstance().getRenderer().getInverseBGColor();
+	text.setColor(c.x, c.y, c.z);
 
     
     text.begin(windowWidth, windowHeight);

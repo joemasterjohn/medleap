@@ -232,9 +232,9 @@ void Transfer1DRenderer::drawHistogram()
 	d.end();
 	d.draw();
 
-
 	d.begin(GL_LINE_STRIP);
-	d.color(0, 0, 0);
+	Vec3 c = MainController::getInstance().getRenderer().getInverseBGColor() * 0.5f;
+	d.color(c.x, c.y, c.z);
 	for (unsigned i = 0; i < histogram->getNumBins(); ++i) {
 		float x = (float)i / histogram->getNumBins();
 		float y = std::log(histogram->getSize(i) + 1) / logMaxFreq;
@@ -249,11 +249,9 @@ void Transfer1DRenderer::drawHistogram()
 	d.draw();
 
 	d.begin(GL_LINES);
-	d.color(0, 0, 0);
 	d.vertex(-1, 1);
 	d.vertex(1, 1);
 
-	d.color(0, 0, 0);
 	d.vertex(markL, -1);
 	d.vertex(markL, 1);
 
@@ -269,9 +267,6 @@ void Transfer1DRenderer::drawHistogram()
 
 	d.end();
 	d.draw();
-
-
-
 }
 
 void Transfer1DRenderer::drawColorBar()

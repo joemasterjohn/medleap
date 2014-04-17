@@ -7,6 +7,7 @@ MainRenderer::MainRenderer()
     rightDocking.layerIndex = -1;
     bottomDocking.layerIndex = -1;
     topDocking.layerIndex = -1;
+	bgColor = Vec3(1, 1, 1);
 }
 
 MainRenderer::~MainRenderer()
@@ -16,6 +17,28 @@ MainRenderer::~MainRenderer()
 GLFWwindow* MainRenderer::getWindow()
 {
     return window;
+}
+
+Vec3 MainRenderer::getBackgroundColor() const
+{
+	return bgColor;
+}
+
+Vec3 MainRenderer::getInverseBGColor() const
+{
+	return Vec3(1.0f) - bgColor;
+}
+
+void MainRenderer::setBackgroundColor(const Vec3& c) {
+	bgColor = c;
+}
+
+void MainRenderer::setLightBG() {
+	bgColor = Vec3(1.0f);
+}
+
+void MainRenderer::setDarkBG() {
+	bgColor = Vec3(0.0f);
 }
 
 bool MainRenderer::init(int width, int height, const char* title)
@@ -75,7 +98,7 @@ bool MainRenderer::init(int width, int height, const char* title)
 
 void MainRenderer::draw()
 {
-    glClearColor(1, 1, 1, 0);
+    glClearColor(bgColor.x, bgColor.y, bgColor.z, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     
     // draw from stack

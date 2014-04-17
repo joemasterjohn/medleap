@@ -1,6 +1,7 @@
 #include "MainController.h"
 #include "data/VolumeLoader.h"
 #include <chrono>
+#include "gl/math/Vector3.h"
 
 using namespace std;
 
@@ -90,7 +91,7 @@ void MainController::setMode(MainController::Mode mode)
             pushController(&sliceController);
             pushController(&volumeInfoController);
             if (showHistogram)
-                pushController(&histogramController, Docking(Docking::BOTTOM, 0.2));
+                pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
             break;
         case MODE_3D:
             renderer.clearLayers();
@@ -98,9 +99,14 @@ void MainController::setMode(MainController::Mode mode)
             pushController(&volumeController);
             pushController(&volumeInfoController);
             if (showHistogram)
-                pushController(&histogramController, Docking(Docking::BOTTOM, 0.2));
+                pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
             break;
     }
+}
+
+const MainRenderer& MainController::getRenderer() const
+{
+	return renderer;
 }
 
 MainController::Mode MainController::getMode()
@@ -229,6 +235,11 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
 	if (!menuOn) {
 		if (key == GLFW_KEY_M && action == GLFW_PRESS) {
 			setMode((mode == MODE_2D) ? MODE_3D : MODE_2D);
+		}
+
+		if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+			renderer.setBackgroundColor(Vec3(1.0f) - renderer.getBackgroundColor());
+			volumeController.getRenderer()->markDirty();
 		}
 
 		if (key == GLFW_KEY_UP && action == GLFW_PRESS) {

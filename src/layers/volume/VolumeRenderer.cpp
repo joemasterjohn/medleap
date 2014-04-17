@@ -14,11 +14,9 @@ VolumeRenderer::VolumeRenderer() : cursorGeom(1, 2)
     renderMode = VR;
     shading = true;
     drawnHighRes = false;
-	lightBackground = false;
 	cursorActive = false;
 	cursorRadius = 0.1;
 	useJitter = false;
-	bgColor = Vec3(1, 1, 1);
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -209,11 +207,6 @@ unsigned VolumeRenderer::getCurrentNumSlices()
 	return currentNumSlices;
 }
 
-Vec3 VolumeRenderer::getBackgroundColor()
-{
-	return renderMode == MIP ? Vec3(0.0f) : bgColor;
-}
-
 void VolumeRenderer::updateSlices(double samplingScale, bool limitSamples)
 {
 	// calculate ideal number of samples as twice the number of voxels along view direction
@@ -390,11 +383,6 @@ void VolumeRenderer::draw(double samplingScale, bool limitSamples, int w, int h)
 
 void VolumeRenderer::draw()
 {
-	if (renderMode == MIP)
-		glClearColor(0, 0, 0, 0);
-	else
-		glClearColor(bgColor.x, bgColor.y, bgColor.z, 1);
- 
     static int cleanFrames = 0;
 	static gl::Texture currentTexture;
 

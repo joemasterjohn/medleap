@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include "layers/Renderer.h"
 #include <list>
+#include "gl/math/Vector3.h"
 
 /** Controls all rendering. Should be created once upon application start. */
 class MainRenderer
@@ -52,6 +53,12 @@ public:
     
     /** Window resized event */
     void resize(int width, int height);
+
+	Vec3 getInverseBGColor() const;
+	Vec3 getBackgroundColor() const;
+	void setBackgroundColor(const Vec3& c);
+	void setLightBG();
+	void setDarkBG();
     
 private:
     std::list<Renderer*> activeLayers;
@@ -59,6 +66,7 @@ private:
     int width;
     int height;
 	GLuint vao;
+	Vec3 bgColor;
     
     /** A docked layer */
     struct Docking
