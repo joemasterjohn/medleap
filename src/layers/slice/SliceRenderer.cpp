@@ -13,8 +13,8 @@ struct AxisLabel
 };
 
 static const AxisLabel axes[] = {
-    { "L", Vec3(1,0,0) },  // left
-    { "R", Vec3(-1,0,0) }, // right
+    { "L", Vec3(-1,0,0) },  // left
+    { "R", Vec3(1,0,0) }, // right
     { "P", Vec3(0,1,0) },  // posterior (back)
     { "A", Vec3(0,-1,0) }, // anterior (front)
     { "S", Vec3(0,0,1) },  // superior (head)
@@ -27,6 +27,29 @@ SliceRenderer::SliceRenderer() :
     numOrientationVertices(0),
     currentSlice(0)
 {
+	sliceShader = Program::create("shaders/slice_clut.vert", "shaders/slice_clut.frag");
+	axisShader = Program::create("shaders/color.vert", "shaders/color.frag");
+
+	sliceShader.enable();
+	glUniform1i(sliceShader.getUniform("tex_slice"), 0);
+	glUniform1i(sliceShader.getUniform("tex_clut"), 1);
+
+	// create a texture to store the current slice
+	sliceTexture.generate(GL_TEXTURE_2D);
+
+	// vertex buffer for the slice image geometry
+	GLfloat vertexData[] = {
+		-1, -1, 0, 0,
+		1, -1, 1, 0,
+		1, 1, 1, 1,
+		-1, -1, 0, 0,
+		1, 1, 1, 1,
+		-1, 1, 0, 1
+	};
+
+	sliceVBO = Buffer::genVertexBuffer();
+	sliceVBO.bind();
+	sliceVBO.setData(vertexData, sizeof(vertexData));
 }
 
 SliceRenderer::~SliceRenderer()
@@ -118,33 +141,6 @@ void SliceRenderer::resize(int width, int height)
     modelMatrix = (sliceAspect <= 1.0f) ?
         scale(sliceAspect / windowAspect, 1.0f, 1.0f) :
         scale(1.0f, windowAspect / sliceAspect, 1.0f);
-}
-
-void SliceRenderer::init()
-{
-    sliceShader = Program::create("shaders/slice_clut.vert", "shaders/slice_clut.frag");
-    axisShader = Program::create("shaders/color.vert", "shaders/color.frag");
-    
-    sliceShader.enable();
-    glUniform1i(sliceShader.getUniform("tex_slice"), 0);
-    glUniform1i(sliceShader.getUniform("tex_clut"), 1);
-    
-    // create a texture to store the current slice
-	sliceTexture.generate(GL_TEXTURE_2D);
-    
-    // vertex buffer for the slice image geometry
-    GLfloat vertexData[] = {
-        -1, -1, 0, 0,
-         1, -1, 1, 0,
-         1,  1, 1, 1,
-        -1, -1, 0, 0,
-         1,  1, 1, 1,
-        -1,  1, 0, 1
-    };
-    
-    sliceVBO = Buffer::genVertexBuffer();
-    sliceVBO.bind();
-    sliceVBO.setData(vertexData, sizeof(vertexData));
 }
 
 void SliceRenderer::drawSlice()

@@ -6,10 +6,6 @@
 
 using namespace std;
 
-void VolumeInfoRenderer::init()
-{
-}
-
 void VolumeInfoRenderer::setVolume(VolumeData* volume)
 {
     this->volume = volume;

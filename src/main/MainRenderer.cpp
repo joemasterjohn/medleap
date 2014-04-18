@@ -8,15 +8,14 @@ MainRenderer::MainRenderer()
     bottomDocking.layerIndex = -1;
     topDocking.layerIndex = -1;
 	bgColor = Vec3(1, 1, 1);
+
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 }
 
 MainRenderer::~MainRenderer()
 {
-}
-
-GLFWwindow* MainRenderer::getWindow()
-{
-    return window;
+	glDeleteVertexArrays(1, &vao);
 }
 
 Vec3 MainRenderer::getBackgroundColor() const
@@ -41,62 +40,7 @@ void MainRenderer::setDarkBG() {
 	bgColor = Vec3(0.0f);
 }
 
-bool MainRenderer::init(int width, int height, const char* title)
-{
-    if (!glfwInit())
-        return false;
-    
-    MainConfig cfg;
-    
-    // Use 32-bit color (in sRGB) and 24-bit for depth buffer
-    if (cfg.getValue<bool>(MainConfig::USE_SRGB))
-        glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE);
-    glfwWindowHint(GLFW_RED_BITS, 8);
-    glfwWindowHint(GLFW_GREEN_BITS, 8);
-    glfwWindowHint(GLFW_BLUE_BITS, 8);
-    glfwWindowHint(GLFW_ALPHA_BITS, 8);
-    glfwWindowHint(GLFW_DEPTH_BITS, 24);
-    if (cfg.getValue<bool>(MainConfig::MULTISAMPLING))
-        glfwWindowHint(GLFW_SAMPLES, cfg.getValue<unsigned>(MainConfig::SAMPLES));
-    
-    // Use OpenGL 3.2 core profile
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
-    // Create a window
-    window = glfwCreateWindow(width, height, title, NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        return false;
-    }
-    glfwMakeContextCurrent(window);
-    
-    // Set vertical retrace rate (0 == run as fast as possible)
-    glfwSwapInterval(1);
-    
-    // Initialize GLEW, which provides access to OpenGL functions / extensions
-	glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        glfwTerminate();
-        return false;
-    }
-
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-    
-    if (cfg.getValue<bool>(MainConfig::USE_SRGB))
-        glEnable(GL_FRAMEBUFFER_SRGB);
-    
-    this->width = width;
-    this->height = height;
-    
-    return true;
-}
-
-void MainRenderer::draw()
+void MainRenderer::draw(int width, int height)
 {
     glClearColor(bgColor.x, bgColor.y, bgColor.z, 0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -104,13 +48,13 @@ void MainRenderer::draw()
     // draw from stack
     int layer = 0;
     for (Renderer* r : activeLayers) {
-        updateViewport(r, layer);
+        updateViewport(r, layer, width, height);
         r->draw();
         layer++;
     }
 }
 
-void MainRenderer::updateViewport(Renderer* renderer, int layer)
+void MainRenderer::updateViewport(Renderer* renderer, int layer, int width, int height)
 {
     int x = 0;
     int y = 0;
@@ -212,20 +156,4 @@ void MainRenderer::clearLayers()
     rightDocking.layerIndex = -1;
     bottomDocking.layerIndex = -1;
     topDocking.layerIndex = -1;
-}
-
-int MainRenderer::getWidth()
-{
-    return width;
-}
-
-int MainRenderer::getHeight()
-{
-    return height;
-}
-
-void MainRenderer::resize(int width, int height)
-{
-    this->width = width;
-    this->height = height;
 }

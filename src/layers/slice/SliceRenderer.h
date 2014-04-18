@@ -15,7 +15,6 @@ class SliceRenderer : public Renderer
 public:
     SliceRenderer();
     ~SliceRenderer();
-    void init();
     void setVolume(VolumeData* volume);
     void draw();
     void resize(int width, int height);

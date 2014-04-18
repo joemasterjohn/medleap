@@ -15,11 +15,8 @@ public:
     
     ~MainRenderer();
     
-    /** Initializes OpenGL context and window. Returns FALSE on failure. */
-    bool init(int width, int height, const char* title);
-    
     /** Draws all layers in order */
-    void draw();
+    void draw(int width, int height);
     
     /** Pushes a render layer to the drawing stack. */
     void pushLayer(Renderer* layer);
@@ -41,18 +38,6 @@ public:
     
     /** Pops all layers off the drawing stack. */
     void clearLayers();
-    
-    /** Returns a pointer to the main window */
-    GLFWwindow* getWindow();
-    
-    /** Width of rendering surface. */
-    int getWidth();
-    
-    /** Height of rendering surface. */
-    int getHeight();
-    
-    /** Window resized event */
-    void resize(int width, int height);
 
 	Vec3 getInverseBGColor() const;
 	Vec3 getBackgroundColor() const;
@@ -62,9 +47,6 @@ public:
     
 private:
     std::list<Renderer*> activeLayers;
-    GLFWwindow* window;
-    int width;
-    int height;
 	GLuint vao;
 	Vec3 bgColor;
     
@@ -83,7 +65,7 @@ private:
     Docking bottomDocking;
     Docking topDocking;
     
-    void updateViewport(Renderer* renderer, int layer);
+    void updateViewport(Renderer* renderer, int layer, int width, int height);
 };
 
 #endif /* defined(__medleap__MainRenderer__) */

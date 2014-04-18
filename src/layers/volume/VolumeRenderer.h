@@ -23,7 +23,6 @@ public:
     
     VolumeRenderer();
     ~VolumeRenderer();
-    void init();
     void resize(int width, int height);
     void draw();
     

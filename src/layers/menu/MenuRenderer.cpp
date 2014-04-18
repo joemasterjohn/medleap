@@ -12,17 +12,14 @@ MenuRenderer::MenuRenderer(MenuManager* menuManager) : menuManager(menuManager),
     indexCount = 0;
     indexType = 0;
     setShaderState = nullptr;
+
+	menuVBO = Buffer::genVertexBuffer();
+	menuIBO = Buffer::genIndexBuffer();
+	menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 }
 
 MenuRenderer::~MenuRenderer()
 {
-}
-
-void MenuRenderer::init()
-{
-    menuVBO = Buffer::genVertexBuffer();
-    menuIBO = Buffer::genIndexBuffer();
-    menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 }
 
 void MenuRenderer::highlight(int menuIndex)

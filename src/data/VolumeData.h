@@ -4,6 +4,7 @@
 #include "gl/glew.h"
 #include <vector>
 #include <string>
+#include <thread>
 #include "Window.h"
 #include "BoundingBox.h"
 #include "gl/math/Vector3.h"
@@ -149,36 +150,82 @@ private:
     template<typename T> void computeGradients()
     {
         gradients.clear();
-        minGradientMag = std::numeric_limits<float>::infinity();
-        minGradient = Vec3(minGradientMag);
-        maxGradientMag = -std::numeric_limits<float>::infinity();
-        maxGradient = Vec3(maxGradientMag);
+		gradients.resize(width * height * depth);
 
-        // compute gradient vectors
+		const int numThreads = 4;
+
+		float threadMinMag[numThreads];
+		float threadMaxMag[numThreads];
+		Vec3 threadMin[numThreads];
+		Vec3 threadMax[numThreads];
+		for (int i = 0; i < numThreads; ++i) {
+			threadMinMag[i] = +std::numeric_limits<float>::infinity();
+			threadMaxMag[i] = -std::numeric_limits<float>::infinity();
+			threadMin[i] = Vec3(+std::numeric_limits<float>::infinity());
+			threadMax[i] = Vec3(-std::numeric_limits<float>::infinity());
+		}
+
 		Vec3 scale = Vec3(1.0f) / voxelSize * 2.0f;
-        for (int z = 0; z < depth; z++) {
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-					float gx = (value<T>(x - 1, y, z) - value<T>(x + 1, y, z)) * scale.x;
-					float gy = (value<T>(x, y - 1, z) - value<T>(x, y + 1, z)) * scale.y;
-					float gz = (value<T>(x, y, z - 1) - value<T>(x, y, z + 1)) * scale.z;
-                    Vec3 g(gx, gy, gz);
 
-                    float mag = g.length();
-                    if (mag < minGradientMag) minGradientMag = mag;
-                    if (mag > maxGradientMag) maxGradientMag = mag;
-                    
-                    if (g.x < minGradient.x) minGradient.x = g.x;
-                    if (g.y < minGradient.y) minGradient.y = g.y;
-                    if (g.z < minGradient.z) minGradient.z = g.z;
-                    if (g.x > maxGradient.x) maxGradient.x = g.x;
-                    if (g.y > maxGradient.y) maxGradient.y = g.y;
-                    if (g.z > maxGradient.z) maxGradient.z = g.z;
-                                        
-                    gradients.push_back(g);
-                }
-            }
-        }
+		auto work = [&](int threadIndex, int start, int end) {
+			for (int z = start; z < end; z++) {
+				for (int y = 0; y < height; y++) {
+					for (int x = 0; x < width; x++) {
+						float gx = (value<T>(x - 1, y, z) - value<T>(x + 1, y, z)) * scale.x;
+						float gy = (value<T>(x, y - 1, z) - value<T>(x, y + 1, z)) * scale.y;
+						float gz = (value<T>(x, y, z - 1) - value<T>(x, y, z + 1)) * scale.z;
+						Vec3 g(gx, gy, gz);
+						float mag = g.length();
+
+						if (mag < threadMinMag[threadIndex]) threadMinMag[threadIndex] = mag;
+						if (mag > threadMaxMag[threadIndex]) threadMaxMag[threadIndex] = mag;
+						if (g.x < threadMin[threadIndex].x) threadMin[threadIndex].x = g.x;
+						if (g.y < threadMin[threadIndex].y) threadMin[threadIndex].y = g.y;
+						if (g.z < threadMin[threadIndex].z) threadMin[threadIndex].z = g.z;
+						if (g.x > threadMax[threadIndex].x) threadMax[threadIndex].x = g.x;
+						if (g.y > threadMax[threadIndex].y) threadMax[threadIndex].y = g.y;
+						if (g.z > threadMax[threadIndex].z) threadMax[threadIndex].z = g.z;
+
+						gradients[z * width * height + y * width + x] = g;
+					}
+				}
+			}
+		};
+
+		std::vector<std::thread> threads;
+		int slicesPerThread = depth / numThreads;
+		int remainder = depth % numThreads;
+
+		int start = 0;
+		int end = slicesPerThread;
+		for (int i = 0; i < numThreads; i++) {
+			if (i < remainder)
+				end++;
+			threads.push_back(std::move(thread(work, i, start, end)));
+			start = end;
+			end += slicesPerThread;
+		}
+
+		auto vecMin = [](Vec3&a, Vec3& b)->Vec3 {
+			return Vec3(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z));
+		};
+
+		auto vecMax = [](Vec3&a, Vec3& b)->Vec3 {
+			return Vec3(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
+		};
+
+
+		minGradientMag = std::numeric_limits<float>::infinity();
+		minGradient = Vec3(minGradientMag);
+		maxGradientMag = -std::numeric_limits<float>::infinity();
+		maxGradient = Vec3(maxGradientMag);
+		for (int i = 0; i < numThreads; ++i) {
+			threads[i].join();
+			minGradient = vecMin(minGradient, threadMin[i]);
+			maxGradient = vecMax(maxGradient, threadMax[i]);
+			minGradientMag = std::min(minGradientMag, threadMinMag[i]);
+			maxGradientMag = std::min(maxGradientMag, threadMaxMag[i]);
+		}
     }
     
     friend class VolumeLoader;

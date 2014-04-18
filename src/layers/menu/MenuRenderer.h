@@ -14,7 +14,6 @@ public:
 	MenuRenderer(MenuManager* menuManager);
 	~MenuRenderer();
 
-	void init();
 	void draw();
 	void resize(int width, int height);
 	void highlight(int menuIndex);

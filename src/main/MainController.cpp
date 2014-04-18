@@ -53,32 +53,25 @@ MainController::~MainController()
 {
 }
 
-void MainController::init()
+void MainController::init(GLFWwindow* window)
 {
-    bool status = renderer.init(800, 800, "MedLeap");
-    if (!status) {
-        cout << "Failed to initialize renderer." << endl;
-        return;
-    }
+	this->window = window;
 
-    glfwSetFramebufferSizeCallback(renderer.getWindow(), resizeCB);
-	glfwSetKeyCallback(renderer.getWindow(), keyboardCB);
-	glfwSetMouseButtonCallback(renderer.getWindow(), mouseCB);
-    glfwSetCursorPosCallback(renderer.getWindow(), cursorCB);
-    glfwSetScrollCallback(renderer.getWindow(), scrollCB);
+    glfwSetFramebufferSizeCallback(window, resizeCB);
+	glfwSetKeyCallback(window, keyboardCB);
+	glfwSetMouseButtonCallback(window, mouseCB);
+	glfwSetCursorPosCallback(window, cursorCB);
+	glfwSetScrollCallback(window, scrollCB);
     
     text.loadFont("menlo14");
-    
-    sliceController.getRenderer()->init();
-    volumeController.getRenderer()->init();
-    volumeInfoController.getRenderer()->init();
-    histogramController.getRenderer()->init();
-	menuController.getRenderer()->init();
     
     volumeInfoController.getRenderer()->setVolumeRenderer(volumeController.getRenderer());
     volumeInfoController.getRenderer()->setSliceRenderer(sliceController.getRenderer());
     histogramController.setVolumeRenderer(volumeController.getRenderer());
     histogramController.setSliceRenderer(sliceController.getRenderer());
+	orientationController.setCamera(&volumeController.getRenderer()->getCamera());
+
+	glfwGetWindowSize(window, &width, &height);
 }
 
 void MainController::setMode(MainController::Mode mode)
@@ -100,6 +93,7 @@ void MainController::setMode(MainController::Mode mode)
             pushController(&volumeInfoController);
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
+			pushController(&orientationController);
             break;
     }
 }
@@ -129,6 +123,7 @@ void MainController::setVolume(VolumeData* volume)
     volumeController.setVolume(volume);
     volumeInfoController.setVolume(volume);
     histogramController.setVolume(volume);
+	orientationController.setVolume(volume);
 }
 
 void MainController::setVolumeToLoad(const VolumeLoader::Source& source)
@@ -140,7 +135,7 @@ void MainController::startLoop()
 {
     static double f = 0;
 
-    while (!glfwWindowShouldClose(renderer.getWindow())) {
+    while (!glfwWindowShouldClose(window)) {
 
 		if (loader.getState() == VolumeLoader::FINISHED) {
             setVolume(loader.getVolume());
@@ -148,21 +143,19 @@ void MainController::startLoop()
         }
 
 		update();
-        renderer.draw();
+		renderer.draw(width, height);
 
 		if (loader.getState() == VolumeLoader::LOADING) {
-			// draw load screen PUSH and POP layer
 			GLclampf c = static_cast<GLclampf>((std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5);
-			//glClearColor(c, c, c, 1);
-			glViewport(0, 0, renderer.getWidth(), renderer.getHeight());
+			glViewport(0, 0, width, height);
 			getText().setColor(1, c, c);
-			getText().begin(renderer.getWidth(), renderer.getHeight());
-			getText().add(string("Loading"), renderer.getWidth() / 2, renderer.getHeight() / 2, TextRenderer::CENTER, TextRenderer::CENTER);
-			getText().add(loader.getStateMessage(), renderer.getWidth() / 2, renderer.getHeight() / 2 - 36, TextRenderer::CENTER, TextRenderer::CENTER);
+			getText().begin(width, height);
+			getText().add(string("Loading"), width / 2, height / 2, TextRenderer::CENTER, TextRenderer::CENTER);
+			getText().add(loader.getStateMessage(), width / 2, height / 2 - 36, TextRenderer::CENTER, TextRenderer::CENTER);
 			getText().end();
 		}
 
-		glfwSwapBuffers(renderer.getWindow());
+		glfwSwapBuffers(window);
     }
     glfwTerminate();
 }
@@ -260,11 +253,8 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
 
 void MainController::resize(int width, int height)
 {
-    renderer.resize(width, height);
-    for (Controller* c : activeControllers) {
-        if (c->getRenderer())
-            c->getRenderer()->resize(width, height);
-    }
+	this->width = width;
+	this->height = height;
 }
 
 void MainController::mouseButton(GLFWwindow *window, int button, int action, int mods)
@@ -279,7 +269,7 @@ void MainController::mouseButton(GLFWwindow *window, int button, int action, int
 void MainController::mouseMotion(GLFWwindow *window, double x, double y)
 {
     // convert y to bottom up
-    y = renderer.getHeight() - y - 1;
+    y = height - y - 1;
     for (Controller* c : activeControllers) {
         bool passThrough = c->mouseMotion(window, x, y);
 		if (!passThrough)

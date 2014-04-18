@@ -17,7 +17,6 @@ class Transfer1DRenderer : public Renderer
 public:
     Transfer1DRenderer();
     ~Transfer1DRenderer();
-    void init();
     void draw();
     void resize(int width, int height);
     void setVolume(VolumeData* volume);

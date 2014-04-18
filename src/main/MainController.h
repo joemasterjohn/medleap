@@ -7,6 +7,8 @@
 #include "layers/volume_info/VolumeInfoController.h"
 #include "layers/transfer_1D/Transfer1DController.h"
 #include "layers/menu/MenuController.h"
+#include "layers/orientation/OrientationController.h"
+#include "layers/color_pick/ColorPickController.h"
 #include "util/TextRenderer.h"
 #include "data/VolumeLoader.h"
 #include "Leap.h"
@@ -23,7 +25,7 @@ public:
     };
     
     ~MainController();
-    void init();
+    void init(GLFWwindow* window);
     void startLoop();
     void setVolume(VolumeData* volume);
     void resize(int width, int height);
@@ -63,6 +65,7 @@ private:
     void toggleHistogram();
 	void chooseTrackedGestures();
 
+	GLFWwindow* window;
 	Leap::Controller leapController;
     MainRenderer renderer;
     SliceController sliceController;
@@ -70,6 +73,8 @@ private:
     VolumeInfoController volumeInfoController;
     Transfer1DController histogramController;
 	MenuController menuController;
+	ColorPickController colorPickController;
+	OrientationController orientationController;
     std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;
@@ -77,6 +82,8 @@ private:
     TextRenderer text;
     VolumeLoader loader;
 	bool menuOn;
+	int width;
+	int height;
 };
 
 #endif /* defined(__medleap__MainController__) */

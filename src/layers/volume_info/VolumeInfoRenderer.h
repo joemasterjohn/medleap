@@ -12,7 +12,6 @@
 class VolumeInfoRenderer : public Renderer
 {
 public:
-    void init();
     void draw();
     void setVolume(VolumeData* volume);
     void setVolumeRenderer(VolumeRenderer* renderer);

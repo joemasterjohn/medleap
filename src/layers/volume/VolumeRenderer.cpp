@@ -17,6 +17,54 @@ VolumeRenderer::VolumeRenderer() : cursorGeom(1, 2)
 	cursorActive = false;
 	cursorRadius = 0.1;
 	useJitter = false;
+
+	volumeTexture.generate(GL_TEXTURE_3D);
+	gradientTexture.generate(GL_TEXTURE_3D);
+
+	proxyVertices = Buffer::genVertexBuffer(GL_DYNAMIC_DRAW);
+	proxyIndices = Buffer::genIndexBuffer(GL_DYNAMIC_DRAW);
+
+	camera.setView(lookAt(1, 1, 1, 0, 0, 0, 0, 1, 0));
+	camera.setView(lookAt(0, 0, 1.5f, 0, 0, 0, 0, 1, 0));
+	boxShader = Program::create("shaders/volume_clut.vert", "shaders/volume_clut.frag");
+	boxShader.enable();
+	glUniform1i(boxShader.getUniform("tex_volume"), 0);
+	glUniform1i(boxShader.getUniform("tex_gradients"), 1);
+	glUniform1i(boxShader.getUniform("tex_clut"), 2);
+	glUniform1i(boxShader.getUniform("tex_jitter"), 3);
+
+	fullResRT.setInternalColorFormat(GL_RGB16F);
+	fullResRT.generate(viewport.width, viewport.height, true);
+	lowResRT.setInternalColorFormat(GL_RGB16F);
+	lowResRT.generate(viewport.width / 2, viewport.height / 2, true);
+	fullScreenQuad.generate();
+
+	cursor3DShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
+	cursor3DVBO = Buffer::genVertexBuffer();
+	cursor3DVBO.bind();
+	cursorGeom.fill(cursor3DVBO);
+
+	MainConfig cfg;
+	minSlices = cfg.getValue<unsigned>(MainConfig::MIN_SLICES);
+	maxSlices = cfg.getValue<unsigned>(MainConfig::MAX_SLICES);
+
+
+	// stochastic jittering texture
+	{
+		unsigned size = 32;
+		vector<unsigned char> buf;
+		srand((unsigned)time(NULL));
+		for (unsigned i = 0; i < size*size; ++i)
+			buf.push_back(static_cast<unsigned char>(rand() * 255.0 / RAND_MAX));
+
+		jitterTexture.generate(GL_TEXTURE_2D);
+		jitterTexture.bind();
+		jitterTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		jitterTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		jitterTexture.setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+		jitterTexture.setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+		jitterTexture.setData2D(GL_RED, size, size, GL_RED, GL_UNSIGNED_BYTE, &buf[0]);
+	}
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -129,57 +177,6 @@ void VolumeRenderer::setCLUTTexture(Texture& texture)
 {
     this->clutTexture = texture;
     markDirty();
-}
-
-void VolumeRenderer::init()
-{
-	volumeTexture.generate(GL_TEXTURE_3D);
-	gradientTexture.generate(GL_TEXTURE_3D);
-
-	proxyVertices = Buffer::genVertexBuffer(GL_DYNAMIC_DRAW);
-	proxyIndices = Buffer::genIndexBuffer(GL_DYNAMIC_DRAW);
-
-    camera.setView(lookAt(1, 1, 1, 0, 0, 0, 0, 1, 0));
-     
-    boxShader = Program::create("shaders/volume_clut.vert", "shaders/volume_clut.frag");
-    boxShader.enable();
-    glUniform1i(boxShader.getUniform("tex_volume"), 0);
-    glUniform1i(boxShader.getUniform("tex_gradients"), 1);
-    glUniform1i(boxShader.getUniform("tex_clut"), 2);
-	glUniform1i(boxShader.getUniform("tex_jitter"), 3);
-
-	fullResRT.setInternalColorFormat(GL_RGB16F);
-	fullResRT.generate(viewport.width, viewport.height, true);
-	lowResRT.setInternalColorFormat(GL_RGB16F);
-	lowResRT.generate(viewport.width/2, viewport.height/2, true);
-	fullScreenQuad.generate();
-
-	cursor3DShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
-	cursor3DVBO = Buffer::genVertexBuffer();
-	cursor3DVBO.bind();
-	cursorGeom.fill(cursor3DVBO);
-
-	MainConfig cfg;
-	minSlices = cfg.getValue<unsigned>(MainConfig::MIN_SLICES);
-	maxSlices = cfg.getValue<unsigned>(MainConfig::MAX_SLICES);
-
-
-	// stochastic jittering texture
-	{
-		unsigned size = 32;
-		vector<unsigned char> buf;
-		srand((unsigned)time(NULL));
-		for (unsigned i = 0; i < size*size; ++i)
-			buf.push_back(static_cast<unsigned char>(rand() * 255.0 / RAND_MAX));
-		
-		jitterTexture.generate(GL_TEXTURE_2D);
-		jitterTexture.bind();
-		jitterTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		jitterTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		jitterTexture.setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-		jitterTexture.setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-		jitterTexture.setData2D(GL_RED, size, size, GL_RED, GL_UNSIGNED_BYTE, &buf[0]);
-	}
 }
 
 float VolumeRenderer::getOpacityScale()

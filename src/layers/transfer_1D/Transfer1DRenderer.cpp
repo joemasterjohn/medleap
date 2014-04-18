@@ -54,26 +54,6 @@ const char* hounsfield(float value)
 
 Transfer1DRenderer::Transfer1DRenderer()
 {
-}
-
-Transfer1DRenderer::~Transfer1DRenderer()
-{
-}
-
-void Transfer1DRenderer::setCLUT(CLUT* clut)
-{
-    this->clut = clut;
-    if (clutTexture.id())
-        clut->saveTexture(clutTexture);
-}
-
-Texture& Transfer1DRenderer::getCLUTTexture()
-{
-    return clutTexture;
-}
-
-void Transfer1DRenderer::init()
-{
 	histo1D.generate(GL_TEXTURE_2D);
 	transferFn.generate(GL_TEXTURE_2D);
 
@@ -108,7 +88,6 @@ void Transfer1DRenderer::init()
 
 	// initialize clut strip
 	clutTexture.generate(GL_TEXTURE_1D);
-	clut->saveTexture(clutTexture);
 	clutStripShader = Program::create("shaders/clut_strip.vert",
 		"shaders/clut_strip.frag");
 
@@ -158,6 +137,22 @@ void Transfer1DRenderer::init()
 		bgBuffer.bind();
 		bgBuffer.setData(vertices, sizeof(vertices));
 	}
+}
+
+Transfer1DRenderer::~Transfer1DRenderer()
+{
+}
+
+void Transfer1DRenderer::setCLUT(CLUT* clut)
+{
+    this->clut = clut;
+    if (clutTexture.id())
+        clut->saveTexture(clutTexture);
+}
+
+Texture& Transfer1DRenderer::getCLUTTexture()
+{
+    return clutTexture;
 }
 
 void Transfer1DRenderer::draw()
