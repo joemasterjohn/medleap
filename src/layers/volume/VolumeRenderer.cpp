@@ -24,8 +24,9 @@ VolumeRenderer::VolumeRenderer() : cursorGeom(1, 2)
 	proxyVertices = Buffer::genVertexBuffer(GL_DYNAMIC_DRAW);
 	proxyIndices = Buffer::genIndexBuffer(GL_DYNAMIC_DRAW);
 
-	camera.setView(lookAt(1, 1, 1, 0, 0, 0, 0, 1, 0));
-	camera.setView(lookAt(0, 0, 1.5f, 0, 0, 0, 0, 1, 0));
+	camera.setView(lookAt(Vec3(0, 0, 1), Vec3(0, 0, 0), Vec3(0, 1, 0)));
+	//camera.setView(lookAt(1, 1, 1, 0, 0, 0, 0, 1, 0));
+	//camera.setView(lookAt(0, 0, 1.5f, 0, 0, 0, 0, 1, 0));
 	boxShader = Program::create("shaders/volume_clut.vert", "shaders/volume_clut.frag");
 	boxShader.enable();
 	glUniform1i(boxShader.getUniform("tex_volume"), 0);
@@ -82,9 +83,11 @@ void VolumeRenderer::setVolume(VolumeData* volume)
 
 	GLenum internalFormat;
 	switch (volume->getType()) {
-	case GL_BYTE: internalFormat = GL_R8_SNORM; break;
-	case GL_SHORT: internalFormat = GL_R16_SNORM; break;
-	default: internalFormat = GL_RED; break;
+		case GL_UNSIGNED_BYTE: internalFormat = GL_R8; break;
+		case GL_UNSIGNED_SHORT: internalFormat = GL_R16; break;
+		case GL_BYTE: internalFormat = GL_R8_SNORM; break;
+		case GL_SHORT: internalFormat = GL_R16_SNORM; break;
+		default: internalFormat = GL_RED; break;
 	}
 
 	volumeTexture.bind();
@@ -235,9 +238,6 @@ void VolumeRenderer::updateSlices(double samplingScale, bool limitSamples)
 
 void VolumeRenderer::draw(double samplingScale, bool limitSamples, int w, int h)
 {
-
-
-
 	//glEnable(GL_DEPTH_TEST);
 	//{
 	//	glEnable(GL_CULL_FACE);

@@ -1,7 +1,7 @@
 #include "OrientationRenderer.h"
 #include "gl/geom/Box.h"
 #include "main/MainController.h"
-
+#include "gl/math/Transform.h"
 using namespace gl;
 
 OrientationRenderer::OrientationRenderer() : camera(NULL)
@@ -18,15 +18,22 @@ OrientationRenderer::OrientationRenderer() : camera(NULL)
 
 void OrientationRenderer::draw()
 {
+
+	Mat3 rot;
+	if (MainController::getInstance().getMode() == MainController::MODE_2D) {
+		Mat3 img2gl{ 1, 0, 0, 0, -1, 0, 0, 0, -1 };
+		rot = img2gl * volume->getPatientBasis().transpose();
+	}
+	else {
+		Mat3 img2gl{ 1, 0, 0, 0, -1, 0, 0, 0, -1 };
+		const Mat4& view = camera->getView();
+		rot = Mat3{ view.col(0), view.col(1), view.col(2) } * img2gl * volume->getPatientBasis().transpose();
+	}
+
 	int draw_w = std::min(viewport.width,viewport.height) * 0.15;
 	int draw_h = draw_w;
 	int draw_x = viewport.width - draw_w;
 	int draw_y = viewport.height - draw_h;
-
-
-	const Mat4& view = camera->getView();
-	Mat3 rot{ view.col(0), view.col(1), view.col(2) };
-	rot = rot * volume->getPatientBasis();
 
 	Mat4 mvp{ 
 		Vec4(rot.col(0).x, rot.col(0).y, rot.col(0).z, 0), 
@@ -37,7 +44,7 @@ void OrientationRenderer::draw()
 	glViewport(draw_x, draw_y, draw_w, draw_h);
 
 	geomShader.enable();
-	glUniformMatrix4fv(geomShader.getUniform("modelViewProjection"), 1, false, mvp);
+	glUniformMatrix4fv(geomShader.getUniform("modelViewProjection"), 1, false,  mvp);
 	glUniform4f(geomShader.getUniform("color"), 0.5f, 0.5f, 0.5f, 0.5f);
 
 	geomVBO.bind();
@@ -59,6 +66,7 @@ void OrientationRenderer::draw()
 	tr.begin(draw_w, draw_h);
 
 	auto text = [&](const Vec4& p, const std::string& label){
+		// convert 3D position p to viewport coordinates x, y
 		Vec4 ndc = mvp * p;
 		ndc /= ndc.w;
 		float x = (ndc.x + 1.0f) * draw_w / 2.0f;
@@ -67,12 +75,24 @@ void OrientationRenderer::draw()
 			tr.add(label, x, y, TextRenderer::CENTER, TextRenderer::CENTER);
 	};
 
-	text(Vec4(+0.5f, 0.0f, 0.0f, 1.0f), "L");
-	text(Vec4(-0.5f, 0.0f, 0.0f, 1.0f), "R");
-	text(Vec4(0.0f, +0.5f, 0.0f, 1.0f), "P");
-	text(Vec4(0.0f, -0.5f, 0.0f, 1.0f), "A");
-	text(Vec4(0.0f, 0.0f, +0.5f, 1.0f), "H");
-	text(Vec4(0.0f, 0.0f, -0.5f, 1.0f), "F");
+
+	if (volume->getModality() == VolumeData::UNKNOWN) {
+		text(Vec4(+0.6f, 0.0f, 0.0f, 1.0f), "+X");
+		text(Vec4(-0.6f, 0.0f, 0.0f, 1.0f), "-X");
+		text(Vec4(0.0f, +0.6f, 0.0f, 1.0f), "+Y");
+		text(Vec4(0.0f, -0.6f, 0.0f, 1.0f), "-Y");
+		text(Vec4(0.0f, 0.0f, +0.6f, 1.0f), "+Z");
+		text(Vec4(0.0f, 0.0f, -0.6f, 1.0f), "-Z");
+	}
+	else {
+		text(Vec4(+0.6f, 0.0f, 0.0f, 1.0f), "L");
+		text(Vec4(-0.6f, 0.0f, 0.0f, 1.0f), "R");
+		text(Vec4(0.0f, +0.6f, 0.0f, 1.0f), "P");
+		text(Vec4(0.0f, -0.6f, 0.0f, 1.0f), "A");
+		text(Vec4(0.0f, 0.0f, +0.6f, 1.0f), "S");
+		text(Vec4(0.0f, 0.0f, -0.6f, 1.0f), "I");
+	}
+
 
 	tr.end();
 }

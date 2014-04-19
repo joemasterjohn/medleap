@@ -21,6 +21,11 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
     test.addColorStop(0.6f, Vec4(1, 0, 0, 1));
     cluts.push_back(test);
 
+	CLUT whiteToBlack;
+	whiteToBlack.getColorStop(0).setColor(1, 1, 1, 0);
+	whiteToBlack.getColorStop(1).setColor(0, 0, 0, 1);
+	cluts.push_back(whiteToBlack);
+
     CLUT spectrum;
     spectrum.clearStops();
     spectrum.addColorStop(0,              Vec4(164, 37, 138, 1)/255.0f);

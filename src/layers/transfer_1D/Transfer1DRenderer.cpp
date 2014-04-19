@@ -265,6 +265,7 @@ void Transfer1DRenderer::drawHistogram()
 
 		Vec4 c = this->clut->getColor((x - markL) / (markR - markL));
 		c *= c.w;
+
 		d.color(c.x, c.y, c.z);
 
 		d.vertex(x, -1);

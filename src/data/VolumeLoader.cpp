@@ -235,18 +235,29 @@ void VolumeLoader::load()
     volume->data = new char[volume->width * volume->height * volume->depth * gl::sizeOf(volume->type)];
     
     // load first image (already in reader memory)
-    img.GetBuffer(volume->data);
-    gl::flipImage(volume->data, volume->width, volume->height, volume->getPixelSizeBytes());
+    //img.GetBuffer(volume->data);
+    //gl::flipImage(volume->data, volume->width, volume->height, volume->getPixelSizeBytes());
     
     // load all other images
-    for (int i = 1; i < volume->depth; i++) {
-        size_t offset = i * volume->getSliceSizeBytes();
-        ImageReader reader;
-        reader.SetFileName(files[i].c_str());
-        reader.Read();
-        reader.GetImage().GetBuffer(volume->data + offset);
+  //  for (int i = 0; i < volume->depth; i++) {
+  //      size_t offset = i * volume->getSliceSizeBytes();
+  //      ImageReader reader;
+  //      reader.SetFileName(files[i].c_str());
+  //      reader.Read();
+  //      reader.GetImage().GetBuffer(volume->data + offset);
+		//gl::flipImage(volume->data + offset, volume->width, volume->height, volume->getPixelSizeBytes());
+  //  }
+
+	for (int i = 0; i < volume->depth; i++) {
+		size_t offset = (volume->depth - i - 1) * volume->getSliceSizeBytes();
+		ImageReader reader;
+		reader.SetFileName(files[i].c_str());
+		reader.Read();
+		reader.GetImage().GetBuffer(volume->data + offset);
 		gl::flipImage(volume->data + offset, volume->width, volume->height, volume->getPixelSizeBytes());
-    }
+	}
+
+
 
 	// Z spacing should be regular between images (this is NOT slice thickness attribute)
 	{
@@ -330,6 +341,7 @@ void VolumeLoader::load()
 		Vec3 x(static_cast<float>(cosines[0]), static_cast<float>(cosines[1]), static_cast<float>(cosines[2]));
 		Vec3 y(static_cast<float>(cosines[3]), static_cast<float>(cosines[4]), static_cast<float>(cosines[5]));
 		Vec3 z = x.cross(y);
+	
         volume->orientation = Mat3(x, y, z);
     } else {
         volume->windows.push_back(Window(volume->type));

@@ -14,7 +14,6 @@ class SliceRenderer : public Renderer
 {
 public:
     SliceRenderer();
-    ~SliceRenderer();
     void setVolume(VolumeData* volume);
     void draw();
     void resize(int width, int height);
@@ -33,20 +32,15 @@ private:
     
     VolumeData* volume;
     gl::Program sliceShader;
-    gl::Program axisShader;
     gl::Texture clutTexture;
     gl::Texture sliceTexture;
     gl::Buffer sliceVBO;
-    gl::Buffer axisVBO;
     
-    int numOrientationVertices;
     int currentSlice;
     std::vector<OrientationLabel> labels;
     Mat4 modelMatrix;
     
     void updateTexture();
-    void drawSlice();
-    void drawOrientationOverlay();
 };
 
 #endif /* defined(__medleap__SliceRenderer__) */

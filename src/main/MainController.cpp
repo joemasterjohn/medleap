@@ -85,6 +85,7 @@ void MainController::setMode(MainController::Mode mode)
             pushController(&volumeInfoController);
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
+			pushController(&orientationController);
             break;
         case MODE_3D:
             renderer.clearLayers();

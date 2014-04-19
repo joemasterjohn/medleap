@@ -115,7 +115,7 @@ void BoxSlicer::slicePlane(const Vec3& p, const BoundingBox& bounds)
     
     // check if any vertices were actually added
     if (polyIndexOffset != indices.size()) {
-        
+
         // end the polygon by pushing the primitive restart index (for triangle fan)
         indices.push_back(primRestartIndex);
         
