@@ -34,7 +34,7 @@ private:
     void createRingGeometry();
     void createListGeometry();
 
-	void drawMenu(Menu& menu);
+	void drawMenu(Menu& menu, Vec3 tc1, Vec3 tc2);
 };
 
 #endif /* defined(__medleap__MenuRenderer__) */

@@ -152,10 +152,12 @@ void CLUT::saveTexture(Texture& texture)
     ColorStop* left = &stops[l];
     ColorStop* right = &stops[r];
     
-    unsigned char buf[256*4];
+	const unsigned texWidth = 256;
+
+	unsigned short buf[texWidth * 4];
     long ptr = 0;
-    for (int i = 0; i < 256; i++) {
-        float p = i/255.0f;
+	for (int i = 0; i < texWidth; i++) {
+		float p = static_cast<float>(i) / texWidth;
         if (p > right->getPosition()) {
             left = &stops[++l];
             right = &stops[++r];
@@ -171,15 +173,15 @@ void CLUT::saveTexture(Texture& texture)
         //rc *= Vec4(rc.w, rc.w, rc.w, 1);
         
         Vec4 color = lc * (1.0f - pn) + rc * pn;
-        buf[ptr++] = (unsigned char)(color.x * 255);
-        buf[ptr++] = (unsigned char)(color.y * 255);
-        buf[ptr++] = (unsigned char)(color.z * 255);
-        buf[ptr++] = (unsigned char)(color.w * 255);
+		buf[ptr++] = (unsigned short)(color.x * 65535);
+		buf[ptr++] = (unsigned short)(color.y * 65535);
+		buf[ptr++] = (unsigned short)(color.z * 65535);
+		buf[ptr++] = (unsigned short)(color.w * 65535);
     }
     
     texture.bind();
     texture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     texture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     texture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    texture.setData1D(0, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, buf);
+    texture.setData1D(0, GL_RGBA, texWidth, GL_RGBA, GL_UNSIGNED_SHORT, buf);
 }

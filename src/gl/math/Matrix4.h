@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include "Vector4.h"
+#include "matrix3.h"
 
 template <typename T> class Vector4;
 
@@ -93,6 +94,30 @@ public:
         for (int i = 0; i < 16; ++i)
             m[i] = B.m[i];
     }
+
+	/// Creates a 4x4 homogeneous matrix from a 3x3 matrix
+	Matrix4<T>(const Matrix3<T>& M)
+	{
+		m[0] = M.col(0).x;
+		m[1] = M.col(0).y;
+		m[2] = M.col(0).z;
+		m[3] = 0;
+
+		m[4] = M.col(1).x;
+		m[5] = M.col(1).y;
+		m[6] = M.col(1).z;
+		m[7] = 0;
+
+		m[8] = M.col(2).x;
+		m[9] = M.col(2).y;
+		m[10] = M.col(2).z;
+		m[11] = 0;
+
+		m[12] = 0;
+		m[13] = 0;
+		m[14] = 0;
+		m[15] = 1;
+	}
     
     /// Returns a copy of the row vector at index i.
     Vector4<T> row(int i) const
@@ -112,6 +137,12 @@ public:
     {
         return m[0] + m[5] + m[10] + m[15];
     }
+
+	/** Returns a matrix containing only the rotation/scale components */
+	Matrix4<T> rotScale() const
+	{
+		return Matrix4(col(0), col(1), col(2), Vec4(0, 0, 0, 1));
+	}
     
     /// Computes the inverse of the matrix; returns identity if none exists.
     Matrix4<T> inverse() const

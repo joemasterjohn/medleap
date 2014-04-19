@@ -20,7 +20,10 @@ private:
 	gl::Buffer geomVBO;
 	gl::Buffer geomIBO;
 	gl::Program geomShader;
-	GLsizei numElements;
+	GLsizei faceIndicesCount;
+	GLsizei faceIndicesOffset;
+	GLsizei edgeIndicesCount;
+	GLsizei edgeIndicesOffset;
 	Mat4 modelViewProj;
 	Camera* camera;
 	VolumeData* volume;

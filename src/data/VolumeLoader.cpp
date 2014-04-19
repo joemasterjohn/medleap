@@ -122,58 +122,63 @@ std::string VolumeLoader::getStateMessage()
 
 void VolumeLoader::loadRAW(const std::string& fileName)
 {
-	string datName = fileName.substr(0, fileName.size() - 4) + ".txt";
-	ifstream f(datName);
-	string line;
+	auto work = [=] {
+		string datName = fileName.substr(0, fileName.size() - 4) + ".txt";
+		ifstream f(datName);
+		string line;
 
-	if (f.is_open()) {
-		this->state = LOADING;
-		stateMessage = "Reading RAW";
+		if (f.is_open()) {
+			this->state = LOADING;
+			stateMessage = "Reading RAW";
 
-		this->volume = new VolumeData;
+			this->volume = new VolumeData;
 
-		getline(f, line);
-		volume->width = std::stoi(line);
-		getline(f, line);
-		volume->height = std::stoi(line);
-		getline(f, line);
-		volume->depth = std::stoi(line);
+			getline(f, line);
+			volume->width = std::stoi(line);
+			getline(f, line);
+			volume->height = std::stoi(line);
+			getline(f, line);
+			volume->depth = std::stoi(line);
 
-		getline(f, line);
-		unsigned pixelBytes = std::stoi(line);
+			getline(f, line);
+			unsigned pixelBytes = std::stoi(line);
 
-		getline(f, line);
-		float x = std::stof(line);
-		getline(f, line);
-		float y = std::stof(line);
-		getline(f, line);
-		float z = std::stof(line);
-		f.close();
+			getline(f, line);
+			float x = std::stof(line);
+			getline(f, line);
+			float y = std::stof(line);
+			getline(f, line);
+			float z = std::stof(line);
+			f.close();
 
-		ifstream binary(fileName, ios::in | ios::binary);
-		volume->data = new char[volume->getNumVoxels()*pixelBytes];
-		binary.read(volume->data, volume->getNumVoxels()*pixelBytes);
-		binary.close();
+			ifstream binary(fileName, ios::in | ios::binary);
+			volume->data = new char[volume->getNumVoxels()*pixelBytes];
+			binary.read(volume->data, volume->getNumVoxels()*pixelBytes);
+			binary.close();
 
-		volume->setVoxelSize(x, y, z);
+			volume->setVoxelSize(x, y, z);
 
-		if (pixelBytes == 1) {
-			volume->type = GL_UNSIGNED_BYTE;
-			calculateMinMax<GLubyte>();
-			volume->computeGradients<GLubyte>();
+			if (pixelBytes == 1) {
+				volume->type = GL_UNSIGNED_BYTE;
+				calculateMinMax<GLubyte>();
+				volume->computeGradients<GLubyte>();
+			}
+			else {
+				volume->type = GL_UNSIGNED_SHORT;
+				calculateMinMax<GLushort>();
+				volume->computeGradients<GLushort>();
+			}
+			volume->format = GL_RED;
+			volume->name = fileName;
+			volume->windows.push_back(Window(volume->type));
+
+			this->state = FINISHED;
+			stateMessage = "Finished";
 		}
-		else {
-			volume->type = GL_UNSIGNED_SHORT;
-			calculateMinMax<GLushort>();
-			volume->computeGradients<GLushort>();
-		}
-		volume->format = GL_RED;
-		volume->name = fileName;
-		volume->windows.push_back(Window(volume->type));
+	};
 
-		this->state = FINISHED;
-		stateMessage = "Finished";
-	}
+	thread t(work);
+	t.detach();
 }
 
 void VolumeLoader::load()

@@ -51,13 +51,27 @@ void MenuRenderer::draw()
     
 	float alpha = this->menuManager->visibility();
 
-    glUniform4f(menuShader.getUniform("color"), 0.7f, 0.7f, 0.7f, alpha * 0.7f);
+	Vec3 menuC;
+	Vec3 hlC;
+	Vec3 tc;
+	if (MainController::getInstance().getRenderer().getBackgroundColor().x > 0.5f) {
+		menuC = Vec3(.7f, .7f, .7f);
+		hlC = Vec3(.1f, .1f, .1f);
+		tc = Vec3(0, 0, 0);
+	}
+	else {
+		menuC = Vec3(.3f, .3f, .3f);
+		hlC = Vec3(.9f, .9f, .9f);
+		tc = Vec3(1, 1, 1);
+	}
+
+    glUniform4f(menuShader.getUniform("color"), menuC.x, menuC.y, menuC.z, alpha * 0.85f);
     glDrawElements(GL_TRIANGLES, indexCount, indexType, 0);
 
     if (highlighted >= 0) {
 
 		float lp = menuManager->getLeapProgress();
-		Vec3 a(0.1f, 0.1f, 0.1f);
+		Vec3 a = hlC;
 		Vec3 b(0.1f, 0.75f, 1.0f);
 		Vec3 c = a * (1 - lp) + b * lp;
 		
@@ -68,16 +82,16 @@ void MenuRenderer::draw()
     }
     glDisable(GL_BLEND);
     
-	drawMenu(menuManager->top());
+	drawMenu(menuManager->top(), tc, Vec3(1.0f) - tc);
 }
 
-void MenuRenderer::drawMenu(Menu& menu)
+void MenuRenderer::drawMenu(Menu& menu, Vec3 textColor1, Vec3 textColor2)
 {
 	TextRenderer& text = MainController::getInstance().getText();
 
 	text.begin(viewport.width, viewport.height);
 
-	text.setColor(0, 0, 0);
+	text.setColor(textColor1.x, textColor1.y, textColor1.z);
 	text.add(
 		menu.getName(),
 		viewport.width / 2,
@@ -103,7 +117,7 @@ void MenuRenderer::drawMenu(Menu& menu)
 		int x = static_cast<int>(std::cos(angle) * radius + viewport.width / 2);
 		int y = static_cast<int>(std::sin(angle) * radius + viewport.height / 2);
 
-		text.setColor(1, 1, 1);
+		text.setColor(textColor2.x, textColor2.y, textColor2.z);
 		text.begin(viewport.width, viewport.height);
 		text.add(menu.getItems()[highlighted].getName(), x, y, 
 			TextRenderer::CENTER, TextRenderer::CENTER);
