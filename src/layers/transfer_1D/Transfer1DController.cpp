@@ -184,7 +184,7 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
     return true;
 }
 
-bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int action, int mods)
+bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y)
 {
     lMouseDrag = button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS;
     rMouseDrag = button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS;

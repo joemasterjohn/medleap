@@ -100,7 +100,7 @@ void MenuRenderer::drawMenu(Menu& menu, Vec3 textColor1, Vec3 textColor2)
 		TextRenderer::TOP);
 
 	double radius = std::min(viewport.width, viewport.height) * 0.5 * 0.7;
-	double angleStep = gl::PI2 / menu.getItems().size();
+	double angleStep = gl::two_pi / menu.getItems().size();
     double angle = angleStep/2.0;
 	for (MenuItem& item : menu.getItems()) {
 		int x = static_cast<int>(std::cos(angle) * radius + viewport.width / 2);
@@ -152,7 +152,7 @@ void MenuRenderer::createRingGeometry()
 	this->indicesPerMenuItem = stepsPerItem * 6;
 
     unsigned jmod = 2 * numSteps;
-    float step = PI2 / numSteps;
+	float step = two_pi / numSteps;
     float angle = 0.0f;
     for (unsigned i = 0; i < numSteps; i++) {
         pushVert(angle, innerRadius);

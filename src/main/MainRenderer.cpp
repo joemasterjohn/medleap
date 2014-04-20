@@ -7,7 +7,7 @@ MainRenderer::MainRenderer()
     rightDocking.layerIndex = -1;
     bottomDocking.layerIndex = -1;
     topDocking.layerIndex = -1;
-	bgColor = Vec3(1, 1, 1);
+	bgColor = Vec3(0.0f);
 
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);

@@ -60,7 +60,7 @@ public:
     T anglePositive() const
     {
         T rads = angle();
-        return rads < 0 ? gl::PI2 + rads : rads;
+        return rads < 0 ? gl::two_pi + rads : rads;
     }
     
     /// Computes the angle from this vector to v (always positive).
@@ -69,7 +69,7 @@ public:
         double a1 = anglePositive();
         double a2 = v.anglePositive();
 		if (a2 < a1)
-			a2 += gl::PI2;
+			a2 += gl::two_pi;
         return a2 - a1;
     }
     

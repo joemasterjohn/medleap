@@ -53,7 +53,7 @@ bool VolumeController::keyboardInput(GLFWwindow* window, int key, int action, in
     return true;
 }
 
-bool VolumeController::mouseButton(GLFWwindow* window, int button, int action, int mods)
+bool VolumeController::mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         mouseDragLeftButton = action == GLFW_PRESS;

@@ -18,7 +18,7 @@ public:
     
     bool keyboardInput(GLFWwindow* window, int key, int action, int mods);
     bool mouseMotion(GLFWwindow* window, double x, double y);
-    bool mouseButton(GLFWwindow* window, int button, int action, int mods);
+    bool mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y) override;
     Histogram* histogram;
 
     void setVolumeRenderer(VolumeRenderer* volumeRenderer);

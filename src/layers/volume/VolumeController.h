@@ -13,11 +13,11 @@ public:
     VolumeRenderer* getRenderer();
     void setVolume(VolumeData* volume);
     
-    bool keyboardInput(GLFWwindow* window, int key, int action, int mods);
-    bool mouseButton(GLFWwindow* window, int button, int action, int mods);
-    bool mouseMotion(GLFWwindow* window, double x, double y);
-    bool scroll(GLFWwindow* window, double dx, double dy);
-	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame);
+    bool keyboardInput(GLFWwindow* window, int key, int action, int mods) override;
+    bool mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y) override;
+    bool mouseMotion(GLFWwindow* window, double x, double y) override;
+    bool scroll(GLFWwindow* window, double dx, double dy) override;
+	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame) override;
 
 private:
     VolumeRenderer renderer;

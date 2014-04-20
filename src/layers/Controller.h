@@ -25,7 +25,7 @@ public:
     }
     
     /** Mouse button input handler. Returns TRUE if input should pass through to next controller; false if consumed in this controller. */
-    virtual bool mouseButton(GLFWwindow* window, int button, int action, int mods)
+    virtual bool mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y)
     {
         return true;
     }

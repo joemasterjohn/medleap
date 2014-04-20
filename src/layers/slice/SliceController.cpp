@@ -35,7 +35,7 @@ bool SliceController::keyboardInput(GLFWwindow* window, int key, int action, int
     return true;
 }
 
-bool SliceController::mouseButton(GLFWwindow* window, int button, int action, int mods)
+bool SliceController::mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {

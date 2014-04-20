@@ -40,14 +40,11 @@ bool MenuController::keyboardInput(GLFWwindow* window, int key, int action, int 
 	return false;
 }
 
-bool MenuController::mouseButton(GLFWwindow* window, int button, int action, int mods)
+bool MenuController::mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y)
 {
 	if (menus.visibility() < 1.0) return false;
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		double x, y;
-		glfwGetCursorPos(window, &x, &y);
-		y = renderer->getViewport().height - y - 1;
 		int selected = calcHighlightedMenu(x, y);
 		menus.top()[selected].trigger();
 	}
@@ -83,7 +80,7 @@ int MenuController::calcHighlightedMenu(double x, double y)
 int MenuController::calcHighlightedMenu(double radians)
 {
 	size_t numItems = menus.top().getItems().size();
-	double angleStep = gl::PI2/ numItems;
+	double angleStep = gl::two_pi / numItems;
 	return static_cast<int>(radians / angleStep) % numItems;
 }
 

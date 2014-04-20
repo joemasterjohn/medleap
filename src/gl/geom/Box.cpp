@@ -22,10 +22,10 @@ Box::Box(GLfloat width, GLfloat height, GLfloat depth, unsigned widthSegments, u
 			vertices.push_back(Vec3(m * Vec4(v.x, v.y, v.z, 1.0f)) + offset);
 	};
 
-	addPlane(Plane(depth, height, depthSegments, heightSegments), rotationY(PI / 2.0), Vec3(+width / 2.0f, 0, 0));
-	addPlane(Plane(depth, height, depthSegments, heightSegments), rotationY(-PI / 2.0), Vec3(-width / 2.0f, 0, 0));
-	addPlane(Plane(width, depth, widthSegments, depthSegments), rotationX(-PI / 2.0), Vec3(0.0f, +height / 2.0f, 0.0f));
-	addPlane(Plane(width, depth, widthSegments, depthSegments), rotationX(PI / 2.0), Vec3(0.0f, -height / 2.0f, 0.0f));
+	addPlane(Plane(depth, height, depthSegments, heightSegments), rotationY(pi / 2.0), Vec3(+width / 2.0f, 0, 0));
+	addPlane(Plane(depth, height, depthSegments, heightSegments), rotationY(-pi / 2.0), Vec3(-width / 2.0f, 0, 0));
+	addPlane(Plane(width, depth, widthSegments, depthSegments), rotationX(-pi / 2.0), Vec3(0.0f, +height / 2.0f, 0.0f));
+	addPlane(Plane(width, depth, widthSegments, depthSegments), rotationX(pi / 2.0), Vec3(0.0f, -height / 2.0f, 0.0f));
 	addPlane(Plane(width, height, widthSegments, heightSegments), Mat4(), Vec3(0.0f, 0.0f, +depth / 2.0f));
-	addPlane(Plane(width, height, widthSegments, heightSegments), rotationY(PI), Vec3(0.0f, 0.0f, -depth / 2.0f));
+	addPlane(Plane(width, height, widthSegments, heightSegments), rotationY(pi), Vec3(0.0f, 0.0f, -depth / 2.0f));
 }

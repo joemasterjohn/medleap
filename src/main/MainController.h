@@ -23,7 +23,7 @@ public:
         MODE_2D,
         MODE_3D
     };
-    
+
     ~MainController();
     void init(GLFWwindow* window);
     void startLoop();
@@ -84,6 +84,8 @@ private:
 	bool menuOn;
 	int width;
 	int height;
+	double mMouseX;
+	double mMouseY;
 };
 
 #endif /* defined(__medleap__MainController__) */

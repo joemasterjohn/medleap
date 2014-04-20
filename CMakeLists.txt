@@ -31,6 +31,12 @@ set(DATA_SHADERS
     shaders/texture_2D.frag
     shaders/menu.vert
     shaders/menu.frag
+	shaders/color_pick_hsv_circle.vert
+	shaders/color_pick_hsv_circle.frag
+	shaders/color_pick_selected.vert
+	shaders/color_pick_selected.frag
+	shaders/color_pick_gradient.vert
+	shaders/color_pick_gradient.frag
 )
 
 set(DATA_FONTS

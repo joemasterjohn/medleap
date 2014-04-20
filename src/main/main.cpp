@@ -33,6 +33,9 @@ GLFWwindow* initGL(int width, int height, const char* title)
 	}
 	glfwMakeContextCurrent(window);
 
+	if (cfg.getValue<bool>(MainConfig::USE_SRGB))
+		glEnable(GL_FRAMEBUFFER_SRGB);
+
 	// Set vertical retrace rate (0 == run as fast as possible)
 	glfwSwapInterval(1);
 

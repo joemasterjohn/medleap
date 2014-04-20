@@ -51,10 +51,10 @@ void OrientationRenderer::draw()
 {
 	Mat4 modelView;
 	if (MainController::getInstance().getMode() == MainController::MODE_2D) {
-		modelView = rotationX(PI) * volume->getPatientBasis().transpose();
+		modelView = rotationX(pi) * volume->getPatientBasis().transpose();
 	}
 	else {
-		modelView = camera->getView().rotScale() * rotationX(PI) * volume->getPatientBasis().transpose();
+		modelView = camera->getView().rotScale() * rotationX(pi) * volume->getPatientBasis().transpose();
 	}
 
 	int draw_w = std::min(viewport.width,viewport.height) * 0.15;
@@ -109,7 +109,7 @@ void OrientationRenderer::draw()
 		ndc /= ndc.w;
 		float x = (ndc.x + 1.0f) * draw_w / 2.0f;
 		float y = (ndc.y + 1.0f) * draw_h / 2.0f;
-		if (ndc.z > -0.01)
+		if (ndc.z > -0.1)
 			tr.add(label, x, y, TextRenderer::CENTER, TextRenderer::CENTER);
 	};
 

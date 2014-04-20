@@ -92,6 +92,8 @@ void MainController::setMode(MainController::Mode mode)
             activeControllers.clear();
             pushController(&volumeController);
             pushController(&volumeInfoController);
+			pushController(&colorPickController);
+
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
 			pushController(&orientationController);
@@ -261,7 +263,7 @@ void MainController::resize(int width, int height)
 void MainController::mouseButton(GLFWwindow *window, int button, int action, int mods)
 {
 	for (Controller* c : activeControllers) {
-		bool passThrough = c->mouseButton(window, button, action, mods);
+		bool passThrough = c->mouseButton(window, button, action, mods, mMouseX, mMouseY);
 		if (!passThrough)
 			break;
 	}
@@ -271,6 +273,8 @@ void MainController::mouseMotion(GLFWwindow *window, double x, double y)
 {
     // convert y to bottom up
     y = height - y - 1;
+	mMouseX = x;
+	mMouseY = y;
     for (Controller* c : activeControllers) {
         bool passThrough = c->mouseMotion(window, x, y);
 		if (!passThrough)

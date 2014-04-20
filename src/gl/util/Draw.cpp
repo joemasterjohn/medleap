@@ -94,7 +94,7 @@ void Draw::line(float x1, float y1, float x2, float y2)
 void Draw::circle(float x, float y, float radius, int numSegments)
 {
 	float angle = 0.0f;
-	float step = PI2 / numSegments;
+	float step = two_pi / numSegments;
 	for (unsigned i = 0; i < numSegments; ++i) {
 		vertex(x + std::cos(angle) * radius, y + std::sin(angle) * radius);
 		vertex(x + std::cos(angle + step) * radius, y + std::sin(angle + step) * radius);
