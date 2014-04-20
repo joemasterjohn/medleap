@@ -336,7 +336,7 @@ void MainController::pushController(Controller* controller, MainController::Dock
 void MainController::chooseTrackedGestures()
 {
 	// MainController uses the CIRCLE gesutre to toggle the menu
-	leapController.enableGesture(Leap::Gesture::TYPE_CIRCLE, true);
+	//leapController.enableGesture(Leap::Gesture::TYPE_CIRCLE, true);
 
 	leapController.enableGesture(Leap::Gesture::TYPE_KEY_TAP, false);
 	leapController.enableGesture(Leap::Gesture::TYPE_SCREEN_TAP, false);

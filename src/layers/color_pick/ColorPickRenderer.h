@@ -18,7 +18,7 @@ public:
 	void resize(int width, int height) override;
 
 	void choose(const ColorHSV& color) { mColor = color; }
-
+	void tracking(bool tracking) { mTracking = tracking; }
 	const gl::Rectangle<float>& circleRect() const { return mCircleRect; }
 	const gl::Rectangle<float>& alphaRect() const { return mAlphaRect; }
 	const gl::Rectangle<float>& valueRect() const { return mValueRect; }
@@ -37,6 +37,7 @@ private:
 	ColorHSV mColor;
 	Mat4 mProjection;
 	TextRenderer text;
+	bool mTracking;
 
 	void quad(gl::Program prog, const gl::Rectangle<float>& rect);
 };

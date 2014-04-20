@@ -10,7 +10,7 @@
 using namespace std;
 using namespace gl;
 
-ColorPickRenderer::ColorPickRenderer() : mColor(0.0f, 1.0f, 1.0f, 1.0f)
+ColorPickRenderer::ColorPickRenderer() : mColor(0.0f, 1.0f, 1.0f, 1.0f), mTracking(false)
 {
 	GLfloat vertices[] = {
 		-1.0f, -1.0f,
@@ -101,10 +101,14 @@ void ColorPickRenderer::draw()
 	float x = cos(mColor.hue()) * mCircleRect.width / 2.0f * mColor.saturation() + mCircleRect.center().x;
 	float y = sin(mColor.hue()) * mCircleRect.width / 2.0f * mColor.saturation() + mCircleRect.center().y;
 	mCursor.setModelViewProj(mProjection * translation(x,y,0));
+
 	mCursor.draw();
 
 	text.begin(viewport.width, viewport.height);
-	text.setColor(1, 1, 1);
+	if (mTracking)
+		text.setColor(0.5f, 0.5f, 1);
+	else
+		text.setColor(1, 1, 1);
 
 	stringstream ss;
 	ss << "Opacity: " << fixed << setprecision(2) << mColor.alpha();
