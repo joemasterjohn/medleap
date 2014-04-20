@@ -8,6 +8,7 @@
 #include "gl/math/Matrix4.h"
 #include "Color.h"
 #include "gl/util/Draw.h"
+#include "util/TextRenderer.h"
 
 class ColorPickRenderer : public Renderer
 {
@@ -35,6 +36,7 @@ private:
 	gl::Draw mCursor;
 	ColorHSV mColor;
 	Mat4 mProjection;
+	TextRenderer text;
 
 	void quad(gl::Program prog, const gl::Rectangle<float>& rect);
 };

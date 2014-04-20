@@ -1,7 +1,6 @@
 #version 150
 
 uniform float value;
-uniform float alpha;
 
 in vec2 fs_position;
 out vec4 display_color;
@@ -41,7 +40,7 @@ void main()
 	float saturation = length(fs_position);
 
 	if (saturation <= 1.0) {
-		display_color = hsv2rgb(hue, saturation, 1.0);
+		display_color = hsv2rgb(hue, saturation, value);
 	} else {
 		display_color = vec4(0.0);
 	}

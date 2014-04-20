@@ -5,6 +5,7 @@
 #include "gl/math/Matrix4.h"
 #include "gl/math/Transform.h"
 #include "Color.h"
+#include <sstream>
 
 using namespace std;
 using namespace gl;
@@ -34,6 +35,8 @@ ColorPickRenderer::ColorPickRenderer() : mColor(0.0f, 1.0f, 1.0f, 1.0f)
 	mCursor.color(1, 1, 1);
 	mCursor.circle(0, 0, 21.0f, 32);
 	mCursor.end();
+
+	text.loadFont("menlo14");
 }
 
 void ColorPickRenderer::draw()
@@ -51,6 +54,8 @@ void ColorPickRenderer::draw()
 		glEnableVertexAttribArray(loc);
 		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
 
+		glUniform1f(circleShader.getUniform("value"), mColor.value());
+
 		glEnable(GL_BLEND);
 		quad(circleShader, mCircleRect);
 		glDisable(GL_BLEND);
@@ -60,7 +65,6 @@ void ColorPickRenderer::draw()
 	{
 		selectShader.enable();
 		glUniform4fv(selectShader.getUniform("color"), 1, mColor.rgb().vec4());
-		glUniform2f(selectShader.getUniform("tiles"), 4, 4);
 		GLint loc = selectShader.getAttribute("vs_position");
 		glEnableVertexAttribArray(loc);
 		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
@@ -75,7 +79,12 @@ void ColorPickRenderer::draw()
 		glEnableVertexAttribArray(loc);
 		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
 
+		glUniform4f(gradientShader.getUniform("color1"), 1.0f, 1.0f, 1.0f, 1.0f);
+		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
 		quad(gradientShader, mAlphaRect);
+
+		glUniform4fv(gradientShader.getUniform("color1"), 1, mColor.hsv().value(1.0f).rgb().vec4());
+		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
 		quad(gradientShader, mValueRect);
 	}
 
@@ -84,6 +93,17 @@ void ColorPickRenderer::draw()
 	float y = sin(mColor.hue()) * mCircleRect.width / 2.0f * mColor.saturation() + mCircleRect.center().y;
 	mCursor.setModelViewProj(mProjection * translation(x,y,0));
 	mCursor.draw();
+
+	text.begin(viewport.width, viewport.height);
+	text.setColor(1, 1, 1);
+
+	stringstream ss;
+	ss << "Opacity: " << fixed << setprecision(2) << mColor.alpha();
+	text.add(ss.str(), mAlphaRect.center().x, mAlphaRect.bottom()-viewport.y-24, TextRenderer::CENTER, TextRenderer::CENTER);
+	ss.str("");
+	ss << "Brightness: " << mColor.value();
+	text.add(ss.str(), mValueRect.center().x, mAlphaRect.bottom() - viewport.y - 24, TextRenderer::CENTER, TextRenderer::CENTER);
+	text.end();
 }
 
 void ColorPickRenderer::quad(Program prog, const Rectangle<float>& rect)
@@ -105,7 +125,7 @@ void ColorPickRenderer::resize(int width, int height)
 	mCircleRect.width = circleRadius * 2.0f;
 	mCircleRect.height = circleRadius * 2.0f;
 
-	float barSize = 0.025 * min(viewport.width, viewport.height);
+	float barSize = 0.02 * min(viewport.width, viewport.height);
 
 	mAlphaRect.x = mCircleRect.left() - barSize * 5;
 	mAlphaRect.y = mCircleRect.bottom();
@@ -117,8 +137,8 @@ void ColorPickRenderer::resize(int width, int height)
 	mValueRect.width = barSize;
 	mValueRect.height = mCircleRect.height;
 
-	mPreviewRect.x = mCircleRect.x;
+	mPreviewRect.x = mCircleRect.x + mCircleRect.width / 4;
 	mPreviewRect.y = mCircleRect.y - barSize * 5;
-	mPreviewRect.width = mCircleRect.width;
-	mPreviewRect.height = barSize;
+	mPreviewRect.width = mCircleRect.width / 2;
+	mPreviewRect.height = barSize * 3;
 }

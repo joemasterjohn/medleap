@@ -8,11 +8,7 @@
 class ColorPickController : public Controller
 {
 public:
-	ColorPickController() : 
-		mColor(0.0f, 1.0f, 1.0f, 1.0f), 
-		mChooseColor(false), 
-		mChooseAlpha(false),
-		mChooseValue(false) {}
+	ColorPickController();
 
 	ColorPickRenderer* getRenderer() override { return &renderer; }
 

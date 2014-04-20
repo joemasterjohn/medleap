@@ -54,15 +54,18 @@ void MenuRenderer::draw()
 	Vec3 menuC;
 	Vec3 hlC;
 	Vec3 tc;
+	Vec3 tc2;
 	if (MainController::getInstance().getRenderer().getBackgroundColor().x > 0.5f) {
 		menuC = Vec3(.7f, .7f, .7f);
 		hlC = Vec3(.1f, .1f, .1f);
 		tc = Vec3(0, 0, 0);
+		tc2 = Vec3(1.0f) - tc;
 	}
 	else {
 		menuC = Vec3(.3f, .3f, .3f);
-		hlC = Vec3(.9f, .9f, .9f);
+		hlC = Vec3(0.1f, 0.1f, 0.1f);
 		tc = Vec3(1, 1, 1);
+		tc2 = tc;
 	}
 
     glUniform4f(menuShader.getUniform("color"), menuC.x, menuC.y, menuC.z, alpha * 0.85f);
@@ -82,7 +85,7 @@ void MenuRenderer::draw()
     }
     glDisable(GL_BLEND);
     
-	drawMenu(menuManager->top(), tc, Vec3(1.0f) - tc);
+	drawMenu(menuManager->top(), tc, tc2);
 }
 
 void MenuRenderer::drawMenu(Menu& menu, Vec3 textColor1, Vec3 textColor2)

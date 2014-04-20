@@ -63,7 +63,7 @@ public:
 	/** Set blue in [0,1] */
 	ColorRGB& blue(float blue) { b = blue; return *this; }
 
-	ColorRGB rgb() const override { return{ r, g, b }; }
+	ColorRGB rgb() const override { return{ r, g, b, alpha() }; }
 	ColorHSV hsv() const override;
 
 private:
@@ -98,7 +98,7 @@ public:
 	ColorHSV& value(float value) { v = value; return *this; }
 
 	ColorRGB rgb() const override;
-	ColorHSV hsv() const override { return{ h, s, v }; }
+	ColorHSV hsv() const override { return{ h, s, v, alpha() }; }
 
 private:
 	float h, s, v;

@@ -32,7 +32,7 @@ ColorHSV ColorRGB::hsv() const
 		h = -1.0f; // undefined hue
 	}
 
-	return{ h, s, v };
+	return{ h, s, v, alpha() };
 }
 
 ColorRGB ColorHSV::rgb() const
@@ -50,21 +50,21 @@ ColorRGB ColorHSV::rgb() const
 	float m = v - c;
 
 	if (h < 1) {
-		return{ c + m, x + m, m };
+		return{ c + m, x + m, m, alpha() };
 	}
 	else if (h < 2) {
-		return{ x + m, c + m, m};
+		return{ x + m, c + m, m, alpha() };
 	}
 	else if (h < 3) {
-		return{ m, c + m, x + m };
+		return{ m, c + m, x + m, alpha() };
 	}
 	else if (h < 4) {
-		return{ m, x + m, c + m };
+		return{ m, x + m, c + m, alpha() };
 	}
 	else if (h < 5) {
-		return{ x + m, m, c + m };
+		return{ x + m, m, c + m, alpha() };
 	}
 	else {
-		return{ c + m, m, x + m };
+		return{ c + m, m, x + m, alpha() };
 	}
 }
