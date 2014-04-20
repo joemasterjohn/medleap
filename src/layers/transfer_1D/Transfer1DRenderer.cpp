@@ -292,6 +292,7 @@ void Transfer1DRenderer::drawHistogram()
 	d.end();
 	d.draw();
 
+	d.color(0.2f, 0.2f, 0.2f);
 	d.begin(GL_LINES);
 	d.vertex(-1, 1);
 	d.vertex(1, 1);

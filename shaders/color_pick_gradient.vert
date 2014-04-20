@@ -12,5 +12,5 @@ void main()
 	gl_Position = modelViewProjection * vs_position;
 
 	float i = vs_position.y * 0.5 + 0.5;
-	fs_color = color1 * i + color2 * (i - 1.0);
+	fs_color = color1 * i + color2 * (1.0 - i);
 }

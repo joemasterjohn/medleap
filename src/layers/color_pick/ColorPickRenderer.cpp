@@ -82,10 +82,19 @@ void ColorPickRenderer::draw()
 		glUniform4f(gradientShader.getUniform("color1"), 1.0f, 1.0f, 1.0f, 1.0f);
 		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
 		quad(gradientShader, mAlphaRect);
-
 		glUniform4fv(gradientShader.getUniform("color1"), 1, mColor.hsv().value(1.0f).rgb().vec4());
 		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
 		quad(gradientShader, mValueRect);
+
+		// bar knobs
+		glUniform4f(gradientShader.getUniform("color1"), 1.0f, 1.0f, 1.0f, 1.0f);
+		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
+		float x = mAlphaRect.center().x - mAlphaRect.width * 1.3f / 2;
+		float y = mAlphaRect.bottom() + mAlphaRect.height * mColor.alpha() - 1.5f;
+		quad(gradientShader, { x, y, mAlphaRect.width * 1.3f, 3 });
+		x = mValueRect.center().x - mValueRect.width * 1.3f / 2;
+		y = mValueRect.bottom() + mValueRect.height * mColor.value() - 1.5f;
+		quad(gradientShader, { x, y, mValueRect.width * 1.3f, 3 });
 	}
 
 	// draw cursor circle
