@@ -5,6 +5,7 @@
 #include "gl/Shader.h"
 #include <memory>
 #include <vector>
+#include "gl/math/Math.h"
 
 namespace gl
 {
@@ -36,8 +37,17 @@ namespace gl
         GLint getAttribute(const GLchar* name) const;
         
         void enable();
-        
         void disable();
+
+		void uniform(const GLchar* name, float x);
+		void uniform(const GLchar* name, float x, float y);
+		void uniform(const GLchar* name, float x, float y, float z);
+		void uniform(const GLchar* name, float x, float y, float z, float w);
+		void uniform(const GLchar* name, const Vec2& v);
+		void uniform(const GLchar* name, const Vec3& v);
+		void uniform(const GLchar* name, const Vec4& v);
+		void uniform(const GLchar* name, const Mat4& m);
+
         
         static Program create(const char* vsrc, const char* fsrc);
         static Program createFromSrc(const char* vsrc, const char* fsrc);

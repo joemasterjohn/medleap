@@ -135,3 +135,43 @@ Program Program::create(const Shader& vShader, const Shader& fShader)
 	prog.link();
 	return prog;
 }
+
+void Program::uniform(const GLchar* name, float x)
+{
+	glUniform1f(glGetUniformLocation(id(), name), x);
+}
+
+void Program::uniform(const GLchar* name, float x, float y)
+{
+	glUniform2f(glGetUniformLocation(id(), name), x, y);
+}
+
+void Program::uniform(const GLchar* name, float x, float y, float z)
+{
+	glUniform3f(glGetUniformLocation(id(), name), x, y, z);
+}
+
+void Program::uniform(const GLchar* name, float x, float y, float z, float w)
+{
+	glUniform4f(glGetUniformLocation(id(), name), x, y, z, w);
+}
+
+void Program::uniform(const GLchar* name, const Vec2& v)
+{
+	glUniform2f(glGetUniformLocation(id(), name), v.x, v.y);
+}
+
+void Program::uniform(const GLchar* name, const Vec3& v)
+{
+	glUniform3f(glGetUniformLocation(id(), name), v.x, v.y, v.z);
+}
+
+void Program::uniform(const GLchar* name, const Vec4& v)
+{
+	glUniform4f(glGetUniformLocation(id(), name), v.x, v.y, v.z, v.w);
+}
+
+void Program::uniform(const GLchar* name, const Mat4& m)
+{
+	glUniformMatrix4fv(glGetUniformLocation(id(), name), 1, false, m);
+}

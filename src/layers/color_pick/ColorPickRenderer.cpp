@@ -25,6 +25,7 @@ ColorPickRenderer::ColorPickRenderer() : mColor(0.0f, 1.0f, 1.0f, 1.0f), mTracki
 	selectShader = Program::create("shaders/color_pick_selected.vert", "shaders/color_pick_selected.frag");
 	gradientShader = Program::create("shaders/color_pick_gradient.vert", "shaders/color_pick_gradient.frag");
 
+
 	mCursor.begin(GL_LINES);
 	mCursor.color(0, 0, 0);
 	mCursor.circle(0, 0, 20.0f, 32);
@@ -43,68 +44,49 @@ void ColorPickRenderer::draw()
 
 	geomVBO.bind();
 
+	// vs_position
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+
+	gradientShader.enable();
+
 	// background
-	{
-		gradientShader.enable();
-		GLint loc = gradientShader.getAttribute("vs_position");
-		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
+	gradientShader.uniform("color1", 0.15f, 0.15f, 0.15f, 0.85f);
+	gradientShader.uniform("color2", 0.15f, 0.15f, 0.15f, 0.85f);
+	glEnable(GL_BLEND);
+	quad(gradientShader, {(float)viewport.x, (float)viewport.y, (float)viewport.width, (float)viewport.height});
+	glDisable(GL_BLEND);
 
-		// background
-		glEnable(GL_BLEND);
-		glUniform4f(gradientShader.getUniform("color1"), 0.15f, 0.15f, 0.15f, 0.85f);
-		glUniform4f(gradientShader.getUniform("color2"), 0.15f, 0.15f, 0.15f, 0.85f);
-		quad(gradientShader, {(float)viewport.x, (float)viewport.y, (float)viewport.width, (float)viewport.height});
-		glDisable(GL_BLEND);
+	// alpha bar and knob
+	gradientShader.uniform("color1", 1.0f, 1.0f, 1.0f, 1.0f);
+	gradientShader.uniform("color2", 0.0f, 0.0f, 0.0f, 0.0f);
+	quad(gradientShader, mAlphaRect);
+	float x = mAlphaRect.center().x - mAlphaRect.width * 1.3f / 2;
+	float y = mAlphaRect.bottom() + mAlphaRect.height * mColor.alpha() - 1.5f;
+	quad(gradientShader, { x, y, mAlphaRect.width * 1.3f, 3 });
 
-
-		// alpha / value bars
-		glUniform4f(gradientShader.getUniform("color1"), 1.0f, 1.0f, 1.0f, 1.0f);
-		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
-		quad(gradientShader, mAlphaRect);
-		glUniform4fv(gradientShader.getUniform("color1"), 1, mColor.hsv().value(1.0f).rgb().vec4());
-		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
-		quad(gradientShader, mValueRect);
-
-		// bar knobs
-		glUniform4f(gradientShader.getUniform("color1"), 1.0f, 1.0f, 1.0f, 1.0f);
-		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
-		float x = mAlphaRect.center().x - mAlphaRect.width * 1.3f / 2;
-		float y = mAlphaRect.bottom() + mAlphaRect.height * mColor.alpha() - 1.5f;
-		quad(gradientShader, { x, y, mAlphaRect.width * 1.3f, 3 });
-		x = mValueRect.center().x - mValueRect.width * 1.3f / 2;
-		y = mValueRect.bottom() + mValueRect.height * mColor.value() - 1.5f;
-		quad(gradientShader, { x, y, mValueRect.width * 1.3f, 3 });
-	}
-
+	// value bar and knob
+	gradientShader.uniform("color1", mColor.hsv().value(1.0f).rgb().vec4());
+	quad(gradientShader, mValueRect);
+	x = mValueRect.center().x - mValueRect.width * 1.3f / 2;
+	y = mValueRect.bottom() + mValueRect.height * mColor.value() - 1.5f;
+	quad(gradientShader, { x, y, mValueRect.width * 1.3f, 3 });
+	
 	// color circle
-	{
-		circleShader.enable();
-		GLint loc = circleShader.getAttribute("vs_position");
-		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
-
-		glUniform1f(circleShader.getUniform("value"), mColor.value());
-
-		glEnable(GL_BLEND);
-		quad(circleShader, mCircleRect);
-		glDisable(GL_BLEND);
-	}
-
+	circleShader.enable();
+	circleShader.uniform("value", mColor.value());
+	glEnable(GL_BLEND);
+	quad(circleShader, mCircleRect);
+	glDisable(GL_BLEND);
+	
 	// color select box
-	{
-		selectShader.enable();
-		glUniform4fv(selectShader.getUniform("color"), 1, mColor.rgb().vec4());
-		GLint loc = selectShader.getAttribute("vs_position");
-		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
-
-		quad(selectShader, mPreviewRect);
-	}
+	selectShader.enable();
+	selectShader.uniform("color", mColor.rgb().vec4());
+	quad(selectShader, mPreviewRect);
 
 	// draw cursor circle
-	float x = cos(mColor.hue()) * mCircleRect.width / 2.0f * mColor.saturation() + mCircleRect.center().x;
-	float y = sin(mColor.hue()) * mCircleRect.width / 2.0f * mColor.saturation() + mCircleRect.center().y;
+	x = cos(mColor.hue()) * mCircleRect.width / 2.0f * mColor.saturation() + mCircleRect.center().x;
+	y = sin(mColor.hue()) * mCircleRect.width / 2.0f * mColor.saturation() + mCircleRect.center().y;
 	mCursor.setModelViewProj(mProjection * translation(x,y,0));
 	mCursor.draw();
 
@@ -112,6 +94,7 @@ void ColorPickRenderer::draw()
 	mCursor.setModelViewProj(mProjection * translation(m_leap_cursor.x, m_leap_cursor.y, 0));
 	mCursor.draw();
 
+	// text
 	text.begin(viewport.width, viewport.height);
 	if (mTracking)
 		text.setColor(0.5f, 0.5f, 1);
