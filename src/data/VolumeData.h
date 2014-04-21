@@ -202,7 +202,7 @@ private:
 		for (int i = 0; i < numThreads; i++) {
 			if (i < remainder)
 				end++;
-			threads.push_back(std::move(thread(work, i, start, end)));
+			threads.push_back(std::move(std::thread(work, i, start, end)));
 			start = end;
 			end += slicesPerThread;
 		}

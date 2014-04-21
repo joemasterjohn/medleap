@@ -6,7 +6,7 @@
 GLFWwindow* initGL(int width, int height, const char* title)
 {
 	if (!glfwInit())
-		return false;
+		return NULL;
 
 	MainConfig cfg;
 
