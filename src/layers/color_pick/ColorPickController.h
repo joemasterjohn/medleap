@@ -4,6 +4,7 @@
 #include "layers/Controller.h"
 #include "ColorPickRenderer.h"
 #include "Color.h"
+#include "leap/HandTriggerTracker.h"
 
 class ColorPickController : public Controller
 {
@@ -21,9 +22,15 @@ public:
 private:
 	ColorHSV mColor;
 	ColorPickRenderer renderer;
+	HandTriggerTracker handTrigger;
 	bool mChooseColor;
 	bool mChooseAlpha;
 	bool mChooseValue;
+
+	void leapChooseWidget(const Leap::Controller& controller);
+	void leapUpdateColor(const Leap::Controller& controller);
+	void leapUpdateAlpha(const Leap::Controller& controller);
+	void leapUpdateValue(const Leap::Controller& controller);
 };
 
 #endif // medleap_ColorPickController_h

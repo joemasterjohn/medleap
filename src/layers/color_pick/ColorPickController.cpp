@@ -12,6 +12,8 @@ ColorPickController::ColorPickController() :
 		mChooseValue(false)
 {
 	renderer.choose(mColor);
+
+	handTrigger.engageFunction(std::bind(&ColorPickController::leapChooseWidget, this, std::placeholders::_1));
 }
 
 bool ColorPickController::mouseMotion(GLFWwindow* window, double x, double y)
@@ -72,69 +74,65 @@ bool ColorPickController::mouseButton(GLFWwindow* window, int button, int action
 
 bool ColorPickController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
-	static int framesSinceLastTrigger = 100;
-	static bool tracking = false;
+	handTrigger.update(leapController);
 
-	FingerList fingers = currentFrame.fingers();
-	if (fingers.count() > 1 && fingers.count() < 4) {
-
-		// assuming RIGHT HAND
-		Finger index = fingers.frontmost();
-		Finger thumb = fingers.leftmost();
-		double relV = abs(thumb.tipVelocity().magnitude() - index.tipVelocity().magnitude());
-
-		static float prevValue;
-		static Vec3 ref;
-
-		if (thumb.tipVelocity().magnitude() > 200 && index.tipVelocity().magnitude() < 50 && framesSinceLastTrigger > 80) {
-			tracking = !tracking;
-			framesSinceLastTrigger = 0;
-			if (tracking) {
-				prevValue = mColor.value();
-				ref = Vec3(index.tipPosition().x, index.tipPosition().y, index.tipPosition().z);
-				tracking = true;
-			}
-			cout << "tracking : " << tracking << endl;
-		}
-
-		if (framesSinceLastTrigger < 100)
-			framesSinceLastTrigger++;
-
-
-		if (tracking) {
-			Vec3 tip(index.tipPosition().x, index.tipPosition().y, index.tipPosition().z);
-			tip -= ref;
-			float hue = Vec2(tip.x, tip.y).anglePositive();
-			float sat = Vec2(tip.x, tip.y).length() / 50.0f;
-			float val = prevValue + (tip.z / 50.0f);
-			val = max(min(val, 1.0f), 0.0f);
-			sat = max(min(sat, 1.0f), 0.0f);
-			mColor.hue(hue);
-			mColor.saturation(sat);
-			mColor.value(val);
-			renderer.choose(mColor);
-		}
-	}
-	else {
-		if (tracking)
-			cout << "tracking : 0" << endl;
-		tracking = false;
-		framesSinceLastTrigger = 100;
-	}
-
-	renderer.tracking(tracking);
-
-	if (fingers.count() >= 4) {
-		
-
-		// height of hand
-		Hand hand = currentFrame.hands().frontmost();
-		float y = hand.palmPosition().y;
-		
-		float a = max(min(1.0f, (y - 250) / 100), -1.0f) * 0.5 + 0.5;
-		mColor.alpha(a);
-		renderer.choose(mColor);
+	// DEBUG ONLY: REMOVE
+	if (!handTrigger.tracking() && currentFrame.fingers().count() > 0) {
+		Vector v = leapController.frame().fingers().frontmost().tipPosition();
+		float x = v.x / 100.0f * renderer.getViewport().width / 2.0f + renderer.getViewport().center().x;
+		float y = (v.y - 250) / 100.0f * renderer.getViewport().height / 2.0f + renderer.getViewport().center().y;
+		renderer.leapCursor({ x,y });
+	} else {
+		renderer.leapCursor({ -200, -200 });
 	}
 
 	return false;
+}
+
+void ColorPickController::leapChooseWidget(const Leap::Controller& controller)
+{
+	Vector v = controller.frame().fingers().frontmost().tipPosition();
+	float x = v.x / 100.0f * renderer.getViewport().width / 2.0f + renderer.getViewport().center().x;
+	float y = (v.y - 250) / 100.0f * renderer.getViewport().height / 2.0f + renderer.getViewport().center().y;
+
+	float vpw = renderer.getViewport().width;
+
+	if (x <= vpw / 3.0f) {
+		handTrigger.trackFunction(std::bind(&ColorPickController::leapUpdateAlpha, this, std::placeholders::_1));
+	}
+	else if (x <= vpw / 3.0f * 2.0f) {
+		handTrigger.trackFunction(std::bind(&ColorPickController::leapUpdateColor, this, std::placeholders::_1));
+	}
+	else {
+		handTrigger.trackFunction(std::bind(&ColorPickController::leapUpdateValue, this, std::placeholders::_1));
+	}
+}
+
+void ColorPickController::leapUpdateColor(const Leap::Controller& controller)
+{
+	Vec3 tip(handTrigger.deltaTipPos().x, handTrigger.deltaTipPos().y, handTrigger.deltaTipPos().z);
+
+	float prevValue = 0.0f;
+	float hue = Vec2(tip.x, tip.y).anglePositive();
+	float sat = Vec2(tip.x, tip.y).length() / 50.0f;
+	float val = prevValue + (tip.z / 50.0f);
+	val = max(min(val, 1.0f), 0.0f);
+	sat = max(min(sat, 1.0f), 0.0f);
+	mColor.hue(hue);
+	mColor.saturation(sat);
+	mColor.value(val);
+	renderer.choose(mColor);
+	cout << "update color" << endl;
+}
+
+void ColorPickController::leapUpdateAlpha(const Leap::Controller& controller)
+{
+
+
+	cout << "update alpha" << endl;
+}
+
+void ColorPickController::leapUpdateValue(const Leap::Controller& controller)
+{
+	cout << "update value" << endl;
 }

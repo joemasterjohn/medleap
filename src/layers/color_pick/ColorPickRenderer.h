@@ -17,6 +17,7 @@ public:
 	void draw() override;
 	void resize(int width, int height) override;
 
+	void leapCursor(const gl::Vec2& pos) { m_leap_cursor = pos; }
 	void choose(const ColorHSV& color) { mColor = color; }
 	void tracking(bool tracking) { mTracking = tracking; }
 	const gl::Rectangle<float>& circleRect() const { return mCircleRect; }
@@ -36,6 +37,7 @@ private:
 	gl::Draw mCursor;
 	ColorHSV mColor;
 	gl::Mat4 mProjection;
+	gl::Vec2 m_leap_cursor;
 	TextRenderer text;
 	bool mTracking;
 

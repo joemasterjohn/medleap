@@ -81,6 +81,9 @@ source_group("main" FILES ${SOURCE_MAIN})
 file(GLOB SOURCE_DATA src/data/*.cpp src/data/*.h)
 source_group("data" FILES ${SOURCE_DATA})
 
+file(GLOB SOURCE_LEAP src/leap/*.cpp src/leap/*.h)
+source_group("leap" FILES ${SOURCE_LEAP})
+
 file(GLOB SOURCE_UTIL src/util/*.cpp src/util/*.h)
 source_group("util" FILES ${SOURCE_UTIL})
 
@@ -117,6 +120,7 @@ source_group("layers\\orientation" FILES ${SOURCE_LAYER_ORIENTATION})
 set(SOURCE_AND_RESOURCES
     ${SOURCE_MAIN}
     ${SOURCE_DATA}
+	${SOURCE_LEAP}
     ${SOURCE_LAYERS}
     ${SOURCE_LAYER_SLICE}
     ${SOURCE_LAYER_TFN1D}

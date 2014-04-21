@@ -106,7 +106,10 @@ void ColorPickRenderer::draw()
 	float x = cos(mColor.hue()) * mCircleRect.width / 2.0f * mColor.saturation() + mCircleRect.center().x;
 	float y = sin(mColor.hue()) * mCircleRect.width / 2.0f * mColor.saturation() + mCircleRect.center().y;
 	mCursor.setModelViewProj(mProjection * translation(x,y,0));
+	mCursor.draw();
 
+	// draw leap cursor
+	mCursor.setModelViewProj(mProjection * translation(m_leap_cursor.x, m_leap_cursor.y, 0));
 	mCursor.draw();
 
 	text.begin(viewport.width, viewport.height);
