@@ -115,24 +115,22 @@ void ColorPickController::leapUpdateColor(const Leap::Controller& controller)
 	float prevValue = 0.0f;
 	float hue = Vec2(tip.x, tip.y).anglePositive();
 	float sat = Vec2(tip.x, tip.y).length() / 50.0f;
-	float val = prevValue + (tip.z / 50.0f);
-	val = max(min(val, 1.0f), 0.0f);
 	sat = max(min(sat, 1.0f), 0.0f);
 	mColor.hue(hue);
 	mColor.saturation(sat);
-	mColor.value(val);
 	renderer.choose(mColor);
-	cout << "update color" << endl;
 }
 
 void ColorPickController::leapUpdateAlpha(const Leap::Controller& controller)
 {
-
-
-	cout << "update alpha" << endl;
+	Vec3 tip(handTrigger.deltaTipPos().x, handTrigger.deltaTipPos().y, handTrigger.deltaTipPos().z);
+	mColor.alpha(clamp(tip.y / 100.0f, 0.0f, 1.0f));
+	renderer.choose(mColor);
 }
 
 void ColorPickController::leapUpdateValue(const Leap::Controller& controller)
 {
-	cout << "update value" << endl;
+	Vec3 tip(handTrigger.deltaTipPos().x, handTrigger.deltaTipPos().y, handTrigger.deltaTipPos().z);
+	mColor.value(clamp(tip.y / 100.0f, 0.0f, 1.0f));
+	renderer.choose(mColor);
 }
