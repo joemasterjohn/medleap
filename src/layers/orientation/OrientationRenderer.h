@@ -4,7 +4,7 @@
 #include "layers/Renderer.h"
 #include "gl/Buffer.h"
 #include "gl/Program.h"
-#include "gl/math/Matrix4.h"
+#include "gl/math/Math.h"
 #include "util/Camera.h"
 #include "data/VolumeData.h"
 
@@ -24,7 +24,7 @@ private:
 	GLsizei faceIndicesOffset;
 	GLsizei edgeIndicesCount;
 	GLsizei edgeIndicesOffset;
-	Mat4 modelViewProj;
+	gl::Mat4 modelViewProj;
 	Camera* camera;
 	VolumeData* volume;
 };

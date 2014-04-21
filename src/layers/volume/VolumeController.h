@@ -28,7 +28,7 @@ private:
     bool mouseDragRightButton;
     double dragStartX;
     double dragStartY;
-    Mat4 dragStartView;
+	gl::Mat4 dragStartView;
 };
 
 #endif /* defined(__medleap__VolumeController__) */

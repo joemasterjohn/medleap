@@ -1,8 +1,9 @@
 #include "MainController.h"
 #include "data/VolumeLoader.h"
 #include <chrono>
-#include "gl/math/Vector3.h"
+#include "gl/math/Math.h"
 
+using namespace gl;
 using namespace std;
 
 void keyboardCB(GLFWwindow* window, int key, int scancode, int action, int mods)

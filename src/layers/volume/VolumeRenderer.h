@@ -2,7 +2,7 @@
 #define __medleap__VolumeRenderer__
 
 #include "gl/glew.h"
-#include "gl/math/Matrix4.h"
+#include "gl/math/Math.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
 #include "gl/Buffer.h"
@@ -51,7 +51,7 @@ public:
 	bool cursorActive;
 	gl::Buffer cursor3DVBO;
 	gl::Program cursor3DShader;
-	Vec3 cursor3D;
+	gl::Vec3 cursor3D;
 	gl::Sphere cursorGeom;
 	bool useJitter;
     
@@ -65,7 +65,7 @@ private:
 	gl::Texture jitterTexture;
     VolumeData* volume;
     Camera camera;
-    Mat4 model;
+	gl::Mat4 model;
     float opacityScale;
 	unsigned minSlices;
 	unsigned maxSlices;

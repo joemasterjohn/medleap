@@ -5,7 +5,7 @@
 #include "gl/Texture.h"
 #include "gl/Program.h"
 #include "gl/Buffer.h"
-#include "gl/math/Matrix4.h"
+#include "gl/math/Math.h"
 #include "data/VolumeData.h"
 #include "Histogram.h"
 #include "CLUT.h"
@@ -41,7 +41,7 @@ private:
     gl::Program colorShader;
     GLuint vbo; // TODO: replace with object
     GLsizei stride;
-    Mat4 histoModelMatrix;
+	gl::Mat4 histoModelMatrix;
     Histogram* histogram;
     int cursorX, cursorY;
     float cursorShaderOffset;

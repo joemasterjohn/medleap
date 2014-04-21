@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include "layers/Renderer.h"
 #include <list>
-#include "gl/math/Vector3.h"
+#include "gl/math/Math.h"
 
 /** Controls all rendering. Should be created once upon application start. */
 class MainRenderer
@@ -39,16 +39,16 @@ public:
     /** Pops all layers off the drawing stack. */
     void clearLayers();
 
-	Vec3 getInverseBGColor() const;
-	Vec3 getBackgroundColor() const;
-	void setBackgroundColor(const Vec3& c);
+	gl::Vec3 getInverseBGColor() const;
+	gl::Vec3 getBackgroundColor() const;
+	void setBackgroundColor(const gl::Vec3& c);
 	void setLightBG();
 	void setDarkBG();
     
 private:
     std::list<Renderer*> activeLayers;
 	GLuint vao;
-	Vec3 bgColor;
+	gl::Vec3 bgColor;
     
     /** A docked layer */
     struct Docking

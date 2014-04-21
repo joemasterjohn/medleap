@@ -5,7 +5,7 @@
 #include "gl/geom/Rectangle.h"
 #include "gl/Buffer.h"
 #include "gl/Program.h"
-#include "gl/math/Matrix4.h"
+#include "gl/math/Math.h"
 #include "Color.h"
 #include "gl/util/Draw.h"
 #include "util/TextRenderer.h"
@@ -35,7 +35,7 @@ private:
 	gl::Rectangle<float> mPreviewRect;
 	gl::Draw mCursor;
 	ColorHSV mColor;
-	Mat4 mProjection;
+	gl::Mat4 mProjection;
 	TextRenderer text;
 	bool mTracking;
 

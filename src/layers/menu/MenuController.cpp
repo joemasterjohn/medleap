@@ -1,11 +1,13 @@
 #include "MenuController.h"
 #include <iostream>
 #include "util/Util.h"
-#include "gl/math/Vector2.h"
+#include "gl/math/Math.h"
 #include "main/MainController.h"
 
 #include "DirectoryMenu.h"
 #include "MainMenu.h"
+
+using namespace gl;
 
 MenuController::MenuController()
 {

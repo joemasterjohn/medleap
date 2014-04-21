@@ -9,6 +9,7 @@
 
 using namespace std;
 using namespace gdcm;
+using namespace gl;
 
 VolumeLoader::VolumeLoader()
 {

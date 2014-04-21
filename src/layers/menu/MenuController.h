@@ -4,7 +4,7 @@
 #include "layers/Controller.h"
 #include "MenuRenderer.h"
 #include "MenuManager.h"
-#include "gl/math/Vector2.h"
+#include "gl/math/Math.h"
 
 class MenuController : public Controller
 {
@@ -19,10 +19,10 @@ public:
 	bool scroll(GLFWwindow* window, double dx, double dy) override;
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame) override;
 	void update(std::chrono::milliseconds elapsed);
-	void setLeapCenter(const Vec2& center);
+	void setLeapCenter(const gl::Vec2& center);
 
 private:
-	Vec2 leapCenter;
+	gl::Vec2 leapCenter;
     std::string workingDir;
 	MenuManager menus;
 	MenuRenderer* renderer;

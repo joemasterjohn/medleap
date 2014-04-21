@@ -1,8 +1,7 @@
 #ifndef CGL_CAMERA_H_
 #define CGL_CAMERA_H_
 
-#include "gl/math/Matrix4.h"
-#include "gl/math/Vector3.h"
+#include "gl/math/Math.h"
 
 class Camera
 {
@@ -11,31 +10,31 @@ public:
     Camera();
     
     /// Returns the view matrix.
-    const Mat4& getView() const;
+	const gl::Mat4& getView() const;
     
     /// Returns the projection matrix.
-    const Mat4& getProjection() const;
+	const gl::Mat4& getProjection() const;
     
     /// Returns the eye position in world coordinates; origin in eye coordinates.
-    const Vec4& getEye() const;
+	const gl::Vec4& getEye() const;
     
     /// Returns the up axis in world coordinates; (0, 1, 0) in eye coordinates.
-    const Vec4& getUp() const;
+	const gl::Vec4& getUp() const;
     
     /// Returns the right axis in world coordinates; (1, 0, 0) in eye coordinates.
-    const Vec4& getRight() const;
+	const gl::Vec4& getRight() const;
     
     /// Returns the forward axis in world coordinates; (0, 0, -1) in eye coordinates.
-    const Vec4& getForward() const;
+	const gl::Vec4& getForward() const;
     
     /// Assigns a new view matrix.
-    void setView(const Mat4& view);
+	void setView(const gl::Mat4& view);
     
     /// Assigns a projection matrix.
-    void setProjection(const Mat4& projection);
+	void setProjection(const gl::Mat4& projection);
     
     /// Adds a rotation of radians around axis.
-    void rotate(float radians, Vec3 axis);
+	void rotate(float radians, gl::Vec3 axis);
     
     /// Adds a rotation of radians around the X axis.
     void rotateX(float radians);
@@ -59,7 +58,7 @@ public:
     void translate(float x, float y, float z);
     
     /// Adds a translation of t in world coordinates.
-    void translate(const Vec3& t);
+	void translate(const gl::Vec3& t);
     
     /// Adds a translation along the right axis.
     void translateRight(float units);
@@ -80,13 +79,13 @@ public:
     void translateBackward(float units);
     
 private:
-    Mat4 view;
-    Mat4 viewInverse;
-    Mat4 projection;
-    Vec4 eye;
-    Vec4 up;
-    Vec4 right;
-    Vec4 forward;
+	gl::Mat4 view;
+	gl::Mat4 viewInverse;
+	gl::Mat4 projection;
+	gl::Vec4 eye;
+	gl::Vec4 up;
+	gl::Vec4 right;
+	gl::Vec4 forward;
     
     void update();
 };

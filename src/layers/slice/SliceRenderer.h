@@ -7,7 +7,7 @@
 #include "gl/Texture.h"
 #include "gl/Buffer.h"
 #include "data/VolumeData.h"
-#include "gl/math/Matrix4.h"
+#include "gl/math/Math.h"
 
 /** Renders a 2D slice of the volume */
 class SliceRenderer : public Renderer
@@ -22,23 +22,13 @@ public:
     void setCLUTTexture(gl::Texture& texture);
 
 private:
-    class OrientationLabel
-    {
-    public:
-        std::string text;
-        Vec2 position;
-        OrientationLabel(std::string text, Vec2 position) : text(text), position(position) {}
-    };
-    
     VolumeData* volume;
     gl::Program sliceShader;
     gl::Texture clutTexture;
     gl::Texture sliceTexture;
     gl::Buffer sliceVBO;
-    
     int currentSlice;
-    std::vector<OrientationLabel> labels;
-    Mat4 modelMatrix;
+	gl::Mat4 modelMatrix;
     
     void updateTexture();
 };

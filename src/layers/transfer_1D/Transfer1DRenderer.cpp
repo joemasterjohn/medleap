@@ -1,5 +1,4 @@
 #include "Transfer1DRenderer.h"
-#include "gl/math/Transform.h"
 #include "main/MainController.h"
 #include <string>
 #include <sstream>

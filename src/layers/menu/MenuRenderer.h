@@ -5,7 +5,7 @@
 #include "MenuManager.h"
 #include "gl/Buffer.h"
 #include "gl/Program.h"
-#include "gl/math/Matrix4.h"
+#include "gl/math/Math.h"
 #include <functional>
 
 class MenuRenderer : public Renderer
@@ -22,7 +22,7 @@ private:
 	MenuManager* menuManager;
 	int highlighted;
     
-    Mat4 modelViewProjection;
+	gl::Mat4 modelViewProjection;
     gl::Buffer menuVBO;
     gl::Buffer menuIBO;
     gl::Program menuShader;
@@ -34,7 +34,7 @@ private:
     void createRingGeometry();
     void createListGeometry();
 
-	void drawMenu(Menu& menu, Vec3 tc1, Vec3 tc2);
+	void drawMenu(Menu& menu, gl::Vec3 tc1, gl::Vec3 tc2);
 };
 
 #endif /* defined(__medleap__MenuRenderer__) */

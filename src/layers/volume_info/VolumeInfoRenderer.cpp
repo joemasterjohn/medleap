@@ -5,6 +5,7 @@
 #include <iomanip>
 
 using namespace std;
+using namespace gl;
 
 void VolumeInfoRenderer::setVolume(VolumeData* volume)
 {
@@ -72,6 +73,9 @@ void VolumeInfoRenderer::draw()
     drawText(os.str(), textRow++);
     
     // Dimensions (mm)
+	// drawText("Size (mm): ", v.x, " x ", v.y, " x ", v.z);
+
+
     Vec3 v = volume->getSizeMillimeters();
 	os.str("");
 	os << setprecision(1) << fixed;

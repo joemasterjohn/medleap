@@ -1,5 +1,6 @@
 #include "camera.h"
-#include "gl/math/Transform.h"
+
+using namespace gl;
 
 Camera::Camera()
 {}

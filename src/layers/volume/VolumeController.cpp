@@ -1,5 +1,6 @@
 #include "VolumeController.h"
-#include "gl/math/Transform.h"
+
+using namespace gl;
 
 VolumeController::VolumeController()
 {

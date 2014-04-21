@@ -10,9 +10,7 @@ class DirectoryMenu : public Menu
 public:
 	DirectoryMenu(std::string workingDir, MenuManager& menus);
 	~DirectoryMenu();
-    
-//    const std::string& getFullPath();
-    
+        
 private:
     std::string workingDir;
 	MenuManager& menus;

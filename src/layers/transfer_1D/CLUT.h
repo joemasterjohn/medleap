@@ -1,7 +1,7 @@
 #ifndef __medleap__CLUT__
 #define __medleap__CLUT__
 
-#include "gl/math/Vector4.h"
+#include "gl/math/Math.h"
 #include "gl/Texture.h"
 #include <vector>
 
@@ -14,27 +14,27 @@ public:
     {
     public:
         ColorStop(float position, float r, float g, float b, float a);
-        ColorStop(float position, Vec4 color);
+		ColorStop(float position, gl::Vec4 color);
         
         float getPosition();
         void setPosition(float position);
         
-        Vec4 getColor();
+		gl::Vec4 getColor();
         void setColor(float r, float g, float b, float a);
-        void setColor(Vec4 color);
+		void setColor(gl::Vec4 color);
         
     private:
         float position;
-        Vec4 color;
+		gl::Vec4 color;
     };
     
     
     CLUT();
     ~CLUT();
-    Vec4 getColor(float position);
+	gl::Vec4 getColor(float position);
     ColorStop& getColorStop(float position);
     void removeColorStop(float position);
-    void addColorStop(float position, Vec4 color);
+	void addColorStop(float position, gl::Vec4 color);
     void clearStops();
     
     void saveTexture(gl::Texture& texture);

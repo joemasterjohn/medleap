@@ -1,5 +1,4 @@
 #include "SliceRenderer.h"
-#include "gl/math/Transform.h"
 #include "main/MainController.h"
 
 using namespace gl;

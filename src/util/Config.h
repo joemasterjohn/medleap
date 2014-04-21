@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include <sstream>
-#include "gl/math/Vector3.h"
+#include "gl/math/Math.h"
 
 /** Stores/loads configuration values in a file. */
 class Config

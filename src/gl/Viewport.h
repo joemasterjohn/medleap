@@ -3,11 +3,10 @@
 
 #include "gl/glew.h"
 #include "gl/geom/Rectangle.h"
-#include "gl/math/Transform.h"
 
 namespace gl
 {
-    class Viewport : public Rectangle<int>
+    class Viewport : public Rectangle<GLint>
     {
     public:
 
@@ -17,7 +16,11 @@ namespace gl
 		}
 
 		Mat4 orthoProjection() const {
-			return ortho2D(left(), right(), bottom(), top());
+			return ortho2D(
+				static_cast<float>(left()), 
+				static_cast<float>(right()),
+				static_cast<float>(bottom()),
+				static_cast<float>(top()));
 		}
     };
     

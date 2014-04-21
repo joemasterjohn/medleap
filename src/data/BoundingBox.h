@@ -3,8 +3,7 @@
 
 #include <vector>
 #include <utility>
-#include "gl/math/Vector4.h"
-#include "gl/math/Vector2.h"
+#include "gl/math/Math.h"
 
 /** Contains vertex positions and edges (indices) for an axis-aligned bounding box */
 class BoundingBox
@@ -17,14 +16,14 @@ public:
     float getWidth() const;
     float getHeight() const;
     float getLength() const;
-    Vec3 getMinimum() const;
-    Vec3 getMaximum() const;
-    const std::vector<Vec4>& getVertices() const;
+    gl::Vec3 getMinimum() const;
+    gl::Vec3 getMaximum() const;
+	const std::vector<gl::Vec4>& getVertices() const;
     const std::vector<Edge>& getEdges() const;
     
 private:
-    Vec3 size;
-    std::vector<Vec4> vertices;
+	gl::Vec3 size;
+	std::vector<gl::Vec4> vertices;
     std::vector<Edge> edges;
 };
 

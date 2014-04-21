@@ -60,7 +60,7 @@ void Draw::draw()
 	loc = lineShader.getUniform("modelViewProj");
 	glUniformMatrix4fv(loc, 1, false, modelViewProjection);
 
-	glDrawArrays(mode, 0, vertices.size() / 6);
+	glDrawArrays(mode, 0, static_cast<GLsizei>(vertices.size() / 6));
 }
 
 void Draw::setModelViewProj(const Mat4& mvp)
@@ -95,7 +95,7 @@ void Draw::circle(float x, float y, float radius, int numSegments)
 {
 	float angle = 0.0f;
 	float step = two_pi / numSegments;
-	for (unsigned i = 0; i < numSegments; ++i) {
+	for (int i = 0; i < numSegments; ++i) {
 		vertex(x + std::cos(angle) * radius, y + std::sin(angle) * radius);
 		vertex(x + std::cos(angle + step) * radius, y + std::sin(angle + step) * radius);
 		angle += step;

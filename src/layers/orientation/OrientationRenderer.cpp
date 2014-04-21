@@ -1,6 +1,5 @@
 #include "OrientationRenderer.h"
 #include "main/MainController.h"
-#include "gl/math/Transform.h"
 
 using namespace gl;
 using namespace std;

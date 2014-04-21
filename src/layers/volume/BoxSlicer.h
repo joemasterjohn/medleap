@@ -2,8 +2,7 @@
 #define BOXSLICER_H
 
 #include <vector>
-#include "gl/math/Vector2.h"
-#include "gl/math/Vector3.h"
+#include "gl/math/Math.h"
 #include "util/Camera.h"
 #include "data/BoundingBox.h"
 #include "gl/glew.h"
@@ -25,7 +24,7 @@ public:
     void slice(const BoundingBox& bounds, const Camera& camera, int slices);
     
     /** Vertex positions */
-    const std::vector<Vec3>& getVertices();
+    const std::vector<gl::Vec3>& getVertices();
     
     /** Indices for the geometry */
     const std::vector<GLushort>& getIndices();
@@ -46,14 +45,14 @@ private:
     
     friend class VertexSorter;
     
-    Vec3 up;
-    Vec3 right;
-    Vec3 normal;
-    std::vector<Vec3> vertices;
+	gl::Vec3 up;
+	gl::Vec3 right;
+	gl::Vec3 normal;
+	std::vector<gl::Vec3> vertices;
     std::vector<GLushort> indices;
     const GLushort primRestartIndex;
     
-    void slicePlane(const Vec3& p, const BoundingBox& bounds);
+	void slicePlane(const gl::Vec3& p, const BoundingBox& bounds);
 };
 
 #endif // BOXSLICER_H

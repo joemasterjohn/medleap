@@ -1,8 +1,7 @@
 #ifndef medleap_Color_h
 #define medleap_Color_h
 
-#include "gl/math/Vector3.h"
-#include "gl/math/Vector4.h"
+#include "gl/math/Math.h"
 
 class ColorRGB;
 class ColorHSV;
@@ -49,10 +48,10 @@ public:
 	float blue() { return b; }
 
 	/** The red, green, and blue components in [0,1] */
-	Vec3 vec3() const { return{ r, g, b }; }
+	gl::Vec3 vec3() const { return{ r, g, b }; }
 
 	/** The red, green, blue, and alpha components in [0,1] */
-	Vec4 vec4() const { return{ r, g, b, alpha() }; }
+	gl::Vec4 vec4() const { return{ r, g, b, alpha() }; }
 
 	/** Set red in [0,1] */
 	ColorRGB& red(float red) { r = red; return *this;  }

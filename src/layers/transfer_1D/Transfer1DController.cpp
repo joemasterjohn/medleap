@@ -1,5 +1,7 @@
 #include "Transfer1DController.h"
 
+using namespace gl;
+
 Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels(NULL)
 {
     lMouseDrag = false;

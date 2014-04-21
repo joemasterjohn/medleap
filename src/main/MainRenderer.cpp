@@ -1,6 +1,8 @@
 #include "MainRenderer.h"
 #include "MainConfig.h"
 
+using namespace gl;
+
 MainRenderer::MainRenderer()
 {
     leftDocking.layerIndex = -1;

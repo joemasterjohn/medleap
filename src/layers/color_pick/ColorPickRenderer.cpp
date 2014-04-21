@@ -1,9 +1,5 @@
 #include "ColorPickRenderer.h"
 #include <vector>
-#include "gl/math/Vector3.h"
-#include "gl/math/Math.h"
-#include "gl/math/Matrix4.h"
-#include "gl/math/Transform.h"
 #include "Color.h"
 #include <sstream>
 
@@ -47,6 +43,40 @@ void ColorPickRenderer::draw()
 
 	geomVBO.bind();
 
+	// background
+	{
+		gradientShader.enable();
+		GLint loc = gradientShader.getAttribute("vs_position");
+		glEnableVertexAttribArray(loc);
+		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
+
+		// background
+		glEnable(GL_BLEND);
+		glUniform4f(gradientShader.getUniform("color1"), 0.15f, 0.15f, 0.15f, 0.85f);
+		glUniform4f(gradientShader.getUniform("color2"), 0.15f, 0.15f, 0.15f, 0.85f);
+		quad(gradientShader, {(float)viewport.x, (float)viewport.y, (float)viewport.width, (float)viewport.height});
+		glDisable(GL_BLEND);
+
+
+		// alpha / value bars
+		glUniform4f(gradientShader.getUniform("color1"), 1.0f, 1.0f, 1.0f, 1.0f);
+		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
+		quad(gradientShader, mAlphaRect);
+		glUniform4fv(gradientShader.getUniform("color1"), 1, mColor.hsv().value(1.0f).rgb().vec4());
+		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
+		quad(gradientShader, mValueRect);
+
+		// bar knobs
+		glUniform4f(gradientShader.getUniform("color1"), 1.0f, 1.0f, 1.0f, 1.0f);
+		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
+		float x = mAlphaRect.center().x - mAlphaRect.width * 1.3f / 2;
+		float y = mAlphaRect.bottom() + mAlphaRect.height * mColor.alpha() - 1.5f;
+		quad(gradientShader, { x, y, mAlphaRect.width * 1.3f, 3 });
+		x = mValueRect.center().x - mValueRect.width * 1.3f / 2;
+		y = mValueRect.bottom() + mValueRect.height * mColor.value() - 1.5f;
+		quad(gradientShader, { x, y, mValueRect.width * 1.3f, 3 });
+	}
+
 	// color circle
 	{
 		circleShader.enable();
@@ -70,31 +100,6 @@ void ColorPickRenderer::draw()
 		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
 
 		quad(selectShader, mPreviewRect);
-	}
-
-	// alpha/value bars
-	{
-		gradientShader.enable();
-		GLint loc = gradientShader.getAttribute("vs_position");
-		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
-
-		glUniform4f(gradientShader.getUniform("color1"), 1.0f, 1.0f, 1.0f, 1.0f);
-		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
-		quad(gradientShader, mAlphaRect);
-		glUniform4fv(gradientShader.getUniform("color1"), 1, mColor.hsv().value(1.0f).rgb().vec4());
-		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
-		quad(gradientShader, mValueRect);
-
-		// bar knobs
-		glUniform4f(gradientShader.getUniform("color1"), 1.0f, 1.0f, 1.0f, 1.0f);
-		glUniform4f(gradientShader.getUniform("color2"), 0.0f, 0.0f, 0.0f, 0.0f);
-		float x = mAlphaRect.center().x - mAlphaRect.width * 1.3f / 2;
-		float y = mAlphaRect.bottom() + mAlphaRect.height * mColor.alpha() - 1.5f;
-		quad(gradientShader, { x, y, mAlphaRect.width * 1.3f, 3 });
-		x = mValueRect.center().x - mValueRect.width * 1.3f / 2;
-		y = mValueRect.bottom() + mValueRect.height * mColor.value() - 1.5f;
-		quad(gradientShader, { x, y, mValueRect.width * 1.3f, 3 });
 	}
 
 	// draw cursor circle

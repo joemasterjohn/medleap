@@ -7,9 +7,8 @@
 #include <thread>
 #include "Window.h"
 #include "BoundingBox.h"
-#include "gl/math/Vector3.h"
+#include "gl/math/Math.h"
 #include "gl/Texture.h"
-#include "gl/math/Matrix3.h"
 
 /** Volumetric data stored in a regular grid of voxels. All voxel values are assumed to be an integer format (8 or 16 bits) either signed or unsigned. */
 class VolumeData
@@ -34,13 +33,13 @@ public:
     const BoundingBox& getBounds() const;
     
 	/** Size of each voxel in millimeters. Default is (1,1,1) for unknown modalities. */
-	Vec3 getVoxelSizeMillimeters() const;
+	gl::Vec3 getVoxelSizeMillimeters() const;
 
 	/** Size of the volume in number of voxels */
-	Vector3<unsigned> getSizeVoxels() const;
+	gl::Vector3<unsigned> getSizeVoxels() const;
 
 	/** Size of the volume in millimeters */
-	Vec3 getSizeMillimeters() const;
+	gl::Vec3 getSizeMillimeters() const;
 
 	/** Size in bytes of the entire volume */
 	size_t getSizeBytes() const;
@@ -82,16 +81,16 @@ public:
     Modality getModality() const;
     
 	/** Matrix that transforms DICOM image space (+X right, +Y down) to patient space (+X = left, +Y = posterior, +Z = superior) */
-	const Mat3& getPatientBasis() const;
+	const gl::Mat3& getPatientBasis() const;
 
 	/** Returns all gradient vectors */
-	const std::vector<Vec3>& getGradients() const;
+	const std::vector<gl::Vec3>& getGradients() const;
 
 	/** Vector storing minimum x, y, and z components of all gradient vectors */
-	Vec3 getMinGradient() const;
+	gl::Vec3 getMinGradient() const;
 
 	/** Vector storing maximum x, y, and z components of all gradient vectors */
-	Vec3 getMaxGradient() const;
+	gl::Vec3 getMaxGradient() const;
 
     /** Windows that store values of interest */
     std::vector<Window>& getWindows();
@@ -115,9 +114,9 @@ private:
 
     char* data;
 	std::string name;
-    std::vector<Vec3> gradients;
-    Vec3 minGradient;
-    Vec3 maxGradient;
+	std::vector<gl::Vec3> gradients;
+	gl::Vec3 minGradient;
+	gl::Vec3 maxGradient;
     float minGradientMag;
     float maxGradientMag;
     unsigned int width;
@@ -127,10 +126,10 @@ private:
     GLenum type;
     int minVoxelValue;
     int maxVoxelValue;
-    Vec3 voxelSize;
+	gl::Vec3 voxelSize;
     BoundingBox* bounds;
     Modality modality;
-    Mat3 orientation;
+	gl::Mat3 orientation;
     std::vector<Window> windows;
     unsigned int activeWindow;
 
@@ -149,6 +148,8 @@ private:
     /** Computes gradient vectors for this volume. Gradients are always stored as floats, regardless of the volume data type. */
     template<typename T> void computeGradients()
     {
+		using namespace gl;
+
         gradients.clear();
 		gradients.resize(width * height * depth);
 

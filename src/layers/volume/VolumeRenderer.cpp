@@ -1,5 +1,4 @@
 #include "VolumeRenderer.h"
-#include "gl/math/Transform.h"
 #include "BoxSlicer.h"
 #include "gl/util/Draw.h"
 #include "main/MainConfig.h"
