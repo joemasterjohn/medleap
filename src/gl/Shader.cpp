@@ -4,28 +4,28 @@
 
 using namespace gl;
 
-Shader::Shader() : handle(nullptr), type(GL_INVALID_ENUM)
+Shader::Shader() : handle_(nullptr), type_(GL_INVALID_ENUM)
 {
 }
 
 GLuint Shader::id() const
 {
-	return handle ? *(handle.get()) : 0;
+	return handle_ ? *(handle_.get()) : 0;
 }
 
 void Shader::release()
 {
-	handle = nullptr;
+	handle_ = nullptr;
 }
 
-GLenum Shader::getType() const
+GLenum Shader::type() const
 {
-    return type;
+    return type_;
 }
 
-std::string Shader::getSource() const
+std::string Shader::source() const
 {
-    return (id() ? source : std::string());
+    return (id() ? source_ : std::string());
 }
 
 std::string Shader::log() const
@@ -48,8 +48,8 @@ bool Shader::compile(const char* src, GLenum type)
 {
 	generate(type);
     
-    this->type = type;
-    this->source = std::string(src);
+	this->type_ = type;
+    this->source_ = std::string(src);
     
     glShaderSource(id(), 1, &src, NULL);
 	glCompileShader(id());
@@ -70,7 +70,7 @@ bool Shader::compileFile(const char* fileName, GLenum type)
 
 void Shader::generate(GLenum type)
 {
-	this->type = type;
+	this->type_ = type;
 
 	auto deleteFunction = [=](GLuint* p) {
 		if (p) {
@@ -80,5 +80,5 @@ void Shader::generate(GLenum type)
 	};
 
 	GLuint* p = new GLuint(glCreateShader(type));
-	handle = std::shared_ptr<GLuint>(p, deleteFunction);
+	handle_ = std::shared_ptr<GLuint>(p, deleteFunction);
 }

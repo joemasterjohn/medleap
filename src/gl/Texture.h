@@ -1,5 +1,5 @@
-#ifndef CGL_TEXTURE_H_
-#define CGL_TEXTURE_H_
+#ifndef __GL_TEXTURE_H__
+#define __GL_TEXTURE_H__
 
 #include "gl/glew.h"
 #include <memory>
@@ -22,16 +22,16 @@ namespace gl
 		void release();
         
         /** Returns the texture width. */
-        GLuint getWidth() const;
+        GLuint width() const;
         
         /** Returns the texture height. Has no relevance for 1D textures. */
-        GLuint getHeight() const;
+        GLuint height() const;
         
         /** Returns the texture depth. Has no relevance for 1D or 2D textures. */
-        GLuint getDepth() const;
+        GLuint depth() const;
         
         /** Returns the current texture target (1D, 2D, 3D...) */
-        GLenum getTarget() const;
+        GLenum target() const;
         
         /** Binds the referenced texture object to its target. */
         void bind() const;
@@ -96,13 +96,13 @@ namespace gl
         void setParameter(GLenum pname, GLfloat param);
         
     private:
-		std::shared_ptr<GLuint> handle;
-        GLenum target;
-        GLuint width;
-        GLuint height;
-        GLuint depth;
+		std::shared_ptr<GLuint> handle_;
+        GLenum target_;
+        GLuint width_;
+        GLuint height_;
+        GLuint depth_;
     };
     
-} // namespace cgl
+}
 
-#endif // CGL_TEXTURE_H_
+#endif // __GL_TEXTURE_H__

@@ -1,5 +1,5 @@
-#ifndef CGL_BUFFER_H_
-#define CGL_BUFFER_H_
+#ifndef __GL_BUFFER_H__
+#define __GL_BUFFER_H__
 
 #include "gl/glew.h"
 #include <memory>
@@ -19,6 +19,12 @@ namespace gl
 		/** Creates a new OpenGL resource. This object will point to it. */
 		void generate(GLenum target, GLenum usage);
 
+		/** Creates a new OpenGL resource. Sets target to GL_ARRAY_BUFFER. */
+		void generateVBO(GLenum usage);
+
+		/** Creates a new OpenGL resource. Sets target to GL_ELEMENT_ARRAY_BUFFER. */
+		void generateIBO(GLenum usage);
+
 		/** Clears this pointer. If no other objects point to the OpenGL resource, it will be destroyed. */
 		void release();
         
@@ -29,29 +35,23 @@ namespace gl
         void unbind() const;
         
         /** Sets the target to which the buffer is bound. Must be applied before a call to bind() */
-        void setTarget(GLenum target);
+        void target(GLenum target);
         
         /** Sets the expected usage pattern. Must be applied before a call to setData() */
-        void setUsage(GLenum usage);
+        void usage(GLenum usage);
         
         /** Uploads data to the OpenGL-managed buffer */
-        void setData(const GLvoid* data, GLsizeiptr size);
+        void data(const GLvoid* data, GLsizeiptr size);
         
         /** Uploads data to a subset of the OpenGL-managed buffer */
-        void setSubData(const GLvoid* data, GLsizeiptr size, GLintptr offset);
-        
-        /** Creates a vertex buffer (GL_ARRAY_BUFFER) with default usage GL_STATIC_DRAW */
-        static Buffer genVertexBuffer(GLenum usage = GL_STATIC_DRAW);
-        
-        /** Creates an index buffer (GL_ELEMENT_ARRAY_BUFFER) with default usage GL_STATIC_DRAW */
-        static Buffer genIndexBuffer(GLenum usage = GL_STATIC_DRAW);
+        void subData(const GLvoid* data, GLsizeiptr size, GLintptr offset);
 
     private:
-		std::shared_ptr<GLuint> handle;
-        GLenum target;
-        GLenum usage;
+		std::shared_ptr<GLuint> handle_;
+        GLenum target_;
+        GLenum usage_;
     };
     
-} // namespace cgl
+}
 
-#endif // CGL_BUFFER_H_
+#endif // __GL_BUFFER_H__

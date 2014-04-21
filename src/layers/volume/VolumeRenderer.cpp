@@ -20,8 +20,8 @@ VolumeRenderer::VolumeRenderer() : cursorGeom(1, 2)
 	volumeTexture.generate(GL_TEXTURE_3D);
 	gradientTexture.generate(GL_TEXTURE_3D);
 
-	proxyVertices = Buffer::genVertexBuffer(GL_DYNAMIC_DRAW);
-	proxyIndices = Buffer::genIndexBuffer(GL_DYNAMIC_DRAW);
+	proxyVertices.generateVBO(GL_DYNAMIC_DRAW);
+	proxyIndices.generateIBO(GL_DYNAMIC_DRAW);
 
 	camera.setView(lookAt(Vec3(0, 0, 1), Vec3(0, 0, 0), Vec3(0, 1, 0)));
 	//camera.setView(lookAt(1, 1, 1, 0, 0, 0, 0, 1, 0));
@@ -40,7 +40,7 @@ VolumeRenderer::VolumeRenderer() : cursorGeom(1, 2)
 	fullScreenQuad.generate();
 
 	cursor3DShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
-	cursor3DVBO = Buffer::genVertexBuffer();
+	cursor3DVBO.generateVBO(GL_STATIC_DRAW);
 	cursor3DVBO.bind();
 	cursorGeom.fill(cursor3DVBO);
 
@@ -229,9 +229,9 @@ void VolumeRenderer::updateSlices(double samplingScale, bool limitSamples)
     BoxSlicer slicer;
 	slicer.slice(volume->getBounds(), camera, currentNumSlices);
     proxyIndices.bind();
-    proxyIndices.setData(&slicer.getIndices()[0], slicer.getIndices().size() * sizeof(GLushort));
+    proxyIndices.data(&slicer.getIndices()[0], slicer.getIndices().size() * sizeof(GLushort));
     proxyVertices.bind();
-    proxyVertices.setData(&slicer.getVertices()[0], slicer.getVertices().size() * sizeof(slicer.getVertices()[0]));
+    proxyVertices.data(&slicer.getVertices()[0], slicer.getVertices().size() * sizeof(slicer.getVertices()[0]));
     numSliceIndices = static_cast<int>(slicer.getIndices().size());
 }
 
@@ -386,7 +386,7 @@ void VolumeRenderer::draw()
     if (dirty) {
 		lowResRT.bind();
 		lowResRT.clear();
-        draw(0.25, true, lowResRT.getColorTarget().getWidth(), lowResRT.getColorTarget().getHeight());
+        draw(0.25, true, lowResRT.getColorTarget().width(), lowResRT.getColorTarget().height());
 		lowResRT.unbind();
         dirty = false;
         drawnHighRes = false;
@@ -395,7 +395,7 @@ void VolumeRenderer::draw()
     } else if (!drawnHighRes && cleanFrames++ > 30) {
 		fullResRT.bind();
 		fullResRT.clear();
-		draw(2.0, false, fullResRT.getColorTarget().getWidth(), fullResRT.getColorTarget().getHeight());
+		draw(2.0, false, fullResRT.getColorTarget().width(), fullResRT.getColorTarget().height());
 		fullResRT.unbind();
         drawnHighRes = true;
         currentTexture = fullResRT.getColorTarget();

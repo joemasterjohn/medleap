@@ -32,7 +32,7 @@ void Draw::begin(GLenum mode)
 {
 	if (lineShader.id() == 0 || lineBuffer.id() == 0) {
 		lineShader = Program::createFromSrc(vSrc, fSrc);
-		lineBuffer = Buffer::genVertexBuffer(GL_DYNAMIC_DRAW);
+		lineBuffer.generateVBO(GL_DYNAMIC_DRAW);
 	}
 	this->mode = mode;
 	vertices.clear();
@@ -41,7 +41,7 @@ void Draw::begin(GLenum mode)
 void Draw::end()
 {
 	lineBuffer.bind();
-	lineBuffer.setData(&vertices[0], vertices.size() * sizeof(GLfloat));
+	lineBuffer.data(&vertices[0], vertices.size() * sizeof(GLfloat));
 }
 
 void Draw::draw()

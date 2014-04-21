@@ -2,13 +2,13 @@
 
 using namespace gl;
 
-Renderbuffer::Renderbuffer() : handle(nullptr)
+Renderbuffer::Renderbuffer() : handle_(nullptr)
 {
 }
 
 GLuint Renderbuffer::id() const
 {
-	return handle ? *(handle.get()) : 0;
+	return handle_ ? *(handle_.get()) : 0;
 }
 
 void Renderbuffer::generate()
@@ -22,17 +22,17 @@ void Renderbuffer::generate()
 
 	GLuint* p = new GLuint;
 	glGenRenderbuffers(1, p);
-	handle = std::shared_ptr<GLuint>(p, deleteFunction);
+	handle_ = std::shared_ptr<GLuint>(p, deleteFunction);
 }
 
 void Renderbuffer::release()
 {
-	handle = nullptr;
+	handle_ = nullptr;
 }
 
 void Renderbuffer::bind() const
 {
-	if (handle)
+	if (handle_)
 		glBindRenderbuffer(GL_RENDERBUFFER, id());
 }
 

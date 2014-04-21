@@ -1,5 +1,5 @@
-#ifndef __CGL_PROGRAM_H_
-#define __CGL_PROGRAM_H_
+#ifndef __GL_PROGRAM_H__
+#define __GL_PROGRAM_H__
 
 #include "gl/glew.h"
 #include "gl/Shader.h"
@@ -44,9 +44,9 @@ namespace gl
         static Program create(const Shader& vShader, const Shader& fShader);
 
     private:
-		std::shared_ptr<GLuint> handle;
-		std::vector<gl::Shader> attached;
+		std::shared_ptr<GLuint> handle_;
+		std::vector<gl::Shader> attached_;
     };
 }
 
-#endif // __CGL_PROGRAM_H_
+#endif // __GL_PROGRAM_H__

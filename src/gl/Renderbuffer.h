@@ -1,5 +1,5 @@
-#ifndef CGL_RENDERBUFFER_H_
-#define CGL_RENDERBUFFER_H_
+#ifndef __GL_RENDERBUFFER_H__
+#define __GL_RENDERBUFFER_H__
 
 #include "gl/glew.h"
 #include <memory>
@@ -30,9 +30,9 @@ namespace gl
 		void storage(GLenum internalFormat, GLsizei width, GLsizei height, GLsizei samples);
 
 	private:
-		std::shared_ptr<GLuint> handle;
+		std::shared_ptr<GLuint> handle_;
     };
     
-} // namespace cgl
+}
 
-#endif // CGL_RENDERBUFFER_H_
+#endif // __GL_RENDERBUFFER_H__

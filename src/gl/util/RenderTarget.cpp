@@ -48,14 +48,14 @@ void RenderTarget::generate(GLsizei width, GLsizei height, bool useDepth) {
 	colorTarget.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	colorTarget.setData2D(intColorFormat, width, height, colorFormat, colorType, 0);
 	colorTarget.unbind();
-	framebuffer.setColorTarget(0, colorTarget);
+	framebuffer.colorTarget(0, colorTarget);
 
 	if (useDepth) {
 		depthTarget.generate();
 		depthTarget.bind();
 		depthTarget.storage(GL_DEPTH_COMPONENT16, width, height);
 		depthTarget.unbind();
-		framebuffer.setDepthTarget(depthTarget);
+		framebuffer.depthTarget(depthTarget);
 	}
 
 	framebuffer.unbind();
@@ -74,7 +74,7 @@ void RenderTarget::resize(GLsizei width, GLsizei height) {
 
 void RenderTarget::bind() {
 	framebuffer.bind();
-	glViewport(0, 0, colorTarget.getWidth(), colorTarget.getHeight());
+	glViewport(0, 0, colorTarget.width(), colorTarget.height());
 }
 
 void RenderTarget::unbind() {

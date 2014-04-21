@@ -111,13 +111,13 @@ Transfer1DRenderer::Transfer1DRenderer()
 		2, 7, 6
 	};
 
-	clutStripVBO = Buffer::genVertexBuffer();
+	clutStripVBO.generateVBO(GL_STATIC_DRAW);
 	clutStripVBO.bind();
-	clutStripVBO.setData(clutVerts, sizeof(clutVerts));
+	clutStripVBO.data(clutVerts, sizeof(clutVerts));
 
-	clutStripIBO = Buffer::genIndexBuffer();
+	clutStripIBO.generateIBO(GL_STATIC_DRAW);
 	clutStripIBO.bind();
-	clutStripIBO.setData(clutIndices, sizeof(clutIndices));
+	clutStripIBO.data(clutIndices, sizeof(clutIndices));
 
 	{
 		bgShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
@@ -134,7 +134,7 @@ Transfer1DRenderer::Transfer1DRenderer()
 
 		bgBuffer.generate(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 		bgBuffer.bind();
-		bgBuffer.setData(vertices, sizeof(vertices));
+		bgBuffer.data(vertices, sizeof(vertices));
 	}
 }
 

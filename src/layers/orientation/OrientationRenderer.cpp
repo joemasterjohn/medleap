@@ -18,7 +18,7 @@ OrientationRenderer::OrientationRenderer() : camera(NULL)
 
 	geomVBO.generate(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 	geomVBO.bind();
-	geomVBO.setData(&vertices[0], vertices.size() * sizeof(Vec3));
+	geomVBO.data(&vertices[0], vertices.size() * sizeof(Vec3));
 
 
 	vector<GLushort> indices;
@@ -41,7 +41,7 @@ OrientationRenderer::OrientationRenderer() : camera(NULL)
 
 	geomIBO.generate(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
 	geomIBO.bind();
-	geomIBO.setData(&indices[0], indices.size() * sizeof(GLushort));
+	geomIBO.data(&indices[0], indices.size() * sizeof(GLushort));
 
 	geomShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 }

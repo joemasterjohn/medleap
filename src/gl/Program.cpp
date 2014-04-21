@@ -3,14 +3,14 @@
 
 using namespace gl;
 
-Program::Program() : handle(nullptr)
+Program::Program() : handle_(nullptr)
 {
 }
 
 Program::~Program()
 {
-	if (handle.use_count() == 1) {
-		for (Shader& shader : attached) {
+	if (handle_.use_count() == 1) {
+		for (Shader& shader : attached_) {
 			if (shader.id()) {
 				glDetachShader(id(), shader.id());
 			}
@@ -20,7 +20,7 @@ Program::~Program()
 
 GLuint Program::id() const
 {
-	return handle ? *(handle.get()) : 0;
+	return handle_ ? *(handle_.get()) : 0;
 }
 
 void Program::generate()
@@ -33,13 +33,13 @@ void Program::generate()
 	};
 
 	GLuint* p = new GLuint(glCreateProgram());
-	handle = std::shared_ptr<GLuint>(p, deleteFunction);
+	handle_ = std::shared_ptr<GLuint>(p, deleteFunction);
 }
 
 void Program::release()
 {
-	handle = nullptr;
-	attached.clear();
+	handle_ = nullptr;
+	attached_.clear();
 }
 
 GLint Program::getUniform(const GLchar* name) const
@@ -65,7 +65,7 @@ void Program::disable()
 void Program::attach(const Shader& shader)
 {
 	glAttachShader(id(), shader.id());
-	attached.push_back(shader);
+	attached_.push_back(shader);
 }
 
 bool Program::link()

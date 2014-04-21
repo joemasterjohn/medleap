@@ -1,5 +1,5 @@
-#ifndef __CSC529_SHADER__
-#define __CSC529_SHADER__
+#ifndef __GL_SHADER_H__
+#define __GL_SHADER_H__
 
 #include "gl/glew.h"
 #include <string>
@@ -21,10 +21,10 @@ namespace gl
 		void release();
         
         /** Returns the type of the referenced shader (0 if no shader referenced). */
-        GLenum getType() const;
+        GLenum type() const;
         
         /** Returns the source code (empty string if no shader referenced). */
-        std::string getSource() const;
+        std::string source() const;
         
         /** Returns the error log from compiling (empty string if no errors). */
         std::string log() const;
@@ -36,13 +36,13 @@ namespace gl
         bool compileFile(const char* fileName, GLenum type);
         
     private:
-		std::shared_ptr<GLuint> handle;
-        GLenum type;
-        std::string source;
+		std::shared_ptr<GLuint> handle_;
+        GLenum type_;
+        std::string source_;
 
 		void generate(GLenum type);
     };
     
 }
 
-#endif // __CSC529_SHADER__
+#endif // __GL_SHADER_H__

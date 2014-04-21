@@ -12,8 +12,8 @@ MenuRenderer::MenuRenderer(MenuManager* menuManager) : menuManager(menuManager),
     indexType = 0;
     setShaderState = nullptr;
 
-	menuVBO = Buffer::genVertexBuffer();
-	menuIBO = Buffer::genIndexBuffer();
+	menuVBO.generateVBO(GL_STATIC_DRAW);
+	menuIBO.generateIBO(GL_STATIC_DRAW);
 	menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 }
 
@@ -166,10 +166,10 @@ void MenuRenderer::createRingGeometry()
     }
     
     menuVBO.bind();
-    menuVBO.setData(&verts[0], verts.size() * sizeof(GLfloat));
+    menuVBO.data(&verts[0], verts.size() * sizeof(GLfloat));
     
     menuIBO.bind();
-    menuIBO.setData(&indices[0], indices.size() * sizeof(GLushort));
+    menuIBO.data(&indices[0], indices.size() * sizeof(GLushort));
     indexCount = indices.size();
     indexType = GL_UNSIGNED_SHORT;
     

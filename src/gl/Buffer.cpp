@@ -2,19 +2,19 @@
 
 using namespace gl;
 
-Buffer::Buffer() : handle(nullptr), target(GL_INVALID_ENUM), usage(GL_INVALID_ENUM)
+Buffer::Buffer() : handle_(nullptr), target_(GL_INVALID_ENUM), usage_(GL_INVALID_ENUM)
 {
 }
 
 GLuint Buffer::id() const
 {
-	return handle ? *(handle.get()) : 0;
+	return handle_ ? *(handle_.get()) : 0;
 }
 
 void Buffer::generate(GLenum target, GLenum usage)
 {
-	this->target = target;
-	this->usage = usage;
+	this->target_ = target;
+	this->usage_ = usage;
 
 	auto deleteFunction = [=](GLuint* p) {
 		if (p) {
@@ -25,55 +25,51 @@ void Buffer::generate(GLenum target, GLenum usage)
 
 	GLuint* p = new GLuint;
 	glGenBuffers(1, p);
-	handle = std::shared_ptr<GLuint>(p, deleteFunction);
+	handle_ = std::shared_ptr<GLuint>(p, deleteFunction);
+}
+
+void Buffer::generateVBO(GLenum usage)
+{
+	generate(GL_ARRAY_BUFFER, usage);
+}
+
+void Buffer::generateIBO(GLenum usage)
+{
+	generate(GL_ELEMENT_ARRAY_BUFFER, usage);
 }
 
 void Buffer::release()
 {
-	handle = nullptr;
+	handle_ = nullptr;
 }
 
 void Buffer::bind() const
 {
-	if (handle)
-		glBindBuffer(target, id());
+	if (handle_)
+		glBindBuffer(target_, id());
 }
 
 void Buffer::unbind() const
 {
-    glBindBuffer(target, 0);
+    glBindBuffer(target_, 0);
 }
 
-void Buffer::setTarget(GLenum target)
+void Buffer::target(GLenum target)
 {
-    this->target = target;
+    this->target_ = target;
 }
 
-void Buffer::setUsage(GLenum usage)
+void Buffer::usage(GLenum usage)
 {
-    this->usage = usage;
+    this->usage_ = usage;
 }
 
-void Buffer::setData(const GLvoid* data, GLsizeiptr size)
+void Buffer::data(const GLvoid* data, GLsizeiptr size)
 {
-    glBufferData(target, size, data, usage);
+    glBufferData(target_, size, data, usage_);
 }
 
-void Buffer::setSubData(const GLvoid* data, GLsizeiptr size, GLintptr offset)
+void Buffer::subData(const GLvoid* data, GLsizeiptr size, GLintptr offset)
 {
-    glBufferSubData(target, offset, size, data);
-}
-
-Buffer Buffer::genVertexBuffer(GLenum usage)
-{
-	Buffer buf;
-	buf.generate(GL_ARRAY_BUFFER, usage);
-	return buf;
-}
-
-Buffer Buffer::genIndexBuffer(GLenum usage)
-{
-	Buffer buf;
-	buf.generate(GL_ELEMENT_ARRAY_BUFFER, usage);
-	return buf;
+    glBufferSubData(target_, offset, size, data);
 }

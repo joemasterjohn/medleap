@@ -2,18 +2,18 @@
 
 using namespace gl;
 
-Texture::Texture() : handle(nullptr), target(GL_INVALID_ENUM), width(0), height(0), depth(0)
+Texture::Texture() : handle_(nullptr), target_(GL_INVALID_ENUM), width_(0), height_(0), depth_(0)
 {
 }
 
 GLuint Texture::id() const
 {
-	return handle ? *(handle.get()) : 0;
+	return handle_ ? *(handle_.get()) : 0;
 }
 
 void Texture::generate(GLenum target)
 {
-	this->target = target;
+	this->target_ = target;
 
 	auto deleteFunction = [=](GLuint* p) {
 		if (p) {
@@ -24,43 +24,43 @@ void Texture::generate(GLenum target)
 
 	GLuint* p = new GLuint;
 	glGenTextures(1, p);
-	handle = std::shared_ptr<GLuint>(p, deleteFunction);
+	handle_ = std::shared_ptr<GLuint>(p, deleteFunction);
 }
 
 void Texture::release()
 {
-	handle = nullptr;
+	handle_ = nullptr;
 }
 
-GLuint Texture::getWidth() const
+GLuint Texture::width() const
 {
-    return width;
+    return width_;
 }
 
-GLuint Texture::getHeight() const
+GLuint Texture::height() const
 {
-    return height;
+    return height_;
 }
 
-GLuint Texture::getDepth() const
+GLuint Texture::depth() const
 {
-    return depth;
+    return depth_;
 }
 
-GLenum Texture::getTarget() const
+GLenum Texture::target() const
 {
-    return target;
+	return target_;
 }
 
 void Texture::bind() const
 {
-	if (handle)
-		glBindTexture(target, id());
+	if (handle_)
+		glBindTexture(target_, id());
 }
 
 void Texture::unbind() const
 {
-    glBindTexture(target, 0);
+	glBindTexture(target_, 0);
 }
 
 void Texture::setData1D(GLint level,
@@ -70,10 +70,10 @@ void Texture::setData1D(GLint level,
                         GLenum type,
                         const GLvoid *data)
 {
-    this->width = width;
-    this->height = 1;
-    this->depth = 1;
-    glTexImage1D(target, level, internalFormat, width, 0, format, type, data);
+    this->width_ = width;
+    this->height_ = 1;
+    this->depth_ = 1;
+	glTexImage1D(target_, level, internalFormat, width, 0, format, type, data);
 }
 
 void Texture::setData2D(GLint level,
@@ -84,10 +84,10 @@ void Texture::setData2D(GLint level,
                         GLenum type,
                         const GLvoid *data)
 {
-    this->width = width;
-    this->height = height;
-    this->depth = 1;
-    glTexImage2D(target, level, internalFormat, width, height, 0, format, type, data);
+    this->width_ = width;
+    this->height_ = height;
+    this->depth_ = 1;
+	glTexImage2D(target_, level, internalFormat, width, height, 0, format, type, data);
 }
 
 void Texture::setData2D(GLint internalFormat,
@@ -109,7 +109,7 @@ void Texture::setData3D(GLint level,
 			    GLenum type,
 			    const GLvoid* data)
 {
-	glTexImage3D(target, level, internalFormat, width, height, depth, 0, format, type, data);
+	glTexImage3D(target_, level, internalFormat, width, height, depth, 0, format, type, data);
 }
 
 void Texture::setData3D(GLint internalFormat,
@@ -125,10 +125,10 @@ void Texture::setData3D(GLint internalFormat,
 
 void Texture::setParameter(GLenum pname, GLint param)
 {
-    glTexParameteri(target, pname, param);
+	glTexParameteri(target_, pname, param);
 }
 
 void Texture::setParameter(GLenum pname, GLfloat param)
 {
-    glTexParameterf(target, pname, param);
+	glTexParameterf(target_, pname, param);
 }

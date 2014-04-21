@@ -6,6 +6,7 @@ using namespace gl;
 using namespace Leap;
 
 ColorPickController::ColorPickController() :
+		m_prev_color(0.0f, 1.0f, 1.0f, 1.0f),
 		mColor(0.0f, 1.0f, 1.0f, 1.0f),
 		mChooseColor(false),
 		mChooseAlpha(false),
@@ -76,7 +77,7 @@ bool ColorPickController::leapInput(const Leap::Controller& leapController, cons
 {
 	handTrigger.update(leapController);
 
-	// DEBUG ONLY: REMOVE
+	// DEBUG ONLY: REMOVE (change to highlight text indicating which funciton will be used)
 	if (!handTrigger.tracking() && currentFrame.fingers().count() > 0) {
 		Vector v = leapController.frame().fingers().frontmost().tipPosition();
 		float x = v.x / 100.0f * renderer.getViewport().width / 2.0f + renderer.getViewport().center().x;
@@ -84,6 +85,10 @@ bool ColorPickController::leapInput(const Leap::Controller& leapController, cons
 		renderer.leapCursor({ x,y });
 	} else {
 		renderer.leapCursor({ -200, -200 });
+	}
+
+	if (!handTrigger.tracking() && currentFrame.fingers().count() > 4) {
+		std::cout << "EXIT: " << mColor.rgb().vec4() << endl;
 	}
 
 	return false;
@@ -106,6 +111,8 @@ void ColorPickController::leapChooseWidget(const Leap::Controller& controller)
 	else {
 		handTrigger.trackFunction(std::bind(&ColorPickController::leapUpdateValue, this, std::placeholders::_1));
 	}
+
+	m_prev_color = mColor;
 }
 
 void ColorPickController::leapUpdateColor(const Leap::Controller& controller)
@@ -124,13 +131,13 @@ void ColorPickController::leapUpdateColor(const Leap::Controller& controller)
 void ColorPickController::leapUpdateAlpha(const Leap::Controller& controller)
 {
 	Vec3 tip(handTrigger.deltaTipPos().x, handTrigger.deltaTipPos().y, handTrigger.deltaTipPos().z);
-	mColor.alpha(clamp(tip.y / 100.0f, 0.0f, 1.0f));
+	mColor.alpha(clamp(m_prev_color.alpha() + tip.y / 100.0f, 0.0f, 1.0f));
 	renderer.choose(mColor);
 }
 
 void ColorPickController::leapUpdateValue(const Leap::Controller& controller)
 {
 	Vec3 tip(handTrigger.deltaTipPos().x, handTrigger.deltaTipPos().y, handTrigger.deltaTipPos().z);
-	mColor.value(clamp(tip.y / 100.0f, 0.0f, 1.0f));
+	mColor.value(clamp(m_prev_color.value() + tip.y / 100.0f, 0.0f, 1.0f));
 	renderer.choose(mColor);
 }

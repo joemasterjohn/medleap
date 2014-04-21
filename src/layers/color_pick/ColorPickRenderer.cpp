@@ -19,7 +19,7 @@ ColorPickRenderer::ColorPickRenderer() : mColor(0.0f, 1.0f, 1.0f, 1.0f), mTracki
 
 	geomVBO.generate(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 	geomVBO.bind();
-	geomVBO.setData(vertices, sizeof(vertices));
+	geomVBO.data(vertices, sizeof(vertices));
 
 	circleShader = Program::create("shaders/color_pick_hsv_circle.vert", "shaders/color_pick_hsv_circle.frag");
 	selectShader = Program::create("shaders/color_pick_selected.vert", "shaders/color_pick_selected.frag");

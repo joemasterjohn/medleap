@@ -20,14 +20,14 @@ namespace gl
 					buf.push_back(vertices[index]);
 
 				vertexBuffer.bind();
-				vertexBuffer.setData(&buf[0], buf.size() * sizeof(VertexType));
+				vertexBuffer.data(&buf[0], buf.size() * sizeof(VertexType));
 			}
 
 			void fill(gl::Buffer& vertexBuffer, gl::Buffer& indexBuffer) {
 				vertexBuffer.bind();
-				vertexBuffer.setData(&vertices[0], vertices.size() * sizeof(VertexType));
+				vertexBuffer.data(&vertices[0], vertices.size() * sizeof(VertexType));
 				indexBuffer.bind();
-				indexBuffer.setData(&indices[0], indices.size() * sizeof(IndexType));
+				indexBuffer.data(&indices[0], indices.size() * sizeof(IndexType));
 			}
 
 			const std::vector<VertexType>& getVertices() const {

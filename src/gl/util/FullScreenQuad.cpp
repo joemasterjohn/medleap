@@ -39,7 +39,7 @@ void FullScreenQuad::generate() {
 
 	vertexBuffer.generate(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 	vertexBuffer.bind();
-	vertexBuffer.setData(data, sizeof(data));
+	vertexBuffer.data(data, sizeof(data));
 
 	shaderProgram = Program::createFromSrc(vsrc, fsrc);
 }

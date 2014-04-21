@@ -1,5 +1,5 @@
-#ifndef CGL_VIEWPORT_H_
-#define CGL_VIEWPORT_H_
+#ifndef __GL_VIEWPORT_H__
+#define __GL_VIEWPORT_H__
 
 #include "gl/glew.h"
 #include "gl/geom/Rectangle.h"
@@ -24,6 +24,6 @@ namespace gl
 		}
     };
     
-} // namespace cgl
+}
 
-#endif // CGL_VIEWPORT_H_
+#endif // __GL_VIEWPORT_H__

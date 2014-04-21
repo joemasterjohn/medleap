@@ -20,6 +20,7 @@ public:
 	const ColorHSV& color() const { return mColor; }
 
 private:
+	ColorHSV m_prev_color;
 	ColorHSV mColor;
 	ColorPickRenderer renderer;
 	HandTriggerTracker handTrigger;

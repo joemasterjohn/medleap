@@ -1,5 +1,5 @@
-#ifndef CGL_FRAMEBUFFER_H_
-#define CGL_FRAMEBUFFER_H_
+#ifndef __GL_FRAMEBUFFER_H__
+#define __GL_FRAMEBUFFER_H__
 
 #include "gl/glew.h"
 #include "gl/Texture.h"
@@ -31,22 +31,22 @@ namespace gl
         void unbind() const;
         
         /** Sets the target to which the framebuffer is bound. */
-        void setTarget(GLenum target);
+        void target(GLenum target);
         
         /** Sets a texture's MIP level as a color target at attachment i */
-        void setColorTarget(int i, const Texture& texture, int level = 0);
+        void colorTarget(int i, const Texture& texture, int level = 0);
         
         /** Sets a texture's MIP level as a depth target */
-        void setDepthTarget(const Texture& texture, int level = 0);
+        void depthTarget(const Texture& texture, int level = 0);
 
 		/** Sets a renderbuffer as the depth target */
-		void setDepthTarget(const Renderbuffer& rbo);
+		void depthTarget(const Renderbuffer& rbo);
         
     private:
-		std::shared_ptr<GLuint> handle;
-        GLenum target;
+		std::shared_ptr<GLuint> handle_;
+        GLenum target_;
     };
     
-} // namespace cgl
+}
 
-#endif // CGL_FRAMEBUFFER_H_
+#endif // __GL_FRAMEBUFFER_H__

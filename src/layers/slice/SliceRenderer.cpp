@@ -24,9 +24,9 @@ SliceRenderer::SliceRenderer() :
 		1, 1, 1, 1,
 		-1, 1, 0, 1
 	};
-	sliceVBO = Buffer::genVertexBuffer();
+	sliceVBO.generateVBO(GL_STATIC_DRAW);
 	sliceVBO.bind();
-	sliceVBO.setData(vertexData, sizeof(vertexData));
+	sliceVBO.data(vertexData, sizeof(vertexData));
 }
 
 void SliceRenderer::setCLUTTexture(gl::Texture& texture)
