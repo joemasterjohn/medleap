@@ -1,13 +1,18 @@
-#version 150
+#version 330
 
-uniform mat4 model;
+uniform float interval_left;
+uniform float interval_reciprocal_width;
+uniform bool continuous_mode;
 
-in vec4 vs_position;
-in vec2 vs_texcoord;
-out vec2 fs_texcoord;
+layout (location = 0) in vec4 vs_position;
+out float fs_texcoord;
 
 void main()
 {
-    gl_Position = model * vs_position;
-    fs_texcoord = vs_texcoord;
+    gl_Position = vs_position;
+	fs_texcoord = vs_position.x * 0.5 + 0.5;
+
+	if (continuous_mode) {
+		fs_texcoord = (fs_texcoord - interval_left) * interval_reciprocal_width;
+	}
 }

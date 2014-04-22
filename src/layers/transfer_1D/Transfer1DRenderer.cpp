@@ -136,6 +136,7 @@ Transfer1DRenderer::Transfer1DRenderer()
 		bgBuffer.bind();
 		bgBuffer.data(vertices, sizeof(vertices));
 	}
+
 }
 
 Transfer1DRenderer::~Transfer1DRenderer()
@@ -246,6 +247,18 @@ void Transfer1DRenderer::drawBackground()
 
 void Transfer1DRenderer::drawHistogram()
 {
+	histoVBO.bind();
+	histoProg.enable();
+	histoProg.uniform("continuous_mode", clut->mode() == CLUT::continuous);
+	histoProg.uniform("interval_left", clut->interval().left());
+	histoProg.uniform("interval_reciprocal_width", 1.0f / clut->interval().width());
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, histoVBOCount);
+
+
+
 	static Draw d;
 	double logMaxFreq = std::log(histogram->getMaxFrequency() + 1);
 
@@ -253,29 +266,6 @@ void Transfer1DRenderer::drawHistogram()
 	float ww = volume->getCurrentWindow().getWidthReal();
 	float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
 	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-
-	d.begin(GL_TRIANGLE_STRIP);
-	for (unsigned i = 0; i < histogram->getNumBins(); ++i) {
-		float x = (float)i / histogram->getNumBins();
-		float y = std::log(histogram->getSize(i) + 1) / logMaxFreq;
-
-		x = (x - 0.5f) * 2.0f;
-		y = (y - 0.5f) * 2.0f;
-
-		// should really be using the CLUT texture instead...
-		// create geometry only once when histo is made
-		Vec4 c = this->clut->color((x - markL) / (markR - markL));
-		c *= c.w;
-
-		d.color(c.x, c.y, c.z);
-
-		d.vertex(x, -1);
-		d.vertex(x, y);
-	}
-	d.vertex(1, -1);
-	d.vertex(1, -1);
-	d.end();
-	d.draw();
 
 	d.begin(GL_LINE_STRIP);
 	Vec3 c = MainController::getInstance().getRenderer().getInverseBGColor() * 0.5f;
@@ -429,7 +419,28 @@ void Transfer1DRenderer::setHistogram(Histogram* histogram)
     histo1D.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     histo1D.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    histo1D.setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, &pixels[0]);
+	histo1D.setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, &pixels[0]);
+
+
+	// histo vbo triangle strip
+	{
+		vector<Vec2> buffer;
+		for (unsigned i = 0; i < histogram->getNumBins(); ++i) {
+			float x = (float)i / histogram->getNumBins();
+			float y = std::log(histogram->getSize(i) + 1) / logMaxFreq;
+			x = (x - 0.5f) * 2.0f;
+			y = (y - 0.5f) * 2.0f;
+			buffer.push_back({ x, -1.0f });
+			buffer.push_back({ x, y });
+		}
+
+		histoVBO.generateVBO(GL_STATIC_DRAW);
+		histoVBO.bind();
+		histoVBO.data(&buffer[0], buffer.size() * sizeof(Vec2));
+		histoVBOCount = buffer.size();
+
+		histoProg = Program::create("shaders/histogram.vert", "shaders/histogram.frag");
+	}
 }
 
 void Transfer1DRenderer::setCursor(int x, int y)

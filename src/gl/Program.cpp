@@ -136,6 +136,11 @@ Program Program::create(const Shader& vShader, const Shader& fShader)
 	return prog;
 }
 
+void Program::uniform(const GLchar* name, bool value)
+{
+	glUniform1i(glGetUniformLocation(id(), name), value);
+}
+
 void Program::uniform(const GLchar* name, float x)
 {
 	glUniform1f(glGetUniformLocation(id(), name), x);

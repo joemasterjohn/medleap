@@ -39,6 +39,7 @@ namespace gl
         void enable();
         void disable();
 
+		void uniform(const GLchar* name, bool value);
 		void uniform(const GLchar* name, float x);
 		void uniform(const GLchar* name, float x, float y);
 		void uniform(const GLchar* name, float x, float y, float z);

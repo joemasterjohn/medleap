@@ -51,6 +51,12 @@ private:
 	gl::Program bgShader;
 	gl::Buffer bgBuffer;
 
+	// histogram
+	gl::Program histoProg;
+	gl::Buffer  histoVBO;
+	gl::Draw histoOutline;
+	GLsizei histoVBOCount;
+
     // CLUT
     gl::Program clutStripShader;
     gl::Buffer clutStripVBO;

@@ -58,9 +58,10 @@ public:
 	/** Saves CLUT into a 1D texture based on mode */
 	void saveTexture(gl::Texture& texture);
 
-	/** Color at position in [0,1] */
-	gl::Vec4 color(float position);
+	Interval& interval() { return interval_; }
     
+	Mode mode() const { return mode_; }
+
 private:
 	std::vector<std::shared_ptr<Marker>> markers_;
 	Interval interval_;

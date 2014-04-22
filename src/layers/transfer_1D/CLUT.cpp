@@ -33,7 +33,7 @@ void CLUT::Marker::context(bool context)
 
 
 
-CLUT::CLUT() : mode_(continuous), needs_sort_(true)
+CLUT::CLUT() : mode_(piecewise), needs_sort_(true)
 {
 }
 
@@ -122,31 +122,6 @@ void CLUT::sortMarkers()
 }
 
 
-Vec4 CLUT::color(float position)
-{
-    // make sure position is in [0,1]
-    position = std::min(std::max(position, 0.0f), 1.0f);
-    
-	return Vec4(1.0f);
-
-    // find the nearest color stops on the left and right of position
-    //ColorStop* left = &stops[findLeftStop(position)];
-    //ColorStop* right = &stops[findRightStop(position)];
-    //
-    // left and right will be the same color stop if position is exactly the same as the stop's position
-    //if (left == right)
-    //    return left->getColor();
-    //
-    // calculate the position normalized w.r.t. left and right color stops
-    //float lp = left->getPosition();
-    //float rp = right->getPosition();
-    //float np = (position - lp) / (rp - lp);
-    //
-    // return linearly interpolated color
-    //return left->getColor() * (1.0f - np) + right->getColor() * np;
-}
-
-
 void CLUT::saveTexture(Texture& texture)
 {
 	if (markers_.empty())
@@ -199,5 +174,38 @@ void CLUT::saveContinuous(Texture& texture)
 
 void CLUT::savePiecewise(Texture& texture)
 {
+	// why 256? make this variable or const somewhere
+	const unsigned texWidth = 256;
+	//unsigned short buf[texWidth * 4];
 
+	vector<GLushort> buf;
+	buf.resize(texWidth * 4, 0);
+
+	for (MarkerPtr& p : markers_) {
+		Marker* m = p.get();
+		long ptr = 0;
+
+		for (int i = 0; i < texWidth; i++) {
+			float p = static_cast<float>(i) / texWidth;
+
+			if (p >= m->interval().left() && p <= m->interval().right()) {
+
+				float s = clamp(1.0f - abs(m->interval().center() - p) / m->interval().width() * 2.0f, 0.0f, 1.0f);
+				Vec4 color = m->color().vec4();
+				color.w *= s;
+
+				long o = (i * 4);
+				buf[o] += (unsigned short)(color.x * 65535);
+				buf[o+1] += (unsigned short)(color.y * 65535);
+				buf[o+2] += (unsigned short)(color.z * 65535);
+				buf[o+3] += (unsigned short)(color.w * 65535);
+			}
+		}
+	}
+
+	texture.bind();
+	texture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	texture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	texture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	texture.setData1D(0, GL_RGBA, texWidth, GL_RGBA, GL_UNSIGNED_SHORT, &buf[0]);
 }

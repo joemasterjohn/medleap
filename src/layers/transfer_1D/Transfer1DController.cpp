@@ -27,78 +27,6 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 		c.addMarker(1.0f).color(ColorRGB{ 1.0f, 1.0f, 1.0f, 1.0f });
 		cluts.push_back(c);
 	}
-
-   /* CLUT redToWhite;
-    redToWhite.addColorStop(0.25f, Vec4(1, 0, 0, 1));
-    cluts.push_back(redToWhite);
-    
-    CLUT test;
-    test.addColorStop(0.2f, Vec4(0, 1, 0, .8f));
-    test.addColorStop(0.4f, Vec4(1, 1, 0, .9f));
-    test.addColorStop(0.6f, Vec4(1, 0, 0, 1));
-    cluts.push_back(test);
-
-	CLUT whiteToBlack;
-	whiteToBlack.getColorStop(0).setColor(1, 1, 1, 0);
-	whiteToBlack.getColorStop(1).setColor(0, 0, 0, 1);
-	cluts.push_back(whiteToBlack);
-
-    CLUT spectrum;
-    spectrum.clearStops();
-    spectrum.addColorStop(0,              Vec4(164, 37, 138, 1)/255.0f);
-    spectrum.addColorStop(0.1428571429*1, Vec4(0, 92, 166, 50)/255.0f);
-    spectrum.addColorStop(0.1428571429*2, Vec4(42, 199, 239, 50)/255.0f);
-    spectrum.addColorStop(0.1428571429*3, Vec4(0, 168, 96, 170)/255.0f);
-    spectrum.addColorStop(0.1428571429*4, Vec4(251, 240, 82, 22)/255.0f);
-    spectrum.addColorStop(0.1428571429*5, Vec4(254, 135, 59, 180)/255.0f);
-    spectrum.addColorStop(0.1428571429*6, Vec4(247, 18, 42, 128)/255.0f);
-    spectrum.addColorStop(1.0f,           Vec4(169, 0, 36, 5)/255.0f);
-    cluts.push_back(spectrum);
-
-
-	CLUT ryw;
-	ryw.clearStops();
-	ryw.addColorStop(0.0f, Vec4(0, 0, 0, 0.0f));
-	ryw.addColorStop(0.2f, Vec4(0.8f, 0, 0, 0.7f));
-	ryw.addColorStop(0.5f, Vec4(1, 1, 0, 0.8f));
-	ryw.addColorStop(1.0f, Vec4(1, 1, 1, 1.0f));
-	cluts.push_back(ryw);
-    
-    CLUT lowTail;
-	lowTail.clearStops();
-	lowTail.addColorStop(0.0f, Vec4(0, 0, 0, 0.0f));
-	lowTail.addColorStop(0.2f, Vec4(1, 0, 0, 0.1f));
-	lowTail.addColorStop(0.5f, Vec4(1, 1, 0, 0.8f));
-	lowTail.addColorStop(1.0f, Vec4(1, 1, 1, 1.0f));
-	cluts.push_back(lowTail);
-    
-	CLUT foo;
-	foo.clearStops();
-	foo.addColorStop(0.0f, Vec4(0, 0, 0, 0.0f));
-	foo.addColorStop(0.2f, Vec4(0, 0, 0.8f, 0.2f));
-	foo.addColorStop(0.8f, Vec4(1, 1, 0, 0.8f));
-	foo.addColorStop(1.0f, Vec4(1, 1, 1, 0.9f));
-	cluts.push_back(foo);
-
-
-    CLUT mid;
-    mid.clearStops();
-    mid.addColorStop(0.0f, Vec4(0, 0, 0, 0));
-    mid.addColorStop(0.5f, Vec4(1, 1, 1, 1));
-    mid.addColorStop(1.0f, Vec4(0, 0, 0, 0));
-    cluts.push_back(mid);
-    
-    CLUT yellowToWhite;
-    yellowToWhite.clearStops();
-    yellowToWhite.addColorStop(0.0f, Vec4(1, 0, 0, 1));
-    yellowToWhite.addColorStop(1.0f, Vec4(0, 1, 0, 0.1f));
-    cluts.push_back(yellowToWhite);
-    
-    CLUT monochrome;
-    monochrome.clearStops();
-    monochrome.addColorStop(0.0f, Vec4(1, 1, 1, 0));
-    monochrome.addColorStop(1.0f, Vec4(1, 1, 1, 0.2f));
-    cluts.push_back(monochrome);*/
     
     renderer.setCLUT(&cluts[activeCLUT = 0]);
 }
@@ -188,12 +116,20 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
 		float ww = volume->getCurrentWindow().getWidthReal();
         volume->getCurrentWindow().setReal(wc, ww);
         volumeRenderer->markDirty();
+
+		cluts[activeCLUT].interval().center(static_cast<float>(x) / renderer.getViewport().width);
+
     } else if (rMouseDrag) {
 		float cursorVal = static_cast<float>(x) / renderer.getViewport().width * histogram->getRange() + histogram->getMin();
 		float wc = volume->getCurrentWindow().getCenterReal();
 		float ww = 2 * std::abs(cursorVal - wc);
         volume->getCurrentWindow().setReal(wc, ww);
         volumeRenderer->markDirty();
+
+		Interval& intv = cluts[activeCLUT].interval();
+		float cv = static_cast<float>(x) / renderer.getViewport().width;
+		float cc = intv.center();
+		intv.width(2.0f * std::abs(cv - cc));
     }
     
 
