@@ -1,5 +1,5 @@
-#ifndef medleap_Color_h
-#define medleap_Color_h
+#ifndef __MEDLEAP_COLOR_H__
+#define __MEDLEAP_COLOR_H__
 
 #include "gl/math/Math.h"
 
@@ -104,4 +104,4 @@ private:
 };
 
 
-#endif
+#endif // __MEDLEAP_COLOR_H__

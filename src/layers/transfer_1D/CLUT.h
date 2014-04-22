@@ -1,57 +1,79 @@
-#ifndef __medleap__CLUT__
-#define __medleap__CLUT__
+#ifndef __MEDLEAP_TF1D_CLUT_H__
+#define __MEDLEAP_TF1D_CLUT_H__
 
 #include "gl/math/Math.h"
 #include "gl/Texture.h"
+#include "util/Interval.h"
+#include "util/Color.h"
 #include <vector>
 
 /** Color look-up table */
 class CLUT
 {
 public:
-    
-    class ColorStop
-    {
-    public:
-        ColorStop(float position, float r, float g, float b, float a);
-		ColorStop(float position, gl::Vec4 color);
-        
-        float getPosition();
-        void setPosition(float position);
-        
-		gl::Vec4 getColor();
-        void setColor(float r, float g, float b, float a);
-		void setColor(gl::Vec4 color);
-        
-    private:
-        float position;
-		gl::Vec4 color;
-    };
-    
-    
-    CLUT();
-    ~CLUT();
-	gl::Vec4 getColor(float position);
-    ColorStop& getColorStop(float position);
-    void removeColorStop(float position);
-	void addColorStop(float position, gl::Vec4 color);
-    void clearStops();
-    
-    void saveTexture(gl::Texture& texture);
+	enum Mode
+	{
+		continuous,
+		piecewise
+	};
 
-	std::vector<ColorStop>& getStops();
+	class Marker
+	{
+	public:
+		const ColorRGB& color() const { return color_; }
+		const Interval& interval() const { return interval_; }
+		bool context() const { return context_; }
+
+		void color(const Color& color);
+		void interval(const Interval& interval);
+		void context(bool context);
+
+	private:
+		Marker(CLUT& clut, float center, float width);
+
+		CLUT& clut_;
+		Interval interval_;
+		ColorRGB color_;
+		bool context_;
+		// alpha ramp?
+
+		friend class CLUT;
+	};
+    
+	/** Creates an empty CLUT */
+    CLUT();
+
+	/** Adds a new marker and returns a reference to it */
+	Marker& addMarker(float center);
+
+	/** Removes the closest marker to center */
+	void removeMarker(float center);
+
+	/** Removes all markers */
+    void clearMarkers();
+    
+	/** Find marker with center closest to center */
+	Marker* closestMarker(float center);
+
+	/** Saves CLUT into a 1D texture based on mode */
+	void saveTexture(gl::Texture& texture);
+
+	/** Color at position in [0,1] */
+	gl::Vec4 color(float position);
     
 private:
-    std::vector<ColorStop> stops;
-    
-    /** Finds the index of the last color stop with position less or equal to pos */
-    int findLeftStop(float pos);
-    
-    /** Finds the index of the first color stop with position greater or equal to pos */
-    int findRightStop(float position);
-    
-    /** Finds the index of the color stop closest to pos */
-    int findNearestStop(float pos);
+	std::vector<std::shared_ptr<Marker>> markers_;
+	Interval interval_;
+	Mode mode_;
+	bool needs_sort_;
+
+	void sortMarkers();
+	void saveContinuous(gl::Texture& texture);
+	void savePiecewise(gl::Texture& texture);
+
+	std::vector<std::shared_ptr<Marker>>::iterator find(float center);
+
+	friend class Marker;
 };
 
-#endif /* defined(__medleap__CLUT__) */
+#endif // __MEDLEAP_TF1D_CLUT_H__

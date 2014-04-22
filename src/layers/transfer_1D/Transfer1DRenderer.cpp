@@ -187,40 +187,41 @@ void Transfer1DRenderer::draw()
 
 void Transfer1DRenderer::drawColorStopBar()
 {
-	float wc = volume->getCurrentWindow().getCenterReal();
-	float ww = volume->getCurrentWindow().getWidthReal();
-	float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	colorStops.begin(GL_TRIANGLES);
-	for (CLUT::ColorStop& stop : clut->getStops()) {
-		float x = markL + stop.getPosition() * (markR - markL);
-		colorStops.color(stop.getColor().x, stop.getColor().y, stop.getColor().z);
-		colorStops.vertex(x - 0.035, -1);
-		colorStops.vertex(x + 0.035, -1);
-		colorStops.vertex(x, 1);
-	}
-	colorStops.end();
+	// draw stops as triangles
+	//float wc = volume->getCurrentWindow().getCenterReal();
+	//float ww = volume->getCurrentWindow().getWidthReal();
+	//float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	//float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	//colorStops.begin(GL_TRIANGLES);
+	//for (CLUT::ColorStop& stop : clut->getStops()) {
+	//	float x = markL + stop.getPosition() * (markR - markL);
+	//	colorStops.color(stop.getColor().x, stop.getColor().y, stop.getColor().z);
+	//	colorStops.vertex(x - 0.035, -1);
+	//	colorStops.vertex(x + 0.035, -1);
+	//	colorStops.vertex(x, 1);
+	//}
+	//colorStops.end();
 
-	// instead of end updating buffer, have draw update buffer if things have changed
-	// keep track of where modes change and have a clear option
+	//// instead of end updating buffer, have draw update buffer if things have changed
+	//// keep track of where modes change and have a clear option
 
-	colorStops.draw();
-	colorStops.begin(GL_LINES);
-	for (CLUT::ColorStop& stop : clut->getStops()) {
-		float x = markL + stop.getPosition() * (markR - markL);
-		colorStops.color(.5f, .5f, .5f);
-		colorStops.vertex(x - 0.035, -1);
-		colorStops.vertex(x + 0.035, -1);
+	//colorStops.draw();
+	//colorStops.begin(GL_LINES);
+	//for (CLUT::ColorStop& stop : clut->getStops()) {
+	//	float x = markL + stop.getPosition() * (markR - markL);
+	//	colorStops.color(.5f, .5f, .5f);
+	//	colorStops.vertex(x - 0.035, -1);
+	//	colorStops.vertex(x + 0.035, -1);
 
-		colorStops.vertex(x + 0.035, -1);
-		colorStops.vertex(x, 1);
+	//	colorStops.vertex(x + 0.035, -1);
+	//	colorStops.vertex(x, 1);
 
-		colorStops.vertex(x, 1);
-		colorStops.vertex(x - 0.035, -1);
+	//	colorStops.vertex(x, 1);
+	//	colorStops.vertex(x - 0.035, -1);
 
-	}
-	colorStops.end();
-	colorStops.draw();
+	//}
+	//colorStops.end();
+	//colorStops.draw();
 }
 
 void Transfer1DRenderer::drawBackground()
@@ -261,8 +262,9 @@ void Transfer1DRenderer::drawHistogram()
 		x = (x - 0.5f) * 2.0f;
 		y = (y - 0.5f) * 2.0f;
 
-
-		Vec4 c = this->clut->getColor((x - markL) / (markR - markL));
+		// should really be using the CLUT texture instead...
+		// create geometry only once when histo is made
+		Vec4 c = this->clut->color((x - markL) / (markR - markL));
 		c *= c.w;
 
 		d.color(c.x, c.y, c.z);

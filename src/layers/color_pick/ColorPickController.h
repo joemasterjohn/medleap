@@ -3,7 +3,7 @@
 
 #include "layers/Controller.h"
 #include "ColorPickRenderer.h"
-#include "Color.h"
+#include "util/Color.h"
 #include "leap/HandTriggerTracker.h"
 
 class ColorPickController : public Controller

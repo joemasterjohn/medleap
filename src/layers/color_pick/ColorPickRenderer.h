@@ -6,7 +6,7 @@
 #include "gl/Buffer.h"
 #include "gl/Program.h"
 #include "gl/math/Math.h"
-#include "Color.h"
+#include "util/Color.h"
 #include "gl/util/Draw.h"
 #include "util/TextRenderer.h"
 

@@ -62,6 +62,20 @@ namespace gl
 		return a + (b - a) * p;
 	}
 
+	template <typename T>
+	static float normalize(T value) {
+		T t_min = std::numeric_limits<T>::min();
+		T t_max = std::numeric_limits<T>::max();
+		return static_cast<float>(value - t_min) / (t_max - t_min);
+	}
+
+	template <typename T>
+	static T unnormalize(float value) {
+		T t_min = std::numeric_limits<T>::min();
+		T t_max = std::numeric_limits<T>::max();
+		return static_cast<T>(t_min + (t_max - t_min) * value);
+	}
+
 	// Creates a rotation matrix (X axis)
 	Mat4 rotationX(float radians);
 

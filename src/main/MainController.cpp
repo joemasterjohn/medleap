@@ -93,8 +93,6 @@ void MainController::setMode(MainController::Mode mode)
             activeControllers.clear();
             pushController(&volumeController);
             pushController(&volumeInfoController);
-			pushController(&colorPickController);
-
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
 			pushController(&orientationController);

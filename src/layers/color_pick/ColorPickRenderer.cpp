@@ -1,6 +1,6 @@
 #include "ColorPickRenderer.h"
 #include <vector>
-#include "Color.h"
+#include "util/Color.h"
 #include <sstream>
 
 using namespace std;

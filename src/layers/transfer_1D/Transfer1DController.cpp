@@ -8,12 +8,27 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
     rMouseDrag = false;
     
     
-    volumeRenderer = NULL;
-    
-    // start out with the default CLUT: black->white gradient
-    cluts.push_back(CLUT());
-    
-    CLUT redToWhite;
+	volumeRenderer = NULL;
+
+	// start out with the default CLUT: black->white gradient
+
+	{
+		CLUT c;
+		c.addMarker(0.0f).color(ColorRGB{ 0.0f, 0.0f, 0.0f, 0.0f });
+		c.addMarker(1.0f).color(ColorRGB{ 1.0f, 1.0f, 1.0f, 1.0f });
+		cluts.push_back(c);
+	}
+
+	{
+		CLUT c;
+		c.addMarker(0.0f).color(ColorRGB{ 0.0f, 0.0f, 0.0f, 0.0f });
+		c.addMarker(0.2f).color(ColorRGB{ 1.0f, 0.0f, 0.0f, 0.1f });
+		c.addMarker(0.8f).color(ColorRGB{ 1.0f, 1.0f, 0.0f, 0.8f });
+		c.addMarker(1.0f).color(ColorRGB{ 1.0f, 1.0f, 1.0f, 1.0f });
+		cluts.push_back(c);
+	}
+
+   /* CLUT redToWhite;
     redToWhite.addColorStop(0.25f, Vec4(1, 0, 0, 1));
     cluts.push_back(redToWhite);
     
@@ -83,7 +98,7 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
     monochrome.clearStops();
     monochrome.addColorStop(0.0f, Vec4(1, 1, 1, 0));
     monochrome.addColorStop(1.0f, Vec4(1, 1, 1, 0.2f));
-    cluts.push_back(monochrome);
+    cluts.push_back(monochrome);*/
     
     renderer.setCLUT(&cluts[activeCLUT = 0]);
 }
@@ -106,7 +121,7 @@ void Transfer1DController::setVolume(VolumeData* volume)
     if (histogram)
         delete histogram;
     
-    // 1024 bins is somewhat arbitrary; consider adding customization later
+    // 512 bins is somewhat arbitrary; consider adding customization later
     int numBins = 512;
     histogram = new Histogram(volume->getMinValue(), volume->getMaxValue(), numBins);
     
