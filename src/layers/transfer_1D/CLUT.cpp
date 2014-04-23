@@ -33,7 +33,7 @@ void CLUT::Marker::context(bool context)
 
 
 
-CLUT::CLUT() : mode_(piecewise), needs_sort_(true)
+CLUT::CLUT() : mode_(continuous), needs_sort_(true)
 {
 }
 
@@ -136,7 +136,7 @@ void CLUT::saveTexture(Texture& texture)
 void CLUT::saveContinuous(Texture& texture)
 {
 	// why 256? make this variable or const somewhere
-	const unsigned texWidth = 256;
+	const unsigned texWidth = 512;
 	unsigned short buf[texWidth * 4];
 	long ptr = 0;
 
@@ -144,25 +144,39 @@ void CLUT::saveContinuous(Texture& texture)
 	auto r = markers_.begin() + 1;
 
 	for (int i = 0; i < texWidth; i++) {
-		float p = static_cast<float>(i) / texWidth;
-		if (p > r->get()->interval().center()) {
-			l++;
-			r++;
+		float p_tex = static_cast<float>(i) / texWidth;
+		float p_clut = (p_tex - interval_.left()) / interval_.width();
+
+		if (p_clut < 0.0f) {
+			Vec4 color = markers_.front().get()->color().vec4();
+			buf[ptr++] = (unsigned short)(color.x * 65535);
+			buf[ptr++] = (unsigned short)(color.y * 65535);
+			buf[ptr++] = (unsigned short)(color.z * 65535);
+			buf[ptr++] = (unsigned short)(color.w * 65535);
 		}
+		else if (p_clut > 1.0f) {
+			Vec4 color = markers_.back().get()->color().vec4();
+			buf[ptr++] = (unsigned short)(color.x * 65535);
+			buf[ptr++] = (unsigned short)(color.y * 65535);
+			buf[ptr++] = (unsigned short)(color.z * 65535);
+			buf[ptr++] = (unsigned short)(color.w * 65535);
+		}
+		else {
+			if (p_clut > r->get()->interval().center()) {
+				l++;
+				r++;
+			}
 
-		float pn = (p - l->get()->interval().center()) / (r->get()->interval().center() - l->get()->interval().center());
-		Vec4 lc = l->get()->color().vec4();
-		Vec4 rc = r->get()->color().vec4();
+			float pn = (p_clut - l->get()->interval().center()) / (r->get()->interval().center() - l->get()->interval().center());
+			Vec4 lc = l->get()->color().vec4();
+			Vec4 rc = r->get()->color().vec4();
 
-		// pre multiply alpha
-		//lc *= Vec4(lc.w, lc.w, lc.w, 1);
-		//rc *= Vec4(rc.w, rc.w, rc.w, 1);
-
-		Vec4 color = lc * (1.0f - pn) + rc * pn;
-		buf[ptr++] = (unsigned short)(color.x * 65535);
-		buf[ptr++] = (unsigned short)(color.y * 65535);
-		buf[ptr++] = (unsigned short)(color.z * 65535);
-		buf[ptr++] = (unsigned short)(color.w * 65535);
+			Vec4 color = lc * (1.0f - pn) + rc * pn;
+			buf[ptr++] = (unsigned short)(color.x * 65535);
+			buf[ptr++] = (unsigned short)(color.y * 65535);
+			buf[ptr++] = (unsigned short)(color.z * 65535);
+			buf[ptr++] = (unsigned short)(color.w * 65535);
+		}
 	}
 
 	texture.bind();

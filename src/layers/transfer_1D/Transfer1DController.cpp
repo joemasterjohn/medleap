@@ -28,6 +28,14 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 		cluts.push_back(c);
 	}
     
+	{
+		CLUT c;
+		c.addMarker(0.0f).color(ColorRGB{ 0.0f, 0.0f, 0.0f, 0.0f });
+		c.addMarker(0.5f).color(ColorRGB{ 1.0f, 0.0f, 0.0f, 1.0f });
+		c.addMarker(1.0f).color(ColorRGB{ 0.0f, 0.0f, 0.0f, 0.0f });
+		cluts.push_back(c);
+	}
+
     renderer.setCLUT(&cluts[activeCLUT = 0]);
 }
 
@@ -112,24 +120,16 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
     renderer.setCursor(static_cast<int>(x), static_cast<int>(y));
     
     if (lMouseDrag) {
-		float wc = static_cast<float>(x) / renderer.getViewport().width * histogram->getRange() + histogram->getMin();
-		float ww = volume->getCurrentWindow().getWidthReal();
-        volume->getCurrentWindow().setReal(wc, ww);
-        volumeRenderer->markDirty();
-
 		cluts[activeCLUT].interval().center(static_cast<float>(x) / renderer.getViewport().width);
-
+		cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+		volumeRenderer->markDirty();
     } else if (rMouseDrag) {
-		float cursorVal = static_cast<float>(x) / renderer.getViewport().width * histogram->getRange() + histogram->getMin();
-		float wc = volume->getCurrentWindow().getCenterReal();
-		float ww = 2 * std::abs(cursorVal - wc);
-        volume->getCurrentWindow().setReal(wc, ww);
-        volumeRenderer->markDirty();
-
 		Interval& intv = cluts[activeCLUT].interval();
 		float cv = static_cast<float>(x) / renderer.getViewport().width;
 		float cc = intv.center();
 		intv.width(2.0f * std::abs(cv - cc));
+		cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+		volumeRenderer->markDirty();
     }
     
 

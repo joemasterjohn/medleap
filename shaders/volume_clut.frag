@@ -5,8 +5,8 @@ uniform sampler3D tex_gradients;
 uniform sampler1D tex_clut;
 uniform sampler2D tex_jitter;
 
-uniform float window_min;
-uniform float window_multiplier;
+uniform float visible_min;
+uniform float visible_scale;
 uniform vec3 volumeDimensions;
 uniform bool signed_normalized;
 uniform bool use_shading;
@@ -97,8 +97,10 @@ void main()
 
 
 	// apply value-of-interest (window) LUT
-    value = (value - window_min) * window_multiplier;
-    value = max(min(1.0, value), 0.0);
+    value = (value - visible_min) * visible_scale;
+    //value = max(min(1.0, value), 0.0);
+
+	// min(max) not necessary? should be ok with sampler state
     
 	// color/opacity from look-up table using windowed data value
 	vec4 color = texture(tex_clut, value).rgba;

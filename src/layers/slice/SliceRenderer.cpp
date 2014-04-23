@@ -90,8 +90,8 @@ void SliceRenderer::draw()
 
 	// set the uniforms
 	glUniform1i(sliceShader.getUniform("signed_normalized"), volume->isSigned());
-	glUniform1f(sliceShader.getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
-	glUniform1f(sliceShader.getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
+	glUniform1f(sliceShader.getUniform("window_min"), volume->visible().left());
+	glUniform1f(sliceShader.getUniform("window_multiplier"), 1.0f / volume->visible().width());
 	glUniformMatrix4fv(sliceShader.getUniform("model"), 1, false, modelMatrix);
 
 	// set state and shader for drawing medical stuff

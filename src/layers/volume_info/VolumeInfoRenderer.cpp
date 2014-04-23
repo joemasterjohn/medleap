@@ -112,10 +112,10 @@ void VolumeInfoRenderer::draw()
 	drawText(os.str(), textRow++);
     
     // VOI LUT (window) values
-    float wc = volume->getCurrentWindow().getCenterReal();
-    float ww = volume->getCurrentWindow().getWidthReal();
+	int min = volume->getMinValue();
+	int max = volume->getMaxValue();
 	os.str("");
-	os << "WC,WW = " << wc << ", " << ww;
+	os << "min, max = " << min << ", " << max;
 	drawText(os.str(), textRow++);
     
     // Slice Index (2D)

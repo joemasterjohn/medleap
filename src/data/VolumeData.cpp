@@ -17,7 +17,6 @@ VolumeData::VolumeData()
     maxVoxelValue = 0;
     bounds = new BoundingBox(1,1,1);
     modality = UNKNOWN;
-    activeWindow = 0;
 }
 
 VolumeData::~VolumeData()
@@ -128,6 +127,11 @@ int VolumeData::getMaxValue() const
     return maxVoxelValue;
 }
 
+const Interval& VolumeData::visible() const
+{
+	return visible_;
+}
+
 VolumeData::Modality VolumeData::getModality() const
 {
 	return modality;
@@ -153,32 +157,14 @@ Vec3 VolumeData::getMaxGradient() const
 	return maxGradient;
 }
 
-vector<Window>& VolumeData::getWindows()
+const vector<Interval>& VolumeData::windows() const
 {
-	return windows;
-}
-
-Window& VolumeData::getCurrentWindow()
-{
-	return windows[activeWindow];
+	return windows_;
 }
 
 char* VolumeData::getData()
 {
     return data;
-}
-
-void VolumeData::setNextWindow()
-{
-    activeWindow = (activeWindow + 1) % windows.size();
-}
-
-void VolumeData::setPrevWindow()
-{
-    if (activeWindow == 0)
-        activeWindow = static_cast<unsigned>(windows.size() - 1);
-    else
-		activeWindow = static_cast<unsigned>((activeWindow - 1) % windows.size());
 }
 
 

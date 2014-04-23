@@ -262,10 +262,10 @@ void Transfer1DRenderer::drawHistogram()
 	static Draw d;
 	double logMaxFreq = std::log(histogram->getMaxFrequency() + 1);
 
-	float wc = volume->getCurrentWindow().getCenterReal();
-	float ww = volume->getCurrentWindow().getWidthReal();
-	float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	//float wc = volume->getCurrentWindow().getCenterReal();
+	//float ww = volume->getCurrentWindow().getWidthReal();
+	//float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	//float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
 
 	d.begin(GL_LINE_STRIP);
 	Vec3 c = MainController::getInstance().getRenderer().getInverseBGColor() * 0.5f;
@@ -307,49 +307,49 @@ void Transfer1DRenderer::drawHistogram()
 
 void Transfer1DRenderer::drawColorBar()
 {
-	clutStripShader.enable();
-	clutStripVBO.bind();
-	clutStripIBO.bind();
-	clutTexture.bind();
+	//clutStripShader.enable();
+	//clutStripVBO.bind();
+	//clutStripIBO.bind();
+	//clutTexture.bind();
 
-	int loc = clutStripShader.getAttribute("vs_position");
-	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, 4, GL_FLOAT, false, clutStripStride, 0);
+	//int loc = clutStripShader.getAttribute("vs_position");
+	//glEnableVertexAttribArray(loc);
+	//glVertexAttribPointer(loc, 4, GL_FLOAT, false, clutStripStride, 0);
 
-	loc = clutStripShader.getAttribute("vs_texcoord");
-	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, 1, GL_FLOAT, false, clutStripStride, (GLvoid*)(4 * sizeof(GLfloat)));
+	//loc = clutStripShader.getAttribute("vs_texcoord");
+	//glEnableVertexAttribArray(loc);
+	//glVertexAttribPointer(loc, 1, GL_FLOAT, false, clutStripStride, (GLvoid*)(4 * sizeof(GLfloat)));
 
-	float wc = volume->getCurrentWindow().getCenterReal();
-	float ww = volume->getCurrentWindow().getWidthReal();
-	float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	glUniform2f(clutStripShader.getUniform("x_offsets"), markL, markR);
+	//float wc = volume->getCurrentWindow().getCenterReal();
+	//float ww = volume->getCurrentWindow().getWidthReal();
+	//float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	//float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
+	//glUniform2f(clutStripShader.getUniform("x_offsets"), markL, markR);
 
-	glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, 0);
+	//glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, 0);
 }
 
 void Transfer1DRenderer::drawWindowMarkers()
 {
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    colorShader.enable();
-    int loc = colorShader.getAttribute("vs_position");
-    glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
-    
-	float wc = volume->getCurrentWindow().getCenterReal();
-	float ww = volume->getCurrentWindow().getWidthReal();
-	float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
-	float markC = (wc - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
-	float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
+ //   colorShader.enable();
+ //   int loc = colorShader.getAttribute("vs_position");
+ //   glEnableVertexAttribArray(loc);
+ //   glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
+ //   
+	//float wc = volume->getCurrentWindow().getCenterReal();
+	//float ww = volume->getCurrentWindow().getWidthReal();
+	//float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
+	//float markC = (wc - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
+	//float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
 
-    glUniform4f(colorShader.getUniform("color"), 0.5f, 0.5f, 1.0f, 1.0f);
-    glUniform1f(colorShader.getUniform("offset"), markL * 2.0f);
-    glDrawArrays(GL_LINES, 6, 2);
-    glUniform1f(colorShader.getUniform("offset"), markR * 2.0f);
-    glDrawArrays(GL_LINES, 6, 2);
-    glUniform1f(colorShader.getUniform("offset"), markC * 2.0f);
-    glDrawArrays(GL_LINES, 6, 2);
+ //   glUniform4f(colorShader.getUniform("color"), 0.5f, 0.5f, 1.0f, 1.0f);
+ //   glUniform1f(colorShader.getUniform("offset"), markL * 2.0f);
+ //   glDrawArrays(GL_LINES, 6, 2);
+ //   glUniform1f(colorShader.getUniform("offset"), markR * 2.0f);
+ //   glDrawArrays(GL_LINES, 6, 2);
+ //   glUniform1f(colorShader.getUniform("offset"), markC * 2.0f);
+ //   glDrawArrays(GL_LINES, 6, 2);
 }
 
 void Transfer1DRenderer::drawCursorValue()

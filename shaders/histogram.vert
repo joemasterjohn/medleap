@@ -13,6 +13,6 @@ void main()
 	fs_texcoord = vs_position.x * 0.5 + 0.5;
 
 	if (continuous_mode) {
-		fs_texcoord = (fs_texcoord - interval_left) * interval_reciprocal_width;
+		//fs_texcoord = (fs_texcoord - interval_left) * interval_reciprocal_width;
 	}
 }

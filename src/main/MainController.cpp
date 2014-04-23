@@ -237,10 +237,6 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
 			volumeController.getRenderer()->markDirty();
 		}
 
-		if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-			volume->setNextWindow();
-		}
-
 		if (key == GLFW_KEY_H && action == GLFW_PRESS)
 			toggleHistogram();
 	}

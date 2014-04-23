@@ -80,6 +80,10 @@ private:
             if (*buffer < volume->minVoxelValue) volume->minVoxelValue = *buffer;
             buffer++;
         }
+
+		float nl = gl::normalize<T>(volume->minVoxelValue);
+		float nr = gl::normalize<T>(volume->maxVoxelValue);
+		volume->visible_.width(nl, nr);
     }
     
     /** This is used instead of modality LUT if the modality is unknown */
@@ -96,6 +100,10 @@ private:
             if (*buffer < volume->minVoxelValue) volume->minVoxelValue = *buffer;
             buffer++;
         }
+
+		float nl = gl::normalize<T>(volume->minVoxelValue);
+		float nr = gl::normalize<T>(volume->maxVoxelValue);
+		volume->visible_.width(nl, nr);
     }
 };
 

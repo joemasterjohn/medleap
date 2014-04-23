@@ -30,7 +30,7 @@ public:
 
 	private:
 		Marker(CLUT& clut, float center, float width);
-
+		// change so clut pointer assigned by CLUT when added
 		CLUT& clut_;
 		Interval interval_;
 		ColorRGB color_;

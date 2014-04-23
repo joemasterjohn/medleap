@@ -171,7 +171,6 @@ void VolumeLoader::loadRAW(const std::string& fileName)
 			}
 			volume->format = GL_RED;
 			volume->name = fileName;
-			volume->windows.push_back(Window(volume->type));
 
 			this->state = FINISHED;
 			stateMessage = "Finished";
@@ -335,9 +334,29 @@ void VolumeLoader::load()
             memcpy(widths, a.GetValues(), sizeof(double) * numWindows);
         }
         for (int i = 0; i < numWindows; i++) {
-            Window window(volume->type);
-            window.setReal(static_cast<float>(centers[i]), static_cast<float>(widths[i]));
-            volume->windows.push_back(window);
+			Interval intvl;
+
+			switch (volume->type)
+			{
+			case GL_BYTE:
+				intvl.center(static_cast<GLbyte>(centers[i]));
+				intvl.width(static_cast<GLbyte>(widths[i]));
+				break;
+			case GL_UNSIGNED_BYTE:
+				intvl.center(static_cast<GLubyte>(centers[i]));
+				intvl.width(static_cast<GLubyte>(widths[i]));
+				break;
+			case GL_SHORT:
+				intvl.center(static_cast<GLshort>(centers[i]));
+				intvl.width(static_cast<GLshort>(widths[i]));
+				break;
+			case GL_UNSIGNED_SHORT:
+				intvl.center(static_cast<GLushort>(centers[i]));
+				intvl.width(static_cast<GLushort>(widths[i]));
+				break;
+			}
+
+			volume->windows_.push_back(intvl);
         }
         delete[] centers;
         delete[] widths;
@@ -349,8 +368,6 @@ void VolumeLoader::load()
 		Vec3 z = x.cross(y);
 	
         volume->orientation = Mat3(x, y, z);
-    } else {
-        volume->windows.push_back(Window(volume->type));
     }
 
 

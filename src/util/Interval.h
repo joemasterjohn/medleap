@@ -57,7 +57,7 @@ public:
 		}
 
 		width_ = std::max(0.0f, right_ - left_);
-		center_ = width_ / 2.0f;
+		center_ = left_ + width_ / 2.0f;
 	}
 
 	/** Center value of influence area in [Tmin, Tmax] */

@@ -280,8 +280,10 @@ void VolumeRenderer::draw(double samplingScale, bool limitSamples, int w, int h)
     glUniform3fv(boxShader.getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
     glUniform1i(boxShader.getUniform("signed_normalized"), volume->isSigned());
     glUniform1i(boxShader.getUniform("use_shading"), (renderMode != MIP && shading));
-    glUniform1f(boxShader.getUniform("window_min"), volume->getCurrentWindow().getMinNorm());
-    glUniform1f(boxShader.getUniform("window_multiplier"), 1.0f / volume->getCurrentWindow().getWidthNorm());
+
+
+	boxShader.uniform("visible_min", volume->visible().left());
+	boxShader.uniform("visible_scale", 1.0f / volume->visible().width());
 
 	glUniform1i(boxShader.getUniform("render_mode"), renderMode);
 
@@ -347,7 +349,7 @@ void VolumeRenderer::draw(double samplingScale, bool limitSamples, int w, int h)
             break;
         case ISOSURFACE:
             glDisable(GL_BLEND);
-            glUniform1f(boxShader.getUniform("isoValue"), volume->getCurrentWindow().getCenterNorm());
+            //glUniform1f(boxShader.getUniform("isoValue"), volume->getCurrentWindow().getCenterNorm());
             break;
         default:
             break;

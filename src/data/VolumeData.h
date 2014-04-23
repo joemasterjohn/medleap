@@ -5,10 +5,10 @@
 #include <vector>
 #include <string>
 #include <thread>
-#include "Window.h"
 #include "BoundingBox.h"
 #include "gl/math/Math.h"
 #include "gl/Texture.h"
+#include "util/Interval.h"
 
 /** Volumetric data stored in a regular grid of voxels. All voxel values are assumed to be an integer format (8 or 16 bits) either signed or unsigned. */
 class VolumeData
@@ -77,6 +77,9 @@ public:
     /** The maximum voxel value stored in the data */
     int getMaxValue() const;
 
+	/** Range of values in the data normalized by stored data type (ex. if largest value in data is 4095 but the pixels are 16-bit, the normalized max is 4095/65535=0.0624) */
+	const Interval& visible() const;
+
     /** Returns the modality of the data */
     Modality getModality() const;
     
@@ -92,20 +95,11 @@ public:
 	/** Vector storing maximum x, y, and z components of all gradient vectors */
 	gl::Vec3 getMaxGradient() const;
 
-    /** Windows that store values of interest */
-    std::vector<Window>& getWindows();
-    
-    /** The currently active voxel value window (determines which values are displayed) */
-    Window& getCurrentWindow();
+    /** Pre-defined value-of-interest intervals (ex. stored in DICOM data). */
+    const std::vector<Interval>& windows() const;
     
     /** Sets the size of each voxel in real world units */
     void setVoxelSize(float x, float y, float z);
-    
-    /** Sets the current window to the next available window */
-    void setNextWindow();
-    
-    /** Sets the current window to the previous available window */
-    void setPrevWindow();
     
     /** Pointer to the raw data bytes */
     char* getData();
@@ -130,8 +124,8 @@ private:
     BoundingBox* bounds;
     Modality modality;
 	gl::Mat3 orientation;
-    std::vector<Window> windows;
-    unsigned int activeWindow;
+    std::vector<Interval> windows_;
+	Interval visible_;
 
     /** Private constructor since loading is complex and done by the Loader class */
     VolumeData();
