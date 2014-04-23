@@ -249,14 +249,9 @@ void Transfer1DRenderer::drawHistogram()
 {
 	histoVBO.bind();
 	histoProg.enable();
-	histoProg.uniform("continuous_mode", clut->mode() == CLUT::continuous);
-	histoProg.uniform("interval_left", clut->interval().left());
-	histoProg.uniform("interval_reciprocal_width", 1.0f / clut->interval().width());
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
-
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, histoVBOCount);
-
 
 
 	static Draw d;

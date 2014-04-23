@@ -11,28 +11,27 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 	volumeRenderer = NULL;
 
 	// start out with the default CLUT: black->white gradient
-
 	{
 		CLUT c;
-		c.addMarker(0.0f).color(ColorRGB{ 0.0f, 0.0f, 0.0f, 0.0f });
-		c.addMarker(1.0f).color(ColorRGB{ 1.0f, 1.0f, 1.0f, 1.0f });
+		c.addMarker({ { 0.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.f } });
+		c.addMarker({ { 1.0f, 0.2f }, { 1.f, 1.f, 1.f, 1.f } });
 		cluts.push_back(c);
 	}
 
 	{
 		CLUT c;
-		c.addMarker(0.0f).color(ColorRGB{ 0.0f, 0.0f, 0.0f, 0.0f });
-		c.addMarker(0.2f).color(ColorRGB{ 1.0f, 0.0f, 0.0f, 0.1f });
-		c.addMarker(0.8f).color(ColorRGB{ 1.0f, 1.0f, 0.0f, 0.8f });
-		c.addMarker(1.0f).color(ColorRGB{ 1.0f, 1.0f, 1.0f, 1.0f });
+		c.addMarker({ { 0.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.f } });
+		c.addMarker({ { 0.2f, 0.2f }, { 1.f, 0.f, 0.f, 0.1f } });
+		c.addMarker({ { 0.8f, 0.2f }, { 1.f, 1.f, 0.f, 0.8f } });
+		c.addMarker({ { 1.0f, 0.2f }, { 1.f, 1.f, 1.f, 1.0f } });
 		cluts.push_back(c);
 	}
     
 	{
 		CLUT c;
-		c.addMarker(0.0f).color(ColorRGB{ 0.0f, 0.0f, 0.0f, 0.0f });
-		c.addMarker(0.5f).color(ColorRGB{ 1.0f, 0.0f, 0.0f, 1.0f });
-		c.addMarker(1.0f).color(ColorRGB{ 0.0f, 0.0f, 0.0f, 0.0f });
+		c.addMarker({ { 0.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.f } });
+		c.addMarker({ { 0.5f, 0.2f }, { 1.f, 1.f, 1.f, 0.5f } });
+		c.addMarker({ { 1.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.0f } });
 		cluts.push_back(c);
 	}
 

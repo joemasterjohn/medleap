@@ -4,50 +4,48 @@
 using namespace gl;
 using namespace std;
 
-typedef std::shared_ptr<CLUT::Marker> MarkerPtr;
-
-CLUT::Marker::Marker(CLUT& clut, float center, float width) : 
-	clut_(clut),
-	interval_(center, width),
-	color_(1.0f, 1.0f, 1.0f, 1.0f),
+CLUT::Marker::Marker(const Interval& interval, const ColorRGB& color) : 
+	clut_(nullptr),
+	interval_(interval),
+	color_(color),
 	context_(false)
 {
 }
 
-void CLUT::Marker::color(const Color& color)
+CLUT::Marker& CLUT::Marker::color(const Color& color)
 {
 	color_ = color.rgb();
+	return *this;
 }
 
-void CLUT::Marker::interval(const Interval& interval)
+CLUT::Marker& CLUT::Marker::interval(const Interval& interval)
 {
 	interval_ = interval;
-	clut_.needs_sort_ = true;
+	if (clut_) {
+		clut_->needs_sort_ = true;
+	}
+	return *this;
 }
 
-void CLUT::Marker::context(bool context)
+CLUT::Marker& CLUT::Marker::context(bool context)
 {
 	context_ = true;
+	return *this;
 }
 
 
 
 
-CLUT::CLUT() : mode_(continuous), needs_sort_(true)
+CLUT::CLUT() : mode_(continuous), needs_sort_(false)
 {
 }
 
-CLUT::Marker& CLUT::addMarker(float center)
+void CLUT::addMarker(const Marker& marker)
 {
-	MarkerPtr p(new Marker({ *this, center, 0.2f }));
-	markers_.push_back(p);
-
-	if (markers_.size() == 1) {
-		return *(markers_.front().get());
-	}
-
-	sortMarkers();
-	return *(p.get());
+	Marker copy = marker;
+	copy.clut_ = this;
+	markers_.push_back(copy);
+	needs_sort_ = markers_.size() > 1;
 }
 
 void CLUT::removeMarker(float center)
@@ -71,10 +69,10 @@ CLUT::Marker* CLUT::closestMarker(float value)
 	if (markers_.empty())
 		return nullptr;
 
-	return find(value)->get();
+	return &(*find(value));
 }
 
-std::vector<MarkerPtr>::iterator CLUT::find(float center)
+std::vector<CLUT::Marker>::iterator CLUT::find(float center)
 {
 	if (markers_.empty())
 		return markers_.end();
@@ -87,14 +85,14 @@ std::vector<MarkerPtr>::iterator CLUT::find(float center)
 
 	// find iterator to first marker with interval center >= value
 	auto it = lower_bound(markers_.begin(), markers_.end(), center,
-		[](const MarkerPtr& i, float value)->bool{
-		return i.get()->interval().center() < value;
+		[](const Marker& i, float value)->bool{
+		return i.interval().center() < value;
 	});
 
 	if (it == markers_.begin()) {
 		// closest must be at position 0 or 1
-		float l = it->get()->interval().center() - center;
-		float r = (it + 1)->get()->interval().center() - center;
+		float l = it->interval().center() - center;
+		float r = (it + 1)->interval().center() - center;
 		return (l < r) ? it : it + 1;
 	}
 
@@ -104,20 +102,18 @@ std::vector<MarkerPtr>::iterator CLUT::find(float center)
 	}
 
 	// closest must be at i or i-1
-	float l = center - (it - 1)->get()->interval().center();
-	float r = it->get()->interval().center() - center;
+	float l = center - (it - 1)->interval().center();
+	float r = it->interval().center() - center;
 	return (l < r) ? it - 1 : it;
 }
 
 void CLUT::sortMarkers()
 {
-	auto comp = [](MarkerPtr& i, MarkerPtr& j)->bool
-	{
-		return i.get()->interval().center() < j.get()->interval().center();
+	auto comp = [](Marker& i, Marker& j)->bool {
+		return i.interval().center() < j.interval().center();
 	};
 
 	sort(markers_.begin(), markers_.end(), comp);
-
 	needs_sort_ = false;
 }
 
@@ -135,8 +131,7 @@ void CLUT::saveTexture(Texture& texture)
 
 void CLUT::saveContinuous(Texture& texture)
 {
-	// why 256? make this variable or const somewhere
-	const unsigned texWidth = 512;
+	static const unsigned texWidth = 512;
 	unsigned short buf[texWidth * 4];
 	long ptr = 0;
 
@@ -148,28 +143,28 @@ void CLUT::saveContinuous(Texture& texture)
 		float p_clut = (p_tex - interval_.left()) / interval_.width();
 
 		if (p_clut < 0.0f) {
-			Vec4 color = markers_.front().get()->color().vec4();
+			Vec4 color = markers_.front().color().vec4();
 			buf[ptr++] = (unsigned short)(color.x * 65535);
 			buf[ptr++] = (unsigned short)(color.y * 65535);
 			buf[ptr++] = (unsigned short)(color.z * 65535);
 			buf[ptr++] = (unsigned short)(color.w * 65535);
 		}
 		else if (p_clut > 1.0f) {
-			Vec4 color = markers_.back().get()->color().vec4();
+			Vec4 color = markers_.back().color().vec4();
 			buf[ptr++] = (unsigned short)(color.x * 65535);
 			buf[ptr++] = (unsigned short)(color.y * 65535);
 			buf[ptr++] = (unsigned short)(color.z * 65535);
 			buf[ptr++] = (unsigned short)(color.w * 65535);
 		}
 		else {
-			if (p_clut > r->get()->interval().center()) {
+			if (p_clut > r->interval().center()) {
 				l++;
 				r++;
 			}
 
-			float pn = (p_clut - l->get()->interval().center()) / (r->get()->interval().center() - l->get()->interval().center());
-			Vec4 lc = l->get()->color().vec4();
-			Vec4 rc = r->get()->color().vec4();
+			float pn = (p_clut - l->interval().center()) / (r->interval().center() - l->interval().center());
+			Vec4 lc = l->color().vec4();
+			Vec4 rc = r->color().vec4();
 
 			Vec4 color = lc * (1.0f - pn) + rc * pn;
 			buf[ptr++] = (unsigned short)(color.x * 65535);
@@ -188,24 +183,20 @@ void CLUT::saveContinuous(Texture& texture)
 
 void CLUT::savePiecewise(Texture& texture)
 {
-	// why 256? make this variable or const somewhere
-	const unsigned texWidth = 256;
-	//unsigned short buf[texWidth * 4];
-
+	static const unsigned texWidth = 512;
 	vector<GLushort> buf;
 	buf.resize(texWidth * 4, 0);
 
-	for (MarkerPtr& p : markers_) {
-		Marker* m = p.get();
+	for (Marker& m : markers_) {
 		long ptr = 0;
 
 		for (int i = 0; i < texWidth; i++) {
 			float p = static_cast<float>(i) / texWidth;
 
-			if (p >= m->interval().left() && p <= m->interval().right()) {
+			if (p >= m.interval().left() && p <= m.interval().right()) {
 
-				float s = clamp(1.0f - abs(m->interval().center() - p) / m->interval().width() * 2.0f, 0.0f, 1.0f);
-				Vec4 color = m->color().vec4();
+				float s = clamp(1.0f - abs(m.interval().center() - p) / m.interval().width() * 2.0f, 0.0f, 1.0f);
+				Vec4 color = m.color().vec4();
 				color.w *= s;
 
 				long o = (i * 4);

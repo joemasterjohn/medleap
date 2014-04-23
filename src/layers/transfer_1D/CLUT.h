@@ -20,18 +20,18 @@ public:
 	class Marker
 	{
 	public:
+		Marker(const Interval& interval, const ColorRGB& color);
+
 		const ColorRGB& color() const { return color_; }
 		const Interval& interval() const { return interval_; }
 		bool context() const { return context_; }
 
-		void color(const Color& color);
-		void interval(const Interval& interval);
-		void context(bool context);
+		Marker& color(const Color& color);
+		Marker& interval(const Interval& interval);
+		Marker& context(bool context);
 
 	private:
-		Marker(CLUT& clut, float center, float width);
-		// change so clut pointer assigned by CLUT when added
-		CLUT& clut_;
+		CLUT* clut_;
 		Interval interval_;
 		ColorRGB color_;
 		bool context_;
@@ -43,8 +43,8 @@ public:
 	/** Creates an empty CLUT */
     CLUT();
 
-	/** Adds a new marker and returns a reference to it */
-	Marker& addMarker(float center);
+	/** Adds a new marker */
+	void addMarker(const Marker& marker);
 
 	/** Removes the closest marker to center */
 	void removeMarker(float center);
@@ -63,7 +63,7 @@ public:
 	Mode mode() const { return mode_; }
 
 private:
-	std::vector<std::shared_ptr<Marker>> markers_;
+	std::vector<Marker> markers_;
 	Interval interval_;
 	Mode mode_;
 	bool needs_sort_;
@@ -72,9 +72,7 @@ private:
 	void saveContinuous(gl::Texture& texture);
 	void savePiecewise(gl::Texture& texture);
 
-	std::vector<std::shared_ptr<Marker>>::iterator find(float center);
-
-	friend class Marker;
+	std::vector<Marker>::iterator find(float center);
 };
 
 #endif // __MEDLEAP_TF1D_CLUT_H__
