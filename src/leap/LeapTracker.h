@@ -21,6 +21,9 @@ public:
 	/** Tracking is active */
 	bool tracking() const { return tracking_; }
 
+	/** Manually toggles tracking */
+	void tracking(bool tracking) { tracking_ = tracking; total_elapsed_ = std::chrono::milliseconds(0); }
+
 	/** Set a callback function that is called each update tracking is enabled */
 	void trackFunction(std::function<void(const Leap::Controller&)> f) { track_function_ = f; }
 

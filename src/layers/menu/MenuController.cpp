@@ -15,6 +15,11 @@ MenuController::MenuController()
     menus.push(std::shared_ptr<Menu>(new MainMenu(&menus)));
 	leapCenter.x = 0;
 	leapCenter.y = 250;
+
+	trigger_tracker_.engageFunction([&](const Leap::Controller& controller) {
+		menus.top()[selected_].trigger();
+		trigger_tracker_.tracking(false);
+	});
 }
 
 MenuController::~MenuController()
@@ -103,6 +108,7 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 		float radians = v.anglePositive();
 
 		int highlightedItem = calcHighlightedMenu(radians);
+		selected_ = highlightedItem;
 		renderer->highlight(highlightedItem);
 
 		if (pointerFinger.tipVelocity().magnitudeSquared() > 8000 || highlightedItem != lastHighlighted) {
@@ -110,17 +116,19 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 		}
 
 		menus.setLeapProgress(0);
-		if (howLong++ >= 25) {
-			menus.setLeapProgress((howLong-25) / 50.0f);
-			if (howLong >= 75) {
-				menus.top()[highlightedItem].trigger();
-				howLong = 0;
-				menus.setLeapProgress(0);
-			}
-		}
+		//if (howLong++ >= 25) {
+		//	menus.setLeapProgress((howLong-25) / 50.0f);
+		//	if (howLong >= 75) {
+		//		menus.top()[highlightedItem].trigger();
+		//		howLong = 0;
+		//		menus.setLeapProgress(0);
+		//	}
+		//}
 
 		lastHighlighted = highlightedItem;
 	}
+
+	trigger_tracker_.update(leapController);
 
 	return false;
 }

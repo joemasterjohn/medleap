@@ -5,6 +5,7 @@
 #include "MenuRenderer.h"
 #include "MenuManager.h"
 #include "gl/math/Math.h"
+#include "leap/HandTriggerTracker.h"
 
 class MenuController : public Controller
 {
@@ -26,6 +27,8 @@ private:
     std::string workingDir;
 	MenuManager menus;
 	MenuRenderer* renderer;
+	HandTriggerTracker trigger_tracker_;
+	int selected_;
 
 	int calcHighlightedMenu(double x, double y);
 	int calcHighlightedMenu(double radians);    
