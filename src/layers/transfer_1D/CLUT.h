@@ -41,7 +41,29 @@ public:
 	};
     
 	/** Creates an empty CLUT */
-    CLUT();
+    CLUT(Mode mode);
+
+	CLUT(const CLUT& clut) {
+		markers_ = clut.markers_;
+		interval_ = clut.interval_;
+		mode_ = clut.mode_;
+		needs_sort_ = clut.needs_sort_;
+
+		for (Marker& m : markers_)
+			m.clut_ = this;
+	}
+
+	CLUT& operator=(const CLUT& clut) {
+		markers_ = clut.markers_;
+		interval_ = clut.interval_;
+		mode_ = clut.mode_;
+		needs_sort_ = clut.needs_sort_;
+
+		for (Marker& m : markers_)
+			m.clut_ = this;
+
+		return *this;
+	}
 
 	/** Adds a new marker */
 	void addMarker(const Marker& marker);
@@ -61,6 +83,8 @@ public:
 	Interval& interval() { return interval_; }
     
 	Mode mode() const { return mode_; }
+
+	const std::vector<Marker>& markers() const { return markers_; }
 
 private:
 	std::vector<Marker> markers_;

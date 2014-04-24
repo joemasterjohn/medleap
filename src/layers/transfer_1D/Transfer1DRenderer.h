@@ -28,11 +28,8 @@ public:
     void setCursor(int x, int y);
     
     gl::Texture& getTransferFn();
-    
-    void setDrawCursor(bool draw);
-    
+        
 private:
-    bool drawCursor;
     VolumeData* volume;
     TextRenderer text;
     gl::Texture histo1D;
@@ -53,27 +50,20 @@ private:
 
 	// histogram
 	gl::Program histoProg;
+	gl::Program histoOutlineProg;
 	gl::Buffer  histoVBO;
 	gl::Draw histoOutline;
 	GLsizei histoVBOCount;
 
-    // CLUT
-    gl::Program clutStripShader;
-    gl::Buffer clutStripVBO;
-    gl::Buffer clutStripIBO;
     gl::Texture clutTexture;
-    GLsizei clutStripStride;
     CLUT* clut;
 
 	// color stops
 	gl::Draw colorStops;
     
-	void drawColorStopBar();
+	void drawMarkerBar();
 	void drawBackground();
 	void drawHistogram();
-	void drawColorBar();
-    void drawWindowMarkers();
-    void drawCursorValue();
 };
 
 #endif /* defined(__medleap__Transfer1DRenderer__) */

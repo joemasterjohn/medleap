@@ -24,6 +24,7 @@ CLUT::Marker& CLUT::Marker::interval(const Interval& interval)
 	if (clut_) {
 		clut_->needs_sort_ = true;
 	}
+
 	return *this;
 }
 
@@ -36,7 +37,7 @@ CLUT::Marker& CLUT::Marker::context(bool context)
 
 
 
-CLUT::CLUT() : mode_(continuous), needs_sort_(false)
+CLUT::CLUT(Mode mode) : mode_(mode), needs_sort_(false)
 {
 }
 
@@ -131,6 +132,9 @@ void CLUT::saveTexture(Texture& texture)
 
 void CLUT::saveContinuous(Texture& texture)
 {
+	if (needs_sort_)
+		sortMarkers();
+
 	static const unsigned texWidth = 512;
 	unsigned short buf[texWidth * 4];
 	long ptr = 0;
@@ -142,14 +146,14 @@ void CLUT::saveContinuous(Texture& texture)
 		float p_tex = static_cast<float>(i) / texWidth;
 		float p_clut = (p_tex - interval_.left()) / interval_.width();
 
-		if (p_clut < 0.0f) {
+		if (p_clut < markers_.front().interval().center()) {
 			Vec4 color = markers_.front().color().vec4();
 			buf[ptr++] = (unsigned short)(color.x * 65535);
 			buf[ptr++] = (unsigned short)(color.y * 65535);
 			buf[ptr++] = (unsigned short)(color.z * 65535);
 			buf[ptr++] = (unsigned short)(color.w * 65535);
 		}
-		else if (p_clut > 1.0f) {
+		else if (p_clut > markers_.back().interval().center()) {
 			Vec4 color = markers_.back().color().vec4();
 			buf[ptr++] = (unsigned short)(color.x * 65535);
 			buf[ptr++] = (unsigned short)(color.y * 65535);
@@ -187,25 +191,33 @@ void CLUT::savePiecewise(Texture& texture)
 	vector<GLushort> buf;
 	buf.resize(texWidth * 4, 0);
 
-	for (Marker& m : markers_) {
-		long ptr = 0;
+	const float std_deviation = 0.15f;
+	auto curve = [&](float x)->float {
+		const float var = std_deviation * std_deviation;
+		return (exp(-x*x/(2.0f*var)) / sqrt(two_pi*var));
+	};
 
-		for (int i = 0; i < texWidth; i++) {
-			float p = static_cast<float>(i) / texWidth;
+	// offset/scale so weight=0 at -1 and +1 and weight=1 at 0.5
+	// smaller std_deviation will make a sharp peak; larger will make parabola
+	const float offset = curve(-1.0f);
+	const float scale = 1.0f / (curve(0.0f) - offset);
 
-			if (p >= m.interval().left() && p <= m.interval().right()) {
-
-				float s = clamp(1.0f - abs(m.interval().center() - p) / m.interval().width() * 2.0f, 0.0f, 1.0f);
-				Vec4 color = m.color().vec4();
-				color.w *= s;
-
-				long o = (i * 4);
-				buf[o] += (unsigned short)(color.x * 65535);
-				buf[o+1] += (unsigned short)(color.y * 65535);
-				buf[o+2] += (unsigned short)(color.z * 65535);
-				buf[o+3] += (unsigned short)(color.w * 65535);
-			}
+	vector<Vec4> pixels;
+	pixels.resize(texWidth, Vec4(0.0f));
+	for (int i = 0; i < texWidth; i++) {
+		float p = static_cast<float>(i) / texWidth;
+		for (Marker& m : markers_) {
+				float x = (p - m.interval().center()) / m.interval().width();
+				pixels[i] += m.color().vec4() * (curve(x) - offset) * scale;
 		}
+	}
+
+	long ptr = 0;
+	for (int i = 0; i < texWidth; i++) {
+		buf[ptr++] = static_cast<GLushort>(min(1.0f, pixels[i].x) * numeric_limits<GLushort>::max());
+		buf[ptr++] = static_cast<GLushort>(min(1.0f, pixels[i].y) * numeric_limits<GLushort>::max());
+		buf[ptr++] = static_cast<GLushort>(min(1.0f, pixels[i].z) * numeric_limits<GLushort>::max());
+		buf[ptr++] = static_cast<GLushort>(min(1.0f, pixels[i].w) * numeric_limits<GLushort>::max());
 	}
 
 	texture.bind();

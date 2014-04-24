@@ -178,6 +178,14 @@ void MainController::showMenu(bool show)
 	}
 }
 
+void MainController::pickColor(const Color& initialColor, std::function<void(const Color&)> callback)
+{
+	colorPickController.color(initialColor);
+	colorPickController.addCallback(callback);
+	colorPickController.addCallback([&](const Color&){popController();});
+	pushController(&colorPickController);
+}
+
 void MainController::update()
 {
     static auto prevTime = chrono::high_resolution_clock::now();

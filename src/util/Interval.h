@@ -4,7 +4,7 @@
 #include <limits>
 #include "gl/math/Math.h"
 
-/** Interval of normalized values. Guarantees center, left, and right values will always be in [0,1]. */
+/** Interval of normalized values. */
 class Interval
 {
 public:
@@ -31,32 +31,30 @@ public:
 
 	/** Sets the center value of the area of influence in [0, 1]. */
 	void center(float value) {
-		center_ = gl::clamp(value, 0.0f, 1.0f);
-		left_ = gl::clamp(center_ - (width_ / 2.0f), 0.0f, 1.0f);
-		right_ = gl::clamp(center_ + (width_ / 2.0f), 0.0f, 1.0f);
+		center_ = value;
+		left_ = center_ - width_ / 2.0f;
+		right_ = center_ + width_ / 2.0f;
 	}
 
 	/** Sets the width of influence in [0, 1]. */
 	void width(float value) {
-		// clamped to max of 2.0 in case center is at 0.0 or 1.0
-		// and I want to include all values regardless of center
-		width_ = gl::clamp(value, 0.0f, 2.0f);
-		left_ = gl::clamp(center_ - (width_ / 2.0f), 0.0f, 1.0f);
-		right_ = gl::clamp(center_ + (width_ / 2.0f), 0.0f, 1.0f);
+		width_ = value;
+		left_ = center_ - width_ / 2.0f;
+		right_ = center_ + width_ / 2.0f;
 	}
 
 	/** Sets the area of influence bounded by left/right in [0,1]. If left > right, the values will be swapped. */
 	void width(float left, float right) {
 		if (left > right) {
-			left_ = gl::clamp(right, 0.0f, 1.0f);
-			right_ = gl::clamp(left, 0.0f, 1.0f);
+			left_ = right;
+			right_ = left;
 		}
 		else {
-			left_ = gl::clamp(left, 0.0f, 1.0f);
-			right_ = gl::clamp(right, 0.0f, 1.0f);
+			left_ = left;
+			right_ = right;
 		}
 
-		width_ = std::max(0.0f, right_ - left_);
+		width_ = right_ - left_;
 		center_ = left_ + width_ / 2.0f;
 	}
 

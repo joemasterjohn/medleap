@@ -1,4 +1,5 @@
 #include "Transfer1DController.h"
+#include "main/MainController.h"
 
 using namespace gl;
 
@@ -6,32 +7,38 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 {
     lMouseDrag = false;
     rMouseDrag = false;
-    
+	selected_ = nullptr;
     
 	volumeRenderer = NULL;
 
 	// start out with the default CLUT: black->white gradient
 	{
-		CLUT c;
+		CLUT c(CLUT::continuous);
 		c.addMarker({ { 0.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.f } });
 		c.addMarker({ { 1.0f, 0.2f }, { 1.f, 1.f, 1.f, 1.f } });
 		cluts.push_back(c);
 	}
 
 	{
-		CLUT c;
+		CLUT c(CLUT::continuous);
 		c.addMarker({ { 0.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.f } });
 		c.addMarker({ { 0.2f, 0.2f }, { 1.f, 0.f, 0.f, 0.1f } });
 		c.addMarker({ { 0.8f, 0.2f }, { 1.f, 1.f, 0.f, 0.8f } });
 		c.addMarker({ { 1.0f, 0.2f }, { 1.f, 1.f, 1.f, 1.0f } });
 		cluts.push_back(c);
 	}
+
+	{
+		CLUT c(CLUT::piecewise);
+		c.addMarker({ { 0.0f, 0.2f }, { 1.f, 0.f, 0.f, 0.5f } });
+		c.addMarker({ { 0.5f, 0.6f }, { 0.f, 1.f, 0.f, 0.5f } });
+		c.addMarker({ { 1.0f, 0.2f }, { 0.f, 0.f, 1.f, 0.5f } });
+		cluts.push_back(c);
+	}
     
 	{
-		CLUT c;
-		c.addMarker({ { 0.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.f } });
-		c.addMarker({ { 0.5f, 0.2f }, { 1.f, 1.f, 1.f, 0.5f } });
-		c.addMarker({ { 1.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.0f } });
+		CLUT c(CLUT::piecewise);
+		c.addMarker({ { 0.5f, 0.6f }, { 1.f, 1.f, 1.f, 0.5f } });
 		cluts.push_back(c);
 	}
 
@@ -98,30 +105,53 @@ void Transfer1DController::setSliceRenderer(SliceRenderer* sliceRenderer)
 
 bool Transfer1DController::keyboardInput(GLFWwindow* window, int key, int action, int mods)
 {
-    if (key == GLFW_KEY_C && action == GLFW_PRESS) {
-        activeCLUT = (activeCLUT + 1) % cluts.size();
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+		if (++activeCLUT == cluts.size())
+			activeCLUT = 0;
         renderer.setCLUT(&cluts[activeCLUT]);
         volumeRenderer->markDirty();
     }
+
+	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+		if (--activeCLUT < 0)
+			activeCLUT = cluts.size() - 1;
+		renderer.setCLUT(&cluts[activeCLUT]);
+		volumeRenderer->markDirty();
+	}
     
+	if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+		cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+		volumeRenderer->markDirty();
+	}
+
     return true;
 }
 
 bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
 {
     if (!renderer.getViewport().contains(x, y)) {
-        renderer.setDrawCursor(false);
         return true;
     }
     
-    renderer.setDrawCursor(true);
     
     renderer.setCursor(static_cast<int>(x), static_cast<int>(y));
     
     if (lMouseDrag) {
-		cluts[activeCLUT].interval().center(static_cast<float>(x) / renderer.getViewport().width);
-		cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
-		volumeRenderer->markDirty();
+
+		if (cluts[activeCLUT].mode() == CLUT::continuous) {
+			cluts[activeCLUT].interval().center(static_cast<float>(x) / renderer.getViewport().width);
+			cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+			volumeRenderer->markDirty();
+		}
+		else if (selected_) {
+			const Interval& current = selected_->interval();
+			float newCenter = static_cast<float>(x / renderer.getViewport().width);
+			selected_->interval({ newCenter, current.width() });
+			cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+			volumeRenderer->markDirty();
+		}
+
+
     } else if (rMouseDrag) {
 		Interval& intv = cluts[activeCLUT].interval();
 		float cv = static_cast<float>(x) / renderer.getViewport().width;
@@ -130,7 +160,7 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
 		cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
 		volumeRenderer->markDirty();
     }
-    
+   
 
     
     return true;
@@ -141,6 +171,30 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
     lMouseDrag = button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS;
     rMouseDrag = button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS;
     
+
+	// left click = select & move
+	// middle click = create / delete
+	// right click = select & widen
+
+
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		// clut marker drag
+		float center = static_cast<float>(x / renderer.getViewport().width);
+		selected_ = cluts[activeCLUT].closestMarker(center);
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
+		float center = static_cast<float>(x / renderer.getViewport().width);
+		selected_ = cluts[activeCLUT].closestMarker(center);
+
+		auto cb = [&](const Color& color) {
+			selected_->color(color);
+			cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+			volumeRenderer->markDirty();
+		};
+
+		MainController::getInstance().pickColor(selected_->color(), cb);
+	}
     
 	return true;
 }

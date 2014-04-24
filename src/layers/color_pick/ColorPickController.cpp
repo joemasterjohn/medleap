@@ -17,6 +17,11 @@ ColorPickController::ColorPickController() :
 	handTrigger.engageFunction(std::bind(&ColorPickController::leapChooseWidget, this, std::placeholders::_1));
 }
 
+void ColorPickController::addCallback(std::function<void(const Color&)> callback)
+{
+	callbacks_.push_back(callback);
+}
+
 bool ColorPickController::mouseMotion(GLFWwindow* window, double x, double y)
 {
 	if (mChooseColor) {
@@ -56,17 +61,18 @@ bool ColorPickController::mouseButton(GLFWwindow* window, int button, int action
 			mChooseColor = true;
 			mouseMotion(window, x, y);
 		}
-
-		Rectangle<float> alphaRect = renderer.alphaRect();
-		if (alphaRect.contains(x, y)) {
+		else if (renderer.alphaRect().contains(x, y)) {
 			mChooseAlpha = true;
 			mouseMotion(window, x, y);
 		}
-
-		Rectangle<float> valueRect = renderer.valueRect();
-		if (valueRect.contains(x, y)) {
+		else if (renderer.valueRect().contains(x, y)) {
 			mChooseValue = true;
 			mouseMotion(window, x, y);
+		}
+		else if (renderer.previewRect().contains(x, y)) {
+			for (std::function<void(const Color&)>& cb : callbacks_)
+				cb(mColor);
+			callbacks_.clear();
 		}
 	}
 
@@ -88,7 +94,9 @@ bool ColorPickController::leapInput(const Leap::Controller& leapController, cons
 	}
 
 	if (!handTrigger.tracking() && currentFrame.fingers().count() > 4) {
-		std::cout << "EXIT: " << mColor.rgb().vec4() << endl;
+		for (std::function<void(const Color&)>& cb : callbacks_)
+			cb(mColor);
+		callbacks_.clear();
 	}
 
 	return false;

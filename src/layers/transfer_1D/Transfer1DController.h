@@ -34,6 +34,7 @@ private:
     SliceRenderer* sliceRenderer;
     std::vector<CLUT> cluts;
     int activeCLUT;
+	CLUT::Marker* selected_;
     
     void updateTransferTex1D();
 };

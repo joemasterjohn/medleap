@@ -21,8 +21,6 @@ set(DATA_SHADERS
     shaders/slice_clut.frag
     shaders/volume_clut.vert
     shaders/volume_clut.frag
-    shaders/histogram.vert
-    shaders/histogram.frag
     shaders/histo_line.vert
     shaders/histo_line.frag
     shaders/clut_strip.vert
@@ -37,6 +35,10 @@ set(DATA_SHADERS
 	shaders/color_pick_selected.frag
 	shaders/color_pick_gradient.vert
 	shaders/color_pick_gradient.frag
+	shaders/tf1d_histo.vert
+    shaders/tf1d_histo.frag
+	shaders/tf1d_histo_outline.vert
+	shaders/tf1d_histo_outline.frag
 )
 
 set(DATA_FONTS

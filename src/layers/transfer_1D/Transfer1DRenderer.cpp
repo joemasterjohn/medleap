@@ -9,54 +9,14 @@
 using namespace std;
 using namespace gl;
 
-// this only applies to CT modality
-const char* hounsfield(float value)
-{
-    if (value <= -900)
-        return "AIR";
-    
-    if (value <= -450 && value >= -550)
-        return "LUNG";
-    
-    if (value <= -50 && value >= -100)
-        return "FAT";
-    
-    if (value <= 5 && value >= -5)
-        return "WATER";
-    
-    if (value <= 20 && value >= 10)
-        return "MUSCLE";
-    
-    if (value <= 30 && value >= 20)
-        return "MUSCLE/WHITE MATTER";
-    
-    if (value <= 37 && value >= 30)
-        return "MUSCLE/BLOOD";
-    
-    if (value <= 40 && value >= 35)
-        return "MUSCLE/BLOOD/GREY MATTER";
-    
-    if (value <= 45 && value >= 40)
-        return "LIVER/BLOOD/GREY MATTER";
-    
-    if (value <= 60 && value >= 45)
-        return "LIVER";
-    
-    if (value <= 300 && value >= 100)
-        return "SOFT TISSUE";
-    
-    if (value >= 700)
-        return "BONE";
-    
-    return "";
-}
-
 Transfer1DRenderer::Transfer1DRenderer()
 {
 	histo1D.generate(GL_TEXTURE_2D);
 	transferFn.generate(GL_TEXTURE_2D);
 
-	shader = Program::create("shaders/histogram.vert", "shaders/histogram.frag");
+	shader = Program::create("shaders/tf1d_histo.vert", "shaders/tf1d_histo.frag");
+	histoProg = Program::create("shaders/tf1d_histo.vert", "shaders/tf1d_histo.frag");
+	histoOutlineProg = Program::create("shaders/tf1d_histo_outline.vert", "shaders/tf1d_histo_outline.frag");
 	colorShader = Program::create("shaders/histo_line.vert", "shaders/histo_line.frag");
 
 	shader.enable();
@@ -87,37 +47,6 @@ Transfer1DRenderer::Transfer1DRenderer()
 
 	// initialize clut strip
 	clutTexture.generate(GL_TEXTURE_1D);
-	clutStripShader = Program::create("shaders/clut_strip.vert",
-		"shaders/clut_strip.frag");
-
-	GLfloat clutVerts[] = {
-		-1, -1, 0, 0, 0,
-		0, -1, 1, 0, 0,
-		0, -1, 0, 1, 1,
-		1, -1, 0, 0, 1,
-		-1, 1, 0, 0, 0,
-		0, 1, 1, 0, 0,
-		0, 1, 0, 1, 1,
-		1, 1, 0, 0, 1
-	};
-	clutStripStride = 5 * sizeof(GLfloat);
-
-	GLushort clutIndices[] = {
-		0, 1, 5,
-		0, 5, 4,
-		1, 2, 6,
-		1, 6, 5,
-		2, 3, 7,
-		2, 7, 6
-	};
-
-	clutStripVBO.generateVBO(GL_STATIC_DRAW);
-	clutStripVBO.bind();
-	clutStripVBO.data(clutVerts, sizeof(clutVerts));
-
-	clutStripIBO.generateIBO(GL_STATIC_DRAW);
-	clutStripIBO.bind();
-	clutStripIBO.data(clutIndices, sizeof(clutIndices));
 
 	{
 		bgShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
@@ -161,79 +90,51 @@ void Transfer1DRenderer::draw()
 	static const float colorBarHeight = 0.3f;
 	static const int histoHeight = totalHeight;
 
-
-
-	//drawBackground();
-
-	//glViewport(viewport.x, viewport.y, viewport.width, colorBarHeight);
-	//drawColorBar();
-
-	glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+	glViewport(viewport.x, viewport.y + viewport.height * 0.2f, viewport.width, viewport.height * 0.8f);
 	drawHistogram();
-
-	glViewport(viewport.x, viewport.y, viewport.width, colorBarHeight * viewport.height);
-	drawColorStopBar();
-    
-	//glViewport(viewport.x, viewport.y + colorBarHeight, viewport.width, histoHeight);
-    //drawWindowMarkers();
-    
-
-
-    if (drawCursor)
-        drawCursorValue();
-
-
-
+	glViewport(viewport.x, viewport.y, viewport.width, viewport.height * 0.2f);
+	drawBackground();
+	drawMarkerBar();
 }
 
-void Transfer1DRenderer::drawColorStopBar()
+void Transfer1DRenderer::drawMarkerBar()
 {
-	// draw stops as triangles
-	//float wc = volume->getCurrentWindow().getCenterReal();
-	//float ww = volume->getCurrentWindow().getWidthReal();
-	//float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	//float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	//colorStops.begin(GL_TRIANGLES);
-	//for (CLUT::ColorStop& stop : clut->getStops()) {
-	//	float x = markL + stop.getPosition() * (markR - markL);
-	//	colorStops.color(stop.getColor().x, stop.getColor().y, stop.getColor().z);
-	//	colorStops.vertex(x - 0.035, -1);
-	//	colorStops.vertex(x + 0.035, -1);
-	//	colorStops.vertex(x, 1);
-	//}
-	//colorStops.end();
+	static Draw d;
+	d.begin(GL_TRIANGLES);
+	for (const CLUT::Marker& marker : clut->markers()) {
+		Vec3 c = marker.color().vec3();
+		float x = marker.interval().center();
 
-	//// instead of end updating buffer, have draw update buffer if things have changed
-	//// keep track of where modes change and have a clear option
+		if (clut->mode() == CLUT::continuous) {
+			x = x * clut->interval().width() + clut->interval().left();
+		}
 
-	//colorStops.draw();
-	//colorStops.begin(GL_LINES);
-	//for (CLUT::ColorStop& stop : clut->getStops()) {
-	//	float x = markL + stop.getPosition() * (markR - markL);
-	//	colorStops.color(.5f, .5f, .5f);
-	//	colorStops.vertex(x - 0.035, -1);
-	//	colorStops.vertex(x + 0.035, -1);
+		// [0,1] to [-1,1]
+		x = (x - 0.5f) * 2.0f;
 
-	//	colorStops.vertex(x + 0.035, -1);
-	//	colorStops.vertex(x, 1);
+		float l = x - 0.05f * 1.1f;
+		float r = x + 0.05f * 1.1f;
+		d.color(1, 1, 1);
+		d.vertex(l, -1);
+		d.vertex(x, +1);
+		d.vertex(r, -1);
 
-	//	colorStops.vertex(x, 1);
-	//	colorStops.vertex(x - 0.035, -1);
-
-	//}
-	//colorStops.end();
-	//colorStops.draw();
+		l = x - 0.05f;
+		r = x + 0.05f;
+		d.color(c.x, c.y, c.z);
+		d.vertex(l, -1);
+		d.vertex(x, .9f);
+		d.vertex(r, -1);
+	}
+	d.end();
+	d.draw();
 }
 
 void Transfer1DRenderer::drawBackground()
 {
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	bgBuffer.bind();
-
 	bgShader.enable();
-	glUniform4f(bgShader.getUniform("color"), 1.0f, 1.0f, 1.0f, 0.8f);
+	glUniform4f(bgShader.getUniform("color"), 0.0f, 0.0f, 0.0f, 1.0f);
 	glUniformMatrix4fv(bgShader.getUniform("modelViewProjection"), 1, false, Mat4());
 
 	GLint loc = bgShader.getAttribute("vs_position");
@@ -241,8 +142,6 @@ void Transfer1DRenderer::drawBackground()
 	glVertexAttribPointer(loc, 2, GL_FLOAT, false, 2*sizeof(GLfloat), 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	glDisable(GL_BLEND);
 }
 
 void Transfer1DRenderer::drawHistogram()
@@ -253,118 +152,10 @@ void Transfer1DRenderer::drawHistogram()
 	glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, histoVBOCount);
 
-
-	static Draw d;
-	double logMaxFreq = std::log(histogram->getMaxFrequency() + 1);
-
-	//float wc = volume->getCurrentWindow().getCenterReal();
-	//float ww = volume->getCurrentWindow().getWidthReal();
-	//float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	//float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-
-	d.begin(GL_LINE_STRIP);
-	Vec3 c = MainController::getInstance().getRenderer().getInverseBGColor() * 0.5f;
-	d.color(c.x, c.y, c.z);
-	for (unsigned i = 0; i < histogram->getNumBins(); ++i) {
-		float x = (float)i / histogram->getNumBins();
-		float y = std::log(histogram->getSize(i) + 1) / logMaxFreq;
-		x = (x - 0.5f) * 2.0f;
-		y = (y - 0.5f) * 2.0f;
-
-		d.vertex(x, y);
-	}
-	d.vertex(1, -1);
-	d.vertex(1, -1);
-	d.end();
-	d.draw();
-
-	d.color(0.2f, 0.2f, 0.2f);
-	d.begin(GL_LINES);
-	d.vertex(-1, 1);
-	d.vertex(1, 1);
-
-	//d.vertex(markL, -1);
-	//d.vertex(markL, 1);
-
-	//d.vertex(markR, -1);
-	//d.vertex(markR, 1);
-
-	if (drawCursor) {
-		d.color(0.5f, 0.5f, 0.5f);
-		float x = ((float)cursorX / viewport.width - 0.5f) * 2.0f;
-		d.vertex(x, -1);
-		d.vertex(x, 1);
-	}
-
-	d.end();
-	d.draw();
-}
-
-void Transfer1DRenderer::drawColorBar()
-{
-	//clutStripShader.enable();
-	//clutStripVBO.bind();
-	//clutStripIBO.bind();
-	//clutTexture.bind();
-
-	//int loc = clutStripShader.getAttribute("vs_position");
-	//glEnableVertexAttribArray(loc);
-	//glVertexAttribPointer(loc, 4, GL_FLOAT, false, clutStripStride, 0);
-
-	//loc = clutStripShader.getAttribute("vs_texcoord");
-	//glEnableVertexAttribArray(loc);
-	//glVertexAttribPointer(loc, 1, GL_FLOAT, false, clutStripStride, (GLvoid*)(4 * sizeof(GLfloat)));
-
-	//float wc = volume->getCurrentWindow().getCenterReal();
-	//float ww = volume->getCurrentWindow().getWidthReal();
-	//float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	//float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin()) * 2 - 1;
-	//glUniform2f(clutStripShader.getUniform("x_offsets"), markL, markR);
-
-	//glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, 0);
-}
-
-void Transfer1DRenderer::drawWindowMarkers()
-{
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
- //   colorShader.enable();
- //   int loc = colorShader.getAttribute("vs_position");
- //   glEnableVertexAttribArray(loc);
- //   glVertexAttribPointer(loc, 2, GL_FLOAT, false, stride, 0);
- //   
-	//float wc = volume->getCurrentWindow().getCenterReal();
-	//float ww = volume->getCurrentWindow().getWidthReal();
-	//float markL = (wc - ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
-	//float markC = (wc - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
-	//float markR = (wc + ww / 2 - histogram->getMin()) / (histogram->getMax() - histogram->getMin());
-
- //   glUniform4f(colorShader.getUniform("color"), 0.5f, 0.5f, 1.0f, 1.0f);
- //   glUniform1f(colorShader.getUniform("offset"), markL * 2.0f);
- //   glDrawArrays(GL_LINES, 6, 2);
- //   glUniform1f(colorShader.getUniform("offset"), markR * 2.0f);
- //   glDrawArrays(GL_LINES, 6, 2);
- //   glUniform1f(colorShader.getUniform("offset"), markC * 2.0f);
- //   glDrawArrays(GL_LINES, 6, 2);
-}
-
-void Transfer1DRenderer::drawCursorValue()
-{
-    // cursor histogram value
-    TextRenderer& text = MainController::getInstance().getText();
-    text.setColor(0, 0, 0);
-    text.begin(viewport.width, viewport.height);
-    
-	std::ostringstream os;
-	os << std::setprecision(1) << std::fixed;
-	os << cursorValue;
-	if (volume->getModality() == VolumeData::CT)
-		os << " " << hounsfield(cursorValue);
-    
-    if (cursorX > viewport.width / 2)
-        text.add(os.str(), cursorX - 5, cursorY, TextRenderer::RIGHT);
-    else
-		text.add(os.str(), cursorX + 5, cursorY, TextRenderer::LEFT);
-    text.end();
+	histoOutlineProg.enable();
+	histoOutlineProg.uniform("color", 0.5f, 0.5f, 0.5f, 1.0f);
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * sizeof(GLfloat), 0);
+	glDrawArrays(GL_LINE_STRIP, 0, histoVBOCount / 2);
 }
 
 void Transfer1DRenderer::resize(int width, int height)
@@ -379,11 +170,6 @@ void Transfer1DRenderer::setVolume(VolumeData* volume)
 Texture& Transfer1DRenderer::getTransferFn()
 {
     return transferFn;
-}
-
-void Transfer1DRenderer::setDrawCursor(bool draw)
-{
-    drawCursor = draw;
 }
 
 void Transfer1DRenderer::setHistogram(Histogram* histogram)
@@ -421,20 +207,18 @@ void Transfer1DRenderer::setHistogram(Histogram* histogram)
 	{
 		vector<Vec2> buffer;
 		for (unsigned i = 0; i < histogram->getNumBins(); ++i) {
-			float x = (float)i / histogram->getNumBins();
+			float x = (float)i / (histogram->getNumBins()-1);
 			float y = std::log(histogram->getSize(i) + 1) / logMaxFreq;
 			x = (x - 0.5f) * 2.0f;
 			y = (y - 0.5f) * 2.0f;
-			buffer.push_back({ x, -1.0f });
 			buffer.push_back({ x, y });
+			buffer.push_back({ x, -1.0f });
 		}
 
 		histoVBO.generateVBO(GL_STATIC_DRAW);
 		histoVBO.bind();
 		histoVBO.data(&buffer[0], buffer.size() * sizeof(Vec2));
 		histoVBOCount = buffer.size();
-
-		histoProg = Program::create("shaders/histogram.vert", "shaders/histogram.frag");
 	}
 }
 

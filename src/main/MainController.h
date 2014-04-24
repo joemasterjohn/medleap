@@ -24,6 +24,15 @@ public:
         MODE_3D
     };
 
+	class Docking
+	{
+	public:
+		enum Position { NONE, LEFT, RIGHT, BOTTOM, TOP };
+		Position position;
+		double percent;
+		Docking(Position position, double percent) : position(position), percent(percent) {}
+	};
+
     ~MainController();
     void init(GLFWwindow* window);
     void startLoop();
@@ -40,17 +49,15 @@ public:
 	const MainRenderer& getRenderer() const;
 
 	void showMenu(bool show);
-    
+	void pickColor(const Color& initialColor, std::function<void(const Color&)> callback);
+
+	void popController();
+	void pushController(Controller* controller);
+	void pushController(Controller* controller, Docking docking);
+
 private:
     
-    class Docking
-    {
-    public:
-        enum Position { NONE, LEFT, RIGHT, BOTTOM, TOP };
-        Position position;
-        double percent;
-        Docking(Position position, double percent) : position(position), percent(percent) {}
-    };
+
     
     MainController();
     // copy constructor and assignment operators are not implemented as this class is a singleton
@@ -58,9 +65,7 @@ private:
     MainController& operator=(const MainController& copy);
 
 	void update();
-	void popController();
-    void pushController(Controller* controller);
-    void pushController(Controller* controller, Docking docking);
+
     void setMode(Mode mode);
     void toggleHistogram();
 	void chooseTrackedGestures();
