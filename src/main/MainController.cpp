@@ -186,6 +186,7 @@ void MainController::pickColor(const Color& initialColor, std::function<void(con
 	pushController(&colorPickController);
 }
 
+
 void MainController::update()
 {
     static auto prevTime = chrono::high_resolution_clock::now();
@@ -206,10 +207,13 @@ void MainController::update()
 		if (!menuOn) {
 			Leap::GestureList gestures = currentFrame.gestures();
 			for (const Leap::Gesture& g : gestures) {
-				if (g.type() == Leap::Gesture::TYPE_CIRCLE && currentFrame.tools().count() == 0) {
-					Leap::Vector tp = Leap::CircleGesture(g).center();
-					menuController.setLeapCenter(Vec2(tp.x, tp.y));
-					showMenu(true);
+				if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
+					Leap::CircleGesture circle(g);
+					if (circle.progress() > 1) {
+						Leap::Vector tp = Leap::CircleGesture(g).center();
+						menuController.setLeapCenter(Vec2(tp.x, tp.y));
+						showMenu(true);
+					}
 				}
 			}
 		}
@@ -339,7 +343,7 @@ void MainController::pushController(Controller* controller, MainController::Dock
 void MainController::chooseTrackedGestures()
 {
 	// MainController uses the CIRCLE gesutre to toggle the menu
-	//leapController.enableGesture(Leap::Gesture::TYPE_CIRCLE, true);
+	leapController.enableGesture(Leap::Gesture::TYPE_CIRCLE, true);
 
 	leapController.enableGesture(Leap::Gesture::TYPE_KEY_TAP, false);
 	leapController.enableGesture(Leap::Gesture::TYPE_SCREEN_TAP, false);

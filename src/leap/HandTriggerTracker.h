@@ -9,9 +9,6 @@ class HandTriggerTracker  : public LeapTracker
 {
 public:
 	HandTriggerTracker();
-	void trackFunction(std::function<void(const Leap::Controller&)> f) { m_track_function = f; }
-	void engageFunction(std::function<void(const Leap::Controller&)> f) { m_engage_function = f; }
-	void disengageFunction(std::function<void(const Leap::Controller&)> f) { m_disengage_function = f; }
 
 	// Tip position of the index finger when tracking was engaged
 	Leap::Vector engagedTipPos() const { return m_engage_tip_pos; }
@@ -20,16 +17,12 @@ public:
 	Leap::Vector deltaTipPos() const { return m_delta_tip_pos; }
 
 protected:
-	bool shouldEngage(const Leap::Controller& controller);
-	bool shouldDisengage(const Leap::Controller& controller);
-	void engage(const Leap::Controller& controller);
-	void disengage(const Leap::Controller& controller);
-	void track(const Leap::Controller& controller);
+	bool shouldEngage(const Leap::Controller& controller) override;
+	bool shouldDisengage(const Leap::Controller& controller) override;
+	void engage(const Leap::Controller& controller) override;
+	void track(const Leap::Controller& controller) override;
 
 private:
-	std::function<void(const Leap::Controller&)> m_track_function;
-	std::function<void(const Leap::Controller&)> m_engage_function;
-	std::function<void(const Leap::Controller&)> m_disengage_function;
 	float m_thumb_spd_thresh;
 	float m_index_spd_thresh;
 	float m_delta_spd_thresh;

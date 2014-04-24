@@ -208,6 +208,7 @@ void CLUT::savePiecewise(Texture& texture)
 		float p = static_cast<float>(i) / texWidth;
 		for (Marker& m : markers_) {
 				float x = (p - m.interval().center()) / m.interval().width();
+				// TODO: just weight alpha, not color
 				pixels[i] += m.color().vec4() * (curve(x) - offset) * scale;
 		}
 	}

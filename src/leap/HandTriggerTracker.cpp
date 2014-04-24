@@ -3,13 +3,12 @@
 using namespace Leap;
 
 HandTriggerTracker::HandTriggerTracker() :
-		m_track_function(nullptr),
-		m_engage_function(nullptr),
-		m_disengage_function(nullptr),
 		m_thumb_spd_thresh(200),
 		m_index_spd_thresh(50),
 		m_delta_spd_thresh(300)
 {
+	engageDelay(std::chrono::milliseconds(500));
+	disengageDelay(std::chrono::milliseconds(500));
 }
 
 bool HandTriggerTracker::shouldEngage(const Leap::Controller& controller)
@@ -65,19 +64,11 @@ bool HandTriggerTracker::shouldDisengage(const Leap::Controller& controller)
 void HandTriggerTracker::engage(const Leap::Controller& controller)
 {
 	m_engage_tip_pos = controller.frame().fingers().frontmost().tipPosition();
-	if (m_engage_function)
-		m_engage_function(controller);
-}
-
-void HandTriggerTracker::disengage(const Leap::Controller& controller)
-{
-	if (m_disengage_function)
-		m_disengage_function(controller);
+	LeapTracker::engage(controller);
 }
 
 void HandTriggerTracker::track(const Leap::Controller& controller)
 {
 	m_delta_tip_pos = controller.frame().fingers().frontmost().tipPosition() - m_engage_tip_pos;
-	if (m_track_function)
-		m_track_function(controller);
+	LeapTracker::track(controller);
 }

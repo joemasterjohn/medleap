@@ -43,6 +43,10 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 	}
 
     renderer.setCLUT(&cluts[activeCLUT = 0]);
+
+	finger_tracker_.trackFunction(std::bind(&Transfer1DController::moveAndScale, this, std::placeholders::_1));
+	finger_tracker_.engageFunction([&](const Leap::Controller&){saved_interval_ = cluts[activeCLUT].interval(); });
+
 }
 
 Transfer1DController::~Transfer1DController()
@@ -106,17 +110,11 @@ void Transfer1DController::setSliceRenderer(SliceRenderer* sliceRenderer)
 bool Transfer1DController::keyboardInput(GLFWwindow* window, int key, int action, int mods)
 {
     if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
-		if (++activeCLUT == cluts.size())
-			activeCLUT = 0;
-        renderer.setCLUT(&cluts[activeCLUT]);
-        volumeRenderer->markDirty();
+		nextCLUT();
     }
 
 	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
-		if (--activeCLUT < 0)
-			activeCLUT = cluts.size() - 1;
-		renderer.setCLUT(&cluts[activeCLUT]);
-		volumeRenderer->markDirty();
+		prevCLUT();
 	}
     
 	if (key == GLFW_KEY_B && action == GLFW_PRESS) {
@@ -199,6 +197,48 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 	return true;
 }
 
+bool Transfer1DController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
+{
+	finger_tracker_.update(leapController);
+
+	if (finger_tracker_.tracking())
+		return false;
+
+	static auto lastSwipe = std::chrono::system_clock::now();
+	Leap::GestureList gestures = currentFrame.gestures();
+	for (Leap::Gesture g : gestures) {
+		if (g.type() == Leap::Gesture::TYPE_SWIPE) {
+			
+			auto curTime = std::chrono::system_clock::now();
+			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastSwipe);
+			Leap::SwipeGesture swipe(g);
+
+			if (elapsed.count() > 1000 && g.isValid() && swipe.speed() > 2000 && std::abs(swipe.direction().z) < 0.5f) {
+				lastSwipe = curTime;
+				if (swipe.direction().x > 0)
+					nextCLUT();
+				else
+					prevCLUT();
+			}
+		}
+	}
+
+
+	return false;
+}
+
+void Transfer1DController::moveAndScale(const Leap::Controller& controller)
+{
+	float c = saved_interval_.center() + finger_tracker_.centerPosDelta(controller.frame()).x / 400.0f;
+	cluts[activeCLUT].interval().center(c);
+
+	float w = std::max(0.0f, saved_interval_.width() + finger_tracker_.fingerGapDelta(controller.frame()) / 400.0f);
+	cluts[activeCLUT].interval().width(w);
+
+	cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+	volumeRenderer->markDirty();
+}
+
 void Transfer1DController::updateTransferTex1D()
 {
     gl::Texture& tex = renderer.getTransferFn();
@@ -210,4 +250,27 @@ void Transfer1DController::updateTransferTex1D()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     
 //    tex->setData2D(GL_RGB, texWidth, texHeight, GL_RGB, GL_UNSIGNED_BYTE, transfer1DPixels);
+}
+
+std::set<Leap::Gesture::Type> Transfer1DController::requiredGestures()
+{
+	std::set<Leap::Gesture::Type> gestures;
+	gestures.insert(Leap::Gesture::TYPE_SWIPE);
+	return gestures;
+}
+
+void Transfer1DController::nextCLUT()
+{
+	if (++activeCLUT == cluts.size())
+		activeCLUT = 0;
+	renderer.setCLUT(&cluts[activeCLUT]);
+	volumeRenderer->markDirty();
+}
+
+void Transfer1DController::prevCLUT()
+{
+	if (--activeCLUT < 0)
+		activeCLUT = cluts.size() - 1;
+	renderer.setCLUT(&cluts[activeCLUT]);
+	volumeRenderer->markDirty();
 }

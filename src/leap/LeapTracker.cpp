@@ -1,38 +1,70 @@
 #include "LeapTracker.h"
 
+using namespace std::chrono;
+
 LeapTracker::LeapTracker() : 
-		m_frames_since_change(0), 
-		m_frame_threshold(25), 
-		m_tracking(false)
+		tracking_(false),
+		engage_delay_(0),
+		disengage_delay_(0),
+		total_elapsed_(0),
+		last_update_(high_resolution_clock::now()),
+		track_function_(nullptr),
+		engage_function_(nullptr),
+		disengage_function_(nullptr)
 {
 }
 
 void LeapTracker::update(const Leap::Controller& controller)
 {
-	if (m_tracking) {
-		// if disengage tracking conditions met: change state and trigger disengage function
-		if (m_frames_since_change >= m_frame_threshold && shouldDisengage(controller)) {
-			m_tracking = false;
-			m_frames_since_change = 0;
+	auto time = std::chrono::high_resolution_clock::now();
+	milliseconds elapsed = duration_cast<milliseconds>(time - last_update_);
+	last_update_ = time;
+
+	if (tracking_) {
+		if (total_elapsed_ < disengage_delay_) {
+			total_elapsed_ += elapsed;
+		}
+		
+		if (total_elapsed_ >= disengage_delay_ && shouldDisengage(controller)) {
+			tracking_ = false;
+			total_elapsed_ = milliseconds(0);
 			disengage(controller);
 		}
 	}
 	else {
-		// if engage tracking conditions met: change state and trigger engage function
-		if (m_frames_since_change >= m_frame_threshold && shouldEngage(controller)) {
-			m_tracking = true;
-			m_frames_since_change = 0;
+		if (total_elapsed_ < engage_delay_) {
+			total_elapsed_ += elapsed;
+		}
+
+		if (total_elapsed_ >= engage_delay_ && shouldEngage(controller)) {
+			tracking_ = true;
+			total_elapsed_ = milliseconds(0);
 			engage(controller);
 		}
 	}
 
-	// call tracking function while tracking is on
-	if (m_tracking) {
+	if (tracking_) {
 		track(controller);
 	}
+}
 
-	// update time since last tracking state change
-	if (m_frames_since_change < m_frame_threshold) {
-		m_frames_since_change++;
-	}
+void LeapTracker::engage(const Leap::Controller& controller)
+{
+	std::cout << "EG" << std::endl;
+
+	if (engage_function_)
+		engage_function_(controller);
+}
+
+void LeapTracker::disengage(const Leap::Controller& controller)
+{
+	std::cout << "DE" << std::endl;
+	if (disengage_function_)
+		disengage_function_(controller);
+}
+
+void LeapTracker::track(const Leap::Controller& controller)
+{
+	if (track_function_)
+		track_function_(controller);
 }

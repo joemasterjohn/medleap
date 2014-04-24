@@ -112,17 +112,30 @@ void Transfer1DRenderer::drawMarkerBar()
 		// [0,1] to [-1,1]
 		x = (x - 0.5f) * 2.0f;
 
-		float l = x - 0.05f * 1.1f;
-		float r = x + 0.05f * 1.1f;
-		d.color(1, 1, 1);
-		d.vertex(l, -1);
-		d.vertex(x, +1);
-		d.vertex(r, -1);
-
-		l = x - 0.05f;
-		r = x + 0.05f;
+		float l = x - 0.05f * 800.0f / viewport.width;
+		float r = x + 0.05f * 800.0f / viewport.width;
 		d.color(c.x, c.y, c.z);
 		d.vertex(l, -1);
+		d.vertex(x, .9f);
+		d.vertex(r, -1);
+	}
+	d.end();
+	d.draw();
+
+	d.begin(GL_LINES);
+	d.color(0.5f, 0.5f, 0.5f);
+	for (const CLUT::Marker& marker : clut->markers()) {
+		Vec3 c = marker.color().vec3();
+		float x = marker.interval().center();
+		if (clut->mode() == CLUT::continuous) {
+			x = x * clut->interval().width() + clut->interval().left();
+		}
+
+		x = (x - 0.5f) * 2.0f;
+		float l = x - 0.05f * 800.0f / viewport.width;
+		float r = x + 0.05f * 800.0f / viewport.width;
+		d.vertex(l, -1);
+		d.vertex(x, .9f);
 		d.vertex(x, .9f);
 		d.vertex(r, -1);
 	}
