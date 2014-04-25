@@ -225,8 +225,7 @@ void CLUT::savePiecewise(Texture& texture)
 			Vec4 color = m.color().vec4();
 			float x = (p - m.interval().center()) / (m.interval().width() * 0.5f);
 			float a = color.w * m.opacity(x);
-			pixel += {color.x, color.y, color.z, a};
-			//pixel += {color.x * a, color.y * a, color.z * a, a};
+			pixel += {color.x * a, color.y * a, color.z * a, a};
 		}
 	}
 
