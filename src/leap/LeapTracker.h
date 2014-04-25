@@ -51,7 +51,7 @@ private:
 	std::chrono::milliseconds engage_delay_;
 	std::chrono::milliseconds disengage_delay_;
 	std::chrono::milliseconds total_elapsed_;
-	std::chrono::system_clock::time_point last_update_;
+	std::chrono::high_resolution_clock::time_point last_update_;
 	std::function<void(const Leap::Controller&)> track_function_;
 	std::function<void(const Leap::Controller&)> engage_function_;
 	std::function<void(const Leap::Controller&)> disengage_function_;
