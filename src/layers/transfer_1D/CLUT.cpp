@@ -1,5 +1,6 @@
 #include "CLUT.h"
 #include <algorithm>
+#include "util/Util.h"
 
 using namespace gl;
 using namespace std;
@@ -8,7 +9,8 @@ CLUT::Marker::Marker(const Interval& interval, const ColorRGB& color) :
 	clut_(nullptr),
 	interval_(interval),
 	color_(color),
-	context_(false)
+	context_(false),
+	opacity_(gl::exponentialC(9.f))
 {
 }
 
@@ -32,6 +34,11 @@ CLUT::Marker& CLUT::Marker::context(bool context)
 {
 	context_ = true;
 	return *this;
+}
+
+float CLUT::Marker::opacity(float x) const
+{
+	return opacity_(clamp(x, -1.0f, 1.0f));
 }
 
 
@@ -148,6 +155,7 @@ void CLUT::saveContinuous(Texture& texture)
 
 		if (p_clut < markers_.front().interval().center()) {
 			Vec4 color = markers_.front().color().vec4();
+			color *= {color.w, color.w, color.w, 1.0f};
 			buf[ptr++] = (unsigned short)(color.x * 65535);
 			buf[ptr++] = (unsigned short)(color.y * 65535);
 			buf[ptr++] = (unsigned short)(color.z * 65535);
@@ -155,6 +163,7 @@ void CLUT::saveContinuous(Texture& texture)
 		}
 		else if (p_clut > markers_.back().interval().center()) {
 			Vec4 color = markers_.back().color().vec4();
+			color *= {color.w, color.w, color.w, 1.0f};
 			buf[ptr++] = (unsigned short)(color.x * 65535);
 			buf[ptr++] = (unsigned short)(color.y * 65535);
 			buf[ptr++] = (unsigned short)(color.z * 65535);
@@ -168,7 +177,9 @@ void CLUT::saveContinuous(Texture& texture)
 
 			float pn = (p_clut - l->interval().center()) / (r->interval().center() - l->interval().center());
 			Vec4 lc = l->color().vec4();
+			lc *= {lc.w, lc.w, lc.w, 1.0f};
 			Vec4 rc = r->color().vec4();
+			rc *= {rc.w, rc.w, rc.w, 1.0f};
 
 			Vec4 color = lc * (1.0f - pn) + rc * pn;
 			buf[ptr++] = (unsigned short)(color.x * 65535);
@@ -204,12 +215,18 @@ void CLUT::savePiecewise(Texture& texture)
 
 	vector<Vec4> pixels;
 	pixels.resize(texWidth, Vec4(0.0f));
+
 	for (int i = 0; i < texWidth; i++) {
+		Vec4& pixel = pixels[i];
 		float p = static_cast<float>(i) / texWidth;
+		float sum_alpha = 0.0f;
+
 		for (Marker& m : markers_) {
-				float x = (p - m.interval().center()) / m.interval().width();
-				// TODO: just weight alpha, not color
-				pixels[i] += m.color().vec4() * (curve(x) - offset) * scale;
+			Vec4 color = m.color().vec4();
+			float x = (p - m.interval().center()) / (m.interval().width() * 0.5f);
+			float a = color.w * m.opacity(x);
+			pixel += {color.x, color.y, color.z, a};
+			//pixel += {color.x * a, color.y * a, color.z * a, a};
 		}
 	}
 

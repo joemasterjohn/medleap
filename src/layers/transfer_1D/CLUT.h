@@ -5,6 +5,7 @@
 #include "gl/Texture.h"
 #include "util/Interval.h"
 #include "util/Color.h"
+#include <functional>
 #include <vector>
 
 /** Color look-up table */
@@ -26,6 +27,12 @@ public:
 		const Interval& interval() const { return interval_; }
 		bool context() const { return context_; }
 
+		/** Computes opacity weight at a value x in [0,1], where 0 is the marker's left and 1 is the marker's right. Values outside 0,1 are clamped. */
+		float opacity(float x) const;
+
+		/** Sets the opacity weighting function. This function has the domain [-1,1] which maps to the marker interval's [left,right]. */
+		void opacityFn(std::function<float(float)> fn) { opacity_ = fn; }
+
 		Marker& color(const Color& color);
 		Marker& interval(const Interval& interval);
 		Marker& context(bool context);
@@ -35,7 +42,7 @@ public:
 		Interval interval_;
 		ColorRGB color_;
 		bool context_;
-		// alpha ramp?
+		std::function<float(float)> opacity_;
 
 		friend class CLUT;
 	};

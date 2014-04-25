@@ -108,21 +108,12 @@ void main()
 	if (render_mode == RENDER_MODE_MIP) {
 	
 	} else if (render_mode == RENDER_MODE_VR) {
-		// opacity correction
+
+		// correct opacity and associated colors based on variable sampling distance
 		float alpha_stored = color.a;
-
-	
-
 		float alpha_corrected = 1.0 - pow(1.0 - alpha_stored * opacity_scale, opacity_correction);
 		color.a = alpha_corrected;// * cursorAlpha();
-
-
-
-
-		// Pre-multiplied alpha, but I have to compensate for change in alpha
-		//color.rgb *= alpha_corrected / alpha_stored;
-
-		//color.rgb *= color.a;
+		color.rgb *= max(0.0, alpha_corrected / alpha_stored);
 
 		// apply lighting
 		if (use_shading) {

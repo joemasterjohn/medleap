@@ -208,31 +208,24 @@ unsigned VolumeRenderer::getCurrentNumSlices()
 
 void VolumeRenderer::updateSlices(double samplingScale, bool limitSamples)
 {
-	// calculate ideal number of samples as twice the number of voxels along view direction
-	float ax = abs(camera.getForward().x);
-	float ay = abs(camera.getForward().y);
-	float az = abs(camera.getForward().z);
-	Vec3 forwardRay(ax, ay, az);
-	Vec3 volumeDim(volume->getWidth(), volume->getHeight(), volume->getDepth());
-	int idealNumSamples = forwardRay.dot(volumeDim);
-
-	// calculate number of slices to use, but don't go over max
-	currentNumSlices = idealNumSamples * samplingScale;
-	if (limitSamples)
-		currentNumSlices = min(max(currentNumSlices, minSlices), maxSlices);
-
-	glUniform1f(boxShader.getUniform("opacity_correction"), static_cast<float>(idealNumSamples) / currentNumSlices);
-	glUniform1f(boxShader.getUniform("sampling_length"), 1.0f / currentNumSlices);
-	glUniform1f(boxShader.getUniform("jitter_size"),  32.0f);
+	float refSampleLength = volume->getBounds().getLength() / Vec3(volume->getWidth(), volume->getHeight(), volume->getDepth()).length();
 
 	// upload geometry
     BoxSlicer slicer;
-	slicer.slice(volume->getBounds(), camera, currentNumSlices);
+	slicer.slice(volume->getBounds(), camera, refSampleLength * samplingScale, limitSamples ? maxSlices : -1);
     proxyIndices.bind();
     proxyIndices.data(&slicer.getIndices()[0], slicer.getIndices().size() * sizeof(GLushort));
     proxyVertices.bind();
     proxyVertices.data(&slicer.getVertices()[0], slicer.getVertices().size() * sizeof(slicer.getVertices()[0]));
     numSliceIndices = static_cast<int>(slicer.getIndices().size());
+
+	this->currentNumSlices = slicer.sliceCount();
+	float actualSamplingLength = slicer.samplingLength();
+	float slRatio = actualSamplingLength / refSampleLength;
+
+	glUniform1f(boxShader.getUniform("opacity_correction"), slRatio);
+	glUniform1f(boxShader.getUniform("sampling_length"), actualSamplingLength);
+	glUniform1f(boxShader.getUniform("jitter_size"), 32.0f);
 }
 
 void VolumeRenderer::draw(double samplingScale, bool limitSamples, int w, int h)
@@ -345,7 +338,7 @@ void VolumeRenderer::draw(double samplingScale, bool limitSamples, int w, int h)
         case VR:
 			glEnable(GL_BLEND);
             glBlendEquation(GL_FUNC_ADD);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             break;
         case ISOSURFACE:
             glDisable(GL_BLEND);
@@ -388,7 +381,7 @@ void VolumeRenderer::draw()
     if (dirty) {
 		lowResRT.bind();
 		lowResRT.clear();
-        draw(0.25, true, lowResRT.getColorTarget().width(), lowResRT.getColorTarget().height());
+        draw(4.0, true, lowResRT.getColorTarget().width(), lowResRT.getColorTarget().height());
 		lowResRT.unbind();
         dirty = false;
         drawnHighRes = false;
@@ -397,7 +390,7 @@ void VolumeRenderer::draw()
     } else if (!drawnHighRes && cleanFrames++ > 30) {
 		fullResRT.bind();
 		fullResRT.clear();
-		draw(2.0, false, fullResRT.getColorTarget().width(), fullResRT.getColorTarget().height());
+		draw(1.0, false, fullResRT.getColorTarget().width(), fullResRT.getColorTarget().height());
 		fullResRT.unbind();
         drawnHighRes = true;
         currentTexture = fullResRT.getColorTarget();

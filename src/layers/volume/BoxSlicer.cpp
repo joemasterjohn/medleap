@@ -45,30 +45,61 @@ GLushort BoxSlicer::getPrimRestartIndex()
     return primRestartIndex;
 }
 
-void BoxSlicer::slice(const BoundingBox& bounds, const Camera& camera, int slices)
+float BoxSlicer::samplingLength() const
+{
+	return sample_length_;
+}
+
+int BoxSlicer::sliceCount() const
+{
+	return slice_count_;
+}
+
+float BoxSlicer::samplingLength(const BoundingBox& bounds, const Camera& camera, int numSamples) const
+{
+	// determine the view length by projecting bounding box vertices and
+	// taking difference of max and min distances of vertices from eye
+	float minDistance = numeric_limits<float>::infinity();
+	float maxDistance = -numeric_limits<float>::infinity();
+	for (Vec4 vertex : bounds.getVertices()) {
+		Vec4 v = camera.getView() * vertex;
+		float distance = -v.z;
+		if (distance < minDistance) minDistance = distance;
+		if (distance > maxDistance) maxDistance = distance;
+	}
+	return (maxDistance - minDistance) / (numSamples+1);
+}
+
+void BoxSlicer::slice(const BoundingBox& bounds, const Camera& camera, float sampleLength, int maxSlices)
 {
     up = camera.getUp();
     normal = camera.getForward() * -1;
     right = camera.getRight();
     
-    // determine the sampling length by projecting bounding box vertices and
-    // taking difference of max and min distances of vertices from eye
-    float minDistance = numeric_limits<float>::infinity();
-    float maxDistance = -numeric_limits<float>::infinity();
-    for (Vec4 vertex : bounds.getVertices()) {
-        Vec4 v = camera.getView() * vertex;
-        float distance = -v.z;
-        if (distance < minDistance) minDistance = distance;
-        if (distance > maxDistance) maxDistance = distance;
-    }
-    float samplingLength = maxDistance - minDistance;
+	// determine the view length by projecting bounding box vertices and
+	// taking difference of max and min distances of vertices from eye
+	float minDistance = numeric_limits<float>::infinity();
+	float maxDistance = -numeric_limits<float>::infinity();
+	for (Vec4 vertex : bounds.getVertices()) {
+		Vec4 v = camera.getView() * vertex;
+		float distance = -v.z;
+		if (distance < minDistance) minDistance = distance;
+		if (distance > maxDistance) maxDistance = distance;
+	}
+	float totalLength = maxDistance - minDistance;
     
-    // intersect planes with boundingbox to create slice polygons
     vertices.clear();
     indices.clear();
-    Vec3 planePoint = camera.getEye() + camera.getForward() * maxDistance;
-    Vec3 step = camera.getForward() * samplingLength / (slices + 1.0f);
-    for (int i = 0; i < slices; ++i) {
+
+	slice_count_ = (int)std::round(totalLength / sampleLength);
+	if (maxSlices > 0)
+		slice_count_ = std::min(maxSlices, slice_count_);
+	sample_length_ = totalLength / (slice_count_ + 1);
+
+	// intersect planes with boundingbox to create slice polygons
+	Vec3 step = camera.getForward() * sample_length_;
+	Vec3 planePoint = camera.getEye() + camera.getForward() * maxDistance;
+	for (int i = 0; i < slice_count_; ++i) {
         planePoint -= step;
         slicePlane(planePoint, bounds);
     }

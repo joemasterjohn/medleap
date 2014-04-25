@@ -21,14 +21,23 @@ public:
     BoxSlicer();
     
     /** Cuts the box into slices and stores the data in this class */
-    void slice(const BoundingBox& bounds, const Camera& camera, int slices);
-    
+    void slice(const BoundingBox& bounds, const Camera& camera, float sampleLength, int maxSlices);
+
     /** Vertex positions */
     const std::vector<gl::Vec3>& getVertices();
     
     /** Indices for the geometry */
     const std::vector<GLushort>& getIndices();
     
+	/** Determine the distance between planes given a number of samples (faster than slicing to find out) */
+	float samplingLength(const BoundingBox& bounds, const Camera& camera, int numSamples) const;
+
+	/** Distance between sampling planes (updated after slice called) */
+	float samplingLength() const;
+
+	/** Number of actual slices created */
+	int sliceCount() const;
+
     /** Index value that marks the start of a new slice */
     GLushort getPrimRestartIndex();
     
@@ -51,6 +60,8 @@ private:
 	std::vector<gl::Vec3> vertices;
     std::vector<GLushort> indices;
     const GLushort primRestartIndex;
+	float sample_length_;
+	int slice_count_;
     
 	void slicePlane(const gl::Vec3& p, const BoundingBox& bounds);
 };
