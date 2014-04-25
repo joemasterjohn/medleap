@@ -1,6 +1,7 @@
 #include "Util.h"
 #include <cstring>
 #include <vector>
+#include <cmath>
 
 namespace gl
 {
