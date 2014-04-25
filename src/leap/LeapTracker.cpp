@@ -7,7 +7,7 @@ LeapTracker::LeapTracker() :
 		engage_delay_(0),
 		disengage_delay_(0),
 		total_elapsed_(0),
-		last_update_(high_resolution_clock::now()),
+        last_update_(std::chrono::high_resolution_clock::now()),
 		track_function_(nullptr),
 		engage_function_(nullptr),
 		disengage_function_(nullptr)
