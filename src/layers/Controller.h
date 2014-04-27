@@ -7,6 +7,8 @@
 #include "Leap.h"
 #include <set>
 #include <chrono>
+#include <memory>
+#include "layers/menu/Menu.h"
 
 /** User interface controller. Controllers process input in the reverse order they were pushed onto the MainController stack. The controller may allow input to pass through to the next layer, or it may block/consume it such that no lower-level layers can take action. */
 class Controller
@@ -58,6 +60,17 @@ public:
 	/** Called before rendering with the elapsed milliseconds since previous update */
 	virtual void update(std::chrono::milliseconds elapsed)
 	{
+	}
+
+	/** If this layer has some context menu, it can be created here */
+	virtual std::unique_ptr<Menu> contextMenu()
+	{
+		return nullptr;
+	}
+
+	/** If true, this controller will suppress any global Leap gestures like opening the menu */
+	virtual bool modal() const {
+		return false;
 	}
 };
 

@@ -60,6 +60,17 @@ Transfer1DRenderer* Transfer1DController::getRenderer()
     return &renderer;
 }
 
+std::unique_ptr<Menu> Transfer1DController::contextMenu()
+{
+	Menu* menu = new Menu("Transfer 1D");
+	menu->createItem("Create Color", []{MainController::getInstance().menuController().hideMenu(); });
+	menu->createItem("Delete Color", []{MainController::getInstance().menuController().hideMenu(); });
+	menu->createItem("Create CLUT", []{MainController::getInstance().menuController().hideMenu(); });
+	menu->createItem("Delete CLUT", []{MainController::getInstance().menuController().hideMenu(); });
+
+	return std::unique_ptr<Menu>(menu);
+}
+
 void Transfer1DController::setVolume(VolumeData* volume)
 {
     this->volume = volume;

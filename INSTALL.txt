@@ -61,4 +61,5 @@ Install GDCM (http://sourceforge.net/projects/gdcm/).
 
 Install LeapSDK (https://developer.leapmotion.com/downloads)
 - Download and extract somewhere (ex. C:\Users\justin\libs\LeapSDK)
+- Add a new environment variable LEAP_DIR pointing to the path of LeapSDK
 - The version of the SDK I used (v.1.0.9.8391) was built with an older version of Visual Studio. If using VS2013, you may not have the Visual C++ debug DLLs for this version (msvcp100d.dll and msvcr100d.dll). They are included in the LeapSDK\lib\{arch}\ directory. I copied them into C:\Windows\System32\.

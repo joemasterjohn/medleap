@@ -23,6 +23,8 @@ public:
     bool mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y) override;
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame) override;
 	std::set<Leap::Gesture::Type> requiredGestures() override;
+	std::unique_ptr<Menu> contextMenu() override;
+
     Histogram* histogram;
 
     void setVolumeRenderer(VolumeRenderer* volumeRenderer);

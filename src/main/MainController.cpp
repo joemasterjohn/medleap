@@ -47,7 +47,6 @@ MainController::MainController() :
 {
     mode = MODE_3D;
     showHistogram = true;
-	menuOn = false;
 }
 
 MainController::~MainController()
@@ -66,11 +65,11 @@ void MainController::init(GLFWwindow* window)
     
     text.loadFont("menlo14");
     
-    volumeInfoController.getRenderer()->setVolumeRenderer(volumeController.getRenderer());
+	volumeInfoController.getRenderer()->setVolumeRenderer(volumeController_.getRenderer());
     volumeInfoController.getRenderer()->setSliceRenderer(sliceController.getRenderer());
-    histogramController.setVolumeRenderer(volumeController.getRenderer());
+	histogramController.setVolumeRenderer(volumeController_.getRenderer());
     histogramController.setSliceRenderer(sliceController.getRenderer());
-	orientationController.setCamera(&volumeController.getRenderer()->getCamera());
+	orientationController.setCamera(&volumeController_.getRenderer()->getCamera());
 
 	glfwGetWindowSize(window, &width, &height);
 }
@@ -87,15 +86,17 @@ void MainController::setMode(MainController::Mode mode)
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
 			pushController(&orientationController);
+			pushController(&menuController_);
             break;
         case MODE_3D:
             renderer.clearLayers();
             activeControllers.clear();
-            pushController(&volumeController);
+			pushController(&volumeController_);
             pushController(&volumeInfoController);
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
 			pushController(&orientationController);
+			pushController(&menuController_);
             break;
     }
 }
@@ -122,7 +123,7 @@ void MainController::setVolume(VolumeData* volume)
     
     this->volume = volume;
     sliceController.setVolume(volume);
-    volumeController.setVolume(volume);
+	volumeController_.setVolume(volume);
     volumeInfoController.setVolume(volume);
     histogramController.setVolume(volume);
 	orientationController.setVolume(volume);
@@ -141,7 +142,7 @@ void MainController::startLoop()
 
 		if (loader.getState() == VolumeLoader::FINISHED) {
             setVolume(loader.getVolume());
-            volumeController.getRenderer()->markDirty();
+			volumeController_.getRenderer()->markDirty();
         }
 
 		update();
@@ -162,19 +163,31 @@ void MainController::startLoop()
     glfwTerminate();
 }
 
-void MainController::showMenu(bool show)
+Controller* MainController::focusLayer()
 {
-	if ((show && menuOn) || (!show && !menuOn))
-		return;
-
-	if (show) {
-		pushController(&menuController);
-		menuOn = true;
+	if (focus_stack_.empty()) {
+		return nullptr;
 	}
-	else {
-		popController();
-		menuController.getMenuManager().reset();
-		menuOn = false;
+	return focus_stack_.top();
+}
+
+void MainController::focusLayer(Controller* controller)
+{
+	if (!focus_stack_.empty()) {
+		focus_stack_.pop();
+	}
+	focus_stack_.push(controller);
+}
+
+void MainController::pushFocus(Controller* focus)
+{
+	focus_stack_.push(focus);
+}
+
+void MainController::popFocus()
+{
+	if (!focus_stack_.empty()) {
+		focus_stack_.pop();
 	}
 }
 
@@ -182,10 +195,10 @@ void MainController::pickColor(const Color& initialColor, std::function<void(con
 {
 	colorPickController.color(initialColor);
 	colorPickController.addCallback(callback);
-	colorPickController.addCallback([&](const Color&){popController();});
+	colorPickController.addCallback([&](const Color&){popController(); popFocus(); });
 	pushController(&colorPickController);
+	pushFocus(&colorPickController);
 }
-
 
 void MainController::update()
 {
@@ -201,30 +214,23 @@ void MainController::update()
 		c->update(elapsed);
 	}
 
+	// leap input
 	if (leapController.isConnected()) {
-		Leap::Frame currentFrame = leapController.frame();
-
-		if (!menuOn) {
-			Leap::GestureList gestures = currentFrame.gestures();
-			for (const Leap::Gesture& g : gestures) {
-				if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
-					Leap::CircleGesture circle(g);
-					if (circle.progress() > 1) {
-						Leap::Vector tp = Leap::CircleGesture(g).center();
-						menuController.setLeapCenter(Vec2(tp.x, tp.y));
-						showMenu(true);
-					}
-				}
-			}
+		Controller* focus = focusLayer();
+		if (!focus || !focus->modal()) {
+			menuController_.leapInput(leapController, leapController.frame());
 		}
 
-		for (Controller* c : activeControllers) {
-			bool passThrough = c->leapInput(leapController, currentFrame);
-			if (!passThrough) {
-				break;
-			}
+		if (focus) {
+			focus->leapInput(leapController, leapController.frame());
 		}
 	}
+}
+
+void MainController::showTransfer1D(bool show)
+{
+	showHistogram = show;
+	setMode(mode);
 }
 
 void MainController::toggleHistogram()
@@ -235,23 +241,18 @@ void MainController::toggleHistogram()
 
 void MainController::keyboardInput(GLFWwindow *window, int key, int action, int mods)
 {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		showMenu(!menuOn);
+	if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+		setMode((mode == MODE_2D) ? MODE_3D : MODE_2D);
 	}
 
-	if (!menuOn) {
-		if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-			setMode((mode == MODE_2D) ? MODE_3D : MODE_2D);
-		}
-
-		if (key == GLFW_KEY_G && action == GLFW_PRESS) {
-			renderer.setBackgroundColor(Vec3(1.0f) - renderer.getBackgroundColor());
-			volumeController.getRenderer()->markDirty();
-		}
-
-		if (key == GLFW_KEY_H && action == GLFW_PRESS)
-			toggleHistogram();
+	if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+		renderer.setBackgroundColor(Vec3(1.0f) - renderer.getBackgroundColor());
+		volumeController_.getRenderer()->markDirty();
 	}
+
+	if (key == GLFW_KEY_H && action == GLFW_PRESS)
+		toggleHistogram();
+	
     
 	for (Controller* c : activeControllers) {
 		bool passThrough = c->keyboardInput(window, key, action, mods);

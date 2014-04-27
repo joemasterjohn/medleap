@@ -11,16 +11,21 @@
 class MenuRenderer : public Renderer
 {
 public:
-	MenuRenderer(MenuManager* menuManager);
+	MenuRenderer();
 	~MenuRenderer();
 
-	void draw();
-	void resize(int width, int height);
+	void draw() override;
+	void resize(int width, int height) override;
+	void menu(Menu* menu);
 	void highlight(int menuIndex);
 
+	float progress_;
+	gl::Vec2 leap;
+
 private:
-	MenuManager* menuManager;
+	Menu* menu_;
 	int highlighted;
+	float visibility_;
     
 	gl::Mat4 modelViewProjection;
     gl::Buffer menuVBO;

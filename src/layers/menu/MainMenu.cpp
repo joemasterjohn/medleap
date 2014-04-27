@@ -3,31 +3,50 @@
 #include "main/MainConfig.h"
 #include "main/MainController.h"
 
-typedef std::shared_ptr<Menu> MenuPtr;
-
-MainMenu::MainMenu(MenuManager* menuManager) : Menu("Main Menu")
+MainMenu::MainMenu() : Menu("Main Menu")
 {
-    MainConfig cfg;
-    std::string workingDir = cfg.getValue<std::string>(MainConfig::WORKING_DIR);
-    
-    MenuItem& miLoad = createItem("Load");
-    miLoad.setAction([=]{
-        menuManager->push(MenuPtr(new DirectoryMenu(workingDir, *menuManager)));
-    });
-    
-	Menu* mRender = new Menu("Render");
-	//mRender->createItem("2D Mode", [=]{volumeRenderer->cycleMode(); });
+	// MainConfig cfg;
+	//std::string workingDir = cfg.getValue<std::string>(MainConfig::WORKING_DIR);
 
-	mRender->createItem("3D Mode");
-	mRender->createItem("<Back>", [=]{menuManager->pop(); });
+	//MenuItem& miLoad = createItem("Load");
+	////miLoad.setAction([=]{
+	////    menuManager->push(MenuPtr(new DirectoryMenu(workingDir, *menuManager)));
+	////});
 
-    MenuItem& miRender = createItem("Render");
-	miRender.setAction([=]{menuManager->push(MenuPtr(mRender)); });
+	{
+		MenuItem& item = createItem("Transfer");
+		item.setAction([]{
+			MainController& mc = MainController::getInstance();
+			mc.focusLayer(&mc.transfer1DController());
+			mc.showTransfer1D(true);
+			mc.menuController().hideMenu();
+		});
+	}
 
-    MenuItem& miHide = createItem("Hide Menu");
-	miHide.setAction([]{ MainController::getInstance().showMenu(false); });
+	{
+		MenuItem& item = createItem("2D/3D");
+		item.setAction([]{
+			MainController& mc = MainController::getInstance();
+			if (mc.getMode() == MainController::MODE_2D) {
+				mc.setMode(MainController::MODE_3D);
+			} else {
+				mc.setMode(MainController::MODE_2D);
+			}
+			mc.menuController().hideMenu();
+		});
+	}
 
-    MenuItem& miExit = createItem("Exit");
+	createItem("Edit");
+	createItem("Load");
+
+	{
+		MenuItem& item = createItem("View");
+		item.setAction([]{
+			MainController& mc = MainController::getInstance();
+			mc.focusLayer(&mc.volumeController());
+			mc.menuController().hideMenu();
+		});
+	}
 }
 
 MainMenu::~MainMenu()

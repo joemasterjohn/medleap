@@ -2,13 +2,11 @@
 #define __medleap__MainMenu__
 
 #include "Menu.h"
-#include "MenuManager.h"
-#include "layers/volume/VolumeRenderer.h"
 
 class MainMenu : public Menu
 {
 public:
-    MainMenu(MenuManager* menus);
+    MainMenu();
     ~MainMenu();
 };
 

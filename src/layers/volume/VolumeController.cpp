@@ -117,15 +117,14 @@ bool VolumeController::scroll(GLFWwindow* window, double dx, double dy)
 bool VolumeController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
 	Leap::FingerList fingers = currentFrame.fingers();
-	Leap::ToolList tools = currentFrame.tools();
 
 
 	static Vec3 toolStart;
 	static int framesSlow = 0;
 	static Vec3 oldCursorPos;
 
-	if (tools.count() > 0) {
-		Leap::Tool p = tools.frontmost();
+	if (fingers.count() > 0) {
+		Leap::Finger p = fingers.frontmost();
 
 		if (!renderer.cursorActive && p.tipVelocity().magnitude() < 100) {
 			framesSlow++;
@@ -162,7 +161,7 @@ bool VolumeController::leapInput(const Leap::Controller& leapController, const L
 		}
 	}
 
-	if (tools.count() == 0) {
+	if (currentFrame.fingers().count() == 0) {
 		framesSlow = 0;
 		renderer.cursorActive = false;
 	}

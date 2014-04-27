@@ -74,5 +74,6 @@ void DirectoryMenu::load(const VolumeLoader::Source& source)
 {
 	MainController::getInstance().setVolumeToLoad(source);
 	menus.pop();
-	MainController::getInstance().showMenu(false);
+	//MainController::getInstance().menuController().menu();
+	//MainController::getInstance().showMenu(false);
 }

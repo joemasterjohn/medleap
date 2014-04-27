@@ -6,12 +6,15 @@
 using namespace std;
 using namespace gl;
 
-MenuRenderer::MenuRenderer(MenuManager* menuManager) : menuManager(menuManager), highlighted(-1)
+MenuRenderer::MenuRenderer() : 
+	highlighted(-1),
+	visibility_(1.0f),
+	setShaderState(nullptr),
+	indexCount(0),
+	indexType(0),
+	indicesPerMenuItem(0),
+	progress_(0.f)
 {
-    indexCount = 0;
-    indexType = 0;
-    setShaderState = nullptr;
-
 	menuVBO.generateVBO(GL_STATIC_DRAW);
 	menuIBO.generateIBO(GL_STATIC_DRAW);
 	menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
@@ -26,19 +29,16 @@ void MenuRenderer::highlight(int menuIndex)
 	highlighted = menuIndex;
 }
 
+void MenuRenderer::menu(Menu* menu)
+{
+	menu_ = menu;
+	createRingGeometry();
+}
+
 void MenuRenderer::draw()
 {
-	if (menuManager->isEmpty())
+	if (!menu_)
 		return;
-
-	static int lastKnown = -1;
-	if (menuManager->top().getItems().size() != lastKnown) {
-		lastKnown = menuManager->top().getItems().size();
-		createRingGeometry();
-	}
-
-    
-
     
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -48,8 +48,6 @@ void MenuRenderer::draw()
     menuIBO.bind();    
     setShaderState();
     
-	float alpha = this->menuManager->visibility();
-
 	Vec3 menuC;
 	Vec3 hlC;
 	Vec3 tc;
@@ -67,24 +65,29 @@ void MenuRenderer::draw()
 		tc2 = tc;
 	}
 
-    glUniform4f(menuShader.getUniform("color"), menuC.x, menuC.y, menuC.z, alpha * 0.85f);
+	glUniform4f(menuShader.getUniform("color"), menuC.x, menuC.y, menuC.z, visibility_ * 0.85f);
     glDrawElements(GL_TRIANGLES, indexCount, indexType, 0);
 
     if (highlighted >= 0) {
 
-		float lp = menuManager->getLeapProgress();
-		Vec3 a = hlC;
-		Vec3 b(0.1f, 0.75f, 1.0f);
-		Vec3 c = a * (1 - lp) + b * lp;
-		
-
-		glUniform4f(menuShader.getUniform("color"), c.x, c.y, c.z, alpha);
+		Vec3 c = gl::lerp(Vec3(0.5f), Vec3(0.0f), progress_);
+		glUniform4f(menuShader.getUniform("color"), c.x, c.y, c.z, visibility_);
         void* offset = (void*)(indicesPerMenuItem * highlighted * sizeof(GLushort));
 		glDrawElements(GL_TRIANGLES, indicesPerMenuItem, indexType, offset);
     }
     glDisable(GL_BLEND);
     
-	drawMenu(menuManager->top(), tc, tc2);
+	drawMenu(*menu_, tc, tc2);
+
+
+	//static Draw d;
+	//d.begin(GL_LINES);
+	//d.setModelViewProj(gl::ortho2D(viewport.x, viewport.width, viewport.y, viewport.height));
+	//d.color(1, 0, 0);
+	//d.vertex(viewport.width / 2, viewport.height / 2);
+	//d.vertex(viewport.width / 2 + leap.x * 2, viewport.height/2 + leap.y * 2);
+	//d.end();
+	//d.draw();
 }
 
 void MenuRenderer::drawMenu(Menu& menu, Vec3 textColor1, Vec3 textColor2)
@@ -125,11 +128,13 @@ void MenuRenderer::drawMenu(Menu& menu, Vec3 textColor1, Vec3 textColor2)
 			TextRenderer::CENTER, TextRenderer::CENTER);
 		text.end();
 	}
-
 }
 
 void MenuRenderer::createRingGeometry()
 {
+	if (!menu_)
+		return;
+
     GLfloat innerRadius = min(viewport.width, viewport.height) * 0.5 * 0.55;
 	GLfloat outerRadius = min(viewport.width, viewport.height) * 0.5 * 0.85;// 0.5 * sqrt(viewport.width * viewport.width + viewport.height * viewport.height);
     
@@ -149,8 +154,8 @@ void MenuRenderer::createRingGeometry()
     
 	// I want a consistent number of segments for a smooth circle regardless of the number of menu items.
 	// However, I also need the segments to align with the boundaries of the menu items.
-	unsigned stepsPerItem = std::max(1u, static_cast<unsigned>(128u / menuManager->top().getItems().size()));
-	unsigned numSteps = stepsPerItem * menuManager->top().getItems().size();
+	unsigned stepsPerItem = std::max(1u, static_cast<unsigned>(128u / menu_->getItems().size()));
+	unsigned numSteps = stepsPerItem * menu_->getItems().size();
 	this->indicesPerMenuItem = stepsPerItem * 6;
 
     unsigned jmod = 2 * numSteps;

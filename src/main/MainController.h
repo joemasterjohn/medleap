@@ -48,36 +48,43 @@ public:
     static MainController& getInstance();
 	const MainRenderer& getRenderer() const;
 
-	void showMenu(bool show);
+	VolumeController& volumeController() { return volumeController_; }
+	Transfer1DController& transfer1DController() { return histogramController; }
+	MenuController& menuController() { return menuController_; }
+
 	void pickColor(const Color& initialColor, std::function<void(const Color&)> callback);
 
 	void popController();
 	void pushController(Controller* controller);
 	void pushController(Controller* controller, Docking docking);
 
-private:
-    
+	void showTransfer1D(bool show);
 
-    
+	Controller* focusLayer();
+	void focusLayer(Controller* controller);
+	void setMode(Mode mode);
+
+private:    
     MainController();
-    // copy constructor and assignment operators are not implemented as this class is a singleton
-    MainController(const MainController& copy);
-    MainController& operator=(const MainController& copy);
 
+	// no copying
+    MainController(const MainController& copy) = delete;
+    MainController& operator=(const MainController& copy) = delete;
+	
 	void update();
 
-    void setMode(Mode mode);
     void toggleHistogram();
 	void chooseTrackedGestures();
 
+	std::stack<Controller*> focus_stack_;
 	GLFWwindow* window;
 	Leap::Controller leapController;
     MainRenderer renderer;
     SliceController sliceController;
-    VolumeController volumeController;
+	VolumeController volumeController_;
     VolumeInfoController volumeInfoController;
     Transfer1DController histogramController;
-	MenuController menuController;
+	MenuController menuController_;
 	ColorPickController colorPickController;
 	OrientationController orientationController;
     std::list<Controller*> activeControllers;
@@ -86,11 +93,13 @@ private:
     bool showHistogram;
     TextRenderer text;
     VolumeLoader loader;
-	bool menuOn;
 	int width;
 	int height;
 	double mMouseX;
 	double mMouseY;
+
+	void pushFocus(Controller* focus);
+	void popFocus();
 };
 
 #endif /* defined(__medleap__MainController__) */
