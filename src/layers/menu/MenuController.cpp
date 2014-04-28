@@ -10,9 +10,10 @@
 using namespace std;
 using namespace gl;
 
-MenuController::MenuController()
+
+MenuController::MenuController() :
+	transition_(std::chrono::milliseconds(250))
 {
-	visible_ = false;
 }
 
 MenuController::~MenuController()
@@ -26,58 +27,56 @@ MenuRenderer* MenuController::getRenderer()
 
 void MenuController::hideMenu()
 {
-	visible_ = false;
-	menu_ = nullptr;
-	renderer.menu(nullptr);
 	finger_tracker_.tracking(false);
 	renderer.highlight(-1);
 	renderer.progress_ = 0.0f;
+	transition_.state(Transition::State::decrease);
 }
 
 void MenuController::showMainMenu()
 {
-	visible_ = true;
 	Menu* m = new MainMenu;
 	menu_ = std::unique_ptr<Menu>(m);
 	renderer.menu(m);
+	transition_.state(Transition::State::increase);
 }
 
 void MenuController::showContextMenu()
 {
 	Controller* focusLayer = MainController::getInstance().focusLayer();
 	if (focusLayer) {
-		visible_ = true;
 		menu_ = move(focusLayer->contextMenu());
 		renderer.menu(menu_.get());
+		transition_.state(Transition::State::increase);
 	}
 }
 
 bool MenuController::keyboardInput(GLFWwindow* window, int key, int action, int mods)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		if (visible_) {
+		if (transition_.full()) {
 			hideMenu();
-		} else {
+		} else if (transition_.empty()) {
 			showMainMenu();
 		}
 	}
 	else if (key == GLFW_KEY_TAB && action == GLFW_PRESS) {
-		if (visible_) {
+		if (transition_.full()) {
 			hideMenu();
-		} else {
+		} else if (transition_.empty()) {
 			showContextMenu();
 		}
 	}
 
-	return !visible_;
+	return transition_.empty();
 }
 
 bool MenuController::mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y)
 {
-	if (!visible_)
+	if (transition_.empty())
 		return true;
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+	if (transition_.full() && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		int selected = calcHighlightedMenu(x, y);
 		(*menu_)[selected].trigger();
 	}
@@ -87,7 +86,7 @@ bool MenuController::mouseButton(GLFWwindow* window, int button, int action, int
 
 bool MenuController::mouseMotion(GLFWwindow* window, double x, double y)
 {
-	if (!visible_)
+	if (transition_.empty())
 		return true;
 
 	int item = calcHighlightedMenu(x, y);
@@ -96,18 +95,12 @@ bool MenuController::mouseMotion(GLFWwindow* window, double x, double y)
 	return false;
 }
 
-bool  MenuController::scroll(GLFWwindow* window, double dx, double dy)
-{
-	return true;
-}
-
 int MenuController::calcHighlightedMenu(double x, double y)
 {
     x = (x - renderer.getViewport().width / 2.0);
     y = (y - renderer.getViewport().height / 2.0);
 	double radians = Vec2d(x, y).anglePositive();
 	return calcHighlightedMenu(radians);
-
 }
 
 int MenuController::calcHighlightedMenu(double radians)
@@ -122,9 +115,7 @@ int MenuController::calcHighlightedMenu(double radians)
 
 bool MenuController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
-	static long howLong = 0;
-
-	if (!visible_) {
+	if (transition_.empty()) {
 		Leap::GestureList gestures = currentFrame.gestures();
 		for (const Leap::Gesture& g : gestures) {
 			if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
@@ -169,15 +160,16 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 					}
 
 				}
-
-
 			}
 		}
 	}
 
-	return !visible_;
+	return false;
 }
 
 void MenuController::update(std::chrono::milliseconds elapsed)
 {
+	transition_.update(elapsed);
+	renderer.visibility_ = transition_.progress();
+	std::cout << transition_.progress() << std::endl;
 }

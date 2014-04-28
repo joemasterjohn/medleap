@@ -5,6 +5,7 @@
 #include "MenuRenderer.h"
 #include "gl/math/Math.h"
 #include "leap/OneFingerTracker.h"
+#include "util/Transition.h"
 #include <memory>
 
 class MenuController : public Controller
@@ -17,14 +18,15 @@ public:
 	bool keyboardInput(GLFWwindow* window, int key, int action, int mods) override;
 	bool mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y) override;
 	bool mouseMotion(GLFWwindow* window, double x, double y) override;
-	bool scroll(GLFWwindow* window, double dx, double dy) override;
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame) override;
 	void update(std::chrono::milliseconds elapsed) override;
-
+	
 	void hideMenu();
+	void showMainMenu();
+	void showContextMenu();
 
 private:
-	bool visible_;
+	Transition transition_;
     std::string workingDir;
 	std::unique_ptr<Menu> menu_;
 	MenuRenderer renderer;
@@ -33,9 +35,6 @@ private:
 
 	int calcHighlightedMenu(double x, double y);
 	int calcHighlightedMenu(double radians);    
-
-	void showMainMenu();
-	void showContextMenu();
 };
 
 #endif /* defined(__medleap__MenuController__) */

@@ -8,7 +8,7 @@ using namespace gl;
 
 MenuRenderer::MenuRenderer() : 
 	highlighted(-1),
-	visibility_(1.0f),
+	visibility_(0.0f),
 	setShaderState(nullptr),
 	indexCount(0),
 	indexType(0),
@@ -43,7 +43,7 @@ void MenuRenderer::draw()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     menuShader.enable();
-    glUniformMatrix4fv(menuShader.getUniform("modelViewProjection"), 1, false, modelViewProjection);
+    glUniformMatrix4fv(menuShader.getUniform("modelViewProjection"), 1, false, modelViewProjection * gl::scale(visibility_));
     menuVBO.bind();
     menuIBO.bind();    
     setShaderState();

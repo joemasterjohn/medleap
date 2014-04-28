@@ -21,11 +21,11 @@ public:
 
 	float progress_;
 	gl::Vec2 leap;
+	float visibility_;
 
 private:
 	Menu* menu_;
 	int highlighted;
-	float visibility_;
     
 	gl::Mat4 modelViewProjection;
     gl::Buffer menuVBO;
