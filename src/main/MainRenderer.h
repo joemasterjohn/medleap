@@ -3,7 +3,7 @@
 
 #include "gl/glew.h"
 #include <GLFW/glfw3.h>
-#include "layers/Renderer.h"
+#include "layers/Controller.h"
 #include <list>
 #include "gl/math/Math.h"
 
@@ -19,22 +19,22 @@ public:
     void draw(int width, int height);
     
     /** Pushes a render layer to the drawing stack. */
-    void pushLayer(Renderer* layer);
+    void pushLayer(Controller* layer);
     
     /** Pushes a render layer and docks it to the left. All non-docked,lower-level layers will be pushed right. */
-    void dockLeft(Renderer* layer, double percentWidth);
+	void dockLeft(Controller* layer, double percentWidth);
     
     /** Pushes a render layer and docks it to the right. All non-docked, lower-level layers will be pushed left. */
-    void dockRight(Renderer* layer, double percentWidth);
+	void dockRight(Controller* layer, double percentWidth);
     
     /** Pushes a render layer and docks it to the bottom. All non-docked, lower-level layers will be pushed up. */
-    void dockBottom(Renderer* layer, double percentHeight);
+	void dockBottom(Controller* layer, double percentHeight);
     
     /** Pushes a render layer and docks it to the top. All non-docked, lower-level layers will be pushed down. */
-    void dockTop(Renderer* layer, double percentHeight);
+	void dockTop(Controller* layer, double percentHeight);
     
     /** Pops the top layer from the drawing stack. Returns the popped layer or NULL if empty. */
-    Renderer* popLayer();
+	Controller* popLayer();
     
     /** Pops all layers off the drawing stack. */
     void clearLayers();
@@ -46,7 +46,7 @@ public:
 	void setDarkBG();
     
 private:
-    std::list<Renderer*> activeLayers;
+	std::list<Controller*> activeLayers;
 	GLuint vao;
 	gl::Vec3 bgColor;
     
@@ -65,7 +65,7 @@ private:
     Docking bottomDocking;
     Docking topDocking;
     
-    void updateViewport(Renderer* renderer, int layer, int width, int height);
+	void updateViewport(Controller* renderer, int layer, int width, int height);
 };
 
 #endif /* defined(__medleap__MainRenderer__) */

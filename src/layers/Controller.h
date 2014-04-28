@@ -3,7 +3,7 @@
 
 #include "gl/glew.h"
 #include <GLFW/glfw3.h>
-#include "Renderer.h"
+#include "gl/Viewport.h"
 #include "Leap.h"
 #include <set>
 #include <chrono>
@@ -16,9 +16,6 @@ class Controller
 public:
     /** Virtual destructor */
     virtual ~Controller() {}
-    
-    /** Returns a pointer to the controller's renderer, or NULL if this controller doesn't have one */
-    virtual Renderer* getRenderer() = 0;
     
     /** Keyboard input handler. Returns TRUE if input should pass through to next controller; false if consumed in this controller. */
     virtual bool keyboardInput(GLFWwindow* window, int key, int action, int mods)
@@ -62,6 +59,11 @@ public:
 	{
 	}
 
+	/** Draw layer */
+	virtual void draw()
+	{
+	}
+
 	/** If this layer has some context menu, it can be created here */
 	virtual std::unique_ptr<Menu> contextMenu()
 	{
@@ -71,6 +73,42 @@ public:
 	/** If true, this controller will suppress any global Leap gestures like opening the menu */
 	virtual bool modal() const {
 		return false;
+	}
+
+	/** Called when this controller gains Leap focus */
+	virtual void gainFocus()
+	{
+	}
+
+	/** Called when this controller had Leap focus and is losing it */
+	virtual void loseFocus()
+	{
+	}
+
+	void setViewport(int x, int y, int width, int height)
+	{
+		bool changed = viewport_.width != width || viewport_.height != height;
+		viewport_.x = x;
+		viewport_.y = y;
+		viewport_.width = width;
+		viewport_.height = height;
+
+		if (changed)
+			resize();
+	}
+
+	const gl::Viewport& getViewport()
+	{
+		return viewport_;
+	}
+
+protected:
+	gl::Viewport viewport_;
+
+private:
+	/** Rendering surface area is resized */
+	virtual void resize()
+	{
 	}
 };
 

@@ -49,14 +49,14 @@ void MainRenderer::draw(int width, int height)
     
     // draw from stack
     int layer = 0;
-    for (Renderer* r : activeLayers) {
+	for (Controller* r : activeLayers) {
         updateViewport(r, layer, width, height);
         r->draw();
         layer++;
     }
 }
 
-void MainRenderer::updateViewport(Renderer* renderer, int layer, int width, int height)
+void MainRenderer::updateViewport(Controller* renderer, int layer, int width, int height)
 {
     int x = 0;
     int y = 0;
@@ -97,45 +97,45 @@ void MainRenderer::updateViewport(Renderer* renderer, int layer, int width, int 
     renderer->getViewport().apply();
 }
 
-void MainRenderer::pushLayer(Renderer* layer)
+void MainRenderer::pushLayer(Controller* layer)
 {
     activeLayers.push_back(layer);
 }
 
-void MainRenderer::dockLeft(Renderer* layer, double percent)
+void MainRenderer::dockLeft(Controller* layer, double percent)
 {
     leftDocking.percent = percent;
     leftDocking.layerIndex = static_cast<int>(activeLayers.size());
     pushLayer(layer);
 }
 
-void MainRenderer::dockRight(Renderer* layer, double percent)
+void MainRenderer::dockRight(Controller* layer, double percent)
 {
     rightDocking.percent = percent;
     rightDocking.layerIndex = static_cast<int>(activeLayers.size());
     pushLayer(layer);
 }
 
-void MainRenderer::dockBottom(Renderer* layer, double percent)
+void MainRenderer::dockBottom(Controller* layer, double percent)
 {
     bottomDocking.percent = percent;
 	bottomDocking.layerIndex = static_cast<int>(activeLayers.size());
     pushLayer(layer);
 }
 
-void MainRenderer::dockTop(Renderer* layer, double percent)
+void MainRenderer::dockTop(Controller* layer, double percent)
 {
     topDocking.percent = percent;
 	topDocking.layerIndex = static_cast<int>(activeLayers.size());
     pushLayer(layer);
 }
 
-Renderer* MainRenderer::popLayer()
+Controller* MainRenderer::popLayer()
 {
     if (activeLayers.empty())
         return NULL;
     
-    Renderer* popped = activeLayers.back();
+	Controller* popped = activeLayers.back();
     activeLayers.pop_back();
     
     // check if this was a docked layer and remove if so

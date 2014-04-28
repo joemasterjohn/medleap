@@ -23,27 +23,39 @@ MainMenu::MainMenu() : Menu("Main Menu")
 		});
 	}
 
+	
 	{
-		MenuItem& item = createItem("2D/3D");
+		MenuItem& item = createItem("Test");
 		item.setAction([]{
 			MainController& mc = MainController::getInstance();
-			if (mc.getMode() == MainController::MODE_2D) {
-				mc.setMode(MainController::MODE_3D);
-			} else {
-				mc.setMode(MainController::MODE_2D);
-			}
+			mc.menuController().hideMenu();
+			mc.pickColor(ColorRGB(1, 0, 0, 1), [](const Color& color){
+				std::cout << color.rgb().vec3() << std::endl;
+			});
+		});
+	}
+
+	createItem("Load");
+
+	{
+		MenuItem& item = createItem("View 3D");
+		item.setAction([]{
+			MainController& mc = MainController::getInstance();
+			mc.showTransfer1D(false);
+			mc.setMode(MainController::MODE_3D);
+			mc.focusLayer(&mc.volumeController());
 			mc.menuController().hideMenu();
 		});
 	}
 
-	createItem("Edit");
-	createItem("Load");
 
 	{
-		MenuItem& item = createItem("View");
+		MenuItem& item = createItem("View 2D");
 		item.setAction([]{
 			MainController& mc = MainController::getInstance();
-			mc.focusLayer(&mc.volumeController());
+			mc.showTransfer1D(false);
+			mc.setMode(MainController::MODE_2D);
+			mc.focusLayer(&mc.sliceController());
 			mc.menuController().hideMenu();
 		});
 	}

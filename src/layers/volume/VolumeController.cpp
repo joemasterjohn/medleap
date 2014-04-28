@@ -1,26 +1,143 @@
 #include "VolumeController.h"
+#include "BoxSlicer.h"
+#include "gl/util/Draw.h"
+#include "main/MainConfig.h"
 
 using namespace gl;
+using namespace std;
 
-VolumeController::VolumeController()
+VolumeController::VolumeController() : cursorGeom(1, 2)
 {
     mouseDragLeftButton = false;
     mouseDragRightButton = false;
+
+	dirty = true;
+	opacityScale = 1.0f;
+	renderMode = VR;
+	shading = true;
+	drawnHighRes = false;
+	cursorActive = false;
+	cursorRadius = 0.1;
+	useJitter = false;
+
+	volumeTexture.generate(GL_TEXTURE_3D);
+	gradientTexture.generate(GL_TEXTURE_3D);
+
+	proxyVertices.generateVBO(GL_DYNAMIC_DRAW);
+	proxyIndices.generateIBO(GL_DYNAMIC_DRAW);
+
+	camera.setView(lookAt(Vec3(0, 0, 1), Vec3(0, 0, 0), Vec3(0, 1, 0)));
+	//camera.setView(lookAt(1, 1, 1, 0, 0, 0, 0, 1, 0));
+	//camera.setView(lookAt(0, 0, 1.5f, 0, 0, 0, 0, 1, 0));
+	boxShader = Program::create("shaders/volume_clut.vert", "shaders/volume_clut.frag");
+	boxShader.enable();
+	glUniform1i(boxShader.getUniform("tex_volume"), 0);
+	glUniform1i(boxShader.getUniform("tex_gradients"), 1);
+	glUniform1i(boxShader.getUniform("tex_clut"), 2);
+	glUniform1i(boxShader.getUniform("tex_jitter"), 3);
+
+	fullResRT.setInternalColorFormat(GL_RGB16F);
+	fullResRT.generate(viewport_.width, viewport_.height, true);
+	lowResRT.setInternalColorFormat(GL_RGB16F);
+	lowResRT.generate(viewport_.width / 2, viewport_.height / 2, true);
+	fullScreenQuad.generate();
+
+	cursor3DShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
+	cursor3DVBO.generateVBO(GL_STATIC_DRAW);
+	cursor3DVBO.bind();
+	cursorGeom.fill(cursor3DVBO);
+
+	MainConfig cfg;
+	minSlices = cfg.getValue<unsigned>(MainConfig::MIN_SLICES);
+	maxSlices = cfg.getValue<unsigned>(MainConfig::MAX_SLICES);
+
+
+	// stochastic jittering texture
+	{
+		unsigned size = 32;
+		vector<unsigned char> buf;
+		srand((unsigned)time(NULL));
+		for (unsigned i = 0; i < size*size; ++i)
+			buf.push_back(static_cast<unsigned char>(rand() * 255.0 / RAND_MAX));
+
+		jitterTexture.generate(GL_TEXTURE_2D);
+		jitterTexture.bind();
+		jitterTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		jitterTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		jitterTexture.setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+		jitterTexture.setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+		jitterTexture.setData2D(GL_RED, size, size, GL_RED, GL_UNSIGNED_BYTE, &buf[0]);
+	}
 }
 
-VolumeController::~VolumeController()
+Camera& VolumeController::getCamera()
 {
-}
-
-VolumeRenderer* VolumeController::getRenderer()
-{
-    return &renderer;
+	return camera;
 }
 
 void VolumeController::setVolume(VolumeData* volume)
 {
-    this->volume = volume;
-    renderer.setVolume(volume);
+	this->volume = volume;
+
+	GLenum internalFormat;
+	switch (volume->getType()) {
+	case GL_UNSIGNED_BYTE: internalFormat = GL_R8; break;
+	case GL_UNSIGNED_SHORT: internalFormat = GL_R16; break;
+	case GL_BYTE: internalFormat = GL_R8_SNORM; break;
+	case GL_SHORT: internalFormat = GL_R16_SNORM; break;
+	default: internalFormat = GL_RED; break;
+	}
+
+	volumeTexture.bind();
+	volumeTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	volumeTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	volumeTexture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP);
+	volumeTexture.setParameter(GL_TEXTURE_WRAP_R, GL_CLAMP);
+	volumeTexture.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	volumeTexture.setData3D(
+		internalFormat,
+		volume->getWidth(),
+		volume->getHeight(),
+		volume->getDepth(),
+		volume->getFormat(),
+		volume->getType(),
+		volume->getData());
+
+	// gradient texture will be 8-bits per channel (RGB format)
+	{
+		Vec3 minG = volume->getMinGradient();
+		Vec3 maxG = volume->getMaxGradient();
+		Vec3 dG = maxG - minG;
+		const std::vector<Vec3>& gradients = volume->getGradients();
+
+		unsigned char* data = new unsigned char[gradients.size() * 3];
+		unsigned char* p = data;
+
+		for (const Vec3& g : gradients) {
+			*p++ = static_cast<unsigned char>(((g.x - minG.x) / dG.x) * 255);
+			*p++ = static_cast<unsigned char>(((g.y - minG.y) / dG.y) * 255);
+			*p++ = static_cast<unsigned char>(((g.z - minG.z) / dG.z) * 255);
+		}
+
+		gradientTexture.bind();
+		gradientTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		gradientTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		gradientTexture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		gradientTexture.setParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		gradientTexture.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		gradientTexture.setData3D(
+			GL_RGB,
+			volume->getWidth(),
+			volume->getHeight(),
+			volume->getDepth(),
+			GL_RGB,
+			GL_UNSIGNED_BYTE,
+			data);
+
+		delete[] data;
+	}
 }
 
 bool VolumeController::keyboardInput(GLFWwindow* window, int key, int action, int mods)
@@ -29,24 +146,24 @@ bool VolumeController::keyboardInput(GLFWwindow* window, int key, int action, in
 	{
 	case GLFW_KEY_1:
 		if (action == GLFW_PRESS)
-			renderer.setOpacityScale(renderer.getOpacityScale() - 0.1f);
+			setOpacityScale(getOpacityScale() - 0.1f);
 		break;
 	case GLFW_KEY_2:
 		if (action == GLFW_PRESS)
-			renderer.setOpacityScale(renderer.getOpacityScale() + 0.1f);
+			setOpacityScale(getOpacityScale() + 0.1f);
 		break;
 	case GLFW_KEY_V:
 		if (action == GLFW_PRESS)
-			renderer.cycleMode();
+			cycleMode();
 		break;
 	case GLFW_KEY_L:
 		if (action == GLFW_PRESS)
-			renderer.toggleShading();
+			toggleShading();
 		break;
 	case GLFW_KEY_J:
 		if (action == GLFW_PRESS) {
-			renderer.useJitter = !renderer.useJitter;
-			renderer.markDirty();
+			useJitter = !useJitter;
+			markDirty();
 		}
 		break;
 	}
@@ -59,14 +176,14 @@ bool VolumeController::mouseButton(GLFWwindow* window, int button, int action, i
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         mouseDragLeftButton = action == GLFW_PRESS;
         if (mouseDragLeftButton) {
-            dragStartView = renderer.getCamera().getView();
+            dragStartView = camera.getView();
         }
     }
     
 //    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
 //        mouseDragRightButton = action == GLFW_PRESS;
 //        if (mouseDragRightButton) {
-//            dragStartView = renderer.getCamera().getView();
+//            dragStartView = camera.getView();
 //        }
 //        renderer.setMoving(mouseDragRightButton);
 //    }
@@ -76,7 +193,7 @@ bool VolumeController::mouseButton(GLFWwindow* window, int button, int action, i
 
 bool VolumeController::mouseMotion(GLFWwindow* window, double x, double y)
 {
-    if (!renderer.getViewport().contains(x, y))
+    if (!viewport_.contains(x, y))
         return true;
 
     
@@ -88,14 +205,14 @@ bool VolumeController::mouseMotion(GLFWwindow* window, double x, double y)
         
         Mat4 m1 = gl::rotation(static_cast<float>(pitch), dragStartView.row(0));
         Mat4 m2 = gl::rotation(static_cast<float>(yaw), dragStartView.row(1));
-        renderer.getCamera().setView(dragStartView * m1 * m2);
-        renderer.markDirty();
+        camera.setView(dragStartView * m1 * m2);
+        markDirty();
     } else if (mouseDragRightButton) {
 //        double dx = x - dragStartX;
 //        double dy = y - dragStartY;
 //        
 //        Mat4 tm = translation(dx*0.002, dy*0.002, 0);
-//        renderer.getCamera().setView(tm * dragStartView);
+//        camera.setView(tm * dragStartView);
 //        
     } else {
         dragStartX = x;
@@ -108,8 +225,8 @@ bool VolumeController::mouseMotion(GLFWwindow* window, double x, double y)
 bool VolumeController::scroll(GLFWwindow* window, double dx, double dy)
 {
     if (!mouseDragLeftButton) {
-        renderer.getCamera().translateBackward(static_cast<float>(dy * 0.2f));
-        renderer.markDirty();
+        camera.translateBackward(static_cast<float>(dy * 0.2f));
+        markDirty();
     }
     return true;
 }
@@ -126,45 +243,305 @@ bool VolumeController::leapInput(const Leap::Controller& leapController, const L
 	if (fingers.count() > 0) {
 		Leap::Finger p = fingers.frontmost();
 
-		if (!renderer.cursorActive && p.tipVelocity().magnitude() < 100) {
+		if (!cursorActive && p.tipVelocity().magnitude() < 100) {
 			framesSlow++;
 			if (framesSlow > 40) {
-				renderer.cursorActive = true;
+				cursorActive = true;
 				toolStart.x = p.tipPosition().x;
 				toolStart.y = p.tipPosition().y;
 				toolStart.z = p.tipPosition().z;
-				oldCursorPos = renderer.cursor3D;
+				oldCursorPos = cursor3D;
 				framesSlow = 0;
 			}
 		}
 
-		if (renderer.cursorActive) {
+		if (cursorActive) {
 
 			if (p.tipVelocity().magnitude() > 1200) {
 				framesSlow = 0;
-				renderer.cursorActive = false;
+				cursorActive = false;
 
 			}
 			else {
 	
 				Vec3 d = Vec3(p.tipPosition().x, p.tipPosition().y, p.tipPosition().z) - toolStart;
 
-				Camera& cam = renderer.getCamera();
+				Camera& cam = camera;
 				Vec3 offset;
 				offset += cam.getRight() * d.x * 0.003;
 				offset += cam.getUp() * d.y* 0.003;
 				offset += cam.getForward() * -d.z* 0.003;
 
-				renderer.cursor3D = oldCursorPos + offset;
-				renderer.markDirty();
+				cursor3D = oldCursorPos + offset;
+				markDirty();
 			}
 		}
 	}
 
 	if (currentFrame.fingers().count() == 0) {
 		framesSlow = 0;
-		renderer.cursorActive = false;
+		cursorActive = false;
 	}
 
 	return true;
+}
+
+void VolumeController::draw()
+{
+	static int cleanFrames = 0;
+	static gl::Texture currentTexture;
+
+	// draw to texture
+	if (dirty) {
+		lowResRT.bind();
+		lowResRT.clear();
+		draw(4.0, true, lowResRT.getColorTarget().width(), lowResRT.getColorTarget().height());
+		lowResRT.unbind();
+		dirty = false;
+		drawnHighRes = false;
+		cleanFrames = 1;
+		currentTexture = lowResRT.getColorTarget();
+	} else if (!drawnHighRes && cleanFrames++ > 30) {
+		fullResRT.bind();
+		fullResRT.clear();
+		draw(1.0, false, fullResRT.getColorTarget().width(), fullResRT.getColorTarget().height());
+		fullResRT.unbind();
+		drawnHighRes = true;
+		currentTexture = fullResRT.getColorTarget();
+	}
+
+	// draw from texture to screen
+	viewport_.apply();
+	fullScreenQuad.draw(currentTexture);
+}
+
+void VolumeController::resize()
+{
+	fullResRT.resize(viewport_.width, viewport_.height);
+	lowResRT.resize(viewport_.width / 2, viewport_.height / 2);
+	//camera.setProjection(ortho(-0.5f, 0.5f, -0.5f/viewport_.aspect(), 0.5f/viewport_.aspect(), 0, 200));
+	camera.setProjection(perspective(0.8726388f, viewport_.aspect(), 0.1f, 100.0f));
+	markDirty();
+}
+
+void VolumeController::draw(double samplingScale, bool limitSamples, int w, int h)
+{
+	//glEnable(GL_DEPTH_TEST);
+	//{
+	//	glEnable(GL_CULL_FACE);
+	//	glCullFace(GL_FRONT);
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//	cursor3DShader.enable();
+	//	cursor3DVBO.bind();
+	//	glUniform4f(cursor3DShader.getUniform("color"), 0.0f, cursorActive ? 1.0f : 0.0f, 1.0f, 1.0f);
+	//	glUniformMatrix4fv(cursor3DShader.getUniform("modelViewProjection"), 1, false, camera.getProjection() * camera.getView() * translation(cursor3D) * scale(cursorRadius, cursorRadius, cursorRadius));
+	//	int loc = cursor3DShader.getAttribute("vs_position");
+	//	glEnableVertexAttribArray(loc);
+	//	glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
+	//	glDrawArrays(GL_TRIANGLES, 0, cursorGeom.getIndices().size());
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//	glDisable(GL_CULL_FACE);
+	//}
+
+	// proxy geometry
+	glActiveTexture(GL_TEXTURE3);
+	jitterTexture.bind();
+	glActiveTexture(GL_TEXTURE2);
+	clutTexture.bind();
+	glActiveTexture(GL_TEXTURE1);
+	gradientTexture.bind();
+	glActiveTexture(GL_TEXTURE0);
+	volumeTexture.bind();
+
+
+
+
+	boxShader.enable();
+
+	updateSlices(samplingScale, limitSamples);
+
+
+	Mat4 mvp = camera.getProjection() * camera.getView();
+	glUniformMatrix4fv(boxShader.getUniform("modelViewProjection"), 1, false, mvp);
+	glUniformMatrix4fv(boxShader.getUniform("modelView"), 1, false, camera.getView());
+
+	glUniform3fv(boxShader.getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
+	glUniform3fv(boxShader.getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
+	glUniform1i(boxShader.getUniform("signed_normalized"), volume->isSigned());
+	glUniform1i(boxShader.getUniform("use_shading"), (renderMode != MIP && shading));
+
+
+	boxShader.uniform("visible_min", volume->visible().left());
+	boxShader.uniform("visible_scale", 1.0f / volume->visible().width());
+
+	glUniform1i(boxShader.getUniform("render_mode"), renderMode);
+
+	glUniform1i(boxShader.getUniform("use_jitter"), useJitter);
+
+
+
+
+	glUniform3f(boxShader.getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
+	glUniform3f(boxShader.getUniform("camera_pos"), camera.getEye().x, camera.getEye().y, camera.getEye().z);
+
+	glUniform3f(boxShader.getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
+	glUniform1f(boxShader.getUniform("opacity_scale"), opacityScale);
+	Vec3 r = volume->getMaxGradient() - volume->getMinGradient();
+	glUniform3f(boxShader.getUniform("rangeGradient"), r.x, r.y, r.z);
+
+	glUniform3f(boxShader.getUniform("cursor_position"), cursor3D.x, cursor3D.y, cursor3D.z);
+
+
+
+
+
+
+	Vec4 cpss = mvp * Vec4(cursor3D.x, cursor3D.y, cursor3D.z, 1.0);
+	cpss /= cpss.w;
+	cpss.x = (cpss.x + 1.0) * (viewport_.width / 2.0);
+	cpss.y = (cpss.y + 1.0) * (viewport_.height / 2.0);
+	glUniform3f(boxShader.getUniform("cursor_position_ss"), cpss.x, cpss.y, cpss.z);
+
+
+
+
+	Vec4 cpee = camera.getView() * Vec4(cursor3D.x, cursor3D.y, cursor3D.z, 1.0f);
+	glUniform3f(boxShader.getUniform("cursor_position_es"), cpee.x, cpee.y, cpee.z);
+
+
+	glUniform1f(boxShader.getUniform("cursor_radius_ws"), cursorRadius);
+	float cursorRadiusSS = gl::projectedRadius(0.8726388, (cursor3D - camera.getEye()).length(), cursorRadius) * viewport_.height / 2.0f;
+	glUniform1f(boxShader.getUniform("cursor_radius_ss"), cursorRadiusSS);
+
+	glUniform2f(boxShader.getUniform("window_size"), w, h);
+
+
+	glUniform1i(boxShader.getUniform("cursor_on"), true);
+
+	int loc = boxShader.getAttribute("vs_position");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
+
+
+
+	switch (renderMode)
+	{
+	case MIP:
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_MAX);
+		glBlendFunc(GL_ONE, GL_ONE);
+		break;
+	case VR:
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+	case ISOSURFACE:
+		glDisable(GL_BLEND);
+		//glUniform1f(boxShader.getUniform("isoValue"), volume->getCurrentWindow().getCenterNorm());
+		break;
+	default:
+		break;
+	}
+
+
+
+	glEnable(GL_PRIMITIVE_RESTART);
+	glPrimitiveRestartIndex(65535);
+	glDrawElements(GL_TRIANGLE_FAN, numSliceIndices, GL_UNSIGNED_SHORT, 0);
+	glDisable(GL_PRIMITIVE_RESTART);
+
+
+	glDisable(GL_DEPTH_TEST);
+
+	glDisable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
+
+	//static Draw d;
+	//d.setModelViewProj(gl::ortho2D(0, viewport_.width, 0, viewport_.height));
+	//d.begin(GL_LINES);
+	//d.color(1, 0, 0);
+	//d.circle(cpss.x, cpss.y, cursorRadiusSS, 32);
+	//d.end();
+	//d.draw();
+
+}
+
+void VolumeController::updateSlices(double samplingScale, bool limitSamples)
+{
+	float refSampleLength = volume->getBounds().getLength() / Vec3(volume->getWidth(), volume->getHeight(), volume->getDepth()).length();
+
+	// upload geometry
+	BoxSlicer slicer;
+	slicer.slice(volume->getBounds(), camera, refSampleLength * samplingScale, limitSamples ? maxSlices : -1);
+	proxyIndices.bind();
+	proxyIndices.data(&slicer.getIndices()[0], slicer.getIndices().size() * sizeof(GLushort));
+	proxyVertices.bind();
+	proxyVertices.data(&slicer.getVertices()[0], slicer.getVertices().size() * sizeof(slicer.getVertices()[0]));
+	numSliceIndices = static_cast<int>(slicer.getIndices().size());
+
+	this->currentNumSlices = slicer.sliceCount();
+	float actualSamplingLength = slicer.samplingLength();
+	float slRatio = actualSamplingLength / refSampleLength;
+
+	glUniform1f(boxShader.getUniform("opacity_correction"), slRatio);
+	glUniform1f(boxShader.getUniform("sampling_length"), actualSamplingLength);
+	glUniform1f(boxShader.getUniform("jitter_size"), 32.0f);
+}
+
+
+unsigned VolumeController::getCurrentNumSlices()
+{
+	return currentNumSlices;
+}
+
+void VolumeController::markDirty()
+{
+	dirty = true;
+}
+
+void VolumeController::setMode(VolumeController::RenderMode mode)
+{
+	this->renderMode = mode;
+	markDirty();
+}
+
+void VolumeController::cycleMode()
+{
+	renderMode = (VolumeController::RenderMode)((renderMode + 1) % VolumeController::NUM_OF_MODES);
+	markDirty();
+}
+
+VolumeController::RenderMode VolumeController::getMode()
+{
+	return renderMode;
+}
+
+void VolumeController::toggleShading()
+{
+	shading = !shading;
+	markDirty();
+}
+
+bool VolumeController::useShading()
+{
+	return shading;
+}
+
+void VolumeController::setCLUTTexture(Texture& texture)
+{
+	this->clutTexture = texture;
+	markDirty();
+}
+
+float VolumeController::getOpacityScale()
+{
+	return opacityScale;
+}
+
+void VolumeController::setOpacityScale(float scale)
+{
+	this->opacityScale = min(max(0.0f, scale), 1.0f);
+	markDirty();
 }

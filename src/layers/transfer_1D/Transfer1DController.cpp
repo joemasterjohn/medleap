@@ -2,6 +2,7 @@
 #include "main/MainController.h"
 
 using namespace gl;
+using namespace std;
 
 Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels(NULL)
 {
@@ -42,22 +43,71 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 		cluts.push_back(c);
 	}
 
-    renderer.setCLUT(&cluts[activeCLUT = 0]);
+	cluts[activeCLUT].saveTexture(clutTexture);
 
 	finger_tracker_.trackFunction(std::bind(&Transfer1DController::moveAndScale, this, std::placeholders::_1));
 	finger_tracker_.engageFunction([&](const Leap::Controller&){saved_interval_ = cluts[activeCLUT].interval(); });
 
+	histo1D.generate(GL_TEXTURE_2D);
+	transferFn.generate(GL_TEXTURE_2D);
+
+	shader = Program::create("shaders/tf1d_histo.vert", "shaders/tf1d_histo.frag");
+	histoProg = Program::create("shaders/tf1d_histo.vert", "shaders/tf1d_histo.frag");
+	histoOutlineProg = Program::create("shaders/tf1d_histo_outline.vert", "shaders/tf1d_histo_outline.frag");
+	colorShader = Program::create("shaders/histo_line.vert", "shaders/histo_line.frag");
+
+	shader.enable();
+	glUniform1i(shader.getUniform("tex_histogram"), 0);
+	glUniform1i(shader.getUniform("tex_transfer"), 1);
+
+	// vertex buffer for geometry: contains vertices for
+	// 1) the histogram quad (drawn as a texture)
+	// 2) the cursor / value marker line
+	GLfloat vertexData[] = {
+		// start of texture quad vertices
+		-1, -0.5, 0, 0,
+		1, -0.5, 1, 0,
+		1, 1, 1, 1,
+		-1, -0.5, 0, 0,
+		1, 1, 1, 1,
+		-1, 1, 0, 1,
+		// start of cursor line vertices
+		-1, -1, 0, 0,
+		-1, 1, 0, 0
+
+	};
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+
+	stride = 4 * sizeof(GLfloat);
+
+	// initialize clut strip
+	clutTexture.generate(GL_TEXTURE_1D);
+
+	{
+		bgShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
+		bgShader.enable();
+
+		GLfloat vertices[] = {
+			-1, -1,
+			+1, -1,
+			+1, +1,
+			-1, -1,
+			+1, +1,
+			-1, +1
+		};
+
+		bgBuffer.generate(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+		bgBuffer.bind();
+		bgBuffer.data(vertices, sizeof(vertices));
+	}
 }
 
 Transfer1DController::~Transfer1DController()
 {
     if (transfer1DPixels)
         delete transfer1DPixels;
-}
-
-Transfer1DRenderer* Transfer1DController::getRenderer()
-{
-    return &renderer;
 }
 
 std::unique_ptr<Menu> Transfer1DController::contextMenu()
@@ -98,24 +148,68 @@ void Transfer1DController::setVolume(VolumeData* volume)
             break;
     }
     
-    renderer.setHistogram(histogram);
-    renderer.setVolume(volume);
+	this->histogram = histogram;
+	int drawWidth = histogram->getNumBins();
+	int drawHeight = 256;
+
+	std::vector<unsigned char> pixels(drawWidth * drawHeight);
+	std::fill(pixels.begin(), pixels.end(), 0);
+
+	double logMaxFreq = std::log(histogram->getMaxFrequency() + 1);
+
+	for (int bin = 0; bin < histogram->getNumBins(); bin++) {
+		int size = histogram->getSize(bin);
+		double sizeNorm = std::log(size + 1) / logMaxFreq;
+
+		int binHeight = (int)(sizeNorm * drawHeight);
+
+		for (int j = 0; j < binHeight; j++) {
+			pixels[bin + j * drawWidth] = 255;
+		}
+	}
+
+	histo1D.bind();
+	histo1D.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	histo1D.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	histo1D.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	histo1D.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	histo1D.setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, &pixels[0]);
+
+
+	// histo vbo triangle strip
+	{
+		vector<Vec2> buffer;
+		for (unsigned i = 0; i < histogram->getNumBins(); ++i) {
+			float x = (float)i / (histogram->getNumBins() - 1);
+			float y = std::log(histogram->getSize(i) + 1) / logMaxFreq;
+			x = (x - 0.5f) * 2.0f;
+			y = (y - 0.5f) * 2.0f;
+			buffer.push_back({ x, y });
+			buffer.push_back({ x, -1.0f });
+		}
+
+		histoVBO.generateVBO(GL_STATIC_DRAW);
+		histoVBO.bind();
+		histoVBO.data(&buffer[0], buffer.size() * sizeof(Vec2));
+		histoVBOCount = buffer.size();
+	}
     
     if (transfer1DPixels)
         delete transfer1DPixels;
     transfer1DPixels = new GLubyte[histogram->getNumBins() * 256]; // 256 is height (shouldn't be hardcoded)
 }
 
-void Transfer1DController::setVolumeRenderer(VolumeRenderer* volumeRenderer)
+void Transfer1DController::setVolumeRenderer(VolumeController* volumeRenderer)
 {
     this->volumeRenderer = volumeRenderer;
-    volumeRenderer->setCLUTTexture(renderer.getCLUTTexture());
+    volumeRenderer->setCLUTTexture(clutTexture);
 }
 
-void Transfer1DController::setSliceRenderer(SliceRenderer* sliceRenderer)
+void Transfer1DController::setSliceRenderer(SliceController* sliceRenderer)
 {
     this->sliceRenderer = sliceRenderer;
-    sliceRenderer->setCLUTTexture(renderer.getCLUTTexture());
+	sliceRenderer->setCLUTTexture(clutTexture);
 }
 
 bool Transfer1DController::keyboardInput(GLFWwindow* window, int key, int action, int mods)
@@ -129,7 +223,7 @@ bool Transfer1DController::keyboardInput(GLFWwindow* window, int key, int action
 	}
     
 	if (key == GLFW_KEY_B && action == GLFW_PRESS) {
-		cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+		cluts[activeCLUT].saveTexture(clutTexture);
 		volumeRenderer->markDirty();
 	}
 
@@ -138,35 +232,33 @@ bool Transfer1DController::keyboardInput(GLFWwindow* window, int key, int action
 
 bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
 {
-    if (!renderer.getViewport().contains(x, y)) {
+    if (!viewport_.contains(x, y)) {
         return true;
     }
     
     
-    renderer.setCursor(static_cast<int>(x), static_cast<int>(y));
-    
     if (lMouseDrag) {
 
 		if (cluts[activeCLUT].mode() == CLUT::continuous) {
-			cluts[activeCLUT].interval().center(static_cast<float>(x) / renderer.getViewport().width);
-			cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+			cluts[activeCLUT].interval().center(static_cast<float>(x) / viewport_.width);
+			cluts[activeCLUT].saveTexture(clutTexture);
 			volumeRenderer->markDirty();
 		}
 		else if (selected_) {
 			const Interval& current = selected_->interval();
-			float newCenter = static_cast<float>(x / renderer.getViewport().width);
+			float newCenter = static_cast<float>(x / viewport_.width);
 			selected_->interval({ newCenter, current.width() });
-			cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+			cluts[activeCLUT].saveTexture(clutTexture);
 			volumeRenderer->markDirty();
 		}
 
 
     } else if (rMouseDrag) {
 		Interval& intv = cluts[activeCLUT].interval();
-		float cv = static_cast<float>(x) / renderer.getViewport().width;
+		float cv = static_cast<float>(x) / viewport_.width;
 		float cc = intv.center();
 		intv.width(2.0f * std::abs(cv - cc));
-		cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+		cluts[activeCLUT].saveTexture(clutTexture);
 		volumeRenderer->markDirty();
     }
    
@@ -188,17 +280,17 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		// clut marker drag
-		float center = static_cast<float>(x / renderer.getViewport().width);
+		float center = static_cast<float>(x / viewport_.width);
 		selected_ = cluts[activeCLUT].closestMarker(center);
 	}
 
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
-		float center = static_cast<float>(x / renderer.getViewport().width);
+		float center = static_cast<float>(x / viewport_.width);
 		selected_ = cluts[activeCLUT].closestMarker(center);
 
 		auto cb = [&](const Color& color) {
 			selected_->color(color);
-			cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+			cluts[activeCLUT].saveTexture(clutTexture);
 			volumeRenderer->markDirty();
 		};
 
@@ -246,21 +338,8 @@ void Transfer1DController::moveAndScale(const Leap::Controller& controller)
 	float w = std::max(0.0f, saved_interval_.width() + finger_tracker_.fingerGapDelta(controller.frame()) / 400.0f);
 	cluts[activeCLUT].interval().width(w);
 
-	cluts[activeCLUT].saveTexture(renderer.getCLUTTexture());
+	cluts[activeCLUT].saveTexture(clutTexture);
 	volumeRenderer->markDirty();
-}
-
-void Transfer1DController::updateTransferTex1D()
-{
-    gl::Texture& tex = renderer.getTransferFn();
-    tex.bind();
-    tex.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    tex.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    tex.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    tex.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    
-//    tex->setData2D(GL_RGB, texWidth, texHeight, GL_RGB, GL_UNSIGNED_BYTE, transfer1DPixels);
 }
 
 std::set<Leap::Gesture::Type> Transfer1DController::requiredGestures()
@@ -274,7 +353,7 @@ void Transfer1DController::nextCLUT()
 {
 	if (++activeCLUT == cluts.size())
 		activeCLUT = 0;
-	renderer.setCLUT(&cluts[activeCLUT]);
+	cluts[activeCLUT].saveTexture(clutTexture);
 	volumeRenderer->markDirty();
 }
 
@@ -282,6 +361,93 @@ void Transfer1DController::prevCLUT()
 {
 	if (--activeCLUT < 0)
 		activeCLUT = cluts.size() - 1;
-	renderer.setCLUT(&cluts[activeCLUT]);
+	cluts[activeCLUT].saveTexture(clutTexture);
 	volumeRenderer->markDirty();
+}
+
+void Transfer1DController::draw()
+{
+	static const int totalHeight = 80;
+	static const float colorBarHeight = 0.3f;
+	static const int histoHeight = totalHeight;
+
+	glViewport(viewport_.x, viewport_.y + viewport_.height * 0.2f, viewport_.width, viewport_.height * 0.8f);
+	drawHistogram();
+	glViewport(viewport_.x, viewport_.y, viewport_.width, viewport_.height * 0.2f);
+	drawBackground();
+	drawMarkerBar();
+}
+
+void Transfer1DController::drawMarkerBar()
+{
+	static Draw d;
+	d.begin(GL_TRIANGLES);
+	for (const CLUT::Marker& marker : cluts[activeCLUT].markers()) {
+		Vec3 c = marker.color().vec3();
+		float x = marker.interval().center();
+
+		if (cluts[activeCLUT].mode() == CLUT::continuous) {
+			x = x * cluts[activeCLUT].interval().width() + cluts[activeCLUT].interval().left();
+		}
+
+		// [0,1] to [-1,1]
+		x = (x - 0.5f) * 2.0f;
+
+		float l = x - 0.05f * 800.0f / viewport_.width;
+		float r = x + 0.05f * 800.0f / viewport_.width;
+		d.color(c.x, c.y, c.z);
+		d.vertex(l, -1);
+		d.vertex(x, .9f);
+		d.vertex(r, -1);
+	}
+	d.end();
+	d.draw();
+
+	d.begin(GL_LINES);
+	d.color(0.5f, 0.5f, 0.5f);
+	for (const CLUT::Marker& marker : cluts[activeCLUT].markers()) {
+		Vec3 c = marker.color().vec3();
+		float x = marker.interval().center();
+		if (cluts[activeCLUT].mode() == CLUT::continuous) {
+			x = x * cluts[activeCLUT].interval().width() + cluts[activeCLUT].interval().left();
+		}
+
+		x = (x - 0.5f) * 2.0f;
+		float l = x - 0.05f * 800.0f / viewport_.width;
+		float r = x + 0.05f * 800.0f / viewport_.width;
+		d.vertex(l, -1);
+		d.vertex(x, .9f);
+		d.vertex(x, .9f);
+		d.vertex(r, -1);
+	}
+	d.end();
+	d.draw();
+}
+
+void Transfer1DController::drawBackground()
+{
+	bgBuffer.bind();
+	bgShader.enable();
+	glUniform4f(bgShader.getUniform("color"), 0.0f, 0.0f, 0.0f, 1.0f);
+	glUniformMatrix4fv(bgShader.getUniform("modelViewProjection"), 1, false, Mat4());
+
+	GLint loc = bgShader.getAttribute("vs_position");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 2, GL_FLOAT, false, 2 * sizeof(GLfloat), 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void Transfer1DController::drawHistogram()
+{
+	histoVBO.bind();
+	histoProg.enable();
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, histoVBOCount);
+
+	histoOutlineProg.enable();
+	histoOutlineProg.uniform("color", 0.5f, 0.5f, 0.5f, 1.0f);
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * sizeof(GLfloat), 0);
+	glDrawArrays(GL_LINE_STRIP, 0, histoVBOCount / 2);
 }

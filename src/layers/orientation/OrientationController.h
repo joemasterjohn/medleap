@@ -2,20 +2,30 @@
 #define __medleap_OrientationController__
 
 #include "layers/Controller.h"
-#include "OrientationRenderer.h"
 #include "util/Camera.h"
 #include "data/VolumeData.h"
+#include "gl/Buffer.h"
+#include "gl/Program.h"
 
+/** Draws orientation cube in corner */
 class OrientationController : public Controller
 {
 public:
-	OrientationController() : camera(NULL) {}
-	OrientationRenderer* getRenderer() override { return &renderer; }
-	void setCamera(Camera* camera) { this->camera = camera; renderer.setCamera(camera); }
-	void setVolume(VolumeData* volume) { renderer.setVolume(volume); }
+	OrientationController();
+	void camera(Camera* camera) { camera_ = camera; }
+	void volume(VolumeData* volume) { volume_ = volume; }
+	void draw() override;
+
 private:
-	OrientationRenderer renderer;
-	Camera* camera;
+	Camera* camera_;
+	VolumeData* volume_;
+	gl::Buffer cube_vbo_;
+	gl::Buffer cube_ibo_;
+	gl::Program cube_prog_;
+	GLsizei face_index_count_;
+	GLsizei face_index_offset_;
+	GLsizei edge_index_count_;
+	GLsizei edge_index_offset_;
 };
 
 #endif // __medleap_OrientationController__

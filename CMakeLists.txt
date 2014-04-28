@@ -39,6 +39,8 @@ set(DATA_SHADERS
     shaders/tf1d_histo.frag
 	shaders/tf1d_histo_outline.vert
 	shaders/tf1d_histo_outline.frag
+	shaders/orientation_cube.vert
+	shaders/orientation_cube.frag
 )
 
 set(DATA_FONTS

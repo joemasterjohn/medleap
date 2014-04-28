@@ -8,10 +8,9 @@
 #endif
 #include <errno.h>
 
-DirectoryMenu::DirectoryMenu(std::string workingDir, MenuManager& menus) : 
+DirectoryMenu::DirectoryMenu(std::string workingDir) : 
 		Menu(workingDir), 
-		workingDir(workingDir),
-		menus(menus)
+		workingDir(workingDir)
 {
 	goIntoDir(workingDir, false);
 }
@@ -26,11 +25,11 @@ void DirectoryMenu::goIntoDir(const std::string& directory, bool flash)
 	name = workingDir;
 	items.clear();
 
-	if (flash)
-		menus.flash();
+	//if (flash)
+	//	menus.flash();
 
 	MenuItem& mi = createItem("<CANCEL>");
-	mi.setAction([this]{ menus.pop(); });
+	//mi.setAction([this]{ menus.pop(); });
 
 	DIR* dir = opendir(workingDir.c_str());
 	struct dirent* entry = readdir(dir);
@@ -73,7 +72,7 @@ void DirectoryMenu::goUpDir()
 void DirectoryMenu::load(const VolumeLoader::Source& source)
 {
 	MainController::getInstance().setVolumeToLoad(source);
-	menus.pop();
+	//menus.pop();
 	//MainController::getInstance().menuController().menu();
 	//MainController::getInstance().showMenu(false);
 }

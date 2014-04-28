@@ -126,6 +126,7 @@ void Camera::update()
     up = viewInverse.col(1);
     forward = viewInverse.col(2) * -1.0f;
     eye = viewInverse.col(3);
+	fireEvent();
 }
 
 void Camera::setView(const Mat4& view)
@@ -138,4 +139,24 @@ void Camera::setView(const Mat4& view)
 void Camera::setProjection(const Mat4& projection)
 {
     this->projection = projection;
+	fireEvent();
+}
+
+void Camera::addListener(Listener* l)
+{
+	listeners.push_back(l);
+}
+
+void Camera::removeListener(Listener* l)
+{
+	auto it = std::find(listeners.begin(), listeners.end(), l);
+	if (it != listeners.end()) {
+		listeners.erase(it);
+	}
+}
+
+void Camera::fireEvent()
+{
+	for (Listener* l : listeners)
+		l->cameraUpdated(*this);
 }

@@ -13,6 +13,7 @@
 #include "data/VolumeLoader.h"
 #include "Leap.h"
 #include <list>
+#include <stack>
 
 /** Main class (singleton) that controls the UI events and owns the rendering. */
 class MainController
@@ -48,6 +49,7 @@ public:
     static MainController& getInstance();
 	const MainRenderer& getRenderer() const;
 
+	SliceController& sliceController() { return sliceController_; }
 	VolumeController& volumeController() { return volumeController_; }
 	Transfer1DController& transfer1DController() { return histogramController; }
 	MenuController& menuController() { return menuController_; }
@@ -80,7 +82,7 @@ private:
 	GLFWwindow* window;
 	Leap::Controller leapController;
     MainRenderer renderer;
-    SliceController sliceController;
+	SliceController sliceController_;
 	VolumeController volumeController_;
     VolumeInfoController volumeInfoController;
     Transfer1DController histogramController;

@@ -65,11 +65,11 @@ void MainController::init(GLFWwindow* window)
     
     text.loadFont("menlo14");
     
-	volumeInfoController.getRenderer()->setVolumeRenderer(volumeController_.getRenderer());
-    volumeInfoController.getRenderer()->setSliceRenderer(sliceController.getRenderer());
-	histogramController.setVolumeRenderer(volumeController_.getRenderer());
-    histogramController.setSliceRenderer(sliceController.getRenderer());
-	orientationController.setCamera(&volumeController_.getRenderer()->getCamera());
+	volumeInfoController.setVolumeRenderer(&volumeController_);
+	volumeInfoController.setSliceRenderer(&sliceController_);
+	histogramController.setVolumeRenderer(&volumeController_);
+	histogramController.setSliceRenderer(&sliceController_);
+	orientationController.camera(&volumeController_.getCamera());
 
 	glfwGetWindowSize(window, &width, &height);
 }
@@ -81,7 +81,7 @@ void MainController::setMode(MainController::Mode mode)
         case MODE_2D:
             renderer.clearLayers();
             activeControllers.clear();
-            pushController(&sliceController);
+			pushController(&sliceController_);
             pushController(&volumeInfoController);
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
@@ -122,11 +122,11 @@ void MainController::setVolume(VolumeData* volume)
         setMode(mode);
     
     this->volume = volume;
-    sliceController.setVolume(volume);
+	sliceController_.setVolume(volume);
 	volumeController_.setVolume(volume);
     volumeInfoController.setVolume(volume);
     histogramController.setVolume(volume);
-	orientationController.setVolume(volume);
+	orientationController.volume(volume);
 }
 
 void MainController::setVolumeToLoad(const VolumeLoader::Source& source)
@@ -142,7 +142,7 @@ void MainController::startLoop()
 
 		if (loader.getState() == VolumeLoader::FINISHED) {
             setVolume(loader.getVolume());
-			volumeController_.getRenderer()->markDirty();
+			volumeController_.markDirty();
         }
 
 		update();
@@ -174,20 +174,30 @@ Controller* MainController::focusLayer()
 void MainController::focusLayer(Controller* controller)
 {
 	if (!focus_stack_.empty()) {
+		focus_stack_.top()->loseFocus();
 		focus_stack_.pop();
 	}
 	focus_stack_.push(controller);
+	controller->gainFocus();
 }
 
-void MainController::pushFocus(Controller* focus)
+void MainController::pushFocus(Controller* controller)
 {
-	focus_stack_.push(focus);
+	if (!focus_stack_.empty()) {
+		focus_stack_.top()->loseFocus();
+	}
+	focus_stack_.push(controller);
+	controller->gainFocus();
 }
 
 void MainController::popFocus()
 {
 	if (!focus_stack_.empty()) {
+		focus_stack_.top()->loseFocus();
 		focus_stack_.pop();
+		if (!focus_stack_.empty()) {
+			focus_stack_.top()->gainFocus();
+		}
 	}
 }
 
@@ -217,11 +227,13 @@ void MainController::update()
 	// leap input
 	if (leapController.isConnected()) {
 		Controller* focus = focusLayer();
+
+		bool menuPassThrough = true;
 		if (!focus || !focus->modal()) {
-			menuController_.leapInput(leapController, leapController.frame());
+			menuPassThrough = menuController_.leapInput(leapController, leapController.frame());
 		}
 
-		if (focus) {
+		if (focus && menuPassThrough) {
 			focus->leapInput(leapController, leapController.frame());
 		}
 	}
@@ -247,7 +259,7 @@ void MainController::keyboardInput(GLFWwindow *window, int key, int action, int 
 
 	if (key == GLFW_KEY_G && action == GLFW_PRESS) {
 		renderer.setBackgroundColor(Vec3(1.0f) - renderer.getBackgroundColor());
-		volumeController_.getRenderer()->markDirty();
+		volumeController_.markDirty();
 	}
 
 	if (key == GLFW_KEY_H && action == GLFW_PRESS)
@@ -302,8 +314,7 @@ void MainController::scroll(GLFWwindow *window, double dx, double dy)
 void MainController::popController()
 {
 	Controller* c = activeControllers.front();
-	if (c->getRenderer())
-		renderer.popLayer();
+	renderer.popLayer();
 	activeControllers.pop_front();
 
 	chooseTrackedGestures();
@@ -318,26 +329,25 @@ void MainController::pushController(Controller* controller)
 void MainController::pushController(Controller* controller, MainController::Docking docking)
 {
     activeControllers.push_front(controller);
-    if (controller->getRenderer()) {
         
-        switch (docking.position)
-        {
-            case MainController::Docking::LEFT:
-                renderer.dockLeft(controller->getRenderer(), docking.percent);
-                break;
-            case MainController::Docking::RIGHT:
-                renderer.dockRight(controller->getRenderer(), docking.percent);
-                break;
-            case MainController::Docking::BOTTOM:
-                renderer.dockBottom(controller->getRenderer(), docking.percent);
-                break;
-            case MainController::Docking::TOP:
-                renderer.dockTop(controller->getRenderer(), docking.percent);
-                break;
-            default:
-                renderer.pushLayer(controller->getRenderer());
-        }
+    switch (docking.position)
+    {
+        case MainController::Docking::LEFT:
+            renderer.dockLeft(controller, docking.percent);
+            break;
+        case MainController::Docking::RIGHT:
+            renderer.dockRight(controller, docking.percent);
+            break;
+        case MainController::Docking::BOTTOM:
+            renderer.dockBottom(controller, docking.percent);
+            break;
+        case MainController::Docking::TOP:
+            renderer.dockTop(controller, docking.percent);
+            break;
+        default:
+            renderer.pushLayer(controller);
     }
+    
 	chooseTrackedGestures();
 }
 

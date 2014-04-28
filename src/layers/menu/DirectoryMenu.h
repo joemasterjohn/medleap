@@ -2,18 +2,16 @@
 #define __medleap_DirectoryMenu__
 
 #include "Menu.h"
-#include "MenuManager.h"
 #include "data/VolumeLoader.h"
 
 class DirectoryMenu : public Menu
 {
 public:
-	DirectoryMenu(std::string workingDir, MenuManager& menus);
+	DirectoryMenu(std::string workingDir);
 	~DirectoryMenu();
         
 private:
     std::string workingDir;
-	MenuManager& menus;
 
 	void goIntoDir(const std::string& subDir, bool flash);
 	void goUpDir();

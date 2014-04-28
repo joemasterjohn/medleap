@@ -2,10 +2,18 @@
 #define CGL_CAMERA_H_
 
 #include "gl/math/Math.h"
+#include <vector>
 
 class Camera
 {
 public:
+	class Listener
+	{
+	public:
+		virtual ~Listener();
+		virtual void cameraUpdated(const Camera& camera) = 0;
+	};
+
     /// Creates a camera. Initially, the view and projection are identity matrices.
     Camera();
     
@@ -78,6 +86,10 @@ public:
     /// Adds a translation along the backward axis.
     void translateBackward(float units);
     
+	void addListener(Listener* l);
+
+	void removeListener(Listener* l);
+
 private:
 	gl::Mat4 view;
 	gl::Mat4 viewInverse;
@@ -86,8 +98,11 @@ private:
 	gl::Vec4 up;
 	gl::Vec4 right;
 	gl::Vec4 forward;
+
+	std::vector<Listener*> listeners;
     
     void update();
+	void fireEvent();
 };
 
 #endif // CGL_CAMERA_H_

@@ -1,19 +1,125 @@
 #include "VolumeInfoController.h"
+#include "main/MainController.h"
+#include <sstream>
+#include <iomanip>
+
+using namespace std;
+using namespace gl;
 
 VolumeInfoController::VolumeInfoController()
 {
 }
 
-VolumeInfoController::~VolumeInfoController()
-{
-}
-
-VolumeInfoRenderer* VolumeInfoController::getRenderer()
-{
-    return &renderer;
-}
-
 void VolumeInfoController::setVolume(VolumeData* volume)
 {
-    renderer.setVolume(volume);
+	this->volume = volume;
+}
+
+void VolumeInfoController::setVolumeRenderer(VolumeController* volumeRenderer)
+{
+	this->volumeRenderer = volumeRenderer;
+}
+
+void VolumeInfoController::setSliceRenderer(SliceController* sliceRenderer)
+{
+	this->sliceRenderer = sliceRenderer;
+}
+
+void VolumeInfoController::drawText(const std::string& s, int row)
+{
+	TextRenderer& textRenderer = MainController::getInstance().getText();
+
+	int x = 0;
+	int y = viewport_.height - textRenderer.fontHeight() * row;
+	textRenderer.add(s, x, y, TextRenderer::LEFT, TextRenderer::TOP);
+}
+
+void VolumeInfoController::draw()
+{
+	TextRenderer& text = MainController::getInstance().getText();
+	Vec3 c = MainController::getInstance().getRenderer().getInverseBGColor();
+	text.setColor(c.x, c.y, c.z);
+
+	text.begin(viewport_.width, viewport_.height);
+
+	ostringstream os;
+
+	int textRow = 0;
+
+	// Name
+	os << "Data: " << volume->getName();
+	drawText(os.str(), textRow++);
+
+	// Modality
+	switch (volume->getModality())
+	{
+	case VolumeData::CT:
+		drawText(string("Modality: CT"), textRow++);
+		break;
+	case VolumeData::MR:
+		drawText(string("Modality: MR"), textRow++);
+		break;
+	default:
+		drawText(string("Modality: Unknown"), textRow++);
+	}
+
+	// Dimensions (voxels)
+	os.str("");
+	os << "Size (voxels): " << volume->getWidth() << " x " << volume->getHeight() << " x " << volume->getDepth();
+	drawText(os.str(), textRow++);
+
+	// Dimensions (mm)
+	// drawText("Size (mm): ", v.x, " x ", v.y, " x ", v.z);
+
+
+	Vec3 v = volume->getSizeMillimeters();
+	os.str("");
+	os << setprecision(1) << fixed;
+	os << "Size (mm): " << v.x << " x " << v.y << " x " << v.z;
+	drawText(os.str(), textRow++);
+
+	// skip a row
+	textRow++;
+
+	// Rendering mode
+	switch (volumeRenderer->getMode())
+	{
+	case VolumeController::MIP:
+		drawText(string("Rendering: MIP"), textRow++);
+		break;
+	case VolumeController::VR:
+		drawText(string("Rendering: VR"), textRow++);
+		break;
+	case VolumeController::ISOSURFACE:
+		drawText(string("Rendering: Isosurface"), textRow++);
+		break;
+	default:
+		drawText(string("Rendering: Unknown"), textRow++);
+	}
+
+	// Rendering sample rate
+	os.str("");
+	os << "Samples: " << volumeRenderer->getCurrentNumSlices();
+	drawText(os.str(), textRow++);
+
+	// Stochastic Jitter
+	os.str("");
+	os << "Jitter: " << (volumeRenderer->useJitter ? "true" : "false");
+	drawText(os.str(), textRow++);
+
+	// VOI LUT (window) values
+	int min = volume->getMinValue();
+	int max = volume->getMaxValue();
+	os.str("");
+	os << "min, max = " << min << ", " << max;
+	drawText(os.str(), textRow++);
+
+	// Slice Index (2D)
+	if (MainController::getInstance().getMode() == MainController::MODE_2D) {
+		os.str("");
+		os << "Slice: " << (sliceRenderer->slice() + 1) << "/" << volume->getDepth();
+		drawText(os.str(), textRow++);
+	}
+
+	text.end();
 }
