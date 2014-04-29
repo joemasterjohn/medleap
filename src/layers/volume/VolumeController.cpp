@@ -331,13 +331,13 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	glEnable(GL_DEPTH_TEST);
 
 
-	const BoundingBox& bb = volume->getBounds();
+	const Box& bb = volume->getBounds();
 	d.setModelViewProj(mvp);
 	d.begin(GL_LINES);
 	d.color(0.5f, 0.5f, 0.5f);
-	for (const BoundingBox::Edge& edge : bb.getEdges()) {
-		const Vec4& a = bb.getVertices()[edge.first];
-		const Vec4& b = bb.getVertices()[edge.second];
+	for (const Box::Edge& edge : bb.edges()) {
+		const Vec3& a = bb.vertices()[edge.first];
+		const Vec3& b = bb.vertices()[edge.second];
 		d.vertex(a.x, a.y, a.z);
 		d.vertex(b.x, b.y, b.z);
 	}
@@ -394,8 +394,8 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	glUniformMatrix4fv(boxShader.getUniform("modelViewProjection"), 1, false, mvp);
 	glUniformMatrix4fv(boxShader.getUniform("modelView"), 1, false, camera.getView());
 
-	glUniform3fv(boxShader.getUniform("volumeMin"), 1, volume->getBounds().getMinimum());
-	glUniform3fv(boxShader.getUniform("volumeDimensions"), 1, (volume->getBounds().getMaximum() - volume->getBounds().getMinimum()));
+	glUniform3fv(boxShader.getUniform("volumeMin"), 1, volume->getBounds().min());
+	glUniform3fv(boxShader.getUniform("volumeDimensions"), 1, (volume->getBounds().max() - volume->getBounds().min()));
 	glUniform1i(boxShader.getUniform("signed_normalized"), volume->isSigned());
 	glUniform1i(boxShader.getUniform("use_shading"), (renderMode != MIP && shading));
 
@@ -498,7 +498,7 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 
 void VolumeController::updateSlices(double samplingScale, bool limitSamples)
 {
-	float refSampleLength = volume->getBounds().getLength() / Vec3(volume->getWidth(), volume->getHeight(), volume->getDepth()).length();
+	float refSampleLength = volume->getBounds().length() / Vec3(volume->getWidth(), volume->getHeight(), volume->getDepth()).length();
 
 	// upload geometry
 	BoxSlicer slicer;

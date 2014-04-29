@@ -15,7 +15,7 @@ VolumeData::VolumeData()
     type = 0;
     minVoxelValue = 0;
     maxVoxelValue = 0;
-    bounds = new BoundingBox(1,1,1);
+    bounds = new Box(1);
     modality = UNKNOWN;
 }
 
@@ -35,7 +35,7 @@ void VolumeData::setVoxelSize(float x, float y, float z)
     v.normalize();
     
     delete bounds;
-    bounds = new BoundingBox(v.x, v.y, v.z);
+    bounds = new Box(v.x, v.y, v.z);
 }
 
 
@@ -44,7 +44,7 @@ const std::string& VolumeData::getName() const
 	return name;
 }
 
-const BoundingBox& VolumeData::getBounds() const
+const Box& VolumeData::getBounds() const
 {
     return *bounds;
 }

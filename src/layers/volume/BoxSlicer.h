@@ -4,7 +4,7 @@
 #include <vector>
 #include "gl/math/Math.h"
 #include "util/Camera.h"
-#include "data/BoundingBox.h"
+#include "gl/geom/Box.h"
 #include "gl/glew.h"
 
 /**
@@ -21,7 +21,7 @@ public:
     BoxSlicer();
     
     /** Cuts the box into slices and stores the data in this class */
-    void slice(const BoundingBox& bounds, const Camera& camera, float sampleLength, int maxSlices);
+    void slice(const gl::Box& bounds, const Camera& camera, float sampleLength, int maxSlices);
 
     /** Vertex positions */
     const std::vector<gl::Vec3>& getVertices();
@@ -30,7 +30,7 @@ public:
     const std::vector<GLushort>& getIndices();
     
 	/** Determine the distance between planes given a number of samples (faster than slicing to find out) */
-	float samplingLength(const BoundingBox& bounds, const Camera& camera, int numSamples) const;
+	float samplingLength(const gl::Box& bounds, const Camera& camera, int numSamples) const;
 
 	/** Distance between sampling planes (updated after slice called) */
 	float samplingLength() const;
@@ -63,7 +63,7 @@ private:
 	float sample_length_;
 	int slice_count_;
     
-	void slicePlane(const gl::Vec3& p, const BoundingBox& bounds);
+	void slicePlane(const gl::Vec3& p, const gl::Box& bounds);
 };
 
 #endif // BOXSLICER_H

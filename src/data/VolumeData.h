@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <thread>
-#include "BoundingBox.h"
+#include "gl/geom/Box.h"
 #include "gl/math/Math.h"
 #include "gl/Texture.h"
 #include "util/Interval.h"
@@ -30,7 +30,7 @@ public:
 	const std::string& getName() const;
     
     /** Returns a bounding box of the normalized real world size of the volume. */
-    const BoundingBox& getBounds() const;
+    const gl::Box& getBounds() const;
     
 	/** Size of each voxel in millimeters. Default is (1,1,1) for unknown modalities. */
 	gl::Vec3 getVoxelSizeMillimeters() const;
@@ -121,7 +121,7 @@ private:
     int minVoxelValue;
     int maxVoxelValue;
 	gl::Vec3 voxelSize;
-    BoundingBox* bounds;
+    gl::Box* bounds;
     Modality modality;
 	gl::Mat3 orientation;
     std::vector<Interval> windows_;

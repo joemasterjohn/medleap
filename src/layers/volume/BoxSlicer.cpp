@@ -55,14 +55,14 @@ int BoxSlicer::sliceCount() const
 	return slice_count_;
 }
 
-float BoxSlicer::samplingLength(const BoundingBox& bounds, const Camera& camera, int numSamples) const
+float BoxSlicer::samplingLength(const Box& bounds, const Camera& camera, int numSamples) const
 {
 	// determine the view length by projecting bounding box vertices and
 	// taking difference of max and min distances of vertices from eye
 	float minDistance = numeric_limits<float>::infinity();
 	float maxDistance = -numeric_limits<float>::infinity();
-	for (Vec4 vertex : bounds.getVertices()) {
-		Vec4 v = camera.getView() * vertex;
+	for (Vec3 vertex : bounds.vertices()) {
+		Vec4 v = camera.getView() * Vec4(vertex.x, vertex.y, vertex.z, 1.0f);
 		float distance = -v.z;
 		if (distance < minDistance) minDistance = distance;
 		if (distance > maxDistance) maxDistance = distance;
@@ -70,7 +70,7 @@ float BoxSlicer::samplingLength(const BoundingBox& bounds, const Camera& camera,
 	return (maxDistance - minDistance) / (numSamples+1);
 }
 
-void BoxSlicer::slice(const BoundingBox& bounds, const Camera& camera, float sampleLength, int maxSlices)
+void BoxSlicer::slice(const Box& bounds, const Camera& camera, float sampleLength, int maxSlices)
 {
     up = camera.getUp();
     normal = camera.getForward() * -1;
@@ -80,8 +80,8 @@ void BoxSlicer::slice(const BoundingBox& bounds, const Camera& camera, float sam
 	// taking difference of max and min distances of vertices from eye
 	float minDistance = numeric_limits<float>::infinity();
 	float maxDistance = -numeric_limits<float>::infinity();
-	for (Vec4 vertex : bounds.getVertices()) {
-		Vec4 v = camera.getView() * vertex;
+	for (Vec3 vertex : bounds.vertices()) {
+		Vec4 v = camera.getView() * Vec4(vertex.x, vertex.y, vertex.z, 1.0f);
 		float distance = -v.z;
 		if (distance < minDistance) minDistance = distance;
 		if (distance > maxDistance) maxDistance = distance;
@@ -105,7 +105,7 @@ void BoxSlicer::slice(const BoundingBox& bounds, const Camera& camera, float sam
     }
 }
 
-void BoxSlicer::slicePlane(const Vec3& p, const BoundingBox& bounds)
+void BoxSlicer::slicePlane(const Vec3& p, const Box& bounds)
 {
     // number of indices appearing before this polygon
     unsigned short polyIndexOffset = static_cast<unsigned short>(indices.size());
@@ -115,9 +115,9 @@ void BoxSlicer::slicePlane(const Vec3& p, const BoundingBox& bounds)
     bool corners[] = { false, false, false, false, false, false, false, false };
     
     // find intersections of the plane with all edges
-    for (BoundingBox::Edge e : bounds.getEdges()) {
-        const Vec3& a = bounds.getVertices()[e.first];
-        const Vec3& b = bounds.getVertices()[e.second];
+    for (Box::Edge e : bounds.edges()) {
+        const Vec3& a = bounds.vertices()[e.first];
+		const Vec3& b = bounds.vertices()[e.second];
         Vec3 d = b - a;
         
         // if n * d == 0, the edge lies on the plane (ignore it)
