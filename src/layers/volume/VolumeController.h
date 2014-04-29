@@ -31,6 +31,7 @@ public:
     bool mouseMotion(GLFWwindow* window, double x, double y) override;
     bool scroll(GLFWwindow* window, double dx, double dy) override;
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame) override;
+	std::unique_ptr<Menu> contextMenu();
 
 	void markDirty();
 	void setMode(RenderMode mode);
@@ -53,6 +54,7 @@ public:
 	gl::Vec3 cursor3D;
 	gl::Sphere cursorGeom;
 	bool useJitter;
+	gl::Vec3 clip_dir_;
 
 private:
     VolumeData* volume;

@@ -21,7 +21,7 @@ public:
 	bool mouseMotion(GLFWwindow* window, double x, double y) override;
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame) override;
 	void update(std::chrono::milliseconds elapsed) override;
-	
+	void loseFocus() override;
 	void hideMenu();
 	void showMainMenu();
 	void showContextMenu();

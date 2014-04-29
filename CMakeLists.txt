@@ -121,6 +121,15 @@ source_group("layers\\color_pick" FILES ${SOURCE_LAYER_COLORPICK})
 file(GLOB SOURCE_LAYER_ORIENTATION src/layers/orientation/*.cpp src/layers/orientation/*.h)
 source_group("layers\\orientation" FILES ${SOURCE_LAYER_ORIENTATION})
 
+file(GLOB SOURCE_LAYER_CLIP src/layers/clip/*.cpp src/layers/clip/*.h)
+source_group("layers\\clip" FILES ${SOURCE_LAYER_CLIP})
+
+file(GLOB SOURCE_LAYER_MASK src/layers/mask/*.cpp src/layers/mask/*.h)
+source_group("layers\\mask" FILES ${SOURCE_LAYER_MASK})
+
+file(GLOB SOURCE_LAYER_FOCUS src/layers/focus/*.cpp src/layers/focus/*.h)
+source_group("layers\\focus" FILES ${SOURCE_LAYER_FOCUS})
+
 set(SOURCE_AND_RESOURCES
     ${SOURCE_MAIN}
     ${SOURCE_DATA}
@@ -135,6 +144,9 @@ set(SOURCE_AND_RESOURCES
 	${SOURCE_LAYER_MENU}
 	${SOURCE_LAYER_COLORPICK}
 	${SOURCE_LAYER_ORIENTATION}
+	${SOURCE_LAYER_CLIP}
+	${SOURCE_LAYER_MASK}
+	${SOURCE_LAYER_FOCUS}
     ${SOURCE_GL}
 	${SOURCE_GL_MATH}
     ${SOURCE_GL_GEOM}

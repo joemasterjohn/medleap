@@ -19,6 +19,11 @@ MenuController::MenuController() :
 	menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 }
 
+void MenuController::loseFocus()
+{
+	finger_tracker_.tracking(false);
+}
+
 void MenuController::hideMenu()
 {
 	finger_tracker_.tracking(false);
@@ -37,9 +42,12 @@ void MenuController::showContextMenu()
 {
 	Controller* focusLayer = MainController::getInstance().focusLayer();
 	if (focusLayer) {
-		menu_ = move(focusLayer->contextMenu());
-		transition_.state(Transition::State::increase);
-		createRingGeometry();
+		unique_ptr<Menu> m = focusLayer->contextMenu();
+		if (m) {
+			menu_ = move(m);
+			transition_.state(Transition::State::increase);
+			createRingGeometry();
+		}
 	}
 }
 
@@ -112,7 +120,9 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 		for (const Leap::Gesture& g : gestures) {
 			if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
 				Leap::CircleGesture circle(g);
-				if (circle.progress() > 1) {
+				bool xyPlane = abs(circle.normal().dot(Leap::Vector(0, 0, 1))) > 0.8f;
+				if (circle.progress() > 1 && xyPlane) {
+
 					if (currentFrame.fingers().count() > 1)
 						showMainMenu();
 					else

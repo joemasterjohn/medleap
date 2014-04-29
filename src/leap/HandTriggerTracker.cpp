@@ -14,9 +14,14 @@ HandTriggerTracker::HandTriggerTracker() :
 bool HandTriggerTracker::shouldEngage(const Leap::Controller& controller)
 {
 	FingerList fingers = controller.frame().fingers();
+	Frame frame = controller.frame();
 
-	// must be at least two fingers to be tracking
-	if (fingers.count() < 2)
+	// must be a single hand
+	if (frame.hands().count() != 1)
+		return false;
+
+	// must be at two fingers to be tracking
+	if (fingers.count() != 2)
 		return false;
 
 	Finger index = fingers.frontmost();
@@ -24,6 +29,10 @@ bool HandTriggerTracker::shouldEngage(const Leap::Controller& controller)
 	float indexSpd = index.tipVelocity().magnitude();
 	float thumbSpd = thumb.tipVelocity().magnitude();
 	float deltaSpd = abs(indexSpd - thumbSpd);
+
+	// hand must not be retreating
+	if (index.tipVelocity().z > 0)
+		return false;
 
 	// index finger is not moving much, but the thumb is
 	if (indexSpd < m_index_spd_thresh && thumbSpd > m_thumb_spd_thresh)

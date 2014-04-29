@@ -43,7 +43,6 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 		cluts.push_back(c);
 	}
 
-	cluts[activeCLUT].saveTexture(clutTexture);
 
 	finger_tracker_.trackFunction(std::bind(&Transfer1DController::moveAndScale, this, std::placeholders::_1));
 	finger_tracker_.engageFunction([&](const Leap::Controller&){saved_interval_ = cluts[activeCLUT].interval(); });
@@ -102,6 +101,9 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 		bgBuffer.bind();
 		bgBuffer.data(vertices, sizeof(vertices));
 	}
+
+	cluts[activeCLUT].saveTexture(clutTexture);
+
 }
 
 Transfer1DController::~Transfer1DController()

@@ -16,7 +16,7 @@ bool OneFingerTracker::shouldEngage(const Leap::Controller& controller)
 	if (hands.count() != 1)
 		return false;
 
-	if (controller.frame().fingers().count() != 1)
+	if (controller.frame().fingers().count() > 3)
 		return false;
 
 	finger_ = hands[0].fingers().frontmost();

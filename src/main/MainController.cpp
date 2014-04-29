@@ -96,6 +96,9 @@ void MainController::setMode(MainController::Mode mode)
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
 			pushController(&orientationController);
+			pushController(&clip_controller_);
+			pushController(&focus_controller_);
+			pushController(&mask_controller_);
 			pushController(&menuController_);
             break;
     }

@@ -2,6 +2,7 @@
 #include "BoxSlicer.h"
 #include "gl/util/Draw.h"
 #include "main/MainConfig.h"
+#include "main/MainController.h"
 
 using namespace gl;
 using namespace std;
@@ -18,7 +19,8 @@ VolumeController::VolumeController() : cursorGeom(1, 2)
 	drawnHighRes = false;
 	cursorActive = false;
 	cursorRadius = 0.1;
-	useJitter = false;
+	useJitter = true;
+	clip_dir_ = { 1.0f, 0.0f, 0.0f };
 
 	volumeTexture.generate(GL_TEXTURE_3D);
 	gradientTexture.generate(GL_TEXTURE_3D);
@@ -326,7 +328,18 @@ void VolumeController::resize()
 
 void VolumeController::draw(double samplingScale, bool limitSamples, int w, int h)
 {
-	//glEnable(GL_DEPTH_TEST);
+	Mat4 mvp = camera.getProjection() * camera.getView();
+
+	glEnable(GL_DEPTH_TEST);
+	static Draw d;
+	d.setModelViewProj(mvp);
+	d.begin(GL_LINES);
+	d.color(1, 0, 0);
+	d.vertex(0, 0, 0);
+	d.vertex(clip_dir_.x, clip_dir_.y, clip_dir_.z);
+	d.end();
+	d.draw();
+
 	//{
 	//	glEnable(GL_CULL_FACE);
 	//	glCullFace(GL_FRONT);
@@ -361,7 +374,6 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	updateSlices(samplingScale, limitSamples);
 
 
-	Mat4 mvp = camera.getProjection() * camera.getView();
 	glUniformMatrix4fv(boxShader.getUniform("modelViewProjection"), 1, false, mvp);
 	glUniformMatrix4fv(boxShader.getUniform("modelView"), 1, false, camera.getView());
 
@@ -378,7 +390,7 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 
 	glUniform1i(boxShader.getUniform("use_jitter"), useJitter);
 
-
+	boxShader.uniform("clip_dir", clip_dir_);
 
 
 	glUniform3f(boxShader.getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
@@ -443,8 +455,6 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	default:
 		break;
 	}
-
-
 
 	glEnable(GL_PRIMITIVE_RESTART);
 	glPrimitiveRestartIndex(65535);
@@ -544,4 +554,29 @@ void VolumeController::setOpacityScale(float scale)
 {
 	this->opacityScale = min(max(0.0f, scale), 1.0f);
 	markDirty();
+}
+
+std::unique_ptr<Menu> VolumeController::contextMenu()
+{
+	Menu* menu = new Menu("Volume Renderer");
+
+	MenuItem& mip = menu->createItem("MIP");
+	mip.setAction([&]{
+		setMode(MIP);
+		MainController::getInstance().menuController().hideMenu();
+	});
+
+	MenuItem& dvr = menu->createItem("DVR");
+	dvr.setAction([&]{ 
+		setMode(VR);
+		MainController::getInstance().menuController().hideMenu();
+	});
+
+	MenuItem& iso = menu->createItem("Isosurface");
+	iso.setAction([&]{
+		setMode(ISOSURFACE);
+		MainController::getInstance().menuController().hideMenu();
+	});
+
+	return std::unique_ptr<Menu>(menu);
 }

@@ -5,60 +5,52 @@
 
 MainMenu::MainMenu() : Menu("Main Menu")
 {
-	// MainConfig cfg;
-	//std::string workingDir = cfg.getValue<std::string>(MainConfig::WORKING_DIR);
+	MenuItem& mi_transfer = createItem("Transfer");
+	mi_transfer.setAction([]{
+		MainController& mc = MainController::getInstance();
+		mc.focusLayer(&mc.transfer1DController());
+		mc.showTransfer1D(true);
+		mc.menuController().hideMenu();
+	});
 
-	//MenuItem& miLoad = createItem("Load");
-	////miLoad.setAction([=]{
-	////    menuManager->push(MenuPtr(new DirectoryMenu(workingDir, *menuManager)));
-	////});
+	MenuItem& mi_clip = createItem("Clip");
+	mi_clip.setAction([]{
+		MainController& mc = MainController::getInstance();
+		mc.focusLayer(&mc.clipController());
+		mc.menuController().hideMenu();
+	});
 
-	{
-		MenuItem& item = createItem("Transfer");
-		item.setAction([]{
-			MainController& mc = MainController::getInstance();
-			mc.focusLayer(&mc.transfer1DController());
-			mc.showTransfer1D(true);
-			mc.menuController().hideMenu();
-		});
-	}
+	MenuItem& mi_focus = createItem("Focus");
+	mi_focus.setAction([]{
+		MainController& mc = MainController::getInstance();
+		mc.focusLayer(&mc.focusController());
+		mc.menuController().hideMenu();
+	});
 
-	
-	{
-		MenuItem& item = createItem("Test");
-		item.setAction([]{
-			MainController& mc = MainController::getInstance();
-			mc.menuController().hideMenu();
-			mc.pickColor(ColorRGB(1, 0, 0, 1), [](const Color& color){
-				std::cout << color.rgb().vec3() << std::endl;
-			});
-		});
-	}
+	MenuItem& mi_mask = createItem("Mask");
+	mi_mask.setAction([]{
+		MainController& mc = MainController::getInstance();
+		mc.focusLayer(&mc.maskController());
+		mc.menuController().hideMenu();
+	});
 
-	createItem("Load");
+	MenuItem& mi_view3d = createItem("View 3D");
+	mi_view3d.setAction([]{
+		MainController& mc = MainController::getInstance();
+		mc.showTransfer1D(false);
+		mc.setMode(MainController::MODE_3D);
+		mc.focusLayer(&mc.volumeController());
+		mc.menuController().hideMenu();
+	});
 
-	{
-		MenuItem& item = createItem("View 3D");
-		item.setAction([]{
-			MainController& mc = MainController::getInstance();
-			mc.showTransfer1D(false);
-			mc.setMode(MainController::MODE_3D);
-			mc.focusLayer(&mc.volumeController());
-			mc.menuController().hideMenu();
-		});
-	}
-
-
-	{
-		MenuItem& item = createItem("View 2D");
-		item.setAction([]{
-			MainController& mc = MainController::getInstance();
-			mc.showTransfer1D(false);
-			mc.setMode(MainController::MODE_2D);
-			mc.focusLayer(&mc.sliceController());
-			mc.menuController().hideMenu();
-		});
-	}
+	MenuItem& mi_view2d = createItem("View 2D");
+	mi_view2d.setAction([]{
+		MainController& mc = MainController::getInstance();
+		mc.showTransfer1D(false);
+		mc.setMode(MainController::MODE_2D);
+		mc.focusLayer(&mc.sliceController());
+		mc.menuController().hideMenu();
+	});
 }
 
 MainMenu::~MainMenu()

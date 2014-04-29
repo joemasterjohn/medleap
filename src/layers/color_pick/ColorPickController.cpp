@@ -45,6 +45,15 @@ void ColorPickController::addCallback(std::function<void(const Color&)> callback
 	callbacks_.push_back(callback);
 }
 
+void ColorPickController::gainFocus()
+{
+}
+
+void ColorPickController::loseFocus()
+{
+	hand_trigger_.tracking(false);
+}
+
 bool ColorPickController::mouseMotion(GLFWwindow* window, double x, double y)
 {
 	switch (state_)

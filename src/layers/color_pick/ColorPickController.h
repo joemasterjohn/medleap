@@ -22,6 +22,8 @@ public:
 	bool mouseMotion(GLFWwindow* window, double x, double y) override;
 	bool mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y) override;
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame) override;
+	void gainFocus() override;
+	void loseFocus() override;
 	bool modal() const override { return true; }
 	const ColorHSV& color() const { return color_; }
 	void color(const Color& color) { color_ = color.hsv(); }

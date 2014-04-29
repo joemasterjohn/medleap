@@ -9,6 +9,9 @@
 #include "layers/menu/MenuController.h"
 #include "layers/orientation/OrientationController.h"
 #include "layers/color_pick/ColorPickController.h"
+#include "layers/clip/ClipController.h"
+#include "layers/focus/FocusController.h"
+#include "layers/mask/MaskController.h"
 #include "util/TextRenderer.h"
 #include "data/VolumeLoader.h"
 #include "Leap.h"
@@ -49,10 +52,14 @@ public:
     static MainController& getInstance();
 	const MainRenderer& getRenderer() const;
 
+	VolumeData* volumeData() { return volume; }
 	SliceController& sliceController() { return sliceController_; }
 	VolumeController& volumeController() { return volumeController_; }
 	Transfer1DController& transfer1DController() { return histogramController; }
 	MenuController& menuController() { return menuController_; }
+	ClipController& clipController() { return clip_controller_; }
+	FocusController& focusController() { return focus_controller_; }
+	MaskController& maskController() { return mask_controller_; }
 
 	void pickColor(const Color& initialColor, std::function<void(const Color&)> callback);
 
@@ -89,6 +96,10 @@ private:
 	MenuController menuController_;
 	ColorPickController colorPickController;
 	OrientationController orientationController;
+	ClipController clip_controller_;
+	FocusController focus_controller_;
+	MaskController mask_controller_;
+
     std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;
