@@ -2,30 +2,64 @@
 
 using namespace gl;
 
-Plane::Plane(float width, float height, unsigned widthSegments, unsigned heightSegments)
+Plane::Plane(const Vec3& normal, float dist_from_origin) :
+	normal_(normal),
+	dist_origin_(dist_from_origin)
 {
-	unsigned numVertices = (widthSegments + 1) * (heightSegments + 1);
-	unsigned numIndices = widthSegments * heightSegments * 6;
+}
+
+Plane::Plane(const Vec3& normal, const Vec3& point) :
+	normal_(normal),
+	dist_origin_(normal.dot(point))
+{
+}
+
+Vec3 Plane::nearestToOrigin() const
+{
+	return normal_ * dist_origin_;
+}
+
+Vec3 Plane::normal() const
+{
+	return normal_;
+}
+
+Geometry Plane::triangles(unsigned u_segments, unsigned v_segments)
+{
+	Vec3 u, v;
+	if (std::abs(normal_.dot(Vec3::yAxis())) > 0.999f) {
+		u = { 1.0f, 0.0f, 0.0f };
+		v = { 0.0f, 0.0f, -1.0f };
+	} else {
+		u = Vec3::yAxis().cross(normal_).normalize();
+		v = normal_.cross(u).normalize();
+	}
+
+	Vec3 o = nearestToOrigin();
+
+	Geometry g;
+	g.mode = GL_TRIANGLES;
 
 	unsigned i = 0;
-	for (unsigned iy = 0; iy <= heightSegments; ++iy) {
-		float normalizedY = static_cast<float>(iy) / heightSegments;
-		for (unsigned ix = 0; ix <= widthSegments; ++ix) {
-			float normalizedX = static_cast<float>(ix) / widthSegments;
+	for (unsigned iv = 0; iv <= v_segments; ++iv) {
+		float nv = static_cast<float>(iv) / v_segments - 0.5f;
 
-			float x = (normalizedX - 0.5f) * width;
-			float y = (normalizedY - 0.5f) * height;
-			vertices.push_back(Vec3(x, y, 0));
+		for (unsigned iu = 0; iu <= u_segments; ++iu) {
+			float nu = static_cast<float>(iu) / u_segments - 0.5f;
 
-			if (ix < widthSegments && iy < heightSegments) {
-				indices.push_back(i);
-				indices.push_back(i + 1);
-				indices.push_back(i + 2 + widthSegments);
-				indices.push_back(i);
-				indices.push_back(i + 2 + widthSegments);
-				indices.push_back(i + 1 + widthSegments);
+			g.vertices.push_back(o + u * nu + v * nv);
+
+			if (iu < u_segments && iv < v_segments) {
+				g.indices.push_back(i);
+				g.indices.push_back(i + 1);
+				g.indices.push_back(i + 2 + u_segments);
+				g.indices.push_back(i);
+				g.indices.push_back(i + 2 + u_segments);
+				g.indices.push_back(i + 1 + u_segments);
 			}
 			++i;
 		}
 	}
+
+	return g;
 }

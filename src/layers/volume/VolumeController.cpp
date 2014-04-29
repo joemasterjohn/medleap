@@ -7,7 +7,7 @@
 using namespace gl;
 using namespace std;
 
-VolumeController::VolumeController() : cursorGeom(1, 2)
+VolumeController::VolumeController()
 {
     mouseDragLeftButton = false;
     mouseDragRightButton = false;
@@ -46,7 +46,6 @@ VolumeController::VolumeController() : cursorGeom(1, 2)
 	cursor3DShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 	cursor3DVBO.generateVBO(GL_STATIC_DRAW);
 	cursor3DVBO.bind();
-	cursorGeom.fill(cursor3DVBO);
 
 	MainConfig cfg;
 	minSlices = cfg.getValue<unsigned>(MainConfig::MIN_SLICES);
@@ -328,12 +327,25 @@ void VolumeController::resize()
 void VolumeController::draw(double samplingScale, bool limitSamples, int w, int h)
 {
 	Mat4 mvp = camera.getProjection() * camera.getView();
+	static Draw d;
+	glEnable(GL_DEPTH_TEST);
+
+
+	const BoundingBox& bb = volume->getBounds();
+	d.setModelViewProj(mvp);
+	d.begin(GL_LINES);
+	d.color(0.5f, 0.5f, 0.5f);
+	for (const BoundingBox::Edge& edge : bb.getEdges()) {
+		const Vec4& a = bb.getVertices()[edge.first];
+		const Vec4& b = bb.getVertices()[edge.second];
+		d.vertex(a.x, a.y, a.z);
+		d.vertex(b.x, b.y, b.z);
+	}
+	d.end();
+	d.draw();
 
 	// clipping plane lines: this needs to be improved
 	if (clip_planes_.size() > 0) {
-		glEnable(GL_DEPTH_TEST);
-		static Draw d;
-		d.setModelViewProj(mvp);
 		d.begin(GL_LINES);
 		d.color(1, 0, 0);
 		for (int i = 0; i < clip_planes_.size(); i++) {

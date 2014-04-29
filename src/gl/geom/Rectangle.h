@@ -1,5 +1,5 @@
-#ifndef __CGL_GEOM_RECTANGLE_H__
-#define __CGL_GEOM_RECTANGLE_H__
+#ifndef __GL_GEOM_RECTANGLE_H__
+#define __GL_GEOM_RECTANGLE_H__
 
 #include "gl/math/Vector2.h"
 
@@ -57,4 +57,4 @@ namespace gl
 	};
 }
 
-#endif // __CGL_GEOM_RECTANGLE_H__
+#endif // __GL_GEOM_RECTANGLE_H__

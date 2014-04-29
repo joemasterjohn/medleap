@@ -5,24 +5,35 @@
 
 using namespace gl;
 
-Box::Box(GLfloat edgeLength, unsigned segments) : Box(edgeLength, edgeLength, edgeLength, segments, segments, segments)
+Box::Box(float size) : size_(size)
 {
 }
 
-Box::Box(GLfloat width, GLfloat height, GLfloat depth, unsigned widthSegments, unsigned heightSegments, unsigned depthSegments)
+Box::Box(float width, float height, float length) : size_({ width, height, length })
 {
-	auto addPlane = [&](const Plane& plane, const Mat4& m, const Vec3& offset) {
-		size_t indexOffset = vertices.size();
-		for (GLuint i : plane.getIndices())
-			indices.push_back(static_cast<GLuint>(i + indexOffset));
-		for (const Vec3& v : plane.getVertices())
-			vertices.push_back(Vec3(m * Vec4(v.x, v.y, v.z, 1.0f)) + offset);
+}
+
+Geometry Box::triangles(unsigned x_segments, unsigned y_segments, unsigned z_segments)
+{
+	Geometry g;
+	g.mode = GL_TRIANGLES;
+
+	auto addPlane = [&](const Vec3& n, unsigned u_segments, unsigned v_segments)
+	{
+		Geometry p = Plane(n, 0.5f).triangles(u_segments, v_segments);
+		int offset = g.vertices.size();
+		g.vertices.insert(g.vertices.end(), p.vertices.begin(), p.vertices.end());
+		for (int i = 0; i < p.indices.size(); i++) {
+			g.indices.push_back(p.indices[i] + offset);
+		}
 	};
 
-	addPlane(Plane(depth, height, depthSegments, heightSegments), rotationY(pi / 2.0f), Vec3(+width / 2.0f, 0, 0));
-	addPlane(Plane(depth, height, depthSegments, heightSegments), rotationY(-pi / 2.0f), Vec3(-width / 2.0f, 0, 0));
-	addPlane(Plane(width, depth, widthSegments, depthSegments), rotationX(-pi / 2.0f), Vec3(0.0f, +height / 2.0f, 0.0f));
-	addPlane(Plane(width, depth, widthSegments, depthSegments), rotationX(pi / 2.0f), Vec3(0.0f, -height / 2.0f, 0.0f));
-	addPlane(Plane(width, height, widthSegments, heightSegments), Mat4(), Vec3(0.0f, 0.0f, +depth / 2.0f));
-	addPlane(Plane(width, height, widthSegments, heightSegments), rotationY(pi), Vec3(0.0f, 0.0f, -depth / 2.0f));
+	addPlane(Vec3{ +1.0f, +0.0f, +0.0f }, z_segments, y_segments);
+	addPlane(Vec3{ -1.0f, +0.0f, +0.0f }, z_segments, y_segments);
+	addPlane(Vec3{ +0.0f, +1.0f, +0.0f }, x_segments, z_segments);
+	addPlane(Vec3{ +0.0f, -1.0f, +0.0f }, x_segments, z_segments);
+	addPlane(Vec3{ +0.0f, +0.0f, +1.0f }, x_segments, y_segments);
+	addPlane(Vec3{ +0.0f, +0.0f, -1.0f }, x_segments, y_segments);
+
+	return g;
 }

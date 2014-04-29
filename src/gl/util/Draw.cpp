@@ -101,3 +101,11 @@ void Draw::circle(float x, float y, float radius, int numSegments)
 		angle += step;
 	}
 }
+
+void Draw::geometry(const Geometry& g)
+{
+	for (int i = 0; i < g.indices.size(); i++) {
+		const Vec3& p = g.vertices[g.indices[i]];
+		vertex(p.x, p.y, p.z);
+	}
+}

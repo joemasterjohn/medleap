@@ -6,6 +6,7 @@
 #include "gl/Program.h"
 #include "gl/math/Vector3.h"
 #include "gl/math/Matrix4.h"
+#include "Geometry.h"
 #include <vector>
 
 /** Simple "immediate mode" utility for debug drawing */
@@ -28,6 +29,8 @@ namespace gl{
 		void line(float x1, float y1, float x2, float y2);
 
 		void circle(float x, float y, float radius, int numSegments);
+
+		void geometry(const Geometry& g);
 
 	private:
 		Mat4 modelViewProjection;

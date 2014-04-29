@@ -40,8 +40,9 @@ std::unique_ptr<Menu> ClipController::contextMenu()
 
 	MenuItem& mi_clear = menu->createItem("Clear");
 	mi_clear.setAction([&]{
-		auto& planes = MainController::getInstance().volumeController().clipPlanes();
-		planes.clear();
+		auto& vc = MainController::getInstance().volumeController();
+		vc.clipPlanes().clear();
+		vc.markDirty();
 		cur_plane_ = 0;
 	});
 

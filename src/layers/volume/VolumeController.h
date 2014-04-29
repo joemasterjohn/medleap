@@ -52,7 +52,6 @@ public:
 	gl::Buffer cursor3DVBO;
 	gl::Program cursor3DShader;
 	gl::Vec3 cursor3D;
-	gl::Sphere cursorGeom;
 	bool useJitter;
 
 	std::vector<gl::Vec4>& clipPlanes() { return clip_planes_; }

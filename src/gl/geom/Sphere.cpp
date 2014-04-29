@@ -3,11 +3,17 @@
 
 using namespace gl;
 
-Sphere::Sphere(GLfloat radius, unsigned segments)
+Sphere::Sphere(Vec3 center, float radius) : center_(center), radius_(radius)
 {
-	Box box(1.0f, segments);
-	for (const Vec3& v : box.getVertices())
-		vertices.push_back(v.normal() * radius);
-	for (const GLuint& i : box.getIndices())
-		indices.push_back(i);
+}
+
+Geometry Sphere::triangles(unsigned segments)
+{
+	Geometry g = Box(1.0f).triangles(segments, segments, segments);
+
+	for (Vec3& v : g.vertices) {
+		v = v.normal() * radius_ + center_;
+	}
+
+	return g;
 }
