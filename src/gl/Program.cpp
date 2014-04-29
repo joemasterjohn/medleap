@@ -136,7 +136,12 @@ Program Program::create(const Shader& vShader, const Shader& fShader)
 	return prog;
 }
 
-void Program::uniform(const GLchar* name, bool value)
+void Program::uniform(const GLchar* name, GLint value)
+{
+	glUniform1i(glGetUniformLocation(id(), name), value);
+}
+
+void Program::uniform(const GLchar* name, GLboolean value)
 {
 	glUniform1i(glGetUniformLocation(id(), name), value);
 }
@@ -174,6 +179,27 @@ void Program::uniform(const GLchar* name, const Vec3& v)
 void Program::uniform(const GLchar* name, const Vec4& v)
 {
 	glUniform4f(glGetUniformLocation(id(), name), v.x, v.y, v.z, v.w);
+}
+
+void Program::uniform(const GLchar* name, const std::vector<Vec2>& v)
+{
+	if (!v.empty()) {
+		glUniform2fv(glGetUniformLocation(id(), name), v.size(), (const GLfloat*)(&v[0]));
+	}
+}
+
+void Program::uniform(const GLchar* name, const std::vector<Vec3>& v)
+{
+	if (!v.empty()) {
+		glUniform3fv(glGetUniformLocation(id(), name), v.size(), (const GLfloat*)(&v[0]));
+	}
+}
+
+void Program::uniform(const GLchar* name, const std::vector<Vec4>& v)
+{
+	if (!v.empty()) {
+		glUniform4fv(glGetUniformLocation(id(), name), v.size(), (const GLfloat*)(&v[0]));
+	}
 }
 
 void Program::uniform(const GLchar* name, const Mat4& m)

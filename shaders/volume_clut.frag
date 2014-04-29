@@ -30,7 +30,9 @@ uniform float sampling_length;
 uniform bool use_jitter;
 uniform float jitter_size;
 uniform vec3 camera_pos;
-uniform vec3 clip_dir;
+
+uniform int num_clip_planes;
+uniform vec4 clip_planes[4];
 
 #define RENDER_MODE_MIP 0
 #define RENDER_MODE_VR 1
@@ -80,9 +82,12 @@ float cursorAlpha()
 
 void main()
 {
-	if (dot(fs_voxel_position_ws, clip_dir) < 0.0) {
-		discard;
+	for (int i = 0; i < num_clip_planes; i++) {
+		if (dot(fs_voxel_position_ws, clip_planes[i].xyz) < 0.0) {
+			discard;
+		}	
 	}
+
 
 	vec3 samplePos = fs_texcoord;
 	if (use_jitter)

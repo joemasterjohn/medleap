@@ -13,7 +13,8 @@ class LeapTracker
 {
 public:
 	LeapTracker();
-	virtual ~LeapTracker() {}
+
+	virtual ~LeapTracker();
 
 	/** Call each frame to update tracking status */
 	void update(const Leap::Controller& controller);
@@ -22,22 +23,22 @@ public:
 	bool tracking() const { return tracking_; }
 
 	/** Manually toggles tracking */
-	void tracking(bool tracking) { tracking_ = tracking; total_elapsed_ = std::chrono::milliseconds(0); }
+	void tracking(bool tracking);
 
 	/** Set a callback function that is called each update tracking is enabled */
-	void trackFunction(std::function<void(const Leap::Controller&)> f) { track_function_ = f; }
+	void trackFunction(std::function<void(const Leap::Controller&)> f);
 
 	/** Set a callback function that is called when tracking is turned on */
-	void engageFunction(std::function<void(const Leap::Controller&)> f) { engage_function_ = f; }
+	void engageFunction(std::function<void(const Leap::Controller&)> f);
 
 	/** Set a callback function that is called when tracking is turned off */
-	void disengageFunction(std::function<void(const Leap::Controller&)> f) { disengage_function_ = f; }
+	void disengageFunction(std::function<void(const Leap::Controller&)> f);
 
 	/** Time that must elapse since previous disengage before an engage can occur */
-	void engageDelay(std::chrono::milliseconds delay) { engage_delay_ = delay; }
+	void engageDelay(std::chrono::milliseconds delay);
 
 	/** Time that must elapse since previous engage before a disengage can occur */
-	void disengageDelay(std::chrono::milliseconds delay) { disengage_delay_ = delay; }
+	void disengageDelay(std::chrono::milliseconds delay);
 
 protected:
 	virtual bool shouldEngage(const Leap::Controller& controller) = 0;

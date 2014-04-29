@@ -20,7 +20,6 @@ VolumeController::VolumeController() : cursorGeom(1, 2)
 	cursorActive = false;
 	cursorRadius = 0.1;
 	useJitter = true;
-	clip_dir_ = { 1.0f, 0.0f, 0.0f };
 
 	volumeTexture.generate(GL_TEXTURE_3D);
 	gradientTexture.generate(GL_TEXTURE_3D);
@@ -330,15 +329,21 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 {
 	Mat4 mvp = camera.getProjection() * camera.getView();
 
-	glEnable(GL_DEPTH_TEST);
-	static Draw d;
-	d.setModelViewProj(mvp);
-	d.begin(GL_LINES);
-	d.color(1, 0, 0);
-	d.vertex(0, 0, 0);
-	d.vertex(clip_dir_.x, clip_dir_.y, clip_dir_.z);
-	d.end();
-	d.draw();
+	// clipping plane lines: this needs to be improved
+	if (clip_planes_.size() > 0) {
+		glEnable(GL_DEPTH_TEST);
+		static Draw d;
+		d.setModelViewProj(mvp);
+		d.begin(GL_LINES);
+		d.color(1, 0, 0);
+		for (int i = 0; i < clip_planes_.size(); i++) {
+			Vec4&v = clip_planes_[i];
+			d.vertex(0, 0, 0);
+			d.vertex(v.x, v.y, v.z);
+		}
+		d.end();
+		d.draw();
+	}
 
 	//{
 	//	glEnable(GL_CULL_FACE);
@@ -390,7 +395,8 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 
 	glUniform1i(boxShader.getUniform("use_jitter"), useJitter);
 
-	boxShader.uniform("clip_dir", clip_dir_);
+	boxShader.uniform("num_clip_planes", static_cast<GLint>(clip_planes_.size()));
+	boxShader.uniform("clip_planes", clip_planes_);
 
 
 	glUniform3f(boxShader.getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);

@@ -54,7 +54,8 @@ public:
 	gl::Vec3 cursor3D;
 	gl::Sphere cursorGeom;
 	bool useJitter;
-	gl::Vec3 clip_dir_;
+
+	std::vector<gl::Vec4>& clipPlanes() { return clip_planes_; }
 
 private:
     VolumeData* volume;
@@ -66,6 +67,7 @@ private:
     double dragStartY;
 	gl::Mat4 dragStartView;
 
+	std::vector<gl::Vec4> clip_planes_;
 
 	bool shading;
 	RenderMode renderMode;

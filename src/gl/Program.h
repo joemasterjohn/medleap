@@ -39,16 +39,19 @@ namespace gl
         void enable();
         void disable();
 
-		void uniform(const GLchar* name, bool value);
-		void uniform(const GLchar* name, float x);
-		void uniform(const GLchar* name, float x, float y);
-		void uniform(const GLchar* name, float x, float y, float z);
-		void uniform(const GLchar* name, float x, float y, float z, float w);
+		void uniform(const GLchar* name, GLint value);
+		void uniform(const GLchar* name, GLboolean value);
+		void uniform(const GLchar* name, GLfloat x);
+		void uniform(const GLchar* name, GLfloat x, GLfloat y);
+		void uniform(const GLchar* name, GLfloat x, GLfloat y, GLfloat z);
+		void uniform(const GLchar* name, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 		void uniform(const GLchar* name, const Vec2& v);
 		void uniform(const GLchar* name, const Vec3& v);
 		void uniform(const GLchar* name, const Vec4& v);
+		void uniform(const GLchar* name, const std::vector<Vec2>& v);
+		void uniform(const GLchar* name, const std::vector<Vec3>& v);
+		void uniform(const GLchar* name, const std::vector<Vec4>& v);
 		void uniform(const GLchar* name, const Mat4& m);
-
         
         static Program create(const char* vsrc, const char* fsrc);
         static Program createFromSrc(const char* vsrc, const char* fsrc);

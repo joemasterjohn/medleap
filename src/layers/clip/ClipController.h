@@ -10,9 +10,11 @@ public:
 	ClipController();
 	void loseFocus() override;
 	bool leapInput(const Leap::Controller& controller, const Leap::Frame& frame) override;
+	std::unique_ptr<Menu> contextMenu() override;
 
 private:
 	HandTriggerTracker hand_tracker_;
+	unsigned cur_plane_;
 
 	void updateVector(const Leap::Controller& controller);
 };

@@ -14,6 +14,10 @@ LeapTracker::LeapTracker() :
 {
 }
 
+LeapTracker::~LeapTracker()
+{
+}
+
 void LeapTracker::update(const Leap::Controller& controller)
 {
 	auto time = std::chrono::high_resolution_clock::now();
@@ -48,17 +52,20 @@ void LeapTracker::update(const Leap::Controller& controller)
 	}
 }
 
+void LeapTracker::tracking(bool tracking)
+{
+	tracking_ = tracking;
+	total_elapsed_ = milliseconds(0);
+}
+
 void LeapTracker::engage(const Leap::Controller& controller)
 {
-	std::cout << "EG" << std::endl;
-
 	if (engage_function_)
 		engage_function_(controller);
 }
 
 void LeapTracker::disengage(const Leap::Controller& controller)
 {
-	std::cout << "DE" << std::endl;
 	if (disengage_function_)
 		disengage_function_(controller);
 }
@@ -67,4 +74,29 @@ void LeapTracker::track(const Leap::Controller& controller)
 {
 	if (track_function_)
 		track_function_(controller);
+}
+
+void LeapTracker::trackFunction(std::function<void(const Leap::Controller&)> f)
+{ 
+	track_function_ = f; 
+}
+
+void LeapTracker::engageFunction(std::function<void(const Leap::Controller&)> f)
+{ 
+	engage_function_ = f;
+}
+
+void LeapTracker::disengageFunction(std::function<void(const Leap::Controller&)> f)
+{ 
+	disengage_function_ = f; 
+}
+
+void LeapTracker::engageDelay(std::chrono::milliseconds delay)
+{ 
+	engage_delay_ = delay; 
+}
+
+void LeapTracker::disengageDelay(std::chrono::milliseconds delay)
+{ 
+	disengage_delay_ = delay;
 }
