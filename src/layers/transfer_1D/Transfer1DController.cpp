@@ -45,8 +45,13 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 
 	finger_tracker_.trackFunction(std::bind(&Transfer1DController::moveAndScale, this, std::placeholders::_1));
-	finger_tracker_.engageFunction([&](const Leap::Controller&){saved_interval_ = cluts[activeCLUT].interval(); });
-
+	finger_tracker_.engageFunction([&](const Leap::Controller&){
+		saved_interval_ = cluts[activeCLUT].interval();
+		MainController::getInstance().leapStateController().active(LeapStateController::icon_h2f1_point);
+	});
+	finger_tracker_.disengageFunction([](const Leap::Controller&){
+		MainController::getInstance().leapStateController().active(LeapStateController::icon_none);
+	});
 	histo1D.generate(GL_TEXTURE_2D);
 	transferFn.generate(GL_TEXTURE_2D);
 
@@ -115,10 +120,10 @@ Transfer1DController::~Transfer1DController()
 void Transfer1DController::gainFocus()
 {
 	auto& lsc = MainController::getInstance().leapStateController();
-	std::set<LeapStateController::State> states;
-	states.insert(LeapStateController::State::h1f1_point);
-	states.insert(LeapStateController::State::h2f1_point);
-	lsc.availableStates(states);
+	lsc.clear();
+	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
+	lsc.add(LeapStateController::icon_h1f2_circle, "Options");
+	lsc.add(LeapStateController::icon_h2f1_point, "Windowing");
 }
 
 void Transfer1DController::loseFocus()
@@ -319,12 +324,6 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 bool Transfer1DController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
 	finger_tracker_.update(leapController);
-
-	if (finger_tracker_.tracking()) {
-		MainController::getInstance().leapStateController().activeState(LeapStateController::State::h2f1_point);
-	} else {
-		MainController::getInstance().leapStateController().activeState(LeapStateController::State::none);
-	}
 
 	if (finger_tracker_.tracking())
 		return false;

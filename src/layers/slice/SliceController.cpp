@@ -37,18 +37,19 @@ SliceController::SliceController() :
 	finger_tracker_.trackFunction(std::bind(&SliceController::leapScroll, this, std::placeholders::_1));
 	finger_tracker_.engageFunction([&](const Leap::Controller& c){
 		saved_slice_ = currentSlice_;
-		MainController::getInstance().leapStateController().activeState(LeapStateController::State::h2f1_point);
+		MainController::getInstance().leapStateController().active(LeapStateController::icon_h2f1_point);
 	});
 	finger_tracker_.disengageFunction([](const Leap::Controller&){
-		MainController::getInstance().leapStateController().activeState(LeapStateController::State::none);
+		MainController::getInstance().leapStateController().active(LeapStateController::icon_none);
 	});
 }
 
 void SliceController::gainFocus()
 {
-	std::set<LeapStateController::State> states;
-	states.insert(LeapStateController::State::h2f1_point);
-	MainController::getInstance().leapStateController().availableStates(states);
+	auto& lsc = MainController::getInstance().leapStateController();
+	lsc.clear();
+	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
+	lsc.add(LeapStateController::icon_h2f1_point, "Scroll Slices");
 }
 
 void SliceController::slice(int index)

@@ -34,6 +34,7 @@ void MenuController::hideMenu()
 	leap_state_ = LeapState::closed;
 	finger_tracker_.tracking(false);
 	transition_.state(Transition::State::decrease);
+	MainController::getInstance().leapStateController().active(LeapStateController::icon_none);
 }
 
 void MenuController::showMainMenu()
@@ -125,7 +126,7 @@ void MenuController::updateLeapPointer(const Leap::Controller& controller, const
 	finger_tracker_.update(controller);
 	if (finger_tracker_.tracking()) {
 		Leap::Finger f = finger_tracker_.finger(frame);
-		Leap::Vector n = frame.interactionBox().normalizePoint(f.tipPosition());
+		Leap::Vector n = frame.interactionBox().normalizePoint(f.stabilizedTipPosition());
 		leap.x = n.x * viewport_.width + viewport_.x;
 		leap.y = n.y * viewport_.height + viewport_.y;
 	}
@@ -153,6 +154,13 @@ void MenuController::leapMenuClosed(const Leap::Controller& controller, const Le
 void MenuController::leapMenuTriggered(const Leap::Controller& controller, const Leap::Frame& frame)
 {
 	updateLeapPointer(controller, frame);
+
+	if (leap_state_ == LeapState::triggered_main) {
+		MainController::getInstance().leapStateController().active(LeapStateController::icon_h1f1_circle);
+	} else if (leap_state_ == LeapState::triggered_context) {
+		leap_state_ = LeapState::triggered_context;
+		MainController::getInstance().leapStateController().active(LeapStateController::icon_h1f2_circle);
+	}
 
 	if (finger_tracker_.tracking()) {
 		float d = (leap - viewport_.center()).length();
@@ -239,7 +247,7 @@ void MenuController::draw()
 			tc2 = Vec3(1.0f) - tc;
 		} else {
 			menuC = Vec3(.3f, .3f, .3f);
-			hlC = Vec3(0.1f, 0.1f, 0.1f);
+			hlC = Vec3(0.2f, 0.4f, 0.9f);
 			tc = Vec3(1, 1, 1);
 			tc2 = tc;
 		}
@@ -249,7 +257,7 @@ void MenuController::draw()
 
 		if (selected_ >= 0) {
 
-			Vec3 c = gl::lerp(Vec3(0.5f), Vec3(0.0f), progress_);
+			Vec3 c = gl::lerp(Vec3(0.5f), Vec3(0.5f, 0.7f, 0.9f), progress_);
 			glUniform4f(menuShader.getUniform("color"), c.x, c.y, c.z, transition_.progress());
 			void* offset = (void*)(indicesPerMenuItem * selected_ * sizeof(GLushort));
 			glDrawElements(GL_TRIANGLES, indicesPerMenuItem, indexType, offset);
@@ -263,7 +271,7 @@ void MenuController::draw()
 
 	// leap cursor
 	if (leap_state_ != LeapState::closed) {
-		static Draw d;
+		Draw& d = MainController::getInstance().draw();
 		d.begin(GL_LINES);
 		d.setModelViewProj(gl::ortho2D(viewport_.x, viewport_.width, viewport_.y, viewport_.height));
 

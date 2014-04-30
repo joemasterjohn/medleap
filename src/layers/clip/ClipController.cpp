@@ -52,9 +52,10 @@ std::unique_ptr<Menu> ClipController::contextMenu()
 void ClipController::gainFocus()
 {
 	auto& lsc = MainController::getInstance().leapStateController();
-	std::set<LeapStateController::State> states;
-	states.insert(LeapStateController::State::h1f1_point);
-	lsc.availableStates(states);
+	lsc.clear();
+	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
+	lsc.add(LeapStateController::icon_h1f2_circle, "Options");
+	lsc.add(LeapStateController::icon_h1f2_trigger, "Rotate Plane");
 }
 
 void ClipController::loseFocus()

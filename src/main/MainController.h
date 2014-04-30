@@ -15,6 +15,7 @@
 #include "layers/leap_state/LeapStateController.h"
 #include "util/TextRenderer.h"
 #include "data/VolumeLoader.h"
+#include "gl/util/Draw.h"
 #include "Leap.h"
 #include <list>
 #include <stack>
@@ -65,7 +66,7 @@ public:
 	FocusController& focusController() { return focus_controller_; }
 	MaskController& maskController() { return mask_controller_; }
 	LeapStateController& leapStateController() { return leap_state_controller_; }
-
+	gl::Draw& draw() { return draw_; }
 	void pickColor(const Color& initialColor, std::function<void(const Color&)> callback);
 
 	void popController();
@@ -105,6 +106,7 @@ private:
 	FocusController focus_controller_;
 	MaskController mask_controller_;
 	LeapStateController leap_state_controller_;
+	gl::Draw draw_;
 
     std::list<Controller*> activeControllers;
     Mode mode;

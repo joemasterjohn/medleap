@@ -11,36 +11,37 @@
 class LeapStateController : public Controller
 {
 public:
-	enum class State
+	enum Icon
 	{
-		h1f1_point,
-		h1f2_point,
-		h1f3_point,
-		h1f4_point,
-		h1f5_point,
-		h1f1_circle,
-		h1f2_circle,
-		h1f2_trigger,
-		h2f1_point,
-		none
+		icon_h1f1_point,
+		icon_h1f2_point,
+		icon_h1f3_point,
+		icon_h1f4_point,
+		icon_h1f5_point,
+		icon_h1f1_circle,
+		icon_h1f2_circle,
+		icon_h1f2_trigger,
+		icon_h2f1_point,
+		num_icons,
+		icon_none
 	};
 
 	LeapStateController();
 	void draw() override;
-	void availableStates(std::set<State> states);
-	void availableState(State state, bool available);
-	void activeState(State state);
+	void clear();
+	void add(Icon icon, const std::string& label);
+	void active(Icon icon);
 
 private:
-	struct StateView
+	struct DisplayedIcon
 	{
-		std::string label_;
-		gl::Texture texture_;
-		bool available_;
+		Icon icon;
+		std::string label;
 	};
 	
-	std::vector<StateView> state_views_;
-	StateView* active_state_;
+	std::vector<gl::Texture> textures_;
+	std::vector<DisplayedIcon> displayed_;
+	Icon active_;
 	gl::Buffer icon_vbo_;
 	gl::Program icon_prog_;
 };

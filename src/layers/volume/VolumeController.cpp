@@ -70,6 +70,14 @@ VolumeController::VolumeController()
 	}
 }
 
+void VolumeController::gainFocus()
+{
+	auto& lsc = MainController::getInstance().leapStateController();
+	lsc.clear();
+	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
+	lsc.add(LeapStateController::icon_h1f2_circle, "Options");
+}
+
 Camera& VolumeController::getCamera()
 {
 	return camera;

@@ -33,6 +33,7 @@ public:
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame) override;
 	std::unique_ptr<Menu> contextMenu();
 
+	void gainFocus() override;
 	void markDirty();
 	void setMode(RenderMode mode);
 	void cycleMode();
