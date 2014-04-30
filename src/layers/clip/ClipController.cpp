@@ -49,6 +49,14 @@ std::unique_ptr<Menu> ClipController::contextMenu()
 	return std::unique_ptr<Menu>(menu);
 }
 
+void ClipController::gainFocus()
+{
+	auto& lsc = MainController::getInstance().leapStateController();
+	std::set<LeapStateController::State> states;
+	states.insert(LeapStateController::State::h1f1_point);
+	lsc.availableStates(states);
+}
+
 void ClipController::loseFocus()
 {
 	hand_tracker_.tracking(false);

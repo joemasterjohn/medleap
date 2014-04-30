@@ -12,8 +12,11 @@ using namespace gl;
 
 
 MenuController::MenuController() :
-	transition_(std::chrono::milliseconds(250))
+	transition_(std::chrono::milliseconds(250)),
+	leap_state_(LeapState::closed)
 {
+	finger_tracker_.engageDelay(std::chrono::milliseconds(0));
+	finger_tracker_.disengageDelay(std::chrono::milliseconds(0));
 	menuVBO.generateVBO(GL_STATIC_DRAW);
 	menuIBO.generateIBO(GL_STATIC_DRAW);
 	menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
@@ -26,6 +29,7 @@ void MenuController::loseFocus()
 
 void MenuController::hideMenu()
 {
+	leap_state_ = LeapState::closed;
 	finger_tracker_.tracking(false);
 	transition_.state(Transition::State::decrease);
 }
@@ -112,49 +116,84 @@ int MenuController::calcHighlightedMenu(double radians)
 	return static_cast<int>(radians / angleStep) % numItems;
 }
 
-bool MenuController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
+void MenuController::updateLeapPointer(const Leap::Controller& controller, const Leap::Frame& frame)
 {
-	progress_ = 0.0f;
-	if (transition_.empty()) {
-		Leap::GestureList gestures = currentFrame.gestures();
-		for (const Leap::Gesture& g : gestures) {
-			if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
-				Leap::CircleGesture circle(g);
-				bool xyPlane = abs(circle.normal().dot(Leap::Vector(0, 0, 1))) > 0.8f;
-				if (circle.progress() > 1 && xyPlane) {
+	finger_tracker_.update(controller);
+	if (finger_tracker_.tracking()) {
+		Leap::Finger f = finger_tracker_.finger(frame);
+		Leap::Vector n = frame.interactionBox().normalizePoint(f.tipPosition());
+		leap.x = n.x * viewport_.width + viewport_.x;
+		leap.y = n.y * viewport_.height + viewport_.y;
+	}
+}
 
-					if (currentFrame.fingers().count() > 1)
-						showMainMenu();
-					else
-						showContextMenu();
-				}
+void MenuController::leapMenuClosed(const Leap::Controller& controller, const Leap::Frame& frame)
+{
+	Leap::GestureList gestures = frame.gestures();
+	for (const Leap::Gesture& g : gestures) {
+		if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
+			Leap::CircleGesture circle(g);
+			bool xyPlane = abs(circle.normal().dot(Leap::Vector(0, 0, 1))) > 0.8f;
+			if (circle.progress() > 1 && xyPlane) {
+				leap_state_ = LeapState::triggered;
 			}
 		}
 	}
-	else {
+}
 
-		finger_tracker_.update(leapController);
+void MenuController::leapMenuTriggered(const Leap::Controller& controller, const Leap::Frame& frame)
+{
+	updateLeapPointer(controller, frame);
 
-		if (finger_tracker_.tracking()) {
-			Leap::Vector delta = finger_tracker_.posDelta(leapController.frame());
-			Vec2 v = { delta.x, delta.y };
-			float radians = v.anglePositive();
-			float radius = v.length();
+	if (finger_tracker_.tracking()) {
+		float d = (leap - viewport_.center()).length();
+		if (d < 35) {
+			leap_state_ = LeapState::open;
+			showMainMenu();
+		}
+	}
+}
 
-			if (radius > 5.0f) {
-				int highlightedItem = calcHighlightedMenu(radians);
-				selected_ = highlightedItem;
+void MenuController::leapMenuOpen(const Leap::Controller& controller, const Leap::Frame& frame)
+{
+	updateLeapPointer(controller, frame);
 
-				if (radius > 35.0f && selected_ >= 0 && menu_) {
-					progress_ = gl::clamp((radius - 35.0f) / 100.0f, 0.0f, 1.0f);
-					if (progress_ >= 1.0f) {
-						(*menu_)[highlightedItem].trigger();
-						finger_tracker_.tracking(false);
-					}
+	if (finger_tracker_.tracking()) {
+		Vec2 v = (leap - viewport_.center());
+		float radians = v.anglePositive();
+		float radius = v.length();
 
+		if (radius > 5.0f) {
+			int highlightedItem = calcHighlightedMenu(radians);
+			selected_ = highlightedItem;
+
+			if (radius > 235.0f && selected_ >= 0 && menu_) {
+				progress_ = gl::clamp((radius - 235.0f) / 100.0f, 0.0f, 1.0f);
+				if (progress_ >= 1.0f) {
+					(*menu_)[highlightedItem].trigger();
+					finger_tracker_.tracking(false);
 				}
+
 			}
 		}
+	}
+}
+
+bool MenuController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
+{
+	progress_ = 0.0f;
+
+	switch (leap_state_)
+	{
+	case LeapState::closed:
+		leapMenuClosed(leapController, currentFrame);
+		break;
+	case LeapState::triggered:
+		leapMenuTriggered(leapController, currentFrame);
+		break;
+	case LeapState::open:
+		leapMenuOpen(leapController, currentFrame);
+		break;
 	}
 
 	return transition_.empty();
@@ -167,57 +206,64 @@ void MenuController::update(std::chrono::milliseconds elapsed)
 
 void MenuController::draw()
 {
-	if (!menu_)
-		return;
+	if (menu_) {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		menuShader.enable();
+		glUniformMatrix4fv(menuShader.getUniform("modelViewProjection"), 1, false, modelViewProjection * gl::scale(transition_.progress()));
+		menuVBO.bind();
+		menuIBO.bind();
+		setShaderState();
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	menuShader.enable();
-	glUniformMatrix4fv(menuShader.getUniform("modelViewProjection"), 1, false, modelViewProjection * gl::scale(transition_.progress()));
-	menuVBO.bind();
-	menuIBO.bind();
-	setShaderState();
+		Vec3 menuC;
+		Vec3 hlC;
+		Vec3 tc;
+		Vec3 tc2;
+		if (MainController::getInstance().getRenderer().getBackgroundColor().x > 0.5f) {
+			menuC = Vec3(.7f, .7f, .7f);
+			hlC = Vec3(.1f, .1f, .1f);
+			tc = Vec3(0, 0, 0);
+			tc2 = Vec3(1.0f) - tc;
+		} else {
+			menuC = Vec3(.3f, .3f, .3f);
+			hlC = Vec3(0.1f, 0.1f, 0.1f);
+			tc = Vec3(1, 1, 1);
+			tc2 = tc;
+		}
 
-	Vec3 menuC;
-	Vec3 hlC;
-	Vec3 tc;
-	Vec3 tc2;
-	if (MainController::getInstance().getRenderer().getBackgroundColor().x > 0.5f) {
-		menuC = Vec3(.7f, .7f, .7f);
-		hlC = Vec3(.1f, .1f, .1f);
-		tc = Vec3(0, 0, 0);
-		tc2 = Vec3(1.0f) - tc;
-	} else {
-		menuC = Vec3(.3f, .3f, .3f);
-		hlC = Vec3(0.1f, 0.1f, 0.1f);
-		tc = Vec3(1, 1, 1);
-		tc2 = tc;
+		glUniform4f(menuShader.getUniform("color"), menuC.x, menuC.y, menuC.z, transition_.progress() * 0.85f);
+		glDrawElements(GL_TRIANGLES, indexCount, indexType, 0);
+
+		if (selected_ >= 0) {
+
+			Vec3 c = gl::lerp(Vec3(0.5f), Vec3(0.0f), progress_);
+			glUniform4f(menuShader.getUniform("color"), c.x, c.y, c.z, transition_.progress());
+			void* offset = (void*)(indicesPerMenuItem * selected_ * sizeof(GLushort));
+			glDrawElements(GL_TRIANGLES, indicesPerMenuItem, indexType, offset);
+		}
+		glDisable(GL_BLEND);
+
+		if (transition_.full()) {
+			drawMenu(*menu_, tc, tc2);
+		}
 	}
 
-	glUniform4f(menuShader.getUniform("color"), menuC.x, menuC.y, menuC.z, transition_.progress() * 0.85f);
-	glDrawElements(GL_TRIANGLES, indexCount, indexType, 0);
+	// leap cursor
+	if (leap_state_ != LeapState::closed) {
+		static Draw d;
+		d.begin(GL_LINES);
+		d.setModelViewProj(gl::ortho2D(viewport_.x, viewport_.width, viewport_.y, viewport_.height));
 
-	if (selected_ >= 0) {
+		d.color(1, 0, 1);
+		d.circle(viewport_.center().x, viewport_.center().y, 20.0f, 32);
 
-		Vec3 c = gl::lerp(Vec3(0.5f), Vec3(0.0f), progress_);
-		glUniform4f(menuShader.getUniform("color"), c.x, c.y, c.z, transition_.progress());
-		void* offset = (void*)(indicesPerMenuItem * selected_ * sizeof(GLushort));
-		glDrawElements(GL_TRIANGLES, indicesPerMenuItem, indexType, offset);
+		d.color(1, 0, 0);
+		d.circle(leap.x, leap.y, 5.0f, 32);
+		d.circle(leap.x, leap.y, 15, 32);
+		d.circle(leap.x, leap.y, 35.0f, 32);
+		d.end();
+		d.draw();
 	}
-	glDisable(GL_BLEND);
-
-	if (transition_.full()) {
-		drawMenu(*menu_, tc, tc2);
-	}
-
-	//static Draw d;
-	//d.begin(GL_LINES);
-	//d.setModelViewProj(gl::ortho2D(viewport_.x, viewport_.width, viewport_.y, viewport_.height));
-	//d.color(1, 0, 0);
-	//d.vertex(viewport_.width / 2, viewport_.height / 2);
-	//d.vertex(viewport_.width / 2 + leap.x * 2, viewport_.height/2 + leap.y * 2);
-	//d.end();
-	//d.draw();
 }
 
 

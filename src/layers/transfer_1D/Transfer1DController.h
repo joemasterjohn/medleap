@@ -30,6 +30,9 @@ public:
 	std::set<Leap::Gesture::Type> requiredGestures() override;
 	std::unique_ptr<Menu> contextMenu() override;
 
+	void gainFocus() override;
+	void loseFocus() override;
+
 	void draw() override;
 
     void setVolumeRenderer(VolumeController* volumeRenderer);

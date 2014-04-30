@@ -29,11 +29,15 @@ public:
 	void draw() override;
 
 private:
+	enum class LeapState { closed, triggered, open };
+
 	Transition transition_;
     std::string workingDir;
 	std::unique_ptr<Menu> menu_;
 	int selected_;
 	OneFingerTracker finger_tracker_;
+	LeapState leap_state_;
+
 
 	// renderer (clean up)
 	float progress_; // leap progress, not transition
@@ -55,6 +59,11 @@ private:
 	void createRingGeometry();
 	void createListGeometry();
 	void drawMenu(Menu& menu, gl::Vec3 tc1, gl::Vec3 tc2);
+
+	void leapMenuClosed(const Leap::Controller& leapController, const Leap::Frame& frame);
+	void leapMenuTriggered(const Leap::Controller& leapController, const Leap::Frame& frame);
+	void leapMenuOpen(const Leap::Controller& leapController, const Leap::Frame& frame);
+	void updateLeapPointer(const Leap::Controller& leapController, const Leap::Frame& frame);
 };
 
 #endif /* defined(__medleap__MenuController__) */

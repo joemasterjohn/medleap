@@ -6,6 +6,7 @@
 #include "gl/Program.h"
 #include "gl/Texture.h"
 #include <vector>
+#include <set>
 
 class LeapStateController : public Controller
 {
@@ -22,6 +23,7 @@ public:
 
 	LeapStateController();
 	void draw() override;
+	void availableStates(std::set<State> states);
 	void availableState(State state, bool available);
 	void activeState(State state);
 

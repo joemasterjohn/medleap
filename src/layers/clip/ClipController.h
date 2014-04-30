@@ -8,6 +8,7 @@ class ClipController : public Controller
 {
 public:
 	ClipController();
+	void gainFocus() override;
 	void loseFocus() override;
 	bool leapInput(const Leap::Controller& controller, const Leap::Frame& frame) override;
 	std::unique_ptr<Menu> contextMenu() override;

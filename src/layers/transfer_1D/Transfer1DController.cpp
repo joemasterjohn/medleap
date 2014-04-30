@@ -112,6 +112,20 @@ Transfer1DController::~Transfer1DController()
         delete transfer1DPixels;
 }
 
+void Transfer1DController::gainFocus()
+{
+	auto& lsc = MainController::getInstance().leapStateController();
+	std::set<LeapStateController::State> states;
+	states.insert(LeapStateController::State::h1f1_point);
+	states.insert(LeapStateController::State::h2f1_point);
+	lsc.availableStates(states);
+}
+
+void Transfer1DController::loseFocus()
+{
+
+}
+
 std::unique_ptr<Menu> Transfer1DController::contextMenu()
 {
 	Menu* menu = new Menu("Transfer 1D");
@@ -305,6 +319,12 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 bool Transfer1DController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
 	finger_tracker_.update(leapController);
+
+	if (finger_tracker_.tracking()) {
+		MainController::getInstance().leapStateController().activeState(LeapStateController::State::h2f1_point);
+	} else {
+		MainController::getInstance().leapStateController().activeState(LeapStateController::State::none);
+	}
 
 	if (finger_tracker_.tracking())
 		return false;
