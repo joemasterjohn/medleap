@@ -19,7 +19,11 @@ public:
 	/** Difference of current finger position and position when tracking engaged */
 	Leap::Vector posDelta(const Leap::Frame& frame) const;
 
-	void engageVelocityThreshold(float t) { engage_velocity_thresh_ = t; }
+	/** Max speed fingers can be moving and have tracking engage */
+	void engageSpeedThreshold(float speed) { engage_spd_thresh_ = speed; }
+
+	/** Max speed fingers can move before tracking will disengage */
+	void disengageSpeedThreshold(float speed) { disengage_spd_thresh_ = speed; }
 
 protected:
 	bool shouldEngage(const Leap::Controller& controller) override;
@@ -27,8 +31,8 @@ protected:
 
 private:
 	Leap::Finger finger_;
-	float engage_velocity_thresh_;
-	float disengage_velocity_thresh_;
+	float engage_spd_thresh_;
+	float disengage_spd_thresh_;
 };
 
 #endif

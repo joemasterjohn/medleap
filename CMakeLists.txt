@@ -57,8 +57,12 @@ set(DATA_FONTS
 set(DATA_ICONS
 	icons/h1f1_point.png
     icons/h1f2_point.png
+    icons/h1f3_point.png
+    icons/h1f4_point.png
+    icons/h1f5_point.png
+    icons/h1f1_circle.png
+    icons/h1f2_circle.png
     icons/h1f2_trigger.png
-    icons/h1f5_spread.png
     icons/h2f1_point.png
 )
 

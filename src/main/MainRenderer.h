@@ -22,16 +22,16 @@ public:
     void pushLayer(Controller* layer);
     
     /** Pushes a render layer and docks it to the left. All non-docked,lower-level layers will be pushed right. */
-	void dockLeft(Controller* layer, double percentWidth);
+	void dockLeft(Controller* layer, double percentWidth, int pixels);
     
     /** Pushes a render layer and docks it to the right. All non-docked, lower-level layers will be pushed left. */
-	void dockRight(Controller* layer, double percentWidth);
+	void dockRight(Controller* layer, double percentWidth, int pixels);
     
     /** Pushes a render layer and docks it to the bottom. All non-docked, lower-level layers will be pushed up. */
-	void dockBottom(Controller* layer, double percentHeight);
+	void dockBottom(Controller* layer, double percentHeight, int pixels);
     
     /** Pushes a render layer and docks it to the top. All non-docked, lower-level layers will be pushed down. */
-	void dockTop(Controller* layer, double percentHeight);
+	void dockTop(Controller* layer, double percentHeight, int pixels);
     
     /** Pops the top layer from the drawing stack. Returns the popped layer or NULL if empty. */
 	Controller* popLayer();
@@ -51,13 +51,15 @@ private:
 	gl::Vec3 bgColor;
     
     /** A docked layer */
-    struct Docking
-    {
-        /** level of the stack the dock was pushed to (-1 if nothing docked) */
-        int layerIndex;
-        
-        /** how much of the width (docked left/right) or height (docked bottom/top) to occupy */
-        double percent;
+	struct Docking
+	{
+		/** level of the stack the dock was pushed to (-1 if nothing docked) */
+		int layerIndex;
+
+		/** how much of the width (docked left/right) or height (docked bottom/top) to occupy */
+		double percent;
+
+		int pixels;
     };
     
     Docking leftDocking;

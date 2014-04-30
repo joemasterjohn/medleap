@@ -3,8 +3,8 @@
 using namespace Leap;
 
 OneFingerTracker::OneFingerTracker() :
-		engage_velocity_thresh_(50),
-		disengage_velocity_thresh_(250)
+		engage_spd_thresh_(50),
+		disengage_spd_thresh_(250)
 {
 	//engageDelay(std::chrono::milliseconds(200));
 }
@@ -21,7 +21,7 @@ bool OneFingerTracker::shouldEngage(const Leap::Controller& controller)
 
 	finger_ = hands[0].fingers().frontmost();
 
-	if (finger_.tipVelocity().magnitude() > engage_velocity_thresh_)
+	if (finger_.tipVelocity().magnitude() > engage_spd_thresh_)
 		return false;
 
 	return true;
@@ -37,7 +37,7 @@ bool OneFingerTracker::shouldDisengage(const Leap::Controller& controller)
 	if (hands.count() != 1)
 		return true;
 
-	if (finger(controller.frame()).tipVelocity().z > disengage_velocity_thresh_)
+	if (finger(controller.frame()).tipVelocity().z > disengage_spd_thresh_)
 		return true;
 
 	return false;

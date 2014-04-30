@@ -3,8 +3,8 @@
 using namespace Leap;
 
 TwoFingerTracker::TwoFingerTracker() :
-		engage_velocity_thresh_(50),
-		disengage_velocity_thresh_(250)
+		engage_spd_thresh_(50),
+		disengage_spd_thresh_(250)
 {
 	engageDelay(std::chrono::milliseconds(1000));
 }
@@ -22,10 +22,10 @@ bool TwoFingerTracker::shouldEngage(const Leap::Controller& controller)
 	l_index_ = hands.leftmost().fingers().rightmost();
 	r_index_ = hands.rightmost().fingers().leftmost();
 
-	if (l_index_.tipVelocity().magnitude() > engage_velocity_thresh_)
+	if (l_index_.tipVelocity().magnitude() > engage_spd_thresh_)
 		return false;
 
-	if (r_index_.tipVelocity().magnitude() > engage_velocity_thresh_)
+	if (r_index_.tipVelocity().magnitude() > engage_spd_thresh_)
 		return false;
 
 	return true;
@@ -42,10 +42,10 @@ bool TwoFingerTracker::shouldDisengage(const Leap::Controller& controller)
 		return true;
 
 	// maybe better to use velocity perp. to hand axis, not to camera
-	if (leftIndex(controller.frame()).tipVelocity().z > disengage_velocity_thresh_)
+	if (leftIndex(controller.frame()).tipVelocity().z > disengage_spd_thresh_)
 		return true;
 
-	if (rightIndex(controller.frame()).tipVelocity().z > disengage_velocity_thresh_)
+	if (rightIndex(controller.frame()).tipVelocity().z > disengage_spd_thresh_)
 		return true;
 
 	return false;
@@ -117,4 +117,14 @@ Vector TwoFingerTracker::leftIndexPosDelta(const Frame& frame) const
 Vector TwoFingerTracker::rightIndexPosDelta(const Frame& frame) const
 {
 	return frame.finger(r_index_.id()).tipPosition() - r_index_.tipPosition();
+}
+
+void TwoFingerTracker::engageSpeedThreshold(float speed)
+{
+	engage_spd_thresh_ = speed;
+}
+
+void TwoFingerTracker::disengageSpeedThreshold(float speed)
+{
+	disengage_spd_thresh_ = speed;
 }

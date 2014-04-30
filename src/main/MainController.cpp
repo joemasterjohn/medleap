@@ -86,7 +86,7 @@ void MainController::setMode(MainController::Mode mode)
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
 			pushController(&orientationController);
-			pushController(&leap_state_controller_, Docking(Docking::LEFT, 0.07));
+			pushController(&leap_state_controller_, Docking(Docking::LEFT, .07, 64));
 			pushController(&menuController_);
 			break;
         case MODE_3D:
@@ -100,7 +100,7 @@ void MainController::setMode(MainController::Mode mode)
 			pushController(&clip_controller_);
 			pushController(&focus_controller_);
 			pushController(&mask_controller_);
-			pushController(&leap_state_controller_, Docking(Docking::LEFT, 0.07));
+			pushController(&leap_state_controller_, Docking(Docking::LEFT, .07, 64));
 			pushController(&menuController_);
             break;
     }
@@ -338,16 +338,16 @@ void MainController::pushController(Controller* controller, MainController::Dock
     switch (docking.position)
     {
         case MainController::Docking::LEFT:
-            renderer.dockLeft(controller, docking.percent);
+            renderer.dockLeft(controller, docking.percent, docking.pixels);
             break;
         case MainController::Docking::RIGHT:
-            renderer.dockRight(controller, docking.percent);
+			renderer.dockRight(controller, docking.percent, docking.pixels);
             break;
         case MainController::Docking::BOTTOM:
-            renderer.dockBottom(controller, docking.percent);
+			renderer.dockBottom(controller, docking.percent, docking.pixels);
             break;
         case MainController::Docking::TOP:
-            renderer.dockTop(controller, docking.percent);
+			renderer.dockTop(controller, docking.percent, docking.pixels);
             break;
         default:
             renderer.pushLayer(controller);

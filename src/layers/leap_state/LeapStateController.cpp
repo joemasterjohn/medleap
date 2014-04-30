@@ -6,7 +6,7 @@
 using namespace gl;
 using namespace std;
 
-static const int max_states = 5;
+static const int max_states = 9;
 
 LeapStateController::LeapStateController() : active_state_(nullptr)
 {
@@ -32,8 +32,12 @@ LeapStateController::LeapStateController() : active_state_(nullptr)
 	// load the state views and their textures
 	load(state_views_[(int)State::h1f1_point], "Open Hand", "icons/h1f1_point.png");
 	load(state_views_[(int)State::h1f2_point], "Open Hand", "icons/h1f2_point.png");
+	load(state_views_[(int)State::h1f3_point], "Open Hand", "icons/h1f3_point.png");
+	load(state_views_[(int)State::h1f4_point], "Open Hand", "icons/h1f4_point.png");
+	load(state_views_[(int)State::h1f5_point], "Open Hand", "icons/h1f5_point.png");
+	load(state_views_[(int)State::h1f1_circle], "Open Hand", "icons/h1f1_circle.png");
+	load(state_views_[(int)State::h1f2_circle], "Open Hand", "icons/h1f2_circle.png");
 	load(state_views_[(int)State::h1f2_trigger], "Open Hand", "icons/h1f2_trigger.png");
-	load(state_views_[(int)State::h1f5_spread], "Open Hand", "icons/h1f5_spread.png");
 	load(state_views_[(int)State::h2f1_point], "Open Hand", "icons/h2f1_point.png");
 
 	// quad geometry

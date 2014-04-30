@@ -17,6 +17,8 @@ MenuController::MenuController() :
 {
 	finger_tracker_.engageDelay(std::chrono::milliseconds(0));
 	finger_tracker_.disengageDelay(std::chrono::milliseconds(0));
+	finger_tracker_.engageSpeedThreshold(300);
+
 	menuVBO.generateVBO(GL_STATIC_DRAW);
 	menuIBO.generateIBO(GL_STATIC_DRAW);
 	menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
@@ -36,6 +38,7 @@ void MenuController::hideMenu()
 
 void MenuController::showMainMenu()
 {
+	leap_state_ = LeapState::open;
 	Menu* m = new MainMenu;
 	menu_ = std::unique_ptr<Menu>(m);
 	transition_.state(Transition::State::increase);
@@ -44,6 +47,7 @@ void MenuController::showMainMenu()
 
 void MenuController::showContextMenu()
 {
+	leap_state_ = LeapState::open;
 	Controller* focusLayer = MainController::getInstance().focusLayer();
 	if (focusLayer) {
 		unique_ptr<Menu> m = focusLayer->contextMenu();
@@ -135,7 +139,12 @@ void MenuController::leapMenuClosed(const Leap::Controller& controller, const Le
 			Leap::CircleGesture circle(g);
 			bool xyPlane = abs(circle.normal().dot(Leap::Vector(0, 0, 1))) > 0.8f;
 			if (circle.progress() > 1 && xyPlane) {
-				leap_state_ = LeapState::triggered;
+				int numFingers = frame.fingers().count();
+				if (numFingers == 1) {
+					leap_state_ = LeapState::triggered_main;
+				} else if (numFingers == 2 && MainController::getInstance().focusLayer()) {
+					leap_state_ = LeapState::triggered_context;
+				}
 			}
 		}
 	}
@@ -148,8 +157,11 @@ void MenuController::leapMenuTriggered(const Leap::Controller& controller, const
 	if (finger_tracker_.tracking()) {
 		float d = (leap - viewport_.center()).length();
 		if (d < 35) {
-			leap_state_ = LeapState::open;
-			showMainMenu();
+			if (leap_state_ == LeapState::triggered_context) {
+				showContextMenu();
+			} else {
+				showMainMenu();
+			}
 		}
 	}
 }
@@ -188,7 +200,8 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 	case LeapState::closed:
 		leapMenuClosed(leapController, currentFrame);
 		break;
-	case LeapState::triggered:
+	case LeapState::triggered_context:
+	case LeapState::triggered_main:
 		leapMenuTriggered(leapController, currentFrame);
 		break;
 	case LeapState::open:

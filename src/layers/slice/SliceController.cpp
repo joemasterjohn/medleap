@@ -1,4 +1,5 @@
 #include "SliceController.h"
+#include "main/MainController.h"
 
 using namespace gl;
 using namespace Leap;
@@ -30,9 +31,24 @@ SliceController::SliceController() :
 	sliceVBO.bind();
 	sliceVBO.data(vertexData, sizeof(vertexData));
 
+	finger_tracker_.engageSpeedThreshold(100);
 	finger_tracker_.engageDelay(milliseconds(0));
+	finger_tracker_.disengageDelay(milliseconds(0));
 	finger_tracker_.trackFunction(std::bind(&SliceController::leapScroll, this, std::placeholders::_1));
-	finger_tracker_.engageFunction([&](const Leap::Controller& c){saved_slice_ = currentSlice_; });
+	finger_tracker_.engageFunction([&](const Leap::Controller& c){
+		saved_slice_ = currentSlice_;
+		MainController::getInstance().leapStateController().activeState(LeapStateController::State::h2f1_point);
+	});
+	finger_tracker_.disengageFunction([](const Leap::Controller&){
+		MainController::getInstance().leapStateController().activeState(LeapStateController::State::none);
+	});
+}
+
+void SliceController::gainFocus()
+{
+	std::set<LeapStateController::State> states;
+	states.insert(LeapStateController::State::h2f1_point);
+	MainController::getInstance().leapStateController().availableStates(states);
 }
 
 void SliceController::slice(int index)
@@ -193,7 +209,7 @@ bool SliceController::leapInput(const Leap::Controller& leapController, const Le
 
 void SliceController::leapScroll(const Leap::Controller& controller)
 {
-	Vector delta = finger_tracker_.posDelta(controller.frame());
+	Vector delta = finger_tracker_.centerPosDelta(controller.frame());
 	slice(saved_slice_ + delta.x / leap_scroll_dst_);
 }
 

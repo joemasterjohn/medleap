@@ -29,7 +29,7 @@ public:
 	void draw() override;
 
 private:
-	enum class LeapState { closed, triggered, open };
+	enum class LeapState { closed, triggered_main, triggered_context, open };
 
 	Transition transition_;
     std::string workingDir;

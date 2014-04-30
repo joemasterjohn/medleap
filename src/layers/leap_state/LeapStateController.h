@@ -15,8 +15,12 @@ public:
 	{
 		h1f1_point,
 		h1f2_point,
+		h1f3_point,
+		h1f4_point,
+		h1f5_point,
+		h1f1_circle,
+		h1f2_circle,
 		h1f2_trigger,
-		h1f5_spread,
 		h2f1_point,
 		none
 	};

@@ -35,7 +35,10 @@ public:
 		enum Position { NONE, LEFT, RIGHT, BOTTOM, TOP };
 		Position position;
 		double percent;
-		Docking(Position position, double percent) : position(position), percent(percent) {}
+		int pixels;
+		Docking(Position position, int pixels) : position(position), percent(-1.0f), pixels(pixels) {}
+		Docking(Position position, double percent) : position(position), percent(percent), pixels(-1) {}
+		Docking(Position position, double percent, int pixels) : position(position), percent(percent), pixels(pixels) {}
 	};
 
     ~MainController();

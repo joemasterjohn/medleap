@@ -46,6 +46,12 @@ public:
 	/** Returns difference of right index finger's tip position and where it was when engaged */
 	Leap::Vector rightIndexPosDelta(const Leap::Frame& frame) const;
 
+	/** Max speed fingers can be moving and have tracking engage */
+	void engageSpeedThreshold(float speed);
+
+	/** Max speed fingers can move before tracking will disengage */
+	void disengageSpeedThreshold(float speed);
+
 protected:
 	bool shouldEngage(const Leap::Controller& controller) override;
 	bool shouldDisengage(const Leap::Controller& controller) override;
@@ -53,8 +59,8 @@ protected:
 private:
 	Leap::Finger l_index_;
 	Leap::Finger r_index_;
-	float engage_velocity_thresh_;
-	float disengage_velocity_thresh_;
+	float engage_spd_thresh_;
+	float disengage_spd_thresh_;
 };
 
 #endif
