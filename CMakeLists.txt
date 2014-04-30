@@ -54,20 +54,29 @@ set(DATA_FONTS
     fonts/menlo24.dat
 )
 
-foreach(item IN LISTS DATA_SHADERS DATA_FONTS)
+set(DATA_ICONS
+	icons/h1f1_point.png
+    icons/h1f2_point.png
+    icons/h1f2_trigger.png
+    icons/h1f5_spread.png
+    icons/h2f1_point.png
+)
+
+foreach(item IN LISTS DATA_SHADERS DATA_FONTS DATA_ICONS)
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${item}" 
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${item}" "${CMAKE_CURRENT_BINARY_DIR}/${item}"
         DEPENDS   "${CMAKE_CURRENT_SOURCE_DIR}/${item}"
     ) 
 endforeach()
-add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS} ${DATA_FONTS})
+add_custom_target(SHADER_COPY ALL DEPENDS ${DATA_SHADERS} ${DATA_FONTS} ${DATA_ICONS})
 
 
 
 # source group naming for IDEs
 source_group("shaders" FILES ${DATA_SHADERS})
 source_group("fonts" FILES ${DATA_FONTS})
+source_group("icons" FILES ${DATA_ICONS})
 
 file(GLOB SOURCE_GL src/gl/*.cpp src/gl/*.c src/gl/*.h)
 source_group("gl" FILES ${SOURCE_GL})
@@ -160,6 +169,7 @@ set(SOURCE_AND_RESOURCES
     ${SOURCE_UTIL}
     ${DATA_SHADERS}
     ${DATA_FONTS}
+    ${DATA_ICONS}
 )
 
 # set root of source directory for finding headers
@@ -191,6 +201,12 @@ if (APPLE)
         PROPERTIES 
         MACOSX_PACKAGE_LOCATION
         Resources/fonts
+    )
+    SET_SOURCE_FILES_PROPERTIES(
+        ${DATA_ICONS} 
+        PROPERTIES 
+        MACOSX_PACKAGE_LOCATION
+        Resources/icons
     )
 
     # for C++11

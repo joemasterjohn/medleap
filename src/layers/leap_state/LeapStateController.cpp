@@ -29,11 +29,11 @@ LeapStateController::LeapStateController()
 	};
 
 	// load the state views and their textures
-	load(state_views_[(int)State::h1f1_point], "Open Hand", "C:/Users/Justin/Projects/MedLeap/medleap/icons/h1f1_point.png");
-	load(state_views_[(int)State::h1f2_point], "Open Hand", "C:/Users/Justin/Projects/MedLeap/medleap/icons/h1f2_point.png");
-	load(state_views_[(int)State::h1f2_trigger], "Open Hand", "C:/Users/Justin/Projects/MedLeap/medleap/icons/h1f2_trigger.png");
-	load(state_views_[(int)State::h1f5_spread], "Open Hand", "C:/Users/Justin/Projects/MedLeap/medleap/icons/h1f5_spread.png");
-	load(state_views_[(int)State::h2f1_point], "Open Hand", "C:/Users/Justin/Projects/MedLeap/medleap/icons/h2f1_point.png");
+	load(state_views_[(int)State::h1f1_point], "Open Hand", "icons/h1f1_point.png");
+	load(state_views_[(int)State::h1f2_point], "Open Hand", "icons/h1f2_point.png");
+	load(state_views_[(int)State::h1f2_trigger], "Open Hand", "icons/h1f2_trigger.png");
+	load(state_views_[(int)State::h1f5_spread], "Open Hand", "icons/h1f5_spread.png");
+	load(state_views_[(int)State::h2f1_point], "Open Hand", "icons/h2f1_point.png");
 
 
 	// quad geometry
