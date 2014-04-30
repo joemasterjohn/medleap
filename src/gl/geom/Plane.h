@@ -20,6 +20,15 @@ namespace gl
 
 		/** Normal vector unit length */
 		Vec3 normal() const;
+		
+		/** Sets normal vector */
+		void normal(const Vec3& normal);
+
+		/** Returns distance from origin */
+		float distFromOrigin() const;
+
+		/** Sets distance from origin */
+		void distFromOrigin(float dist);
 
 		/** Creates a triangulated surface centered at the point nearest to the plane's surface. */
 		Geometry triangles(unsigned u_segments, unsigned v_segments);

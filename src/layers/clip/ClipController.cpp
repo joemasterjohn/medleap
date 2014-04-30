@@ -20,7 +20,7 @@ std::unique_ptr<Menu> ClipController::contextMenu()
 	mi_new.setAction([&]{
 		auto& vc = MainController::getInstance().volumeController();
 		if (vc.clipPlanes().size() < max_planes) {
-			vc.clipPlanes().push_back(Vec4::yAxis());
+			vc.clipPlanes().push_back(Plane(Vec3::yAxis(), 0.0f));
 			cur_plane_ = vc.clipPlanes().size() - 1;
 		}
 		vc.markDirty();
@@ -73,9 +73,7 @@ void ClipController::updateVector(const Leap::Controller& controller)
 
 	Vector t = hand_tracker_.deltaTipPos().normalized();
 	Vec3 dir = view_inverse * Vec4{ t.x, t.y, t.z, 0.0f };
-	vc.clipPlanes()[cur_plane_].x = dir.x;
-	vc.clipPlanes()[cur_plane_].y = dir.y;
-	vc.clipPlanes()[cur_plane_].z = dir.z;
+	vc.clipPlanes()[cur_plane_].normal(dir);
 
 
 	vc.markDirty();

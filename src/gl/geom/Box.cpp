@@ -38,16 +38,21 @@ Box::Box(float width, float height, float length) : size_({ width, height, lengt
 	edges_.push_back(Box::Edge(3, 7));
 }
 
-Geometry Box::lines()
+Geometry Box::lines() const
 {
 	Geometry g;
 
+	g.vertices = vertices_;
 
+	for (const Box::Edge& e : edges_) {
+		g.indices.push_back(e.first);
+		g.indices.push_back(e.second);
+	}
 
 	return g;
 }
 
-Geometry Box::triangles(unsigned x_segments, unsigned y_segments, unsigned z_segments)
+Geometry Box::triangles(unsigned x_segments, unsigned y_segments, unsigned z_segments) const
 {
 	Geometry g;
 	g.mode = GL_TRIANGLES;
@@ -107,33 +112,32 @@ std::vector<Vec3> Box::intersect(const Plane& plane) const
 				if (t == 0.0f && !corners[e.first]) {
 					Vec3 v = a + d * t;
 					corners[e.first] = true;
-					indices.push_back(static_cast<unsigned short>(vertices.size()));
 					vertices.push_back(v);
 				} else if (t == 1.0f && !corners[e.second]) {
 					Vec3 v = a + d * t;
 					corners[e.second] = true;
-					indices.push_back(static_cast<unsigned short>(vertices.size()));
 					vertices.push_back(v);
 				} else {
 					Vec3 v = a + d * t;
-					indices.push_back(static_cast<unsigned short>(vertices.size()));
 					vertices.push_back(v);
 				}
 			}
 		}
 	}
 
-	// check if any vertices were actually added
-	if (polyIndexOffset != indices.size()) {
+	// x and y are random orthogonal vectors in the plane
+	Vec3 x = Vec3::random().cross(n).normalize();
+	Vec3 y = n.cross(x);
+	auto sort_angle = [&](const Vec3& v)->float {
+		float s = (y.cross(v)).dot(n);
+		return (v.cross(x).dot(n) >= 0.0f) ? 2.0f - s : s;
+	};
 
-		// end the polygon by pushing the primitive restart index (for triangle fan)
-		indices.push_back(primRestartIndex);
+	auto sort_comp = [&](const Vec3& a, const Vec3& b)->bool {
+		return sort_angle(a.normal()) < sort_angle(b.normal());
+	};
 
-		// sort indices to form a simple polygon (don't include primRestartIndex)
-		sort(indices.begin() + polyIndexOffset,
-			indices.end() - 1,
-			VertexSorter(this));
-	}
+	std::sort(vertices.begin(), vertices.end(), sort_comp);
 
-	return v;
+	return vertices;
 }

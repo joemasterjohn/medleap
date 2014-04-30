@@ -86,8 +86,9 @@ void MainController::setMode(MainController::Mode mode)
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
 			pushController(&orientationController);
+			pushController(&leap_state_controller_, Docking(Docking::LEFT, 0.07));
 			pushController(&menuController_);
-            break;
+			break;
         case MODE_3D:
             renderer.clearLayers();
             activeControllers.clear();
@@ -99,6 +100,7 @@ void MainController::setMode(MainController::Mode mode)
 			pushController(&clip_controller_);
 			pushController(&focus_controller_);
 			pushController(&mask_controller_);
+			pushController(&leap_state_controller_, Docking(Docking::LEFT, 0.07));
 			pushController(&menuController_);
             break;
     }

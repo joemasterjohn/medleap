@@ -24,6 +24,22 @@ Vec3 Plane::normal() const
 	return normal_;
 }
 
+void Plane::normal(const Vec3& normal)
+{
+	normal_ = normal;
+}
+
+float Plane::distFromOrigin() const
+{
+	return dist_origin_;
+}
+
+void Plane::distFromOrigin(float dist)
+{
+	dist_origin_ = dist;
+}
+
+
 Geometry Plane::triangles(unsigned u_segments, unsigned v_segments)
 {
 	Vec3 u, v;

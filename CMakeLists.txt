@@ -41,6 +41,8 @@ set(DATA_SHADERS
 	shaders/tf1d_histo_outline.frag
 	shaders/orientation_cube.vert
 	shaders/orientation_cube.frag
+	shaders/icon.vert
+	shaders/icon.frag
 )
 
 set(DATA_FONTS
@@ -88,7 +90,7 @@ source_group("data" FILES ${SOURCE_DATA})
 file(GLOB SOURCE_LEAP src/leap/*.cpp src/leap/*.h)
 source_group("leap" FILES ${SOURCE_LEAP})
 
-file(GLOB SOURCE_UTIL src/util/*.cpp src/util/*.h)
+file(GLOB SOURCE_UTIL src/util/*.cpp src/util/*.h src/util/*.c)
 source_group("util" FILES ${SOURCE_UTIL})
 
 file(GLOB SOURCE_LAYERS src/layers/*.cpp src/layers/*.h)
@@ -130,6 +132,9 @@ source_group("layers\\mask" FILES ${SOURCE_LAYER_MASK})
 file(GLOB SOURCE_LAYER_FOCUS src/layers/focus/*.cpp src/layers/focus/*.h)
 source_group("layers\\focus" FILES ${SOURCE_LAYER_FOCUS})
 
+file(GLOB SOURCE_LAYER_LEAP_STATE src/layers/leap_state/*.cpp src/layers/leap_state/*.h)
+source_group("layers\\leap_state" FILES ${SOURCE_LAYER_LEAP_STATE})
+
 set(SOURCE_AND_RESOURCES
     ${SOURCE_MAIN}
     ${SOURCE_DATA}
@@ -147,6 +152,7 @@ set(SOURCE_AND_RESOURCES
 	${SOURCE_LAYER_CLIP}
 	${SOURCE_LAYER_MASK}
 	${SOURCE_LAYER_FOCUS}
+	${SOURCE_LAYER_LEAP_STATE}
     ${SOURCE_GL}
 	${SOURCE_GL_MATH}
     ${SOURCE_GL_GEOM}

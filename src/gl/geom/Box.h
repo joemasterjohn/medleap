@@ -23,8 +23,8 @@ namespace gl
 		Vec3 min() const;
 		Vec3 max() const;
 
-		Geometry lines();
-		Geometry triangles(unsigned x_segments, unsigned y_segments, unsigned z_segments);
+		Geometry lines() const;
+		Geometry triangles(unsigned x_segments, unsigned y_segments, unsigned z_segments) const;
 
 		std::vector<Vec3> intersect(const Plane& p) const;
     

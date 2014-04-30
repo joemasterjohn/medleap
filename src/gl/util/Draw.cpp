@@ -40,6 +40,10 @@ void Draw::begin(GLenum mode)
 
 void Draw::end()
 {
+	if (vertices.empty()) {
+		return;
+	}
+
 	lineBuffer.bind();
 	lineBuffer.data(&vertices[0], vertices.size() * sizeof(GLfloat));
 }

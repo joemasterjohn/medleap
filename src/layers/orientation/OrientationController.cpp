@@ -58,8 +58,8 @@ void OrientationController::draw()
 
 	int draw_w = std::min(viewport_.width, viewport_.height) * 0.15;
 	int draw_h = draw_w;
-	int draw_x = viewport_.width - draw_w;
-	int draw_y = viewport_.height - draw_h;
+	int draw_x = viewport_.width - draw_w + viewport_.x;
+	int draw_y = viewport_.height - draw_h + viewport_.y;
 
 	glViewport(draw_x, draw_y, draw_w, draw_h);
 

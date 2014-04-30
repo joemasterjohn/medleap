@@ -335,26 +335,22 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	d.setModelViewProj(mvp);
 	d.begin(GL_LINES);
 	d.color(0.5f, 0.5f, 0.5f);
-	for (const Box::Edge& edge : bb.edges()) {
-		const Vec3& a = bb.vertices()[edge.first];
-		const Vec3& b = bb.vertices()[edge.second];
-		d.vertex(a.x, a.y, a.z);
-		d.vertex(b.x, b.y, b.z);
-	}
+	d.geometry(volume->getBounds().lines());
 	d.end();
 	d.draw();
 
 	// clipping plane lines: this needs to be improved
 	if (clip_planes_.size() > 0) {
-		d.begin(GL_LINES);
-		d.color(1, 0, 0);
-		for (int i = 0; i < clip_planes_.size(); i++) {
-			Vec4&v = clip_planes_[i];
-			d.vertex(0, 0, 0);
-			d.vertex(v.x, v.y, v.z);
+		d.color(1, 0, 1);
+		for (Plane& p : clip_planes_) {
+			d.begin(GL_LINE_LOOP);
+			vector<Vec3> verts = volume->getBounds().intersect(p);
+			for (Vec3& v : verts) {
+				d.vertex(v.x, v.y, v.z);
+			}
+			d.end();
+			d.draw();
 		}
-		d.end();
-		d.draw();
 	}
 
 	//{
@@ -408,7 +404,11 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	glUniform1i(boxShader.getUniform("use_jitter"), useJitter);
 
 	boxShader.uniform("num_clip_planes", static_cast<GLint>(clip_planes_.size()));
-	boxShader.uniform("clip_planes", clip_planes_);
+	std::vector<Vec4> planes;
+	for (Plane& p : clip_planes_) {
+		planes.push_back(Vec4(p.normal(), p.distFromOrigin()));
+	}
+	boxShader.uniform("clip_planes", planes);
 
 
 	glUniform3f(boxShader.getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
@@ -480,6 +480,19 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	glDisable(GL_PRIMITIVE_RESTART);
 
 
+	//if (clip_planes_.size() > 0) {
+	//	d.color(1, 0, 1);
+	//	for (Plane& p : clip_planes_) {
+	//		d.begin(GL_TRIANGLE_FAN);
+	//		vector<Vec3> verts = volume->getBounds().intersect(p);
+	//		for (Vec3& v : verts) {
+	//			d.vertex(v.x, v.y, v.z);
+	//		}
+	//		d.end();
+	//		d.draw();
+	//	}
+	//}
+
 	glDisable(GL_DEPTH_TEST);
 
 	glDisable(GL_BLEND);
@@ -493,6 +506,8 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	//d.circle(cpss.x, cpss.y, cursorRadiusSS, 32);
 	//d.end();
 	//d.draw();
+
+
 
 }
 

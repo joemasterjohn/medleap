@@ -12,6 +12,7 @@
 #include "layers/clip/ClipController.h"
 #include "layers/focus/FocusController.h"
 #include "layers/mask/MaskController.h"
+#include "layers/leap_state/LeapStateController.h"
 #include "util/TextRenderer.h"
 #include "data/VolumeLoader.h"
 #include "Leap.h"
@@ -60,6 +61,7 @@ public:
 	ClipController& clipController() { return clip_controller_; }
 	FocusController& focusController() { return focus_controller_; }
 	MaskController& maskController() { return mask_controller_; }
+	LeapStateController& leapStateController() { return leap_state_controller_; }
 
 	void pickColor(const Color& initialColor, std::function<void(const Color&)> callback);
 
@@ -99,6 +101,7 @@ private:
 	ClipController clip_controller_;
 	FocusController focus_controller_;
 	MaskController mask_controller_;
+	LeapStateController leap_state_controller_;
 
     std::list<Controller*> activeControllers;
     Mode mode;

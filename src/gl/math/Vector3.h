@@ -274,6 +274,15 @@ namespace gl
 			return s_z;
 		}
 
+		// Random unit-length vector
+		static Vector3<T> random()
+		{
+			float x = (T)((double)rand() / (RAND_MAX));
+			float y = (T)((double)rand() / (RAND_MAX));
+			float z = (T)((double)rand() / (RAND_MAX));
+			return Vector3<T>(x, y, z).normalize();
+		}
+
 		// Prints the vector to an output stream.
 		friend std::ostream& operator<<(std::ostream& os, const Vector3<T>& v)
 		{

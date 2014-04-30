@@ -12,7 +12,7 @@
 #include "gl/Renderbuffer.h"
 #include "gl/util/RenderTarget.h"
 #include "gl/util/FullScreenQuad.h"
-#include "gl/geom/Sphere.h"
+#include "gl/geom/Plane.h"
 
 /** Main controller for 3D mode */
 class VolumeController : public Controller
@@ -54,7 +54,7 @@ public:
 	gl::Vec3 cursor3D;
 	bool useJitter;
 
-	std::vector<gl::Vec4>& clipPlanes() { return clip_planes_; }
+	std::vector<gl::Plane>& clipPlanes() { return clip_planes_; }
 
 private:
     VolumeData* volume;
@@ -66,7 +66,7 @@ private:
     double dragStartY;
 	gl::Mat4 dragStartView;
 
-	std::vector<gl::Vec4> clip_planes_;
+	std::vector<gl::Plane> clip_planes_;
 
 	bool shading;
 	RenderMode renderMode;

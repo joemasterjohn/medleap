@@ -30,6 +30,8 @@ namespace gl
 		// Constructs a 4D vector by copying the values from v.
 		Vector4<T>(const Vector4<T>& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
+		Vector4<T>(const Vector3<T>& v, float w) : x(v.x), y(v.y), z(v.z), w(w) {}
+
 		// Constructs a 4D vector from an array.
 		Vector4<T>(const T a[4]) : x(a[0]), y(a[1]), z(a[2]), w(a[3]) {}
 
