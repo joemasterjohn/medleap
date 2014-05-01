@@ -4,6 +4,8 @@
 #include "layers/Controller.h"
 #include "leap/GrabTracker.h"
 #include "gl/math/Math.h"
+#include "MaskVolume.h"
+#include "util/History.h"
 
 class MaskController : public Controller
 {
@@ -13,38 +15,12 @@ public:
 	bool leapInput(const Leap::Controller& controller, const Leap::Frame& frame) override;
 
 private:
-	class Tool
-	{
-	public:
-		void apply(gl::Vec3 position);
-	};
-
-	class Edit
-	{
-		Tool tool;
-		std::vector<gl::Vec3> points;
-		void apply(); // for each point: tool.apply(p)
-		void undo();
-	};
-
-
-	// History<Edit> history_;
-	// list<Edit> history;
-
-	// swipe left = undo
-
 	GrabTracker tracker_;
 	gl::Vec3 cursor_;
-	float tool_radius_;
-	// erase OR restore (or lower alpha?)
-	// tool shape: sphere, flat disk
-
-	// reset all
-	// undo
+	std::unique_ptr<MaskVolume> mask_volume_;
+	History<MaskVolume::Edit, 10> edits_;
 
 	void scrubVoxels();
-
-	void apply(const Edit& edit);
 };
 
 #endif // __medleap_MaskController__

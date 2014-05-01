@@ -7,7 +7,7 @@
 using namespace gl;
 using namespace std;
 
-VolumeController::VolumeController()
+VolumeController::VolumeController() : mask_cursor_({ 0.0f }, 1.0f)
 {
     mouseDragLeftButton = false;
     mouseDragRightButton = false;
@@ -312,17 +312,7 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	static Draw d;
 	glEnable(GL_DEPTH_TEST);
 
-	{
-		static int x = 0;
-		vector<GLubyte> dat;
-		dat.resize(64, (GLubyte)255);
-		maskTexture.bind();
-		glTexSubImage3D(GL_TEXTURE_3D, 0, x, 0, 0, 4, 4, 4, GL_RED, GL_UNSIGNED_BYTE, &dat[0]);
-		x++;
-		std::cout << x << std::endl;
-		if (x == volume->getWidth())
-			x = 0;
-	}
+
 
 	const Box& bb = volume->getBounds();
 	d.setModelViewProj(mvp);
@@ -347,7 +337,13 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	}
 
 	// mask cursor
-
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	d.begin(GL_TRIANGLES);
+	d.color(1, 0, 0);
+	d.geometry(mask_cursor_.triangles(4));
+	d.end();
+	d.draw();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	//{
 	//	glEnable(GL_CULL_FACE);

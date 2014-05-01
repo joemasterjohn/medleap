@@ -14,6 +14,7 @@
 #include "gl/util/FullScreenQuad.h"
 #include "gl/geom/Plane.h"
 #include "LeapCameraControl.h"
+#include "gl/geom/Sphere.h"
 
 /** Main controller for 3D mode */
 class VolumeController : public Controller
@@ -55,6 +56,8 @@ public:
 	gl::Program cursor3DShader;
 	gl::Vec3 cursor3D;
 	bool useJitter;
+
+	gl::Sphere mask_cursor_;
 
 	std::vector<gl::Plane>& clipPlanes() { return clip_planes_; }
 

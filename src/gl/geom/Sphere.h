@@ -12,6 +12,8 @@ namespace gl
 		Sphere(Vec3 center, float radius);
 		Geometry triangles(unsigned segments);
 
+		Vec3& center() { return center_; }
+
 	private:
 		Vec3 center_;
 		float radius_;

@@ -4,7 +4,6 @@
 #include "gl/math/Math.h"
 #include "gl/geom/Sphere.h"
 #include "gl/geom/Box.h"
-#include "MaskEdit.h"
 
 /** 3D space that can be subtracted/added with a volume texture */
 class MaskVolume
@@ -12,29 +11,42 @@ class MaskVolume
 public:
 	enum class Operation { sub, add };
 
-	virtual ~MaskVolume() {}
+	class Edit
+	{
+	public:
+		Edit();
+		Edit(Operation operation, std::vector<gl::Vec3i>& voxels);
+		void redo(gl::Texture& texture);
+		void undo(gl::Texture& texture);
+
+	private:
+		Operation operation_;
+		std::vector<gl::Vec3i> voxels_;
+	};
+
+	virtual ~MaskVolume();
 
 	/** Applies operation on texture centered at position. */
-	virtual MaskEdit apply(const gl::Texture& texture, const gl::Vec3& position, Operation operation) const = 0;
+	virtual Edit apply(gl::Texture& texture, const gl::Vec3& position, Operation operation) const = 0;
 };
 
 /** Spherical masking volume */
-class SphereMask : MaskVolume
+class SphereMask : public MaskVolume
 {
 public:
 	SphereMask(const gl::Sphere sphere);
-	MaskEdit apply(const gl::Texture& texture, const gl::Vec3& position, Operation operation) const;
+	Edit apply(gl::Texture& texture, const gl::Vec3& position, Operation operation) const;
 
 private:
 	gl::Sphere sphere_;
 };
 
 /** Axis-aligned box masking volume */
-class BoxMask : MaskVolume
+class BoxMask : public MaskVolume
 {
 public:
 	BoxMask(const gl::Box box);
-	MaskEdit apply(const gl::Texture& texture, const gl::Vec3& position, Operation operation) const;
+	Edit apply(gl::Texture& texture, const gl::Vec3& position, Operation operation) const;
 
 private:
 	gl::Box box_;
