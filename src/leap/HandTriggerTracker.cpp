@@ -30,9 +30,6 @@ bool HandTriggerTracker::shouldEngage(const Leap::Controller& controller)
 	float thumbSpd = thumb.tipVelocity().magnitude();
 	float deltaSpd = abs(indexSpd - thumbSpd);
 
-	// hand must not be retreating
-	if (index.tipVelocity().z > 0)
-		return false;
 
 	// index finger is not moving much, but the thumb is
 	if (indexSpd < m_index_spd_thresh && thumbSpd > m_thumb_spd_thresh)

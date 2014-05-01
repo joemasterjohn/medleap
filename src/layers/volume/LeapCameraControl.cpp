@@ -9,13 +9,14 @@ LeapCameraControl::LeapCameraControl()
 {
 	grab_tracker_.engageFunction(bind(&LeapCameraControl::grab, this, placeholders::_1));
 	grab_tracker_.disengageFunction(bind(&LeapCameraControl::release, this, placeholders::_1));
+	finger_tracker_.engageFunction(bind(&LeapCameraControl::grab, this, placeholders::_1));
 }
 
 void LeapCameraControl::update(const Leap::Controller& controller)
 {
 	grab_tracker_.update(controller);
 
-	if (grab_tracker_.tracking()) {
+	if (grab_tracker_.tracking() && !finger_tracker_.tracking()) {
 		Camera& camera = MainController::getInstance().volumeController().getCamera();
 
 		Vector t = grab_tracker_.palmPosDelta(controller.frame()) / 100.0f;
@@ -28,6 +29,21 @@ void LeapCameraControl::update(const Leap::Controller& controller)
 		// relative to camera view
 		camera.setView(old_view_ * gl::translation(v.x, v.y, v.z));
 		MainController::getInstance().volumeController().markDirty();
+	} else {
+		finger_tracker_.update(controller);
+		if (finger_tracker_.tracking()) {
+			Vector v = finger_tracker_.centerPosDelta(controller.frame()) / 100.0f;
+			Camera& camera = MainController::getInstance().volumeController().getCamera();
+
+			float yaw = v.x * gl::two_pi;
+			float pitch = gl::clamp(v.y, -0.5f, 0.5f) * gl::pi;
+
+			Mat4 m_yaw = gl::rotation(yaw, old_camera_.getUp());
+			Mat4 m_pitch = gl::rotation(pitch, old_camera_.getRight());
+			camera.setView(old_view_ * m_pitch * m_yaw);
+			
+			MainController::getInstance().volumeController().markDirty();
+		}
 	}
 }
 
@@ -35,6 +51,7 @@ void LeapCameraControl::grab(const Leap::Controller& controller)
 {
 	Camera& camera = MainController::getInstance().volumeController().getCamera();
 	old_view_ = camera.getView();
+	old_camera_ = camera;
 }
 
 void LeapCameraControl::release(const Leap::Controller& controller)

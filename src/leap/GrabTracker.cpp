@@ -54,7 +54,7 @@ Vector GrabTracker::palmPos() const
 
 Vector GrabTracker::palmPos(const Leap::Frame& frame) const
 {
-	return frame.hand(hand_.id()).stabilizedPalmPosition();
+	return frame.hand(hand_.id()).palmPosition();
 }
 
 Vector GrabTracker::palmPosDelta(const Leap::Frame& frame) const
