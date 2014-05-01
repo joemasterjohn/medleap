@@ -13,6 +13,7 @@
 #include "gl/util/RenderTarget.h"
 #include "gl/util/FullScreenQuad.h"
 #include "gl/geom/Plane.h"
+#include "LeapCameraControl.h"
 
 /** Main controller for 3D mode */
 class VolumeController : public Controller
@@ -96,6 +97,7 @@ private:
 	gl::RenderTarget lowResRT;
 	gl::FullScreenQuad fullScreenQuad;
 
+	LeapCameraControl leap_cam_control_;
 
 	void resize() override;
 	void updateSlices(double samplingScale, bool limitSamples);

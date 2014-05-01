@@ -322,10 +322,6 @@ namespace gl
 				col(3) + B.col(3));
 		}
 
-		static Mat4 bloofoaa() {
-			return Mat4(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-		}
-
 		/// Prints the matrix to an output stream.
 		friend std::ostream& operator<<(std::ostream& os, const Matrix4<T>& M)
 		{
