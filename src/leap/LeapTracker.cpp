@@ -25,6 +25,7 @@ void LeapTracker::update(const Leap::Controller& controller)
 	last_update_ = time;
 
 	if (tracking_) {
+
 		if (total_elapsed_ < disengage_delay_) {
 			total_elapsed_ += elapsed;
 		}
@@ -34,8 +35,7 @@ void LeapTracker::update(const Leap::Controller& controller)
 			total_elapsed_ = milliseconds(0);
 			disengage(controller);
 		}
-	}
-	else {
+	} else {
 		if (total_elapsed_ < engage_delay_) {
 			total_elapsed_ += elapsed;
 		}

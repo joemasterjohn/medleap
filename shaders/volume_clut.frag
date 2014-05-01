@@ -1,5 +1,6 @@
 #version 150
 
+uniform sampler3D tex_mask;
 uniform sampler3D tex_volume;
 uniform sampler3D tex_gradients;
 uniform sampler1D tex_clut;
@@ -82,6 +83,8 @@ float cursorAlpha()
 
 void main()
 {
+
+	// should I use jittered position?
 	for (int i = 0; i < num_clip_planes; i++) {
 		if (abs(dot(fs_voxel_position_ws, clip_planes[i].xyz)) < 0.001) {
 			display_color = vec4(1.0, 0.0, 0.0, 0.1);
@@ -94,12 +97,17 @@ void main()
 
 
 	vec3 samplePos = fs_texcoord;
+
 	if (use_jitter)
 	{
 		// stochastic jittering of sample position (need window position of frag) (MOVE WPOS TO VERTEX SHADER)
 		// rayDir is NOT the world position; it should be world_pos - eye_pos_ws
 		vec2 WPOS = (vec2(1.0) + fs_voxel_position_ss.xy) * window_size * 0.5;
 		samplePos += texture(tex_jitter, WPOS / jitter_size).x * normalize(fs_voxel_position_ws - camera_pos) * sampling_length * 3.0;
+	}
+
+	if (texture(tex_mask, samplePos).r > 0.5) {
+		discard;
 	}
 	
     // get raw value stored in volume (normalized to [0, 1])

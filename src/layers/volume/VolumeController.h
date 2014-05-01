@@ -77,6 +77,7 @@ private:
 	gl::Texture volumeTexture;
 	gl::Texture gradientTexture;
 	gl::Texture jitterTexture;
+	gl::Texture maskTexture;
 	Camera camera;
 	gl::Mat4 model;
 	float opacityScale;

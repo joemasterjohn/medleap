@@ -23,6 +23,7 @@ VolumeController::VolumeController()
 
 	volumeTexture.generate(GL_TEXTURE_3D);
 	gradientTexture.generate(GL_TEXTURE_3D);
+	maskTexture.generate(GL_TEXTURE_3D);
 
 	proxyVertices.generateVBO(GL_DYNAMIC_DRAW);
 	proxyIndices.generateIBO(GL_DYNAMIC_DRAW);
@@ -36,6 +37,7 @@ VolumeController::VolumeController()
 	glUniform1i(boxShader.getUniform("tex_gradients"), 1);
 	glUniform1i(boxShader.getUniform("tex_clut"), 2);
 	glUniform1i(boxShader.getUniform("tex_jitter"), 3);
+	glUniform1i(boxShader.getUniform("tex_mask"), 4);
 
 	fullResRT.setInternalColorFormat(GL_RGB16F);
 	fullResRT.generate(viewport_.width, viewport_.height, true);
@@ -145,6 +147,26 @@ void VolumeController::setVolume(VolumeData* volume)
 			data);
 
 		delete[] data;
+	}
+
+	// mask texture
+	{
+		vector<GLubyte> dat;
+		dat.resize(volume->getNumVoxels(), 0);
+		maskTexture.bind();
+		maskTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		maskTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		maskTexture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		maskTexture.setParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		maskTexture.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		maskTexture.setData3D(
+			GL_R8,
+			volume->getWidth(),
+			volume->getHeight(),
+			volume->getDepth(),
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			&dat[0]);	
 	}
 }
 
@@ -290,6 +312,17 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	static Draw d;
 	glEnable(GL_DEPTH_TEST);
 
+	{
+		static int x = 0;
+		vector<GLubyte> dat;
+		dat.resize(64, (GLubyte)255);
+		maskTexture.bind();
+		glTexSubImage3D(GL_TEXTURE_3D, 0, x, 0, 0, 4, 4, 4, GL_RED, GL_UNSIGNED_BYTE, &dat[0]);
+		x++;
+		std::cout << x << std::endl;
+		if (x == volume->getWidth())
+			x = 0;
+	}
 
 	const Box& bb = volume->getBounds();
 	d.setModelViewProj(mvp);
@@ -313,6 +346,9 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 		}
 	}
 
+	// mask cursor
+
+
 	//{
 	//	glEnable(GL_CULL_FACE);
 	//	glCullFace(GL_FRONT);
@@ -330,6 +366,8 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	//}
 
 	// proxy geometry
+	glActiveTexture(GL_TEXTURE4);
+	maskTexture.bind();
 	glActiveTexture(GL_TEXTURE3);
 	jitterTexture.bind();
 	glActiveTexture(GL_TEXTURE2);

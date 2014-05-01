@@ -3,38 +3,39 @@
 
 #include "LeapTracker.h"
 
-/** Leap tracker that continuously tracks two index fingers from both hands. */
+/** Tracks a grabbing motion with one hand. */
 class GrabTracker  : public LeapTracker
 {
 public:
 	GrabTracker();
 
-	/** The grabbing hand */
-	Leap::Hand hand() const;
+	/** State of the hand when engaged */
+	Leap::Hand handEngaged() const;
 
-	/** Position when tracking engaged */
-	Leap::Vector palmPos() const;
+	/** Current state of the hand */
+	Leap::Hand handCurrent() const;
 
-	/** Position for given frame */
-	Leap::Vector palmPos(const Leap::Frame& frame) const;
+	/** Palm position when engaged */
+	Leap::Vector palmPosEngaged() const;
 
-	/** Change in position from when tracking engaged */
-	Leap::Vector palmPosDelta(const Leap::Frame& frame) const;
+	/** Current palm position */
+	Leap::Vector palmPosCurrent() const;
 
-	/** Max speed fingers can be moving and have tracking engage */
-	void engageSpeedThreshold(float speed);
+	/** Vector between engaged palm position and current palm position */
+	Leap::Vector palmPosDelta() const;
 
-	/** Max speed fingers can move before tracking will disengage */
-	void disengageSpeedThreshold(float speed);
+	/** Greatest palm speed that is allowed for tracking to engage */
+	void maxEngageSpeed(float speed);
 
 protected:
 	bool shouldEngage(const Leap::Controller& controller) override;
 	bool shouldDisengage(const Leap::Controller& controller) override;
+	void track(const Leap::Controller& controller) override;
 
 private:
-	Leap::Hand hand_;
-	float engage_spd_thresh_;
-	float disengage_spd_thresh_;
+	Leap::Hand hand_current_;
+	Leap::Hand hand_engaged_;
+	float max_engage_spd_;
 };
 
 #endif

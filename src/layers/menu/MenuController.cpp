@@ -126,7 +126,7 @@ void MenuController::updateLeapPointer(const Leap::Controller& controller, const
 	finger_tracker_.update(controller);
 	if (finger_tracker_.tracking()) {
 		Leap::Finger f = finger_tracker_.finger(frame);
-		Leap::Vector n = frame.interactionBox().normalizePoint(f.stabilizedTipPosition());
+		Leap::Vector n = frame.interactionBox().normalizePoint(f.tipPosition());
 		leap.x = n.x * viewport_.width + viewport_.x;
 		leap.y = n.y * viewport_.height + viewport_.y;
 	}
@@ -183,17 +183,18 @@ void MenuController::leapMenuOpen(const Leap::Controller& controller, const Leap
 		float radians = v.anglePositive();
 		float radius = v.length();
 
-		if (radius > 5.0f) {
+		float innerRadius = min(viewport_.width, viewport_.height) * 0.5 * 0.55;
+		float hitRadius = min(viewport_.width, viewport_.height) * 0.5 * 0.7;
+		float outerRadius = min(viewport_.width, viewport_.height) * 0.5 * 0.85;
+
+		if (radius > innerRadius) {
 			int highlightedItem = calcHighlightedMenu(radians);
 			selected_ = highlightedItem;
+			progress_ = gl::clamp((radius - innerRadius) / (outerRadius - innerRadius), 0.0f, 1.0f);
 
-			if (radius > 235.0f && selected_ >= 0 && menu_) {
-				progress_ = gl::clamp((radius - 235.0f) / 100.0f, 0.0f, 1.0f);
-				if (progress_ >= 1.0f) {
+			if (radius > outerRadius && selected_ >= 0 && menu_) {
 					(*menu_)[highlightedItem].trigger();
 					finger_tracker_.tracking(false);
-				}
-
 			}
 		}
 	}

@@ -2,72 +2,83 @@
 
 using namespace Leap;
 
-GrabTracker::GrabTracker() :
-		engage_spd_thresh_(50),
-		disengage_spd_thresh_(250)
+GrabTracker::GrabTracker() : max_engage_spd_(500.0f)
 {
-	engageDelay(std::chrono::milliseconds(500));
+	engageDelay(std::chrono::milliseconds(150));
 }
 
 bool GrabTracker::shouldEngage(const Leap::Controller& controller)
 {
-	HandList hands = controller.frame().hands();
+	Frame frame = controller.frame();
+	Hand potential_hand = frame.hands().frontmost();
 
-	if (hands.count() != 1)
+	if (frame.hands().count() != 1)
 		return false;
 
-	hand_ = hands.frontmost();
+	if (!potential_hand.isValid())
+		return false;
 
-	// previous frame should have 4 or 5 fingers showing
 	if (controller.frame(20).fingers().count() < 4)
 		return false;
 
-	// current frame should have 1 finger only
-	if (controller.frame().fingers().count() > 1)
+	if (potential_hand.fingers().count() > 1)
 		return false;
 
-	// don't engage if hand retreating
-	if (hand_.palmVelocity().z > 100)
+	if (potential_hand.palmPosition().z > 150)
 		return false;
+
+	if (potential_hand.palmVelocity().magnitude() > max_engage_spd_)
+		return false;
+
+	hand_engaged_ = potential_hand;
 
 	return true;
 }
 
 bool GrabTracker::shouldDisengage(const Leap::Controller& controller)
 {
-	if (controller.frame().fingers().count() > 1)
+	if (!hand_current_.isValid())
 		return true;
 
+	if (hand_current_.fingers().count() > 2)
+		return true;
 
 	return false;
 }
 
-Hand GrabTracker::hand() const
+void GrabTracker::track(const Leap::Controller& controller)
 {
-	return hand_;
+	hand_current_ = controller.frame().hand(hand_engaged_.id());
+
+	LeapTracker::track(controller);
 }
 
-Vector GrabTracker::palmPos() const
+Hand GrabTracker::handEngaged() const
 {
-	return hand_.stabilizedPalmPosition();
+	return hand_engaged_;
 }
 
-Vector GrabTracker::palmPos(const Leap::Frame& frame) const
+Hand GrabTracker::handCurrent() const
 {
-	return frame.hand(hand_.id()).palmPosition();
+	return hand_current_;
 }
 
-Vector GrabTracker::palmPosDelta(const Leap::Frame& frame) const
+Vector GrabTracker::palmPosEngaged() const
 {
-	return palmPos(frame) - palmPos();
+	return hand_engaged_.palmPosition();
 }
 
-void GrabTracker::engageSpeedThreshold(float speed)
+Vector GrabTracker::palmPosCurrent() const
 {
-	engage_spd_thresh_ = speed;
+	return hand_current_.palmPosition();
 }
 
-void GrabTracker::disengageSpeedThreshold(float speed)
+Vector GrabTracker::palmPosDelta() const
 {
-	disengage_spd_thresh_ = speed;
+	return palmPosCurrent() - palmPosEngaged();
+}
+
+void GrabTracker::maxEngageSpeed(float speed)
+{
+	max_engage_spd_ = speed;
 }

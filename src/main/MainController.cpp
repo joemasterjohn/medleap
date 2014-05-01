@@ -46,7 +46,7 @@ MainController::MainController() :
     volume(NULL)
 {
     mode = MODE_3D;
-    showHistogram = true;
+    showHistogram = false;
 }
 
 MainController::~MainController()
