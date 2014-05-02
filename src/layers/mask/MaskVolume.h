@@ -2,15 +2,18 @@
 #define __medleap_MaskVolume__
 
 #include "gl/math/Math.h"
-#include "gl/geom/Sphere.h"
-#include "gl/geom/Box.h"
 #include "gl/util/Geometry.h"
+#include "gl/geom/Box.h"
 
-/** 3D space that can be subtracted/added with a volume texture */
+/** 3D space that can be subtracted/added with a volume */
 class MaskVolume
 {
 public:
-	enum class Operation { sub, add };
+	enum class Operation
+	{ 
+		sub, 
+		add
+	};
 
 	class Edit
 	{
@@ -29,39 +32,10 @@ public:
 	};
 
 	virtual ~MaskVolume();
-
-	virtual Edit apply(gl::Texture& texture, Operation operation) const = 0;
+	virtual Edit apply(const gl::Box& bounds, const gl::Texture& texture, Operation operation) const = 0;
 	virtual gl::Geometry geometry() const = 0;
 	virtual void center(const gl::Vec3& center) = 0;
 	virtual gl::Vec3 center() const = 0;
-};
-
-/** Spherical masking volume */
-class SphereMask : public MaskVolume
-{
-public:
-	SphereMask(const gl::Sphere sphere);
-	Edit apply(gl::Texture& texture, Operation operation) const;
-	gl::Geometry geometry() const override;
-	void center(const gl::Vec3& center) override;
-	gl::Vec3 center() const override;
-
-private:
-	gl::Sphere sphere_;
-};
-
-/** Axis-aligned box masking volume */
-class BoxMask : public MaskVolume
-{
-public:
-	BoxMask(const gl::Box box);
-	Edit apply(gl::Texture& texture, Operation operation) const;
-	gl::Geometry geometry() const override;
-	void center(const gl::Vec3& center) override;
-	gl::Vec3 center() const override;
-
-private:
-	gl::Box box_;
 };
 
 #endif // __medleap_MaskVolume__

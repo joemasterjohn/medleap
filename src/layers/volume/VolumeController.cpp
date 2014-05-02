@@ -154,8 +154,8 @@ void VolumeController::setVolume(VolumeData* volume)
 		vector<GLubyte> dat;
 		dat.resize(volume->getNumVoxels(), 0);
 		maskTexture.bind();
-		maskTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		maskTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		maskTexture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		maskTexture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		maskTexture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		maskTexture.setParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		maskTexture.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -337,13 +337,11 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	}
 
 	// mask cursor
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	d.begin(GL_TRIANGLES);
+	d.begin(GL_LINES);
 	d.color(1, 0, 0);
 	d.geometry(maskGeometry);
 	d.end();
 	d.draw();
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	//{
 	//	glEnable(GL_CULL_FACE);

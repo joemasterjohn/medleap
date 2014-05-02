@@ -109,6 +109,9 @@ void Texture::setData3D(GLint level,
 			    GLenum type,
 			    const GLvoid* data)
 {
+	this->width_ = width;
+	this->height_ = height;
+	this->depth_ = depth;
 	glTexImage3D(target_, level, internalFormat, width, height, depth, 0, format, type, data);
 }
 

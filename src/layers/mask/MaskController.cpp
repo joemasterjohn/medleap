@@ -1,12 +1,13 @@
 #include "MaskController.h"
 #include "main/MainController.h"
 #include "gl/math/Math.h"
+#include "BoxMask.h"
 
 using namespace gl;
 using namespace std;
 using namespace Leap;
 
-MaskController::MaskController() : mask_volume_(new BoxMask(Box(0.1f, 0.1f, 0.1f)))
+MaskController::MaskController() : mask_volume_(new BoxMask(Box(0.02f, 0.02f, 0.02f)))
 {
 	VolumeController& vc = MainController::getInstance().volumeController();
 }
@@ -31,7 +32,7 @@ bool MaskController::leapInput(const Leap::Controller& controller, const Leap::F
 
 
 
-		MaskVolume::Edit edit = mask_volume_->apply(vc.maskTexture, MaskVolume::Operation::sub);
+		MaskVolume::Edit edit = mask_volume_->apply(b, vc.maskTexture, MaskVolume::Operation::sub);
 		if (!edit.empty()) {
 			edits_.push(std::move(edit));
 		}
