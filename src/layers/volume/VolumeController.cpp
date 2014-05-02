@@ -7,7 +7,7 @@
 using namespace gl;
 using namespace std;
 
-VolumeController::VolumeController() : mask_cursor_({ 0.0f }, 1.0f)
+VolumeController::VolumeController()
 {
     mouseDragLeftButton = false;
     mouseDragRightButton = false;
@@ -340,7 +340,7 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	d.begin(GL_TRIANGLES);
 	d.color(1, 0, 0);
-	d.geometry(mask_cursor_.triangles(4));
+	d.geometry(maskGeometry);
 	d.end();
 	d.draw();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

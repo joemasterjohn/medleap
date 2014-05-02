@@ -15,7 +15,7 @@ VolumeData::VolumeData()
     type = 0;
     minVoxelValue = 0;
     maxVoxelValue = 0;
-    bounds = new Box(1);
+    bounds = new Box(1.0f);
     modality = UNKNOWN;
 }
 

@@ -5,24 +5,16 @@
 
 using namespace gl;
 
-Box::Box(float size) : Box(size, size, size)
-{
-}
+Box::Box(float size) : Box({ 0.0f, 0.0f, 0.0f }, size, size, size) {}
 
-Box::Box(float width, float height, float length) : size_({ width, height, length })
-{
-	float hw = width / 2.0f;
-	float hh = height / 2.0f;
-	float hl = length / 2.0f;
+Box::Box(float width, float height, float length) : Box({ 0.0f, 0.0f, 0.0f }, width, height, length) {}
 
-	vertices_.push_back(Vec4(-hw, -hh, hl, 1));
-	vertices_.push_back(Vec4(hw, -hh, hl, 1));
-	vertices_.push_back(Vec4(hw, hh, hl, 1));
-	vertices_.push_back(Vec4(-hw, hh, hl, 1));
-	vertices_.push_back(Vec4(-hw, -hh, -hl, 1));
-	vertices_.push_back(Vec4(hw, -hh, -hl, 1));
-	vertices_.push_back(Vec4(hw, hh, -hl, 1));
-	vertices_.push_back(Vec4(-hw, hh, -hl, 1));
+Box::Box(const Vec3& center, float size) : Box(center, size, size, size) {}
+
+Box::Box(const Vec3& center, float width, float height, float length) : center_(center)
+{
+	vertices_.resize(8, { 0.0f, 0.0f, 0.0f });
+	size(width, height, length);
 
 	edges_.push_back(Box::Edge(0, 1));
 	edges_.push_back(Box::Edge(1, 2));
@@ -36,6 +28,36 @@ Box::Box(float width, float height, float length) : size_({ width, height, lengt
 	edges_.push_back(Box::Edge(1, 5));
 	edges_.push_back(Box::Edge(2, 6));
 	edges_.push_back(Box::Edge(3, 7));
+}
+
+void Box::size(float size)
+{
+	Box::size(size, size, size);
+}
+
+void Box::size(float width, float height, float length)
+{
+	size_.set(width, height, length);
+
+	Vec3 h = size_ / 2.0f;
+	min_ = center_ - h;
+	max_ = center_ + h;
+
+	vertices_[0].set(center_.x - h.x, center_.y - h.y, center_.z + h.z);
+	vertices_[1].set(center_.x + h.x, center_.y - h.y, center_.z + h.z);
+	vertices_[2].set(center_.x + h.x, center_.y + h.y, center_.z + h.z);
+	vertices_[3].set(center_.x - h.x, center_.y + h.y, center_.z + h.z);
+
+	vertices_[4].set(center_.x - h.x, center_.y - h.y, center_.z - h.z);
+	vertices_[5].set(center_.x + h.x, center_.y - h.y, center_.z - h.z);
+	vertices_[6].set(center_.x + h.x, center_.y + h.y, center_.z - h.z);
+	vertices_[7].set(center_.x - h.x, center_.y + h.y, center_.z - h.z);
+}
+
+void Box::center(const Vec3& center)
+{
+	center_ = center;
+	size(size_.x, size_.y, size_.z);
 }
 
 Geometry Box::lines() const
@@ -77,14 +99,24 @@ Geometry Box::triangles(unsigned x_segments, unsigned y_segments, unsigned z_seg
 	return g;
 }
 
-Vec3 Box::min() const
+bool Box::contains(const Vec3& p) const
 {
-	return -size_ / 2.0f;
+	return (p.x >= min_.x && p.y <= max_.x &&
+			p.y >= min_.y && p.y <= max_.y &&
+			p.z >= min_.z && p.z <= max_.z);
 }
 
-Vec3 Box::max() const
+Vec3 Box::normalize(const Vec3& p) const
 {
-	return size_ / 2.0f;
+	return (p - min_) / size_;
+}
+
+Vec3 Box::clamp(const Vec3& p) const
+{
+	float x = gl::clamp(p.x, min_.x, max_.x);
+	float y = gl::clamp(p.y, min_.y, max_.y);
+	float z = gl::clamp(p.z, min_.z, max_.z);
+	return{ x, y, z };
 }
 
 std::vector<Vec3> Box::intersect(const Plane& plane) const

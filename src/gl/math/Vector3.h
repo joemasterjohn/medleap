@@ -57,6 +57,14 @@ namespace gl
 			return *(&x + index);
 		}
 
+		// Sets components
+		void set(T x, T y, T z)
+		{
+			this->x = x;
+			this->y = y;
+			this->z = z;
+		}
+
 		// Computes the length/magnitude squared of the vector.
 		T lengthSquared() const
 		{

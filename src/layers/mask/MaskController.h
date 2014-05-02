@@ -16,11 +16,8 @@ public:
 
 private:
 	GrabTracker tracker_;
-	gl::Vec3 cursor_;
 	std::unique_ptr<MaskVolume> mask_volume_;
 	History<MaskVolume::Edit, 10> edits_;
-
-	void scrubVoxels();
 };
 
 #endif // __medleap_MaskController__

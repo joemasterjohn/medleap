@@ -57,7 +57,8 @@ public:
 	gl::Vec3 cursor3D;
 	bool useJitter;
 
-	gl::Sphere mask_cursor_;
+	gl::Texture maskTexture;
+	gl::Geometry maskGeometry;
 
 	std::vector<gl::Plane>& clipPlanes() { return clip_planes_; }
 
@@ -80,7 +81,6 @@ private:
 	gl::Texture volumeTexture;
 	gl::Texture gradientTexture;
 	gl::Texture jitterTexture;
-	gl::Texture maskTexture;
 	Camera camera;
 	gl::Mat4 model;
 	float opacityScale;

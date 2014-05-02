@@ -10,9 +10,10 @@ namespace gl
     {
     public:
 		Sphere(Vec3 center, float radius);
-		Geometry triangles(unsigned segments);
+		Geometry triangles(unsigned segments) const;
 
-		Vec3& center() { return center_; }
+		void center(const Vec3& center) { center_ = center; }
+		Vec3 center() const { return center_; }
 
 	private:
 		Vec3 center_;

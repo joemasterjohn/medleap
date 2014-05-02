@@ -163,6 +163,13 @@ namespace gl
 			return *(&x + index);
 		}
 
+		// Sets components
+		void set(T x, T y)
+		{
+			this->x = x;
+			this->y = y;
+		}
+
 		// Returns true if the two vectors have the exact same component values.
 		bool operator==(const Vector2<T>& v) const {
 			return x == v.x && y == v.y;
