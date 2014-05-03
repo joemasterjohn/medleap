@@ -338,8 +338,16 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 
 	// mask cursor
 	d.begin(GL_LINES);
-	d.color(1, 0, 0);
+	d.color(maskColor.x, maskColor.y, maskColor.z);
 	d.geometry(maskGeometry);
+
+	d.vertex(maskCenter.x, maskCenter.y, volume->getBounds().min().z);
+	d.vertex(maskCenter.x, maskCenter.y, volume->getBounds().max().z);
+	d.vertex(maskCenter.x, volume->getBounds().min().y, maskCenter.z);
+	d.vertex(maskCenter.x, volume->getBounds().max().y, maskCenter.z);
+	d.vertex(volume->getBounds().min().x, maskCenter.y, maskCenter.z);
+	d.vertex(volume->getBounds().max().x, maskCenter.y, maskCenter.z);
+
 	d.end();
 	d.draw();
 

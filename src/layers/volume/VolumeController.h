@@ -56,6 +56,8 @@ public:
 	gl::Program cursor3DShader;
 	gl::Vec3 cursor3D;
 	bool useJitter;
+	gl::Vec3 maskColor;
+	gl::Vec3 maskCenter;
 
 	gl::Texture maskTexture;
 	gl::Geometry maskGeometry;
