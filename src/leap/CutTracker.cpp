@@ -54,16 +54,25 @@ void CutTracker::acquireFingers(const Leap::Controller& controller)
 	hand_current_ = frame.hand(hand_current_.id());
 
 	if (frame.hands().count() != 1) {
+		cout << "two hands" << endl;
 		state_ = State::searching;
 		return;
 	}
 
 	if (!hand_current_.isValid()) {
+		cout << "INVALID HAND" << endl;
 		state_ = State::searching;
 		return;
 	}
 
-	if (hand_current_.fingers().count() != 2) {
+	if (hand_current_.fingers().count() < 2) {
+		cout << "TOO few fingers" << endl;
+		state_ = State::searching;
+		return;
+	}
+
+	if (hand_current_.fingers().count() > 3) {
+		cout << "TOO many fingers" << endl;
 		state_ = State::searching;
 		return;
 	}
@@ -74,21 +83,26 @@ void CutTracker::acquireFingers(const Leap::Controller& controller)
 	second_closest_finger_ = sorted_fingers[1];
 
 	if (!closest_finger_.isValid()) {
+		cout << "closest invalid" << endl;
 		state_ = State::searching;
 		return;
 	}
 
 	if (!second_closest_finger_.isValid()) {
+		cout << "2nd closest invalid" << endl;
+
 		state_ = State::searching;
 		return;
 	}
 
 	if (abs(closest_finger_.direction().z) < 0.9f) {
+		cout << "closest dir bad" << endl;
 		state_ = State::searching;
 		return;
 	}
 
 	if (abs(second_closest_finger_.direction().z) < 0.9f) {
+		cout << "2md closest dir bad" << endl;
 		state_ = State::searching;
 		return;
 	}
@@ -131,6 +145,7 @@ void CutTracker::fingerClose(const Leap::Controller& controller)
 
 	float dist = (a.tipPosition() - b.tipPosition()).magnitude();
 	if (dist < 10.0f) {
+		hand_engaged_ = hand_current_;
 		state_ = State::tracking;
 		return;
 	}
@@ -158,6 +173,8 @@ bool CutTracker::shouldEngage(const Leap::Controller& controller)
 
 bool CutTracker::shouldDisengage(const Leap::Controller& controller)
 {
+	hand_current_ = controller.frame().hand(hand_engaged_.id());
+
 	if (!hand_current_.isValid()) {
 		state_ = State::searching;
 		return true;

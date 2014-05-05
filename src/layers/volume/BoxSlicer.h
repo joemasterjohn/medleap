@@ -21,7 +21,7 @@ public:
     BoxSlicer();
     
     /** Cuts the box into slices and stores the data in this class */
-    void slice(const gl::Box& bounds, const Camera& camera, float sampleLength, int maxSlices);
+    void slice(const gl::Box& bounds, const Camera& camera, float sampleLength, int minSlices, int maxSlices);
 
     /** Vertex positions */
     const std::vector<gl::Vec3>& getVertices();

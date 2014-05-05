@@ -257,7 +257,7 @@ void MenuController::draw()
 		glDrawElements(GL_TRIANGLES, indexCount, indexType, 0);
 
 		if (selected_ >= 0) {
-
+			glUniformMatrix4fv(menuShader.getUniform("modelViewProjection"), 1, false, modelViewProjection * gl::scale(transition_.progress() + (0.2f * progress_)));
 			Vec3 c = gl::lerp(Vec3(0.5f), Vec3(0.5f, 0.7f, 0.9f), progress_);
 			glUniform4f(menuShader.getUniform("color"), c.x, c.y, c.z, transition_.progress());
 			void* offset = (void*)(indicesPerMenuItem * selected_ * sizeof(GLushort));

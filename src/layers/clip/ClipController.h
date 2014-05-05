@@ -2,7 +2,8 @@
 #define __medleap_ClipController__
 
 #include "layers/Controller.h"
-#include "leap/HandTriggerTracker.h"
+#include "leap/GrabTracker.h"
+#include "leap/CutTracker.h"
 
 class ClipController : public Controller
 {
@@ -12,10 +13,15 @@ public:
 	void loseFocus() override;
 	bool leapInput(const Leap::Controller& controller, const Leap::Frame& frame) override;
 	std::unique_ptr<Menu> contextMenu() override;
+	void draw() override;
 
 private:
-	HandTriggerTracker hand_tracker_;
+	CutTracker cut_tracker_;
+	GrabTracker grab_tracker_;
 	unsigned cur_plane_;
+	gl::Vec2 leap_start_;
+	gl::Vec2 leap_end_;
+	gl::Vec2 leap_current_;
 
 	void updateVector(const Leap::Controller& controller);
 };

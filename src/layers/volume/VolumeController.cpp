@@ -3,6 +3,7 @@
 #include "gl/util/Draw.h"
 #include "main/MainConfig.h"
 #include "main/MainController.h"
+#include "gl/geom/Plane.h"
 
 using namespace gl;
 using namespace std;
@@ -341,12 +342,55 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	d.color(maskColor.x, maskColor.y, maskColor.z);
 	d.geometry(maskGeometry);
 
+	Vec3 min = volume->getBounds().min();
+	Vec3 max = volume->getBounds().max();
+
 	d.vertex(maskCenter.x, maskCenter.y, volume->getBounds().min().z);
 	d.vertex(maskCenter.x, maskCenter.y, volume->getBounds().max().z);
 	d.vertex(maskCenter.x, volume->getBounds().min().y, maskCenter.z);
 	d.vertex(maskCenter.x, volume->getBounds().max().y, maskCenter.z);
 	d.vertex(volume->getBounds().min().x, maskCenter.y, maskCenter.z);
 	d.vertex(volume->getBounds().max().x, maskCenter.y, maskCenter.z);
+
+	//gl::Plane plane((Vec3(camera.getEye()) - maskCenter).normalize(), maskCenter);
+	//std::vector<gl::Vec3> verts = volume->getBounds().intersect(plane);
+
+	//for (int i = 0; i < verts.size(); i++) {
+	//	Vec3 v = verts[i];
+	//	Vec3 u = verts[(i+1)%verts.size()];
+	//	d.vertex(v.x, v.y, v.z);
+	//	d.vertex(u.x, u.y, u.z);
+	//}
+
+	//d.vertex(min.x, min.y, maskCenter.z);
+	//d.vertex(min.x, max.y, maskCenter.z);
+	//d.vertex(min.x, max.y, maskCenter.z);
+	//d.vertex(max.x, max.y, maskCenter.z);
+	//d.vertex(max.x, max.y, maskCenter.z);
+	//d.vertex(max.x, min.y, maskCenter.z);
+	//d.vertex(max.x, min.y, maskCenter.z);
+	//d.vertex(min.x, min.y, maskCenter.z);
+
+	//d.vertex(min.x, maskCenter.y, min.z );
+	//d.vertex(min.x, maskCenter.y, max.z );
+	//d.vertex(min.x, maskCenter.y, max.z );
+	//d.vertex(max.x, maskCenter.y, max.z );
+	//d.vertex(max.x, maskCenter.y, max.z );
+	//d.vertex(max.x, maskCenter.y, min.z );
+	//d.vertex(max.x, maskCenter.y, min.z );
+	//d.vertex(min.x, maskCenter.y, min.z );
+
+
+	//d.vertex(maskCenter.x, min.y, min.z);
+	//d.vertex(maskCenter.x, min.y, max.z);
+	//d.vertex(maskCenter.x, min.y, max.z);
+	//d.vertex(maskCenter.x, max.y, max.z);
+	//d.vertex(maskCenter.x, max.y, max.z);
+	//d.vertex(maskCenter.x, max.y, min.z);
+	//d.vertex(maskCenter.x, max.y, min.z);
+	//d.vertex(maskCenter.x, min.y, min.z);
+
+	// around the x
 
 	d.end();
 	d.draw();
@@ -517,7 +561,7 @@ void VolumeController::updateSlices(double samplingScale, bool limitSamples)
 
 	// upload geometry
 	BoxSlicer slicer;
-	slicer.slice(volume->getBounds(), camera, refSampleLength * samplingScale, limitSamples ? maxSlices : -1);
+	slicer.slice(volume->getBounds(), camera, refSampleLength * samplingScale, limitSamples ? minSlices : -1, limitSamples ? maxSlices : -1);
 	proxyIndices.bind();
 	proxyIndices.data(&slicer.getIndices()[0], slicer.getIndices().size() * sizeof(GLushort));
 	proxyVertices.bind();

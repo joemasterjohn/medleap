@@ -15,6 +15,10 @@ namespace gl
 			glViewport(x, y, width, height);
 		}
 
+		Vec2 normalize(Vec2 coords) const {
+			return{ (coords.x - x) / width, (coords.y - y) / height };
+		}
+
 		Mat4 orthoProjection() const {
 			return ortho2D(
 				static_cast<float>(left()), 

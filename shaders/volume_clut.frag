@@ -83,16 +83,12 @@ float cursorAlpha()
 
 void main()
 {
-
 	// should I use jittered position?
 	for (int i = 0; i < num_clip_planes; i++) {
-		if (abs(dot(fs_voxel_position_ws, clip_planes[i].xyz)) < 0.001) {
-			display_color = vec4(1.0, 0.0, 0.0, 0.1);
-			return;
-		}
-		if (dot(fs_voxel_position_ws, clip_planes[i].xyz) > 0.0) {
+		vec4 plane = clip_planes[i];
+		if (dot(fs_voxel_position_ws, plane.xyz) > plane.w) {
 			discard;
-		}	
+		}
 	}
 
 

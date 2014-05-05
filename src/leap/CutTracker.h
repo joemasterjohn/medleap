@@ -19,6 +19,8 @@ public:
 	CutTracker();
 
 	State state() const { return state_; }
+
+	Leap::Hand handEngaged() { return hand_engaged_; }
 	Leap::Hand handCurrent() { return hand_current_; }
 
 	/** Greatest palm speed that is allowed for tracking to engage */

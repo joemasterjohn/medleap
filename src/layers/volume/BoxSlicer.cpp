@@ -70,7 +70,7 @@ float BoxSlicer::samplingLength(const Box& bounds, const Camera& camera, int num
 	return (maxDistance - minDistance) / (numSamples+1);
 }
 
-void BoxSlicer::slice(const Box& bounds, const Camera& camera, float sampleLength, int maxSlices)
+void BoxSlicer::slice(const Box& bounds, const Camera& camera, float sampleLength, int minSlices, int maxSlices)
 {
     up = camera.getUp();
     normal = camera.getForward() * -1;
@@ -93,7 +93,7 @@ void BoxSlicer::slice(const Box& bounds, const Camera& camera, float sampleLengt
 
 	slice_count_ = (int)std::round(totalLength / sampleLength);
 	if (maxSlices > 0)
-		slice_count_ = std::min(maxSlices, slice_count_);
+		slice_count_ = std::max(minSlices, std::min(maxSlices, slice_count_));
 	sample_length_ = totalLength / (slice_count_ + 1);
 
 	// intersect planes with boundingbox to create slice polygons
