@@ -5,7 +5,7 @@ using namespace Leap;
 using namespace std;
 using namespace gl;
 
-LeapCameraControl::LeapCameraControl()
+LeapCameraControl::LeapCameraControl() : tracking_(false)
 {
 	grab_tracker_.engageFunction(bind(&LeapCameraControl::grab, this, placeholders::_1));
 	grab_tracker_.disengageFunction(bind(&LeapCameraControl::release, this, placeholders::_1));
@@ -19,6 +19,7 @@ void LeapCameraControl::update(const Leap::Controller& controller)
 	HandList hands = frame.hands();
 
 	if (hands.count() != 2) {
+		tracking_ = false;
 		return;
 	}
 
@@ -26,27 +27,31 @@ void LeapCameraControl::update(const Leap::Controller& controller)
 	Hand right_hand = hands.rightmost();
 
 	if (left_hand.fingers().count() < 2) {
+		tracking_ = false;
 		return;
 	}
 
 	if (right_hand.fingers().count() < 2) {
+		tracking_ = false;
 		return;
 	}
 
 	if (!prev_frame.hand(left_hand.id()).isValid()) {
+		tracking_ = false;
 		return;
 	}
 
 	if (!prev_frame.hand(right_hand.id()).isValid()) {
+		tracking_ = false;
 		return;
 	}
+
+	tracking_ = true;
 
 	// if just one hand moving: rotation
 	// if both h ands moving: translation
 	VolumeController& vc = MainController::getInstance().volumeController();
-	static Vec3 eye = vc.getCamera().getEye();
-	static float yaw = 0;
-	static float pitch = 0;
+	Camera& camera = vc.getCamera();
 
 	Vector lht = left_hand.translation(prev_frame);
 	Vector rht = right_hand.translation(prev_frame);
@@ -60,17 +65,10 @@ void LeapCameraControl::update(const Leap::Controller& controller)
 	Vector prev_center = (prev_frame.hand(left_hand.id()).stabilizedPalmPosition() + prev_frame.hand(right_hand.id()).stabilizedPalmPosition()) / 2.0f;
 	Vector center_delta = center - prev_center;
 
-	if (true) {
-		yaw += center_delta.x / 25.0f;
-		pitch = clamp(pitch - center_delta.y / 25.0f, -pi_over_2, pi_over_2);
-	} else if (sameDir) {
-		eye += Vec3(-rht.x, -rht.y, -rht.z) / 100.0f;
+	camera.yaw += center_delta.x / 25.0f;
+	camera.pitch = clamp(camera.pitch - center_delta.y / 25.0f, -pi_over_2, pi_over_2);
 
-	}
-
-
-
-	vc.getCamera().setView(translation(-eye.x, -eye.y, -eye.z) * rotationX(pitch) * rotationY(yaw));
+	vc.getCamera().setView(translation(0.0f, 0.0f, -1.0f) * rotationX(camera.pitch) * rotationY(camera.yaw));
 
 	vc.markDirty();
 

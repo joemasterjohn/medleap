@@ -119,6 +119,7 @@ Transfer1DController::~Transfer1DController()
 
 void Transfer1DController::gainFocus()
 {
+	MainController::getInstance().showTransfer1D(true);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();
 	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
@@ -128,14 +129,12 @@ void Transfer1DController::gainFocus()
 
 void Transfer1DController::loseFocus()
 {
-
+	MainController::getInstance().showTransfer1D(false);
 }
 
 std::unique_ptr<Menu> Transfer1DController::contextMenu()
 {
 	Menu* menu = new Menu("Transfer 1D");
-	menu->createItem("Create Color", []{MainController::getInstance().menuController().hideMenu(); });
-	menu->createItem("Delete Color", []{MainController::getInstance().menuController().hideMenu(); });
 	menu->createItem("Create CLUT", []{MainController::getInstance().menuController().hideMenu(); });
 	menu->createItem("Delete CLUT", []{MainController::getInstance().menuController().hideMenu(); });
 
@@ -323,9 +322,21 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 
 bool Transfer1DController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
-	finger_tracker_.update(leapController);
+	if (!finger_tracker_.tracking()) {
+		one_finger_tracker_.update(leapController);
 
-	if (finger_tracker_.tracking())
+		if (one_finger_tracker_.tracking()) {
+			Leap::Finger f = currentFrame.finger(one_finger_tracker_.finger().id());
+			Leap::Vector v = currentFrame.interactionBox().normalizePoint(f.stabilizedTipPosition());
+			leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height);
+		}
+	}
+
+	if (!one_finger_tracker_.tracking()) {
+		finger_tracker_.update(leapController);
+	}
+
+	if (finger_tracker_.tracking() || one_finger_tracker_.tracking())
 		return false;
 
 	static auto lastSwipe = std::chrono::system_clock::now();
@@ -397,6 +408,18 @@ void Transfer1DController::draw()
 	glViewport(viewport_.x, viewport_.y, viewport_.width, viewport_.height * 0.2f);
 	drawBackground();
 	drawMarkerBar();
+
+	viewport_.apply();
+
+	if (one_finger_tracker_.tracking()) {
+		Draw& d = MainController::getInstance().draw();
+		d.setModelViewProj(viewport_.orthoProjection());
+		d.begin(GL_LINES);
+		d.color(1.0f, 0.0f, 0.0f);
+		d.circle(leap_cursor_.x, leap_cursor_.y, 10.0f, 16);
+		d.end();
+		d.draw();
+	}
 }
 
 void Transfer1DController::drawMarkerBar()

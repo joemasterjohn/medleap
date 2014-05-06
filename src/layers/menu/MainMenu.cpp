@@ -9,7 +9,6 @@ MainMenu::MainMenu() : Menu("Main Menu")
 	mi_transfer.setAction([]{
 		MainController& mc = MainController::getInstance();
 		mc.focusLayer(&mc.transfer1DController());
-		mc.showTransfer1D(true);
 		mc.menuController().hideMenu();
 	});
 
@@ -37,8 +36,6 @@ MainMenu::MainMenu() : Menu("Main Menu")
 	MenuItem& mi_view3d = createItem("View 3D");
 	mi_view3d.setAction([]{
 		MainController& mc = MainController::getInstance();
-		mc.showTransfer1D(false);
-		mc.setMode(MainController::MODE_3D);
 		mc.focusLayer(&mc.volumeController());
 		mc.menuController().hideMenu();
 	});
@@ -46,8 +43,6 @@ MainMenu::MainMenu() : Menu("Main Menu")
 	MenuItem& mi_view2d = createItem("View 2D");
 	mi_view2d.setAction([]{
 		MainController& mc = MainController::getInstance();
-		mc.showTransfer1D(false);
-		mc.setMode(MainController::MODE_2D);
 		mc.focusLayer(&mc.sliceController());
 		mc.menuController().hideMenu();
 	});

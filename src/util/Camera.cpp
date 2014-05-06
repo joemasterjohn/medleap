@@ -70,21 +70,6 @@ void Camera::translate(float x, float y, float z)
     update();
 }
 
-void Camera::pitch(float radians)
-{
-    rotate(radians, right);
-}
-
-void Camera::roll(float radians)
-{
-    rotate(radians, forward);
-}
-
-void Camera::yaw(float radians)
-{
-    rotate(radians, up);
-}
-
 void Camera::translate(const Vec3& t)
 {
     translate(t.x, t.y, t.z);

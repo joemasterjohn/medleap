@@ -15,21 +15,44 @@ MaskController::MaskController() : mask_volume_(new BoxMask(Box(0.02f, 0.02f, 0.
 bool MaskController::modal() const
 {
 	return tracker_.state() == CutTracker::State::fingers_acquired || 
-		   tracker_.state() == CutTracker::State::tracking;
+		   tracker_.state() == CutTracker::State::tracking ||
+		   cam_control_.tracking();
 }
+
+void MaskController::gainFocus()
+{
+	MainController::getInstance().setMode(MainController::MODE_3D);
+	VolumeController& vc = MainController::getInstance().volumeController();
+	vc.draw_bounds = true;
+	vc.draw_cursor3D = true;
+	vc.markDirty();
+}
+
+void MaskController::loseFocus()
+{
+	VolumeController& vc = MainController::getInstance().volumeController();
+	vc.draw_bounds = false;
+	vc.draw_cursor3D = false;
+	vc.markDirty();
+}
+
 
 bool MaskController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
-	tracker_.update(controller);
+	if (!cam_control_.tracking()) {
+		tracker_.update(controller);
 
-	VolumeController& vc = MainController::getInstance().volumeController();
-	vc.maskColor = { 0.0f, 0.0f, 1.0f };
-	if (modal()) {
-		vc.maskColor = { 1.0f, 1.0f, 0.0f };
-		Vector v2 = tracker_.handCurrent().palmPosition();
-		v2 -= controller.frame(1).hand(tracker_.handCurrent().id()).palmPosition();
+		VolumeController& vc = MainController::getInstance().volumeController();
+		vc.maskColor = { 0.0f, 0.0f, 1.0f };
 
-		v2 *= 0.5;
+		bool move = tracker_.state() == CutTracker::State::fingers_acquired || tracker_.state() == CutTracker::State::tracking;
+
+		if (move) {
+			vc.maskColor = { 1.0f, 1.0f, 0.0f };
+			Vector v2 = tracker_.handCurrent().palmPosition();
+			v2 -= controller.frame(1).hand(tracker_.handCurrent().id()).palmPosition();
+
+			v2 *= 0.5;
 
 			Mat4 eye2world = vc.getCamera().getView().inverse();
 			Vec4 v = eye2world * Vec4(v2.x, v2.y, v2.z, 0.0f);
@@ -54,8 +77,16 @@ bool MaskController::leapInput(const Leap::Controller& controller, const Leap::F
 			vc.maskGeometry = mask_volume_->geometry();
 
 			vc.markDirty();
-		
+
+		}
+
 	}
+
+	if (!tracker_.tracking()) {
+		cam_control_.update(controller);
+	}
+
+
 
 	return false;
 }

@@ -4,6 +4,7 @@
 #include "layers/Controller.h"
 #include "leap/GrabTracker.h"
 #include "leap/CutTracker.h"
+#include "layers/volume/LeapCameraControl.h"
 
 class ClipController : public Controller
 {
@@ -18,6 +19,7 @@ public:
 private:
 	CutTracker cut_tracker_;
 	GrabTracker grab_tracker_;
+	LeapCameraControl cam_control_;
 	unsigned cur_plane_;
 	gl::Vec2 leap_start_;
 	gl::Vec2 leap_end_;

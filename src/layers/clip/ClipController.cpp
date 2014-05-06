@@ -51,21 +51,37 @@ std::unique_ptr<Menu> ClipController::contextMenu()
 
 void ClipController::gainFocus()
 {
+	MainController::getInstance().setMode(MainController::MODE_3D);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();
 	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
 	lsc.add(LeapStateController::icon_h1f2_circle, "Options");
 	lsc.add(LeapStateController::icon_h1f2_trigger, "Rotate Plane");
+
+	VolumeController& vc = MainController::getInstance().volumeController();
+	vc.draw_bounds = true;
+	vc.draw_planes = true;
+	vc.markDirty();
 }
 
 void ClipController::loseFocus()
 {
+	VolumeController& vc = MainController::getInstance().volumeController();
+	vc.draw_bounds = false;
+	vc.draw_planes = false;
+	vc.markDirty();
 	grab_tracker_.tracking(false);
 }
 
 bool ClipController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
-	cut_tracker_.update(controller);
+	if (!cam_control_.tracking()) {
+		cut_tracker_.update(controller);
+	}
+
+	if (!cut_tracker_.tracking()) {
+		cam_control_.update(controller);
+	}
 
 	if (cut_tracker_.state() != CutTracker::State::searching) {
 		Vector p = cut_tracker_.handCurrent().stabilizedPalmPosition();
@@ -97,9 +113,6 @@ bool ClipController::leapInput(const Leap::Controller& controller, const Leap::F
 				vc.clipPlanes()[cur_plane_] = Plane(n, sn);
 				vc.markDirty();
 			}
-			
-
-
 		}
 	}
 
@@ -131,21 +144,35 @@ void ClipController::updateVector(const Leap::Controller& controller)
 void ClipController::draw()
 {
 	Draw& d = MainController::getInstance().draw();
-	d.setModelViewProj(viewport_.orthoProjection());
-	d.begin(GL_LINES);
-	
+
 	if (cut_tracker_.tracking()) {
-		d.color(1, 1, 0);
+		d.setModelViewProj(viewport_.orthoProjection());
+		d.begin(GL_LINES);
+		d.color(1, 0, 0);
 		Vec2 c = (leap_end_ - leap_start_) / 2 + leap_start_;
-		Vec2 n = (leap_end_ - leap_start_).normalize().rotate90() * 25;
+		Vec2 n = (leap_end_ - leap_start_).normalize().rotate90() * 50;
 		d.vertex(c.x , c.y , 0);
 		d.vertex(c.x + n.x, c.y + n.y, 0);
+		d.end();
+		d.draw();
 	}
 
-	d.circle(leap_current_.x, leap_current_.y, 15.0f, 16);
-	d.circle(leap_current_.x, leap_current_.y, 20.0f, 16);
-	d.circle(leap_current_.x, leap_current_.y, 25.0f, 16);
+	if (cut_tracker_.state() != CutTracker::State::searching) {
+		d.setModelViewProj(viewport_.orthoProjection());
+		d.color(0, 0, 0);
+		d.begin(GL_TRIANGLE_FAN);
+		d.circle(leap_current_.x, leap_current_.y, 15.0f, 32);
+		d.end();
+		d.draw();
 
-	d.end();
-	d.draw();
+		if (cut_tracker_.tracking()) {
+			d.color(1, .5f, .5f);
+		} else {
+			d.color(1, 1, .5f);
+		}
+		d.begin(GL_TRIANGLE_FAN);
+		d.circle(leap_current_.x, leap_current_.y, 13.0f, 32);
+		d.end();
+		d.draw();
+	}
 }

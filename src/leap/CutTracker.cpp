@@ -71,7 +71,7 @@ void CutTracker::acquireFingers(const Leap::Controller& controller)
 		return;
 	}
 
-	if (hand_current_.fingers().count() > 3) {
+	if (hand_current_.fingers().count() > 2) {
 		cout << "TOO many fingers" << endl;
 		state_ = State::searching;
 		return;

@@ -12,6 +12,9 @@ VolumeController::VolumeController()
 {
     mouseDragLeftButton = false;
     mouseDragRightButton = false;
+	draw_bounds = true;
+	draw_planes = false;
+	draw_cursor3D = false;
 
 	dirty = true;
 	opacityScale = 1.0f;
@@ -75,6 +78,7 @@ VolumeController::VolumeController()
 
 void VolumeController::gainFocus()
 {
+	MainController::getInstance().setMode(MainController::MODE_3D);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();
 	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
@@ -309,22 +313,24 @@ void VolumeController::resize()
 
 void VolumeController::draw(double samplingScale, bool limitSamples, int w, int h)
 {
-	Mat4 mvp = camera.getProjection() * camera.getView();
+	Mat4 modelView = camera.getView();
+	Mat4 mvp = camera.getProjection() * modelView;
 	static Draw d;
 	glEnable(GL_DEPTH_TEST);
 
 
-
-	const Box& bb = volume->getBounds();
-	d.setModelViewProj(mvp);
-	d.begin(GL_LINES);
-	d.color(0.5f, 0.5f, 0.5f);
-	d.geometry(volume->getBounds().lines());
-	d.end();
-	d.draw();
+	if (draw_bounds) {
+		const Box& bb = volume->getBounds();
+		d.setModelViewProj(mvp);
+		d.begin(GL_LINES);
+		d.color(0.5f, 0.5f, 0.5f);
+		d.geometry(volume->getBounds().lines());
+		d.end();
+		d.draw();
+	}
 
 	// clipping plane lines: this needs to be improved
-	if (clip_planes_.size() > 0) {
+	if (draw_planes && clip_planes_.size() > 0) {
 		d.color(1, 0, 1);
 		for (Plane& p : clip_planes_) {
 			d.begin(GL_LINE_LOOP);
@@ -338,62 +344,64 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	}
 
 	// mask cursor
-	d.begin(GL_LINES);
-	d.color(maskColor.x, maskColor.y, maskColor.z);
-	d.geometry(maskGeometry);
+	if (draw_cursor3D) {
+		d.begin(GL_LINES);
+		d.color(maskColor.x, maskColor.y, maskColor.z);
+		d.geometry(maskGeometry);
 
-	Vec3 min = volume->getBounds().min();
-	Vec3 max = volume->getBounds().max();
+		Vec3 min = volume->getBounds().min();
+		Vec3 max = volume->getBounds().max();
 
-	d.vertex(maskCenter.x, maskCenter.y, volume->getBounds().min().z);
-	d.vertex(maskCenter.x, maskCenter.y, volume->getBounds().max().z);
-	d.vertex(maskCenter.x, volume->getBounds().min().y, maskCenter.z);
-	d.vertex(maskCenter.x, volume->getBounds().max().y, maskCenter.z);
-	d.vertex(volume->getBounds().min().x, maskCenter.y, maskCenter.z);
-	d.vertex(volume->getBounds().max().x, maskCenter.y, maskCenter.z);
+		d.vertex(maskCenter.x, maskCenter.y, volume->getBounds().min().z);
+		d.vertex(maskCenter.x, maskCenter.y, volume->getBounds().max().z);
+		d.vertex(maskCenter.x, volume->getBounds().min().y, maskCenter.z);
+		d.vertex(maskCenter.x, volume->getBounds().max().y, maskCenter.z);
+		d.vertex(volume->getBounds().min().x, maskCenter.y, maskCenter.z);
+		d.vertex(volume->getBounds().max().x, maskCenter.y, maskCenter.z);
 
-	//gl::Plane plane((Vec3(camera.getEye()) - maskCenter).normalize(), maskCenter);
-	//std::vector<gl::Vec3> verts = volume->getBounds().intersect(plane);
+		//gl::Plane plane((Vec3(camera.getEye()) - maskCenter).normalize(), maskCenter);
+		//std::vector<gl::Vec3> verts = volume->getBounds().intersect(plane);
 
-	//for (int i = 0; i < verts.size(); i++) {
-	//	Vec3 v = verts[i];
-	//	Vec3 u = verts[(i+1)%verts.size()];
-	//	d.vertex(v.x, v.y, v.z);
-	//	d.vertex(u.x, u.y, u.z);
-	//}
+		//for (int i = 0; i < verts.size(); i++) {
+		//	Vec3 v = verts[i];
+		//	Vec3 u = verts[(i+1)%verts.size()];
+		//	d.vertex(v.x, v.y, v.z);
+		//	d.vertex(u.x, u.y, u.z);
+		//}
 
-	//d.vertex(min.x, min.y, maskCenter.z);
-	//d.vertex(min.x, max.y, maskCenter.z);
-	//d.vertex(min.x, max.y, maskCenter.z);
-	//d.vertex(max.x, max.y, maskCenter.z);
-	//d.vertex(max.x, max.y, maskCenter.z);
-	//d.vertex(max.x, min.y, maskCenter.z);
-	//d.vertex(max.x, min.y, maskCenter.z);
-	//d.vertex(min.x, min.y, maskCenter.z);
+		//d.vertex(min.x, min.y, maskCenter.z);
+		//d.vertex(min.x, max.y, maskCenter.z);
+		//d.vertex(min.x, max.y, maskCenter.z);
+		//d.vertex(max.x, max.y, maskCenter.z);
+		//d.vertex(max.x, max.y, maskCenter.z);
+		//d.vertex(max.x, min.y, maskCenter.z);
+		//d.vertex(max.x, min.y, maskCenter.z);
+		//d.vertex(min.x, min.y, maskCenter.z);
 
-	//d.vertex(min.x, maskCenter.y, min.z );
-	//d.vertex(min.x, maskCenter.y, max.z );
-	//d.vertex(min.x, maskCenter.y, max.z );
-	//d.vertex(max.x, maskCenter.y, max.z );
-	//d.vertex(max.x, maskCenter.y, max.z );
-	//d.vertex(max.x, maskCenter.y, min.z );
-	//d.vertex(max.x, maskCenter.y, min.z );
-	//d.vertex(min.x, maskCenter.y, min.z );
+		//d.vertex(min.x, maskCenter.y, min.z );
+		//d.vertex(min.x, maskCenter.y, max.z );
+		//d.vertex(min.x, maskCenter.y, max.z );
+		//d.vertex(max.x, maskCenter.y, max.z );
+		//d.vertex(max.x, maskCenter.y, max.z );
+		//d.vertex(max.x, maskCenter.y, min.z );
+		//d.vertex(max.x, maskCenter.y, min.z );
+		//d.vertex(min.x, maskCenter.y, min.z );
 
 
-	//d.vertex(maskCenter.x, min.y, min.z);
-	//d.vertex(maskCenter.x, min.y, max.z);
-	//d.vertex(maskCenter.x, min.y, max.z);
-	//d.vertex(maskCenter.x, max.y, max.z);
-	//d.vertex(maskCenter.x, max.y, max.z);
-	//d.vertex(maskCenter.x, max.y, min.z);
-	//d.vertex(maskCenter.x, max.y, min.z);
-	//d.vertex(maskCenter.x, min.y, min.z);
+		//d.vertex(maskCenter.x, min.y, min.z);
+		//d.vertex(maskCenter.x, min.y, max.z);
+		//d.vertex(maskCenter.x, min.y, max.z);
+		//d.vertex(maskCenter.x, max.y, max.z);
+		//d.vertex(maskCenter.x, max.y, max.z);
+		//d.vertex(maskCenter.x, max.y, min.z);
+		//d.vertex(maskCenter.x, max.y, min.z);
+		//d.vertex(maskCenter.x, min.y, min.z);
 
-	// around the x
+		// around the x
 
-	d.end();
-	d.draw();
+		d.end();
+		d.draw();
+	}
 
 	//{
 	//	glEnable(GL_CULL_FACE);
@@ -432,7 +440,7 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 
 
 	glUniformMatrix4fv(boxShader.getUniform("modelViewProjection"), 1, false, mvp);
-	glUniformMatrix4fv(boxShader.getUniform("modelView"), 1, false, camera.getView());
+	glUniformMatrix4fv(boxShader.getUniform("modelView"), 1, false, modelView);
 
 	glUniform3fv(boxShader.getUniform("volumeMin"), 1, volume->getBounds().min());
 	glUniform3fv(boxShader.getUniform("volumeDimensions"), 1, (volume->getBounds().max() - volume->getBounds().min()));
@@ -454,8 +462,8 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	}
 	boxShader.uniform("clip_planes", planes);
 
-
 	glUniform3f(boxShader.getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
+
 	glUniform3f(boxShader.getUniform("camera_pos"), camera.getEye().x, camera.getEye().y, camera.getEye().z);
 
 	glUniform3f(boxShader.getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);

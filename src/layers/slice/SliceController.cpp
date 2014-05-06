@@ -46,6 +46,7 @@ SliceController::SliceController() :
 
 void SliceController::gainFocus()
 {
+	MainController::getInstance().setMode(MainController::MODE_2D);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();
 	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");

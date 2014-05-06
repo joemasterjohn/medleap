@@ -8,10 +8,25 @@ using namespace Leap;
 
 FocusController::FocusController()
 {
+	tracker_.engageSpeedThreshold(50.0f);
+}
+
+void FocusController::gainFocus()
+{
+	MainController::getInstance().setMode(MainController::MODE_3D);
+}
+
+void FocusController::loseFocus()
+{
+
 }
 
 bool FocusController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
+	tracker_.update(controller);
+
+
+
 	//Leap::FingerList fingers = currentFrame.fingers();
 
 

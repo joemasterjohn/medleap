@@ -58,6 +58,10 @@ public:
 	bool useJitter;
 	gl::Vec3 maskColor;
 	gl::Vec3 maskCenter;
+	bool draw_bounds;
+	bool draw_planes;
+	bool draw_cursor3D;
+
 
 	gl::Texture maskTexture;
 	gl::Geometry maskGeometry;
@@ -84,7 +88,6 @@ private:
 	gl::Texture gradientTexture;
 	gl::Texture jitterTexture;
 	Camera camera;
-	gl::Mat4 model;
 	float opacityScale;
 	unsigned minSlices;
 	unsigned maxSlices;

@@ -53,15 +53,6 @@ public:
     /// Adds a rotation of radians around the Z axis.
     void rotateZ(float radians);
     
-    /// Adds a rotation of radians around the right axis.
-    void pitch(float radians);
-    
-    /// Adds a rotation of radians around the forward axis.
-    void roll(float radians);
-    
-    /// Adds a rotation of radians around the up axis.
-    void yaw(float radians);
-    
     /// Adds a translation of (x, y, z) in world coordinates.
     void translate(float x, float y, float z);
     
@@ -89,6 +80,10 @@ public:
 	void addListener(Listener* l);
 
 	void removeListener(Listener* l);
+
+	// TODO: these should be part of model transform, not view
+	float yaw;
+	float pitch;
 
 private:
 	gl::Mat4 view;

@@ -72,6 +72,10 @@ void MainController::init(GLFWwindow* window)
 	orientationController.camera(&volumeController_.getCamera());
 
 	glfwGetWindowSize(window, &width, &height);
+
+	leapController.config().setFloat("Gesture.Circle.MinRadius", 50.0f);
+	leapController.config().save();
+
 }
 
 void MainController::setMode(MainController::Mode mode)

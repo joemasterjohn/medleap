@@ -11,8 +11,8 @@
 #include "gl/math/Math.h"
 #include "Histogram.h"
 #include "CLUT.h"
-#include "leap/HandTriggerTracker.h"
 #include "leap/TwoFingerTracker.h"
+#include "leap/OneFingerTracker.h"
 #include "util/TextRenderer.h"
 #include "gl/util/Draw.h"
 
@@ -51,9 +51,10 @@ private:
 	CLUT::Marker* selected_;
 
 	// leap
-	HandTriggerTracker trigger_tracker_;
 	TwoFingerTracker finger_tracker_;
 	Interval saved_interval_;
+	OneFingerTracker one_finger_tracker_;
+	gl::Vec2 leap_cursor_;
 
 	// rendering
 	TextRenderer text;
@@ -77,6 +78,7 @@ private:
 	GLsizei histoVBOCount;
 	gl::Texture clutTexture;
 	gl::Draw colorStops;
+
 
 	void moveAndScale(const Leap::Controller& controller);
 

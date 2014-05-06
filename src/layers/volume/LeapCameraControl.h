@@ -13,11 +13,14 @@ public:
 	LeapCameraControl();
 	void update(const Leap::Controller& controller);
 
+	bool tracking() const { return tracking_; }
+
 private:
 	GrabTracker grab_tracker_;
 	TwoFingerTracker finger_tracker_;
 	gl::Mat4 old_view_;
 	Camera old_camera_;
+	bool tracking_;
 
 	void grab(const Leap::Controller& controller);
 	void release(const Leap::Controller& controller);
