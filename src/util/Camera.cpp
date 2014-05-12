@@ -2,7 +2,7 @@
 
 using namespace gl;
 
-Camera::Camera()
+Camera::Camera() : center(0, 0, -1)
 {}
 
 const Vec4& Camera::getEye() const

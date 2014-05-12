@@ -2,7 +2,7 @@
 
 using namespace Leap;
 
-FistPose::FistPose() : max_engage_spd_(500.0f)
+FistPose::FistPose() : max_engage_spd_(75.0f), open_(true)
 {
 	engageDelay(std::chrono::milliseconds(150));
 }
@@ -18,13 +18,14 @@ bool FistPose::shouldEngage(const Leap::Controller& controller)
 	if (!potential_hand.isValid())
 		return false;
 
-	if (potential_hand.grabStrength() < 0.85f)
+	if (potential_hand.fingers().extended().count() != 5)
 		return false;
 
 	if (potential_hand.palmVelocity().magnitude() > max_engage_spd_)
 		return false;
 
-	hand_engaged_ = potential_hand;
+	frames_tracked_ = 0;
+	hand_engaged_ = hand_current_ = potential_hand;
 
 	return true;
 }
@@ -36,43 +37,22 @@ bool FistPose::shouldDisengage(const Leap::Controller& controller)
 	if (!hand_current_.isValid())
 		return true;
 
-	if (hand_current_.grabStrength() < 0.85f)
-		return true;
-
-
 	return false;
 }
 
 void FistPose::track(const Leap::Controller& controller)
 {
+	if (frames_tracked_ > 0) {
+		hand_previous_ = controller.frame(1).hand(hand_current_.id());
+	}
+	if (frames_tracked_ < std::numeric_limits<unsigned>::max()) {
+		frames_tracked_++;
+	}
+
 	hand_current_ = controller.frame().hand(hand_engaged_.id());
+	open_ = (hand_current_.grabStrength() < 0.85f);
 
 	PoseTracker::track(controller);
-}
-
-Hand FistPose::handEngaged() const
-{
-	return hand_engaged_;
-}
-
-Hand FistPose::handCurrent() const
-{
-	return hand_current_;
-}
-
-Vector FistPose::palmPosEngaged() const
-{
-	return hand_engaged_.palmPosition();
-}
-
-Vector FistPose::palmPosCurrent() const
-{
-	return hand_current_.palmPosition();
-}
-
-Vector FistPose::palmPosDelta() const
-{
-	return palmPosCurrent() - palmPosEngaged();
 }
 
 void FistPose::maxEngageSpeed(float speed)

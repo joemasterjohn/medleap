@@ -74,31 +74,43 @@ void LeapCameraControl::update(const Leap::Controller& controller)
 
 	fist_pose_.update(controller);
 
-	if (fist_pose_.tracking() && !point_pose_.tracking()) {
-		Camera& camera = MainController::getInstance().volumeController().getCamera();
+	if (fist_pose_.tracking() && fist_pose_.framesTracked() > 1) {
 
-		Vector t = fist_pose_.palmPosDelta() / 100.0f;
+		if (fist_pose_.isOpen()) {
 
-		Mat4 eye2world = camera.getView().rotScale().transpose();
-		Vec4 v = eye2world * Vec4(t.x, t.y, t.z, 0);
-	
-
-		// relative to camera view
-		camera.setView(old_view_ * gl::translation(v.x, v.y, v.z));
-		MainController::getInstance().volumeController().markDirty();
-	} else {
-		point_pose_.update(controller);
-		if (point_pose_.tracking()) {
-			Vector v = point_pose_.centerDelta() / 100.0f;
 			Camera& camera = MainController::getInstance().volumeController().getCamera();
 
-			float yaw = v.x * gl::two_pi;
-			float pitch = gl::clamp(v.y, -0.5f, 0.5f) * gl::pi;
-
-			Mat4 m_yaw = gl::rotation(yaw, old_camera_.getUp());
-			Mat4 m_pitch = gl::rotation(pitch, old_camera_.getRight());
-			camera.setView(old_view_ * m_pitch * m_yaw);
+			Vector a = fist_pose_.hand().stabilizedPalmPosition();
+			Vector b = fist_pose_.handPrevious().stabilizedPalmPosition();
+			Vector v = (a-b) / 100.0f;
 			
+			camera.yaw += v.x * gl::pi;
+			camera.pitch = gl::clamp(camera.pitch - v.y, -0.5f * gl::pi, 0.5f * gl::pi);
+
+			Mat4 m_center = gl::translation(camera.center);
+			Mat4 m_pitch = gl::rotationX(camera.pitch);
+			Mat4 m_yaw = gl::rotationY(camera.yaw);
+	
+			camera.setView(m_center * m_pitch * m_yaw);
+			MainController::getInstance().volumeController().markDirty();
+
+		} else {
+			Camera& camera = MainController::getInstance().volumeController().getCamera();
+
+			Vector a = fist_pose_.hand().palmPosition();
+			Vector b = fist_pose_.handPrevious().palmPosition();
+			Vector t = (a - b) / 300.0f;
+
+			Mat4 eye2world = camera.getView().rotScale().transpose();
+			Vec4 v = Vec4(t.x, t.y, t.z, 0);
+
+			camera.center += v;
+			Mat4 m_center = gl::translation(camera.center);
+			Mat4 m_pitch = gl::rotationX(camera.pitch);
+			Mat4 m_yaw = gl::rotationY(camera.yaw);
+
+
+			camera.setView(m_center * m_pitch * m_yaw);
 			MainController::getInstance().volumeController().markDirty();
 		}
 	}

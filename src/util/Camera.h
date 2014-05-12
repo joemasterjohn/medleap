@@ -84,6 +84,7 @@ public:
 	// TODO: these should be part of model transform, not view
 	float yaw;
 	float pitch;
+	gl::Vec3 center;
 
 private:
 	gl::Mat4 view;
