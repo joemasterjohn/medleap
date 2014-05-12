@@ -43,7 +43,6 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 		cluts.push_back(c);
 	}
 
-
 	finger_tracker_.trackFunction(std::bind(&Transfer1DController::moveAndScale, this, std::placeholders::_1));
 	finger_tracker_.engageFunction([&](const Leap::Controller&){
 		saved_interval_ = cluts[activeCLUT].interval();
@@ -326,7 +325,7 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 		one_finger_tracker_.update(leapController);
 
 		if (one_finger_tracker_.tracking()) {
-			Leap::Finger f = currentFrame.finger(one_finger_tracker_.finger().id());
+			Leap::Finger f = currentFrame.finger(one_finger_tracker_.index().id());
 			Leap::Vector v = currentFrame.interactionBox().normalizePoint(f.stabilizedTipPosition());
 			leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height);
 		}
@@ -348,7 +347,7 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastSwipe);
 			Leap::SwipeGesture swipe(g);
 
-			if (elapsed.count() > 1000 && g.isValid() && swipe.speed() > 2000 && std::abs(swipe.direction().z) < 0.5f) {
+			if (elapsed.count() > 1000 && g.isValid() && swipe.speed() > 200 && std::abs(swipe.direction().z) < 0.5f && swipe.hands().frontmost().fingers().extended().count() == 5) {
 				lastSwipe = curTime;
 				if (swipe.direction().x > 0)
 					nextCLUT();
@@ -364,10 +363,10 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 
 void Transfer1DController::moveAndScale(const Leap::Controller& controller)
 {
-	float c = saved_interval_.center() + finger_tracker_.centerPosDelta(controller.frame()).x / 400.0f;
+	float c = saved_interval_.center() + finger_tracker_.centerDelta().x / 400.0f;
 	cluts[activeCLUT].interval().center(c);
 
-	float w = std::max(0.0f, saved_interval_.width() + finger_tracker_.fingerGapDelta(controller.frame()) / 400.0f);
+	float w = std::max(0.0f, saved_interval_.width() + finger_tracker_.fingerGapDelta() / 400.0f);
 	cluts[activeCLUT].interval().width(w);
 
 	cluts[activeCLUT].saveTexture(clutTexture);

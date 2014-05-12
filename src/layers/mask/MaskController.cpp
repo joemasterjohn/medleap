@@ -14,9 +14,7 @@ MaskController::MaskController() : mask_volume_(new BoxMask(Box(0.02f, 0.02f, 0.
 
 bool MaskController::modal() const
 {
-	return tracker_.state() == CutTracker::State::fingers_acquired || 
-		   tracker_.state() == CutTracker::State::tracking ||
-		   cam_control_.tracking();
+	return v_pose_.tracking() || cam_control_.tracking();
 }
 
 void MaskController::gainFocus()
@@ -40,17 +38,15 @@ void MaskController::loseFocus()
 bool MaskController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
 	if (!cam_control_.tracking()) {
-		tracker_.update(controller);
+		v_pose_.update(controller);
 
 		VolumeController& vc = MainController::getInstance().volumeController();
 		vc.maskColor = { 0.0f, 0.0f, 1.0f };
 
-		bool move = tracker_.state() == CutTracker::State::fingers_acquired || tracker_.state() == CutTracker::State::tracking;
-
-		if (move) {
+		if (v_pose_.tracking()) {
 			vc.maskColor = { 1.0f, 1.0f, 0.0f };
-			Vector v2 = tracker_.handCurrent().palmPosition();
-			v2 -= controller.frame(1).hand(tracker_.handCurrent().id()).palmPosition();
+			Vector v2 = v_pose_.hand().palmPosition();
+			v2 -= controller.frame(1).hand(v_pose_.hand().id()).palmPosition();
 
 			v2 *= 0.5;
 
@@ -66,7 +62,7 @@ bool MaskController::leapInput(const Leap::Controller& controller, const Leap::F
 			vc.maskCenter = center;
 
 
-			if (tracker_.tracking()) {
+			if (v_pose_.state() == VPose::State::closed) {
 				vc.maskColor = { 1.0f, 0.0f, 0.0f };
 				MaskVolume::Edit edit = mask_volume_->apply(b, vc.maskTexture, MaskVolume::Operation::sub);
 				if (!edit.empty()) {
@@ -82,7 +78,7 @@ bool MaskController::leapInput(const Leap::Controller& controller, const Leap::F
 
 	}
 
-	if (!tracker_.tracking()) {
+	if (!v_pose_.tracking()) {
 		cam_control_.update(controller);
 	}
 

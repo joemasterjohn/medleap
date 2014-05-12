@@ -5,7 +5,7 @@
 #include "gl/Buffer.h"
 #include "gl/Program.h"
 #include "gl/math/Math.h"
-#include "leap/OneFingerTracker.h"
+#include "leap/PointPose.h"
 #include "util/Transition.h"
 #include <memory>
 #include <functional>
@@ -35,7 +35,7 @@ private:
     std::string workingDir;
 	std::unique_ptr<Menu> menu_;
 	int selected_;
-	OneFingerTracker finger_tracker_;
+	PointPose point_pose_;
 	LeapState leap_state_;
 
 

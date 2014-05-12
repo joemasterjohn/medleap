@@ -19,5 +19,5 @@ bool TransformControl::shouldDisengage(const Leap::Controller& controller)
 
 void TransformControl::track(const Leap::Controller& controller)
 {
-	LeapTracker::track(controller);
+	PoseTracker::track(controller);
 }

@@ -2,7 +2,7 @@
 #define __medleap_FocusController__
 
 #include "layers/Controller.h"
-#include "leap/OneFingerTracker.h"
+#include "leap/PointPose.h"
 
 class FocusController : public Controller
 {
@@ -14,7 +14,7 @@ public:
 	void loseFocus() override;
 
 private:
-	OneFingerTracker tracker_;
+	PointPose point_pose_;
 };
 
 #endif // __medleap_FocusController__

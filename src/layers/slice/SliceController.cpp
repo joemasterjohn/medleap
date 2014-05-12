@@ -31,15 +31,15 @@ SliceController::SliceController() :
 	sliceVBO.bind();
 	sliceVBO.data(vertexData, sizeof(vertexData));
 
-	finger_tracker_.engageSpeedThreshold(100);
-	finger_tracker_.engageDelay(milliseconds(0));
-	finger_tracker_.disengageDelay(milliseconds(0));
-	finger_tracker_.trackFunction(std::bind(&SliceController::leapScroll, this, std::placeholders::_1));
-	finger_tracker_.engageFunction([&](const Leap::Controller& c){
+	point_pose_.engageSpeedThreshold(100);
+	point_pose_.engageDelay(milliseconds(0));
+	point_pose_.disengageDelay(milliseconds(0));
+	point_pose_.trackFunction(std::bind(&SliceController::leapScroll, this, std::placeholders::_1));
+	point_pose_.engageFunction([&](const Leap::Controller& c){
 		saved_slice_ = currentSlice_;
 		MainController::getInstance().leapStateController().active(LeapStateController::icon_h2f1_point);
 	});
-	finger_tracker_.disengageFunction([](const Leap::Controller&){
+	point_pose_.disengageFunction([](const Leap::Controller&){
 		MainController::getInstance().leapStateController().active(LeapStateController::icon_none);
 	});
 }
@@ -204,18 +204,18 @@ void SliceController::update(std::chrono::milliseconds elapsed)
 
 bool SliceController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
-	finger_tracker_.update(leapController);
+	point_pose_.update(leapController);
 
 	return false;
 }
 
 void SliceController::leapScroll(const Leap::Controller& controller)
 {
-	Vector delta = finger_tracker_.centerPosDelta(controller.frame());
+	Vector delta = point_pose_.posDelta();
 	slice(saved_slice_ + delta.x / leap_scroll_dst_);
 }
 
 void SliceController::loseFocus()
 {
-	finger_tracker_.tracking(false);
+	point_pose_.tracking(false);
 }

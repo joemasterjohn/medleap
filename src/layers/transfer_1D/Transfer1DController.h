@@ -11,8 +11,8 @@
 #include "gl/math/Math.h"
 #include "Histogram.h"
 #include "CLUT.h"
-#include "leap/TwoFingerTracker.h"
-#include "leap/OneFingerTracker.h"
+#include "leap/PointPose2H.h"
+#include "leap/PointPose.h"
 #include "util/TextRenderer.h"
 #include "gl/util/Draw.h"
 
@@ -51,9 +51,9 @@ private:
 	CLUT::Marker* selected_;
 
 	// leap
-	TwoFingerTracker finger_tracker_;
+	PointPose2H finger_tracker_;
 	Interval saved_interval_;
-	OneFingerTracker one_finger_tracker_;
+	PointPose one_finger_tracker_;
 	gl::Vec2 leap_cursor_;
 
 	// rendering

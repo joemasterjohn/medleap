@@ -1,5 +1,5 @@
-#ifndef __MEDLEAP_LEAP_TRACKER_H__
-#define __MEDLEAP_LEAP_TRACKER_H__
+#ifndef __MEDLEAP_POSE_TRACKER_H__
+#define __MEDLEAP_POSE_TRACKER_H__
 
 #include "Leap.h"
 #include <functional>
@@ -7,14 +7,15 @@
 
 /**
 Abstract class that stores tracking state for a Leap device. This class will stream updates (track) when it has been engaged.
-The implementing base class determines the conditions that engage and disengage tracking.
+The implementing base class determines the conditions that engage and disengage tracking. Optional callbacks can be registered
+to receive notifications when specific events occur.
 */
-class LeapTracker
+class PoseTracker
 {
 public:
-	LeapTracker();
+	PoseTracker();
 
-	virtual ~LeapTracker();
+	virtual ~PoseTracker();
 
 	/** Call each frame to update tracking status */
 	void update(const Leap::Controller& controller);

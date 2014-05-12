@@ -1,9 +1,9 @@
 #ifndef __MEDLEAP_TRANSFORM_CONTROL_H__
 #define __MEDLEAP_TRANSFORM_CONTROL_H__
 
-#include "LeapTracker.h"
+#include "PoseTracker.h"
 
-class TransformControl  : public LeapTracker
+class TransformControl : public PoseTracker
 {
 public:
 	TransformControl();

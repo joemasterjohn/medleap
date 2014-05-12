@@ -2,7 +2,7 @@
 #define __medleap_MaskController__
 
 #include "layers/Controller.h"
-#include "leap/CutTracker.h"
+#include "leap/VPose.h"
 #include "gl/math/Math.h"
 #include "MaskVolume.h"
 #include "util/History.h"
@@ -19,7 +19,7 @@ public:
 	bool leapInput(const Leap::Controller& controller, const Leap::Frame& frame) override;
 
 private:
-	CutTracker tracker_;
+	VPose v_pose_;
 	LeapCameraControl cam_control_;
 	std::unique_ptr<MaskVolume> mask_volume_;
 	History<MaskVolume::Edit, 10> edits_;

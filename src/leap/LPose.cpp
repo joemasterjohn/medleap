@@ -1,8 +1,8 @@
-#include "HandTriggerTracker.h"
+#include "LPose.h"
 
 using namespace Leap;
 
-HandTriggerTracker::HandTriggerTracker() :
+LPose::LPose() :
 		m_thumb_spd_thresh(200),
 		m_index_spd_thresh(50),
 		m_delta_spd_thresh(300)
@@ -11,7 +11,7 @@ HandTriggerTracker::HandTriggerTracker() :
 	disengageDelay(std::chrono::milliseconds(500));
 }
 
-bool HandTriggerTracker::shouldEngage(const Leap::Controller& controller)
+bool LPose::shouldEngage(const Leap::Controller& controller)
 {
 	FingerList fingers = controller.frame().fingers();
 	Frame frame = controller.frame();
@@ -42,7 +42,7 @@ bool HandTriggerTracker::shouldEngage(const Leap::Controller& controller)
 	return false;
 }
 
-bool HandTriggerTracker::shouldDisengage(const Leap::Controller& controller)
+bool LPose::shouldDisengage(const Leap::Controller& controller)
 {
 	FingerList fingers = controller.frame().fingers();
 
@@ -67,14 +67,15 @@ bool HandTriggerTracker::shouldDisengage(const Leap::Controller& controller)
 	return false;
 }
 
-void HandTriggerTracker::engage(const Leap::Controller& controller)
+void LPose::engage(const Leap::Controller& controller)
 {
+	// TODO remove this and put in shouldEngage
 	m_engage_tip_pos = controller.frame().fingers().frontmost().tipPosition();
-	LeapTracker::engage(controller);
+	PoseTracker::engage(controller);
 }
 
-void HandTriggerTracker::track(const Leap::Controller& controller)
+void LPose::track(const Leap::Controller& controller)
 {
 	m_delta_tip_pos = controller.frame().fingers().frontmost().tipPosition() - m_engage_tip_pos;
-	LeapTracker::track(controller);
+	PoseTracker::track(controller);
 }

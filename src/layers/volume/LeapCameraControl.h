@@ -2,8 +2,8 @@
 #define __MEDLEAP_LEAP_CAMERA_CONTROL_H__
 
 #include "Leap.h"
-#include "leap/GrabTracker.h"
-#include "leap/TwoFingerTracker.h"
+#include "leap/FistPose.h"
+#include "leap/PointPose2H.h"
 #include "gl/math/Math.h"
 #include "util/Camera.h"
 
@@ -16,8 +16,8 @@ public:
 	bool tracking() const { return tracking_; }
 
 private:
-	GrabTracker grab_tracker_;
-	TwoFingerTracker finger_tracker_;
+	FistPose fist_pose_;
+	PointPose2H point_pose_;
 	gl::Mat4 old_view_;
 	Camera old_camera_;
 	bool tracking_;

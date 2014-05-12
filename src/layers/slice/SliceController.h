@@ -8,7 +8,7 @@
 #include "gl/Buffer.h"
 #include "data/VolumeData.h"
 #include "gl/math/Math.h"
-#include "leap/TwoFingerTracker.h"
+#include "leap/PointPose.h"
 
 /** Controls slice rendering layer */
 class SliceController : public Controller
@@ -44,7 +44,7 @@ private:
 	int currentSlice_;
 	gl::Mat4 modelMatrix;
 	std::chrono::milliseconds elapsed_;
-	TwoFingerTracker finger_tracker_;
+	PointPose point_pose_;
 	int saved_slice_;
 	float leap_scroll_dst_;
 

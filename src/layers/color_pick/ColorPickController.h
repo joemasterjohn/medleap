@@ -3,7 +3,7 @@
 
 #include "layers/Controller.h"
 #include "util/Color.h"
-#include "leap/HandTriggerTracker.h"
+#include "leap/LPose.h"
 #include "gl/geom/Rectangle.h"
 #include "gl/Buffer.h"
 #include "gl/Program.h"
@@ -34,7 +34,7 @@ private:
 	std::vector<std::function<void(const Color&)>> callbacks_;
 	ColorHSV color_;
 	ColorHSV prev_color_;
-	HandTriggerTracker hand_trigger_;
+	LPose l_pose_;
 	State state_;
 	gl::Buffer geom_vbo_;
 	gl::Program color_circle_prog_;

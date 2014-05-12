@@ -1,23 +1,23 @@
 #ifndef __MEDLEAP_ONE_FINGER_TRACKER_H__
 #define __MEDLEAP_ONE_FINGER_TRACKER_H__
 
-#include "LeapTracker.h"
+#include "PoseTracker.h"
 #include <functional>
 
-/** Leap tracker that continuously tracks one index finger. */
-class OneFingerTracker  : public LeapTracker
+/** Leap tracker that tracks a one-finger pose. */
+class PointPose  : public PoseTracker
 {
 public:
-	OneFingerTracker();
+	PointPose();
 
-	/** The state of the finger when tracking engaged */
-	Leap::Finger finger() const;
+	/** Current state of index finger */
+	Leap::Finger index() const { return current_; }
 
-	/** The state of the finger at the specified frame */
-	Leap::Finger finger(const Leap::Frame& frame) const;
+	/** State of index finger when engaged */
+	Leap::Finger indexEngaged() const { return engaged_; }
 
 	/** Difference of current finger position and position when tracking engaged */
-	Leap::Vector posDelta(const Leap::Frame& frame) const;
+	Leap::Vector posDelta() const;
 
 	/** Max speed fingers can be moving and have tracking engage */
 	void engageSpeedThreshold(float speed) { engage_spd_thresh_ = speed; }
@@ -28,9 +28,11 @@ public:
 protected:
 	bool shouldEngage(const Leap::Controller& controller) override;
 	bool shouldDisengage(const Leap::Controller& controller) override;
+	void track(const Leap::Controller& controller) override;
 
 private:
-	Leap::Finger finger_;
+	Leap::Finger engaged_;
+	Leap::Finger current_;
 	float engage_spd_thresh_;
 	float disengage_spd_thresh_;
 };

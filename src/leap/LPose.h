@@ -1,14 +1,14 @@
 #ifndef __MEDLEAP_HAND_TRIGGER_TRACKER_H__
 #define __MEDLEAP_HAND_TRIGGER_TRACKER_H__
 
-#include "LeapTracker.h"
+#include "PoseTracker.h"
 #include <functional>
 
 /** Leap tracker that continuously tracks a user's index finger and thumb. Tracking state is toggled by the user "clicking" their thumb. */
-class HandTriggerTracker  : public LeapTracker
+class LPose : public PoseTracker
 {
 public:
-	HandTriggerTracker();
+	LPose();
 
 	// Tip position of the index finger when tracking was engaged
 	Leap::Vector engagedTipPos() const { return m_engage_tip_pos; }

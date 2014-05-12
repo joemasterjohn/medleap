@@ -15,9 +15,9 @@ MenuController::MenuController() :
 	transition_(std::chrono::milliseconds(250)),
 	leap_state_(LeapState::closed)
 {
-	finger_tracker_.engageDelay(std::chrono::milliseconds(0));
-	finger_tracker_.disengageDelay(std::chrono::milliseconds(0));
-	finger_tracker_.engageSpeedThreshold(1200);
+	point_pose_.engageDelay(std::chrono::milliseconds(0));
+	point_pose_.disengageDelay(std::chrono::milliseconds(0));
+	point_pose_.engageSpeedThreshold(1200);
 
 	menuVBO.generateVBO(GL_STATIC_DRAW);
 	menuIBO.generateIBO(GL_STATIC_DRAW);
@@ -26,13 +26,13 @@ MenuController::MenuController() :
 
 void MenuController::loseFocus()
 {
-	finger_tracker_.tracking(false);
+	point_pose_.tracking(false);
 }
 
 void MenuController::hideMenu()
 {
 	leap_state_ = LeapState::closed;
-	finger_tracker_.tracking(false);
+	point_pose_.tracking(false);
 	transition_.state(Transition::State::decrease);
 	MainController::getInstance().leapStateController().active(LeapStateController::icon_none);
 }
@@ -123,9 +123,9 @@ int MenuController::calcHighlightedMenu(double radians)
 
 void MenuController::updateLeapPointer(const Leap::Controller& controller, const Leap::Frame& frame)
 {
-	finger_tracker_.update(controller);
-	if (finger_tracker_.tracking()) {
-		Leap::Finger f = finger_tracker_.finger(frame);
+	point_pose_.update(controller);
+	if (point_pose_.tracking()) {
+		Leap::Finger f = point_pose_.index();
 		Leap::Vector n = frame.interactionBox().normalizePoint(f.tipPosition());
 		leap.x = n.x * viewport_.width + viewport_.x;
 		leap.y = n.y * viewport_.height + viewport_.y;
@@ -139,11 +139,21 @@ void MenuController::leapMenuClosed(const Leap::Controller& controller, const Le
 		if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
 			Leap::CircleGesture circle(g);
 			bool xyPlane = abs(circle.normal().dot(Leap::Vector(0, 0, 1))) > 0.8f;
-			if (circle.progress() > 1 && xyPlane && circle.radius() > 75.0f) {
-				int numFingers = frame.fingers().count();
-				if (numFingers == 1) {
+			if (circle.progress() > 1 && xyPlane && circle.radius() > 35.0f) {
+
+				Leap::Hand hand = circle.hands().frontmost();
+				Leap::FingerList fingers = hand.fingers();
+				
+				bool main = fingers.extended().count() == 1 && 
+					fingers.extended()[0].type() == Leap::Finger::TYPE_INDEX;
+
+				bool secondary = fingers[Leap::Finger::TYPE_INDEX].isExtended() &&
+					fingers[Leap::Finger::TYPE_THUMB].isExtended() &&
+					fingers[Leap::Finger::TYPE_MIDDLE].isExtended();
+
+				if (main) {
 					leap_state_ = LeapState::triggered_main;
-				} else if (numFingers > 2 && MainController::getInstance().focusLayer() && MainController::getInstance().focusLayer()->contextMenu()) {
+				} else if (secondary && MainController::getInstance().focusLayer() && MainController::getInstance().focusLayer()->contextMenu()) {
 					leap_state_ = LeapState::triggered_context;
 				}
 			}
@@ -162,7 +172,7 @@ void MenuController::leapMenuTriggered(const Leap::Controller& controller, const
 		MainController::getInstance().leapStateController().active(LeapStateController::icon_h1f2_circle);
 	}
 
-	if (finger_tracker_.tracking()) {
+	if (point_pose_.tracking()) {
 		float d = (leap - viewport_.center()).length();
 		if (d < 35) {
 			if (leap_state_ == LeapState::triggered_context) {
@@ -178,7 +188,7 @@ void MenuController::leapMenuOpen(const Leap::Controller& controller, const Leap
 {
 	updateLeapPointer(controller, frame);
 
-	if (finger_tracker_.tracking()) {
+	if (point_pose_.tracking()) {
 		Vec2 v = (leap - viewport_.center());
 		float radians = v.anglePositive();
 		float radius = v.length();
@@ -194,7 +204,7 @@ void MenuController::leapMenuOpen(const Leap::Controller& controller, const Leap
 
 			if (radius > outerRadius && selected_ >= 0 && menu_) {
 					(*menu_)[highlightedItem].trigger();
-					finger_tracker_.tracking(false);
+					point_pose_.tracking(false);
 			}
 		}
 	}
@@ -208,7 +218,7 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 	{
 	case LeapState::closed:
 		leapMenuClosed(leapController, currentFrame);
-		break;
+		return true;
 	case LeapState::triggered_context:
 	case LeapState::triggered_main:
 		leapMenuTriggered(leapController, currentFrame);
@@ -218,7 +228,7 @@ bool MenuController::leapInput(const Leap::Controller& leapController, const Lea
 		break;
 	}
 
-	return transition_.empty();
+	return false;
 }
 
 void MenuController::update(std::chrono::milliseconds elapsed)

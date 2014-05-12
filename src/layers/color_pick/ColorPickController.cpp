@@ -10,7 +10,7 @@ ColorPickController::ColorPickController() :
 		color_(0.0f, 1.0f, 1.0f, 1.0f),
 		state_(State::idle)
 {
-	hand_trigger_.engageFunction(
+	l_pose_.engageFunction(
 		std::bind(&ColorPickController::leapChooseWidget, this, std::placeholders::_1));
 
 	GLfloat vertices[] = {
@@ -51,7 +51,7 @@ void ColorPickController::gainFocus()
 
 void ColorPickController::loseFocus()
 {
-	hand_trigger_.tracking(false);
+	l_pose_.tracking(false);
 }
 
 bool ColorPickController::mouseMotion(GLFWwindow* window, double x, double y)
@@ -112,10 +112,10 @@ bool ColorPickController::mouseButton(GLFWwindow* window, int button, int action
 
 bool ColorPickController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
-	hand_trigger_.update(leapController);
+	l_pose_.update(leapController);
 
 	// DEBUG ONLY: REMOVE (change to highlight text indicating which funciton will be used)
-	if (!hand_trigger_.tracking() && currentFrame.fingers().count() > 0) {
+	if (!l_pose_.tracking() && currentFrame.fingers().count() > 0) {
 		Vector v = leapController.frame().fingers().frontmost().tipPosition();
 		m_leap_cursor.x = v.x / 100.0f * viewport_.width / 2.0f + viewport_.center().x;
 		m_leap_cursor.y = (v.y - 250) / 100.0f * viewport_.height / 2.0f + viewport_.center().y;
@@ -123,7 +123,7 @@ bool ColorPickController::leapInput(const Leap::Controller& leapController, cons
 		m_leap_cursor = { -200, -200 };
 	}
 
-	if (!hand_trigger_.tracking() && currentFrame.fingers().count() > 4) {
+	if (!l_pose_.tracking() && currentFrame.fingers().count() > 4) {
 		for (std::function<void(const Color&)>& cb : callbacks_)
 			cb(color_);
 		callbacks_.clear();
@@ -141,13 +141,13 @@ void ColorPickController::leapChooseWidget(const Leap::Controller& controller)
 	float vpw = viewport_.width;
 
 	if (x <= vpw / 3.0f) {
-		hand_trigger_.trackFunction(std::bind(&ColorPickController::leapUpdateAlpha, this, std::placeholders::_1));
+		l_pose_.trackFunction(std::bind(&ColorPickController::leapUpdateAlpha, this, std::placeholders::_1));
 	}
 	else if (x <= vpw / 3.0f * 2.0f) {
-		hand_trigger_.trackFunction(std::bind(&ColorPickController::leapUpdateColor, this, std::placeholders::_1));
+		l_pose_.trackFunction(std::bind(&ColorPickController::leapUpdateColor, this, std::placeholders::_1));
 	}
 	else {
-		hand_trigger_.trackFunction(std::bind(&ColorPickController::leapUpdateValue, this, std::placeholders::_1));
+		l_pose_.trackFunction(std::bind(&ColorPickController::leapUpdateValue, this, std::placeholders::_1));
 	}
 
 	prev_color_ = color_;
@@ -155,7 +155,7 @@ void ColorPickController::leapChooseWidget(const Leap::Controller& controller)
 
 void ColorPickController::leapUpdateColor(const Leap::Controller& controller)
 {
-	Vec3 tip(hand_trigger_.deltaTipPos().x, hand_trigger_.deltaTipPos().y, hand_trigger_.deltaTipPos().z);
+	Vec3 tip(l_pose_.deltaTipPos().x, l_pose_.deltaTipPos().y, l_pose_.deltaTipPos().z);
 
 	float prevValue = 0.0f;
 	float hue = Vec2(tip.x, tip.y).anglePositive();
@@ -167,13 +167,13 @@ void ColorPickController::leapUpdateColor(const Leap::Controller& controller)
 
 void ColorPickController::leapUpdateAlpha(const Leap::Controller& controller)
 {
-	Vec3 tip(hand_trigger_.deltaTipPos().x, hand_trigger_.deltaTipPos().y, hand_trigger_.deltaTipPos().z);
+	Vec3 tip(l_pose_.deltaTipPos().x, l_pose_.deltaTipPos().y, l_pose_.deltaTipPos().z);
 	color_.alpha(clamp(prev_color_.alpha() + tip.y / 100.0f, 0.0f, 1.0f));
 }
 
 void ColorPickController::leapUpdateValue(const Leap::Controller& controller)
 {
-	Vec3 tip(hand_trigger_.deltaTipPos().x, hand_trigger_.deltaTipPos().y, hand_trigger_.deltaTipPos().z);
+	Vec3 tip(l_pose_.deltaTipPos().x, l_pose_.deltaTipPos().y, l_pose_.deltaTipPos().z);
 	color_.value(clamp(prev_color_.value() + tip.y / 100.0f, 0.0f, 1.0f));
 }
 

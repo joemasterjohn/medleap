@@ -1,13 +1,13 @@
 #ifndef __MEDLEAP_GRAB_TRACKER_H__
 #define __MEDLEAP_GRAB_TRACKER_H__
 
-#include "LeapTracker.h"
+#include "PoseTracker.h"
 
 /** Tracks a grabbing motion with one hand. */
-class GrabTracker  : public LeapTracker
+class FistPose  : public PoseTracker
 {
 public:
-	GrabTracker();
+	FistPose();
 
 	/** State of the hand when engaged */
 	Leap::Hand handEngaged() const;
