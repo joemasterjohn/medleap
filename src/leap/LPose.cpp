@@ -3,79 +3,89 @@
 using namespace Leap;
 
 LPose::LPose() :
-		m_thumb_spd_thresh(200),
-		m_index_spd_thresh(50),
-		m_delta_spd_thresh(300)
+	state_(State::open),
+	open_function_(nullptr),
+	close_function_(nullptr)
 {
-	engageDelay(std::chrono::milliseconds(500));
-	disengageDelay(std::chrono::milliseconds(500));
 }
 
 bool LPose::shouldEngage(const Leap::Controller& controller)
 {
-	FingerList fingers = controller.frame().fingers();
 	Frame frame = controller.frame();
 
-	// must be a single hand
 	if (frame.hands().count() != 1)
 		return false;
 
-	// must be at two fingers to be tracking
-	if (fingers.count() != 2)
+	Hand front_hand = frame.hands().frontmost();
+
+	if (!front_hand.isValid())
 		return false;
 
-	Finger index = fingers.frontmost();
-	Finger thumb = fingers.leftmost();
-	float indexSpd = index.tipVelocity().magnitude();
-	float thumbSpd = thumb.tipVelocity().magnitude();
-	float deltaSpd = abs(indexSpd - thumbSpd);
+	FingerList fingers = front_hand.fingers();
+	if (!fingers[Finger::TYPE_THUMB].isExtended() ||
+		!fingers[Finger::TYPE_INDEX].isExtended() ||
+		fingers[Finger::TYPE_MIDDLE].isExtended() ||
+		fingers[Finger::TYPE_RING].isExtended() ||
+		fingers[Finger::TYPE_PINKY].isExtended())
+	{
+		return false;
+	}
 
-
-	// index finger is not moving much, but the thumb is
-	if (indexSpd < m_index_spd_thresh && thumbSpd > m_thumb_spd_thresh)
-		return true;
-
-	// fingers are moving, but the thumb is moving away from index quickly
-	if (deltaSpd > m_delta_spd_thresh)
-		return true;
-
-	return false;
+	hand_engaged_ = hand_current_ = front_hand;
+	return true;
 }
 
 bool LPose::shouldDisengage(const Leap::Controller& controller)
 {
-	FingerList fingers = controller.frame().fingers();
+	Frame frame = controller.frame();
 
-	// hand has disappeared, so must stop tracking
-	if (fingers.count() < 1)
+	if (frame.hands().count() != 1)
 		return true;
 
-	Finger index = fingers.frontmost();
-	Finger thumb = fingers.leftmost();
-	float indexSpd = index.tipVelocity().magnitude();
-	float thumbSpd = thumb.tipVelocity().magnitude();
-	float deltaSpd = abs(indexSpd - thumbSpd);
-
-	// index finger is not moving much, but the thumb is
-	if (indexSpd < m_index_spd_thresh && thumbSpd > m_thumb_spd_thresh)
+	hand_current_ = frame.hand(hand_current_.id());
+	if (!hand_current_.isValid())
 		return true;
 
-	// fingers are moving, but the thumb is moving away from index quickly
-	if (deltaSpd > m_delta_spd_thresh)
+	FingerList fingers = hand_current_.fingers();
+
+	// it is intentional I'm not checking thumb: it could be
+	// perceived as not extended when tucked into hand
+	if (!fingers[Finger::TYPE_INDEX].isExtended() ||
+		fingers[Finger::TYPE_MIDDLE].isExtended() ||
+		fingers[Finger::TYPE_RING].isExtended() ||
+		fingers[Finger::TYPE_PINKY].isExtended())
+	{
 		return true;
+	}
 
 	return false;
 }
 
-void LPose::engage(const Leap::Controller& controller)
-{
-	// TODO remove this and put in shouldEngage
-	m_engage_tip_pos = controller.frame().fingers().frontmost().tipPosition();
-	PoseTracker::engage(controller);
-}
-
 void LPose::track(const Leap::Controller& controller)
 {
-	m_delta_tip_pos = controller.frame().fingers().frontmost().tipPosition() - m_engage_tip_pos;
+	Frame frame = controller.frame();
+	hand_current_ = frame.hand(hand_current_.id());
+
+	Finger index = hand_current_.fingers()[Finger::TYPE_INDEX];
+	Finger thumb = hand_current_.fingers()[Finger::TYPE_THUMB];
+
+	// consider angle in XZ plane only
+	Vector u = index.direction();
+	u.y = 0;
+	u = u.normalized();
+	Vector v = thumb.direction();
+	v.y = 0;
+	v = v.normalized();
+	float angle = u.angleTo(v);
+
+	State prev = state_;
+	state_ = (angle > 0.3f) ? State::open : State::closed;
+
+	if (prev == State::open && state_ == State::closed && close_function_) {
+		close_function_(controller);
+	} else if (prev == State::closed && state_ == State::open && open_function_) {
+		open_function_(controller);
+	}
+
 	PoseTracker::track(controller);
 }

@@ -76,7 +76,7 @@ void LeapCameraControl::update(const Leap::Controller& controller)
 
 	if (fist_pose_.tracking() && fist_pose_.framesTracked() > 1) {
 
-		if (fist_pose_.isOpen()) {
+		if (fist_pose_.state() == FistPose::State::open) {
 
 			Camera& camera = MainController::getInstance().volumeController().getCamera();
 
@@ -94,7 +94,7 @@ void LeapCameraControl::update(const Leap::Controller& controller)
 			camera.setView(m_center * m_pitch * m_yaw);
 			MainController::getInstance().volumeController().markDirty();
 
-		} else {
+		} else if (fist_pose_.state() == FistPose::State::closed) {
 			Camera& camera = MainController::getInstance().volumeController().getCamera();
 
 			Vector a = fist_pose_.hand().palmPosition();

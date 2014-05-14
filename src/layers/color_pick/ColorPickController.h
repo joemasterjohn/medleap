@@ -16,6 +16,7 @@ class ColorPickController : public Controller
 {
 public:
 	ColorPickController();
+	void clearCallbacks();
 	void addCallback(std::function<void(const Color&)> callback);
 	void draw() override;
 	bool keyboardInput(GLFWwindow* window, int key, int action, int mods) override { return false; }
@@ -33,7 +34,6 @@ private:
 
 	std::vector<std::function<void(const Color&)>> callbacks_;
 	ColorHSV color_;
-	ColorHSV prev_color_;
 	LPose l_pose_;
 	State state_;
 	gl::Buffer geom_vbo_;
@@ -49,10 +49,8 @@ private:
 	gl::Vec2 m_leap_cursor;
 	TextRenderer text_;
 
-	void leapChooseWidget(const Leap::Controller& controller);
-	void leapUpdateColor(const Leap::Controller& controller);
-	void leapUpdateAlpha(const Leap::Controller& controller);
-	void leapUpdateValue(const Leap::Controller& controller);
+	void updateState(float x, float y);
+	void chooseState(float x, float y);
 
 	void resize() override;
 	void quad(gl::Program prog, const gl::Rectangle<float>& rect);

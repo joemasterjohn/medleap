@@ -43,14 +43,6 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 		cluts.push_back(c);
 	}
 
-	finger_tracker_.trackFunction(std::bind(&Transfer1DController::moveAndScale, this, std::placeholders::_1));
-	finger_tracker_.engageFunction([&](const Leap::Controller&){
-		saved_interval_ = cluts[activeCLUT].interval();
-		MainController::getInstance().leapStateController().active(LeapStateController::icon_h2f1_point);
-	});
-	finger_tracker_.disengageFunction([](const Leap::Controller&){
-		MainController::getInstance().leapStateController().active(LeapStateController::icon_none);
-	});
 	histo1D.generate(GL_TEXTURE_2D);
 	transferFn.generate(GL_TEXTURE_2D);
 
@@ -108,6 +100,32 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 	cluts[activeCLUT].saveTexture(clutTexture);
 
+	pinch_pose_.stateFunction([&](const Leap::Controller& c, PinchPose::State prev_state, PinchPose::State state) {
+		if (prev_state == PinchPose::State::open && (state == PinchPose::State::pinch_left || state == PinchPose::State::pinch_right)) {
+			cout << "PINCH" << endl;
+			selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
+			saved_interval_ = selected_->interval();
+		} else if (state == PinchPose::State::open) {
+			cout << "RELEASE" << endl;
+			selected_ = nullptr;
+		} else if (state == PinchPose::State::pinch_both) {
+			selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
+			saved_interval_ = selected_->interval();
+			Leap::Vector l = pinch_pose_.left().stabilizedPalmPosition();
+			Leap::Vector r = pinch_pose_.right().stabilizedPalmPosition();
+			saved_hand_sep_ = (l - r).magnitude() / 200.0f;;
+		}
+	});
+
+	pinch_pose_.doublePinchFunction([&](const Leap::Controller& c){
+		selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
+		auto cb = [&](const Color& color) {
+			selected_->color(color);
+			cluts[activeCLUT].saveTexture(clutTexture);
+			volumeRenderer->markDirty();
+		};
+		MainController::getInstance().pickColor(selected_->color(), cb);
+	});
 }
 
 Transfer1DController::~Transfer1DController()
@@ -128,7 +146,6 @@ void Transfer1DController::gainFocus()
 
 void Transfer1DController::loseFocus()
 {
-	MainController::getInstance().showTransfer1D(false);
 }
 
 std::unique_ptr<Menu> Transfer1DController::contextMenu()
@@ -259,13 +276,13 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
     if (lMouseDrag) {
 
 		if (cluts[activeCLUT].mode() == CLUT::continuous) {
-			cluts[activeCLUT].interval().center(static_cast<float>(x) / viewport_.width);
+			cluts[activeCLUT].interval().center(static_cast<float>(x - viewport_.x) / viewport_.width);
 			cluts[activeCLUT].saveTexture(clutTexture);
 			volumeRenderer->markDirty();
 		}
 		else if (selected_) {
 			const Interval& current = selected_->interval();
-			float newCenter = static_cast<float>(x / viewport_.width);
+			float newCenter = static_cast<float>((x - viewport_.x) / viewport_.width);
 			selected_->interval({ newCenter, current.width() });
 			cluts[activeCLUT].saveTexture(clutTexture);
 			volumeRenderer->markDirty();
@@ -299,12 +316,12 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		// clut marker drag
-		float center = static_cast<float>(x / viewport_.width);
+		float center = static_cast<float>((x - viewport_.x) / viewport_.width);
 		selected_ = cluts[activeCLUT].closestMarker(center);
 	}
 
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
-		float center = static_cast<float>(x / viewport_.width);
+		float center = static_cast<float>((x - viewport_.x) / viewport_.width);
 		selected_ = cluts[activeCLUT].closestMarker(center);
 
 		auto cb = [&](const Color& color) {
@@ -314,6 +331,7 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 		};
 
 		MainController::getInstance().pickColor(selected_->color(), cb);
+		return false;
 	}
     
 	return true;
@@ -321,28 +339,37 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 
 bool Transfer1DController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
-	if (!finger_tracker_.tracking()) {
-		one_finger_tracker_.update(leapController);
+	using namespace Leap;
 
-		if (one_finger_tracker_.tracking()) {
-			Leap::Finger f = currentFrame.finger(one_finger_tracker_.index().id());
-			Leap::Vector v = currentFrame.interactionBox().normalizePoint(f.stabilizedTipPosition());
-			leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height);
+	pinch_pose_.update(leapController);
+
+	if (pinch_pose_.tracking()) {
+		Vector v = currentFrame.interactionBox().normalizePoint(pinch_pose_.right().stabilizedPalmPosition());
+
+		cursor_center_ = v.x;
+		leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height) + Vec2(viewport_.x, viewport_.y);
+
+		InteractionBox ib = currentFrame.interactionBox();
+		Vector l = ib.normalizePoint(pinch_pose_.right().stabilizedPalmPosition()) - ib.normalizePoint(pinch_pose_.rightPinched().stabilizedPalmPosition());
+
+		float width = saved_interval_.width() + l.y;
+
+
+		if (selected_){
+			switch (pinch_pose_.state()) {
+			case PinchPose::State::pinch_left:
+			case PinchPose::State::pinch_right:
+				editInterval(cursor_center_, width);
+				break;
+			}
 		}
 	}
-
-	if (!one_finger_tracker_.tracking()) {
-		finger_tracker_.update(leapController);
-	}
-
-	if (finger_tracker_.tracking() || one_finger_tracker_.tracking())
-		return false;
 
 	static auto lastSwipe = std::chrono::system_clock::now();
 	Leap::GestureList gestures = currentFrame.gestures();
 	for (Leap::Gesture g : gestures) {
 		if (g.type() == Leap::Gesture::TYPE_SWIPE) {
-			
+
 			auto curTime = std::chrono::system_clock::now();
 			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastSwipe);
 			Leap::SwipeGesture swipe(g);
@@ -357,20 +384,26 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 		}
 	}
 
-
 	return false;
+}
+
+void Transfer1DController::editInterval(float center, float width)
+{
+	selected_->interval({ center, width });
+	cluts[activeCLUT].saveTexture(clutTexture);
+	volumeRenderer->markDirty();
 }
 
 void Transfer1DController::moveAndScale(const Leap::Controller& controller)
 {
-	float c = saved_interval_.center() + finger_tracker_.centerDelta().x / 400.0f;
-	cluts[activeCLUT].interval().center(c);
+	//float c = saved_interval_.center() + finger_tracker_.centerDelta().x / 400.0f;
+	//cluts[activeCLUT].interval().center(c);
 
-	float w = std::max(0.0f, saved_interval_.width() + finger_tracker_.fingerGapDelta() / 400.0f);
-	cluts[activeCLUT].interval().width(w);
+	//float w = std::max(0.0f, saved_interval_.width() + finger_tracker_.fingerGapDelta() / 400.0f);
+	//cluts[activeCLUT].interval().width(w);
 
-	cluts[activeCLUT].saveTexture(clutTexture);
-	volumeRenderer->markDirty();
+	//cluts[activeCLUT].saveTexture(clutTexture);
+	//volumeRenderer->markDirty();
 }
 
 std::set<Leap::Gesture::Type> Transfer1DController::requiredGestures()
@@ -410,12 +443,12 @@ void Transfer1DController::draw()
 
 	viewport_.apply();
 
-	if (one_finger_tracker_.tracking()) {
+	if (pinch_pose_.tracking()) {
 		Draw& d = MainController::getInstance().draw();
 		d.setModelViewProj(viewport_.orthoProjection());
 		d.begin(GL_LINES);
 		d.color(1.0f, 0.0f, 0.0f);
-		d.circle(leap_cursor_.x, leap_cursor_.y, 10.0f, 16);
+		d.line(cursor_center_ * viewport_.width + viewport_.x, viewport_.y, cursor_center_ * viewport_.width + viewport_.x, viewport_.top());
 		d.end();
 		d.draw();
 	}
@@ -433,34 +466,27 @@ void Transfer1DController::drawMarkerBar()
 			x = x * cluts[activeCLUT].interval().width() + cluts[activeCLUT].interval().left();
 		}
 
+		float max_scale = 1.5f;
+		float scale_cutoff = 0.2f;
+		float dist = abs(x - cursor_center_);
+		float scale = max(1.0f, max_scale - dist / scale_cutoff);
+		
+
 		// [0,1] to [-1,1]
 		x = (x - 0.5f) * 2.0f;
 
 		float l = x - 0.05f * 800.0f / viewport_.width;
 		float r = x + 0.05f * 800.0f / viewport_.width;
-		d.color(c.x, c.y, c.z);
+		d.color(.5f, .5f, .5f);
 		d.vertex(l, -1);
-		d.vertex(x, .9f);
+		d.vertex(x, .6f);
 		d.vertex(r, -1);
-	}
-	d.end();
-	d.draw();
 
-	d.begin(GL_LINES);
-	d.color(0.5f, 0.5f, 0.5f);
-	for (const CLUT::Marker& marker : cluts[activeCLUT].markers()) {
-		Vec3 c = marker.color().vec3();
-		float x = marker.interval().center();
-		if (cluts[activeCLUT].mode() == CLUT::continuous) {
-			x = x * cluts[activeCLUT].interval().width() + cluts[activeCLUT].interval().left();
-		}
-
-		x = (x - 0.5f) * 2.0f;
-		float l = x - 0.05f * 800.0f / viewport_.width;
-		float r = x + 0.05f * 800.0f / viewport_.width;
+		d.color(c.x, c.y, c.z);
+		l = x - 0.04f * 800.0f / viewport_.width;
+		r = x + 0.04f * 800.0f / viewport_.width;
 		d.vertex(l, -1);
-		d.vertex(x, .9f);
-		d.vertex(x, .9f);
+		d.vertex(x, .5f);
 		d.vertex(r, -1);
 	}
 	d.end();

@@ -144,8 +144,7 @@ void MenuController::leapMenuClosed(const Leap::Controller& controller, const Le
 				Leap::Hand hand = circle.hands().frontmost();
 				Leap::FingerList fingers = hand.fingers();
 				
-				bool main = fingers.extended().count() == 1 && 
-					fingers.extended()[0].type() == Leap::Finger::TYPE_INDEX;
+				bool main = fingers.extended().count() < 3;
 
 				bool secondary = fingers[Leap::Finger::TYPE_INDEX].isExtended() &&
 					fingers[Leap::Finger::TYPE_THUMB].isExtended() &&

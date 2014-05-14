@@ -1,8 +1,9 @@
 #include "FistPose.h"
 
+using namespace std;
 using namespace Leap;
 
-FistPose::FistPose() : max_engage_spd_(75.0f), open_(true)
+FistPose::FistPose() : state_(State::open), max_engage_spd_(75.0f)
 {
 	engageDelay(std::chrono::milliseconds(150));
 }
@@ -50,7 +51,16 @@ void FistPose::track(const Leap::Controller& controller)
 	}
 
 	hand_current_ = controller.frame().hand(hand_engaged_.id());
-	open_ = (hand_current_.grabStrength() < 0.85f);
+
+	if (hand_current_.grabStrength() < 0.85f) {
+		if (hand_current_.fingers().extended().count() == 5) {
+			state_ = State::open;
+		} else {
+			state_ = State::partial;
+		}
+	} else {
+		state_ = State::closed;
+	}
 
 	PoseTracker::track(controller);
 }

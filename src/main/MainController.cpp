@@ -213,6 +213,7 @@ void MainController::popFocus()
 void MainController::pickColor(const Color& initialColor, std::function<void(const Color&)> callback)
 {
 	colorPickController.color(initialColor);
+	colorPickController.clearCallbacks();
 	colorPickController.addCallback(callback);
 	colorPickController.addCallback([&](const Color&){popController(); popFocus(); });
 	pushController(&colorPickController);
@@ -291,6 +292,7 @@ void MainController::resize(int width, int height)
 
 void MainController::mouseButton(GLFWwindow *window, int button, int action, int mods)
 {
+	// pushing color picker while iterating causes foreach to break
 	for (Controller* c : activeControllers) {
 		bool passThrough = c->mouseButton(window, button, action, mods, mMouseX, mMouseY);
 		if (!passThrough)

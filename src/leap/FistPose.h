@@ -7,10 +7,20 @@
 class FistPose  : public PoseTracker
 {
 public:
+	enum class State
+	{
+		/** All digits are extended */
+		open,
+		/** Some digits are extended */
+		partial,
+		/** No digits are extended */
+		closed
+	};
+
 	FistPose();
 
-	/** Fingers are spread out */
-	bool isOpen() const { return open_; }
+	/** Current state */
+	State state() { return state_; }
 
 	/** Current state of the hand */
 	Leap::Hand hand() const { return hand_current_; }
@@ -32,11 +42,11 @@ protected:
 	void track(const Leap::Controller& controller) override;
 
 private:
+	State state_;
 	Leap::Hand hand_current_;
 	Leap::Hand hand_engaged_;
 	Leap::Hand hand_previous_;
 	float max_engage_spd_;
-	bool open_;
 	unsigned frames_tracked_;
 };
 

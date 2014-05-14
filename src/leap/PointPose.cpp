@@ -17,6 +17,7 @@ bool PointPose::shouldEngage(const Leap::Controller& controller)
 
 	const Hand& hand = hands[0];
 	FingerList extended = hand.fingers().extended();
+
 	if (extended.count() != 1 || extended[0].type() != Finger::TYPE_INDEX)
 		return false;
 

@@ -11,8 +11,7 @@
 #include "gl/math/Math.h"
 #include "Histogram.h"
 #include "CLUT.h"
-#include "leap/PointPose2H.h"
-#include "leap/PointPose.h"
+#include "leap/PinchPose.h"
 #include "util/TextRenderer.h"
 #include "gl/util/Draw.h"
 
@@ -42,7 +41,7 @@ private:
     bool lMouseDrag, rMouseDrag;
     VolumeData* volume;
     GLubyte* transfer1DPixels;
-
+	float cursor_center_;
     
     VolumeController* volumeRenderer;
     SliceController* sliceRenderer;
@@ -51,9 +50,9 @@ private:
 	CLUT::Marker* selected_;
 
 	// leap
-	PointPose2H finger_tracker_;
+	PinchPose pinch_pose_;
 	Interval saved_interval_;
-	PointPose one_finger_tracker_;
+	float saved_hand_sep_;
 	gl::Vec2 leap_cursor_;
 
 	// rendering
@@ -80,6 +79,7 @@ private:
 	gl::Draw colorStops;
 
 
+	void editInterval(float center, float width);
 	void moveAndScale(const Leap::Controller& controller);
 
 	void nextCLUT();
