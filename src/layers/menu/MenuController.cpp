@@ -17,7 +17,8 @@ MenuController::MenuController() :
 {
 	point_pose_.engageDelay(std::chrono::milliseconds(0));
 	point_pose_.disengageDelay(std::chrono::milliseconds(0));
-	point_pose_.engageSpeedThreshold(1200);
+	point_pose_.maxHandEngageSpeed(0);
+	point_pose_.minValidFrames(0);
 
 	menuVBO.generateVBO(GL_STATIC_DRAW);
 	menuIBO.generateIBO(GL_STATIC_DRAW);
@@ -123,9 +124,9 @@ int MenuController::calcHighlightedMenu(double radians)
 
 void MenuController::updateLeapPointer(const Leap::Controller& controller, const Leap::Frame& frame)
 {
-	point_pose_.update(controller);
+	point_pose_.update(frame);
 	if (point_pose_.tracking()) {
-		Leap::Finger f = point_pose_.index();
+		Leap::Finger f = point_pose_.pointer();
 		Leap::Vector n = frame.interactionBox().normalizePoint(f.tipPosition());
 		leap.x = n.x * viewport_.width + viewport_.x;
 		leap.y = n.y * viewport_.height + viewport_.y;
@@ -139,12 +140,12 @@ void MenuController::leapMenuClosed(const Leap::Controller& controller, const Le
 		if (g.type() == Leap::Gesture::TYPE_CIRCLE) {
 			Leap::CircleGesture circle(g);
 			bool xyPlane = abs(circle.normal().dot(Leap::Vector(0, 0, 1))) > 0.8f;
-			if (circle.progress() > 1 && xyPlane && circle.radius() > 35.0f) {
+			if (circle.progress() > .75f && xyPlane && circle.radius() > 15.0f) {
 
 				Leap::Hand hand = circle.hands().frontmost();
 				Leap::FingerList fingers = hand.fingers();
 				
-				bool main = fingers.extended().count() < 3;
+				bool main = frame.fingers().extended().count() < 3;
 
 				bool secondary = fingers[Leap::Finger::TYPE_INDEX].isExtended() &&
 					fingers[Leap::Finger::TYPE_THUMB].isExtended() &&

@@ -2,58 +2,54 @@
 
 using namespace Leap;
 
-PointPose::PointPose() :
-	engage_spd_thresh_(50),
-	disengage_spd_thresh_(250)
+PointPose::PointPose(Pose1H::TrackedHand tracked) : Pose1H(tracked)
 {
+	maxHandEngageSpeed(35.0f);
 }
 
-bool PointPose::shouldEngage(const Leap::Controller& controller)
+bool PointPose::shouldEngage(const Leap::Frame& frame)
 {
-	HandList hands = controller.frame().hands();
-
-	if (hands.count() != 1)
+	if (!Pose1H::shouldEngage(frame)) {
 		return false;
+	}
 
-	const Hand& hand = hands[0];
-	FingerList extended = hand.fingers().extended();
+	FingerList extended = hand().fingers().extended();
 
-	if (extended.count() != 1 || extended[0].type() != Finger::TYPE_INDEX)
+	if (extended.count() > 1) {
 		return false;
+	}
 
-	engaged_ = current_ = extended[0];
-
-	if (engaged_.tipVelocity().magnitude() > engage_spd_thresh_)
+	pointer_ = hand().fingers().frontmost();
+	if (!pointer_.isExtended() || !pointer_.isValid()) {
 		return false;
+	}
 
 	return true;
 }
 
-bool PointPose::shouldDisengage(const Leap::Controller& controller)
+bool PointPose::shouldDisengage(const Leap::Frame& frame)
 {
-	HandList hands = controller.frame().hands();
-	if (hands.count() != 1)
+	if (Pose1H::shouldDisengage(frame)) {
 		return true;
+	}
 
-	const Hand& hand = hands[0];
-	FingerList extended = hand.fingers().extended();
-	if (extended.count() != 1 || extended[0].type() != Finger::TYPE_INDEX)
+	pointer_ = frame.finger(pointer_.id());
+	if (!pointer_.isValid()) {
 		return true;
+	}
 
-	current_ = extended[0];
-	if (current_.tipVelocity().z > disengage_spd_thresh_)
+	if (hand().fingers().extended().count() != 1) {
 		return true;
+	}
 
 	return false;
 }
 
-void PointPose::track(const Leap::Controller& controller)
+void PointPose::engage(const Frame& frame)
 {
-	current_ = controller.frame().finger(engaged_.id());
-	PoseTracker::track(controller);
+	pointer_engaged_ = pointer_;
 }
 
-Vector PointPose::posDelta() const
+void PointPose::track(const Leap::Frame& frame)
 {
-	return index().tipPosition() - indexEngaged().tipPosition();
 }

@@ -1,100 +1,61 @@
 #include "PinchPose.h"
 
-using namespace std;
 using namespace Leap;
-using namespace std::chrono;
 
-PinchPose::PinchPose() : state_(State::open), last_pinch_(high_resolution_clock::now())
+PinchPose::PinchPose() : 
+	pinching_(false), 
+	pinch_strength_(0.90f), 
+	release_strength_(0.85f),
+	open_fn_(nullptr),
+	close_fn_(nullptr)
 {
+	minValidFrames(5);
+	maxHandEngageSpeed(175.0f);
 }
 
-bool PinchPose::shouldEngage(const Leap::Controller& controller)
+bool PinchPose::shouldEngage(const Frame& frame)
 {
-	Frame frame = controller.frame();
-	HandList hands = frame.hands();
-
-	if (hands.count() == 0)
+	if (!Pose1H::shouldEngage(frame)) {
 		return false;
+	}
 
-	if (frame.fingers().extended().count() < 3)
+	if (hand().fingers().extended().count() < 3) {
 		return false;
+	}
 
-	state_ = State::open;
+	pinching_ = false;
 	return true;
 }
 
-bool PinchPose::shouldDisengage(const Leap::Controller& controller)
+bool PinchPose::shouldDisengage(const Frame& frame)
 {
-	Frame frame = controller.frame();
-
-	if (frame.hands().count() == 0)
+	if (Pose1H::shouldDisengage(frame)) {
 		return true;
+	}
 
-	if (frame.fingers().extended().count() < 3)
+	if (hand().fingers().extended().count() < 3) {
 		return true;
+	}
 
 	return false;
 }
 
-void PinchPose::track(const Leap::Controller& controller)
+void PinchPose::track(const Frame& frame)
 {
-	Frame frame = controller.frame();
-
-	// left and right hands made invalid, then detected
-	left_ = Hand{};
-	right_ = Hand{};
-	for (const Leap::Hand& hand : frame.hands()) {
-		if (hand.isLeft())
-			left_ = hand;
-		else if (hand.isRight())
-			right_ = hand;
-	}
-
-	State prev_state = state_;
-	bool pinch_left = left_.isValid() && left_.pinchStrength() > 0.9f;
-	bool pinch_right = right_.isValid() && right_.pinchStrength() > 0.9f;
-
-	if (pinch_left && pinch_right) {
-		state_ = State::pinch_both;
-	} else if (pinch_left) {
-		state_ = State::pinch_left;
-		if (prev_state == State::open) {
-			left_pinched_ = left_;
-			last_pinch_ = high_resolution_clock::now();
-		}
-	} else if (pinch_right) {
-		state_ = State::pinch_right;
-		if (prev_state == State::open) {
-			right_pinched_ = right_;
-			auto current_time = high_resolution_clock::now();
-			if (dbl_pinch_fn_){
-				milliseconds time_since_pinch = duration_cast<milliseconds>(current_time - last_pinch_);
-				if (time_since_pinch.count() < 750) {
-					dbl_pinch_fn_(controller);
-				}
+	if (pinching_) {
+		if (hand().confidence() > 0.75f && hand().pinchStrength() <= release_strength_) {
+			pinching_ = false;
+			if (open_fn_) {
+				open_fn_(frame);
 			}
-			last_pinch_ = current_time;
 		}
 	} else {
-		state_ = State::open;
-	}
-
-	if (state_fn_ && state_ != prev_state) {
-		state_fn_(controller, prev_state, state_);
-	}
-
-	PoseTracker::track(controller);
-}
-
-Vector PinchPose::positionStabilized() const
-{
-	if (left_.isValid() && right_.isValid()) {
-		return (left_.stabilizedPalmPosition() + right_.stabilizedPalmPosition()) * 0.5f;
-	} else if (left_.isValid()) {
-		return left_.stabilizedPalmPosition();
-	} else if (right_.isValid()) {
-		return right_.stabilizedPalmPosition();
-	} else {
-		return Vector{};
+		if (hand().confidence() > 0.75f && hand().pinchStrength() >= pinch_strength_) {
+			hand_pinched_ = hand();
+			pinching_ = true;
+			if (close_fn_) {
+				close_fn_(frame);
+			}
+		}
 	}
 }

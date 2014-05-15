@@ -51,7 +51,7 @@ private:
 	void resize() override;
 	void updateTexture();
 
-	void leapScroll(const Leap::Controller& controller);
+	void leapScroll(const Leap::Frame& controller);
 };
 
 #endif /* defined(__medleap__SliceController__) */

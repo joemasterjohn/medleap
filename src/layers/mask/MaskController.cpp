@@ -38,7 +38,7 @@ void MaskController::loseFocus()
 bool MaskController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
 	if (!cam_control_.tracking()) {
-		v_pose_.update(controller);
+		v_pose_.update(frame);
 
 		VolumeController& vc = MainController::getInstance().volumeController();
 		vc.maskColor = { 0.0f, 0.0f, 1.0f };
@@ -62,7 +62,7 @@ bool MaskController::leapInput(const Leap::Controller& controller, const Leap::F
 			vc.maskCenter = center;
 
 
-			if (v_pose_.state() == VPose::State::closed) {
+			if (v_pose_.isClosed()) {
 				vc.maskColor = { 1.0f, 0.0f, 0.0f };
 				MaskVolume::Edit edit = mask_volume_->apply(b, vc.maskTexture, MaskVolume::Operation::sub);
 				if (!edit.empty()) {

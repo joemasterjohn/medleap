@@ -5,32 +5,21 @@ using namespace Leap;
 using namespace std;
 
 VPose::VPose() : 
-	state_(State::open),
-	max_engage_spd_(75.0f),
-	max_separation_(25.0f)
+	closed_(false),
+	max_separation_(25.0f),
+	open_fn_(nullptr),
+	close_fn_(nullptr)
 {
-	engageDelay(std::chrono::milliseconds(150));
+	minValidFrames(5);
+	maxHandEngageSpeed(150.0f);
 }
 
-bool VPose::shouldEngage(const Leap::Controller& controller)
+bool VPose::shouldEngage(const Leap::Frame& frame)
 {
-	Frame frame = controller.frame();
-
-	if (frame.hands().count() != 1)
+	if (!Pose1H::shouldEngage(frame))
 		return false;
 
-	Hand front_hand = frame.hands().frontmost();
-
-	if (!front_hand.isValid())
-		return false;
-
-	if (front_hand.palmVelocity().magnitude() > max_engage_spd_)
-		return false;
-
-	if (front_hand.confidence() < 0.7f)
-		return false;
-
-	FingerList fingers = front_hand.fingers();
+	FingerList fingers = hand().fingers();
 	if (fingers[Finger::TYPE_THUMB].isExtended() ||
 		!fingers[Finger::TYPE_INDEX].isExtended() ||
 		!fingers[Finger::TYPE_MIDDLE].isExtended() ||
@@ -40,25 +29,17 @@ bool VPose::shouldEngage(const Leap::Controller& controller)
 		return false;
 	}
 
-	hand_engaged_ = front_hand;
+	closed_ = false;
 	return true;
 }
 
-bool VPose::shouldDisengage(const Leap::Controller& controller)
+bool VPose::shouldDisengage(const Leap::Frame& frame)
 {
-	Frame frame = controller.frame();
-
-	if (frame.hands().count() == 0)
-		return true;
-
-	hand_current_ = frame.hand(hand_engaged_.id());
-
-	if (!hand_current_.isValid()) {
+	if (Pose1H::shouldDisengage(frame)) {
 		return true;
 	}
 
-	FingerList fingers = hand_current_.fingers();
-
+	FingerList fingers = hand().fingers();
 	if (fingers[Finger::TYPE_THUMB].isExtended() ||
 		!fingers[Finger::TYPE_INDEX].isExtended() ||
 		!fingers[Finger::TYPE_MIDDLE].isExtended() ||
@@ -71,15 +52,19 @@ bool VPose::shouldDisengage(const Leap::Controller& controller)
 	return false;
 }
 
-void VPose::track(const Leap::Controller& controller)
+void VPose::track(const Leap::Frame& frame)
 {
-	hand_current_ = controller.frame().hand(hand_engaged_.id());
-
-	FingerList fingers = hand_current_.fingers();
+	FingerList fingers = hand().fingers();
 	Finger index = fingers[Finger::TYPE_INDEX];
 	Finger middle = fingers[Finger::TYPE_MIDDLE];
 	float dist = (index.tipPosition() - middle.tipPosition()).magnitude();
-	state_ = (dist <= max_separation_) ? State::closed : State::open;
 
-	PoseTracker::track(controller);
+	bool was_closed = closed_;
+	closed_ = (dist <= max_separation_);
+
+	if (open_fn_ && was_closed && !closed_) {
+		open_fn_(frame);
+	} else if (close_fn_ && !was_closed && closed_) {
+		close_fn_(frame);
+	}
 }

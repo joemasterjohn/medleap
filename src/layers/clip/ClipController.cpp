@@ -75,7 +75,7 @@ void ClipController::loseFocus()
 bool ClipController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
 	if (!cam_control_.tracking()) {
-		v_pose_.update(controller);
+		v_pose_.update(frame);
 	}
 
 	if (!v_pose_.tracking()) {
@@ -87,7 +87,7 @@ bool ClipController::leapInput(const Leap::Controller& controller, const Leap::F
 		p = frame.interactionBox().normalizePoint(p);
 		leap_current_ = Vec2(p.x * viewport_.width, p.y * viewport_.width) + Vec2(viewport_.x, viewport_.y);
 
-		if (v_pose_.state() == VPose::State::open) {
+		if (!v_pose_.isClosed()) {
 			leap_start_ = leap_current_;
 		} else {
 			Vector end = v_pose_.hand().stabilizedPalmPosition();
@@ -137,7 +137,7 @@ void ClipController::draw()
 		d.end();
 		d.draw();
 
-		if (v_pose_.state() == VPose::State::closed) {
+		if (v_pose_.isClosed()) {
 			d.color(1, .5f, .5f);
 		} else {
 			d.color(1, 1, .5f);
@@ -152,7 +152,7 @@ void ClipController::draw()
 		d.end();
 		d.draw();
 
-		if (v_pose_.state() == VPose::State::closed) {
+		if (v_pose_.isClosed()) {
 			d.setModelViewProj(viewport_.orthoProjection());
 			d.begin(GL_LINES);
 			d.color(1, 0, 0);

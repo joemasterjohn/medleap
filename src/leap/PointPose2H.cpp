@@ -2,112 +2,91 @@
 
 using namespace Leap;
 
-PointPose2H::PointPose2H() :
-		engage_spd_thresh_(50),
-		disengage_spd_thresh_(250)
+PointPose2H::PointPose2H()
 {
-	engageDelay(std::chrono::milliseconds(250));
+	minValidFrames(5);
+	maxHandEngageSpeed(100.0f);
 }
 
-bool PointPose2H::shouldEngage(const Leap::Controller& controller)
+bool PointPose2H::shouldEngage(const Frame& frame)
 {
-	HandList hands = controller.frame().hands();
-	if (hands.count() != 2)
+	if (!Pose2H::shouldEngage(frame)) {
 		return false;
-
-	if (hands[0].isLeft()) {
-		left_engaged_ = left_current_ = hands[0];
-		right_engaged_ = right_current_ = hands[1];
-	} else {
-		left_engaged_ = left_current_ = hands[1];
-		right_engaged_ = right_current_ = hands[0];
 	}
 
-	FingerList l_extended = left_current_.fingers().extended();
-	if (l_extended.count() != 1 || l_extended[0].type() != Finger::TYPE_INDEX)
+	if (left().fingers().extended().count() > 2) {
 		return false;
+	}
 
-	FingerList r_extended = right_current_.fingers().extended();
-	if (r_extended.count() != 1 || r_extended[0].type() != Finger::TYPE_INDEX)
+	if (right().fingers().extended().count() > 2) {
 		return false;
+	}
 
-	if (leftIndex().tipVelocity().magnitude() > engage_spd_thresh_)
+	left_pointer_ = left().fingers().frontmost();
+	if (!left_pointer_.isExtended() || !left_pointer_.isValid()) {
 		return false;
+	}
 
-	if (rightIndex().tipVelocity().magnitude() > engage_spd_thresh_)
+	right_pointer_ = right().fingers().frontmost();
+	if (!right_pointer_.isExtended() || !right_pointer_.isValid()) {
 		return false;
+	}
 
 	return true;
 }
 
-bool PointPose2H::shouldDisengage(const Leap::Controller& controller)
+bool PointPose2H::shouldDisengage(const Frame& frame)
 {
-	Frame frame = controller.frame();
-	HandList hands = frame.hands();
-
-	if (hands.count() != 2)
+	if (Pose2H::shouldDisengage(frame)) {
 		return true;
+	}
 
-	FingerList l_extended = left_current_.fingers().extended();
-	if (l_extended.count() != 1 || l_extended[0].type() != Finger::TYPE_INDEX)
+	left_pointer_prev_ = left_pointer_;
+	left_pointer_ = frame.finger(left_pointer_.id());
+	if (!left_pointer_.isValid()) {
 		return true;
+	}
 
-	FingerList r_extended = right_current_.fingers().extended();
-	if (r_extended.count() != 1 || r_extended[0].type() != Finger::TYPE_INDEX)
+	if (left().fingers().extended().count() > 2) {
 		return true;
+	}
 
-	// may be better to use velocity perp. to hand axis, not to camera
-	if (leftIndex().tipVelocity().z > disengage_spd_thresh_)
+	right_pointer_prev_ = right_pointer_;
+	right_pointer_ = frame.finger(right_pointer_.id());
+	if (!right_pointer_.isValid()) {
 		return true;
+	}
 
-	if (rightIndex().tipVelocity().z > disengage_spd_thresh_)
+	if (right().fingers().extended().count() > 2) {
 		return true;
+	}
 
 	return false;
 }
 
-void PointPose2H::track(const Leap::Controller& controller)
+void PointPose2H::engage(const Frame& frame)
 {
-	Frame frame = controller.frame();
-	left_current_ = frame.hand(left_engaged_.id());
-	right_current_ = frame.hand(right_engaged_.id());
-	PoseTracker::track(controller);
-}
-
-float PointPose2H::fingerGap() const
-{
-	Vector l = leftIndex().tipPosition();
-	Vector r = rightIndex().tipPosition();
-	return (l - r).magnitude();
-}
-
-float PointPose2H::fingerGapEngaged() const
-{
-	Vector l = leftIndexEngaged().tipPosition();
-	Vector r = rightIndexEngaged().tipPosition();
-	return (l - r).magnitude();
-}
-
-float PointPose2H::fingerGapDelta() const
-{
-	return fingerGap() - fingerGapEngaged();
+	left_pointer_prev_ = left_pointer_;
+	left_pointer_engaged_ = left_pointer_;
+	right_pointer_prev_ = right_pointer_;
+	right_pointer_engaged_ = right_pointer_;
 }
 
 Vector PointPose2H::center() const
 {
-	Vector l = leftIndex().tipPosition();
-	Vector r = rightIndex().tipPosition();
-	return (l + r) / 2.0f;
+	return (left_pointer_.tipPosition() + right_pointer_.tipPosition()) * 0.5f;
 }
 
-Vector PointPose2H::centerEngaged() const
+Vector PointPose2H::deltaCenter() const
 {
-	Vector l = leftIndexEngaged().tipPosition();
-	Vector r = rightIndexEngaged().tipPosition();
-	return (l + r) / 2.0f;
+	Vector curr_c = (left_pointer_.tipPosition() + right_pointer_.tipPosition()) * 0.5f;
+	Vector prev_c = (left_pointer_prev_.tipPosition() + right_pointer_prev_.tipPosition()) * 0.5f;
+	return curr_c - prev_c;
 }
 
-Vector PointPose2H::centerDelta() const
+Vector PointPose2H::deltaCenterEngaged() const
 {
-	return center() - centerEngaged();
+	Vector curr_c = (left_pointer_.tipPosition() + right_pointer_.tipPosition()) * 0.5f;
+	Vector engd_c = (left_pointer_engaged_.tipPosition() + right_pointer_engaged_.tipPosition()) * 0.5f;
+	return curr_c - engd_c;
 }

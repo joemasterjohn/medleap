@@ -22,8 +22,8 @@ private:
 	Camera old_camera_;
 	bool tracking_;
 
-	void grab(const Leap::Controller& controller);
-	void release(const Leap::Controller& controller);
+	void grab(const Leap::Frame& controller);
+	void release(const Leap::Frame& controller);
 };
 
 #endif

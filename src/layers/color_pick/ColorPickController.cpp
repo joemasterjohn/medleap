@@ -35,7 +35,7 @@ ColorPickController::ColorPickController() :
 
 	text_.loadFont("menlo14");
 
-	l_pose_.closeFunction([&](const Leap::Controller& c){ 
+	l_pose_.closeFn([&](const Leap::Frame& c){ 
 		chooseState(m_leap_cursor.x, m_leap_cursor.y);
 	});
 }
@@ -123,16 +123,16 @@ bool ColorPickController::mouseButton(GLFWwindow* window, int button, int action
 	return false;
 }
 
-bool ColorPickController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
+bool ColorPickController::leapInput(const Leap::Controller& leapController, const Leap::Frame& frame)
 {
-	l_pose_.update(leapController);
+	l_pose_.update(frame);
 	if (l_pose_.tracking()) {
-		Vector v = l_pose_.index().stabilizedTipPosition();
-		v = currentFrame.interactionBox().normalizePoint(v);
+		Vector v = l_pose_.pointer().stabilizedTipPosition();
+		v = frame.interactionBox().normalizePoint(v);
 		m_leap_cursor.x = viewport_.x + viewport_.width * v.x;
 		m_leap_cursor.y = viewport_.y + viewport_.height * v.y;
 
-		if (l_pose_.state() == LPose::State::closed) {
+		if (l_pose_.isClosed()) {
 			updateState(m_leap_cursor.x, m_leap_cursor.y);
 		} else {
 			state_ = State::idle;

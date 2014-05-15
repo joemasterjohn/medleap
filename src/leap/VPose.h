@@ -1,59 +1,48 @@
-#ifndef __MEDLEAP_CUT_TRACKER_H__
-#define __MEDLEAP_CUT_TRACKER_H__
+#ifndef __LEAP_POSES_V_H__
+#define __LEAP_POSES_V_H__
 
-#include "PoseTracker.h"
-#include <vector>
+#include "Pose1H.h"
 
 /** Index and middle finger open/close pose. */
-class VPose  : public PoseTracker
+class VPose  : public Pose1H
 {
 public:
-	enum class State
-	{
-		open,
-		closed
-	};
-
 	VPose();
 
-	/** Pose state */
-	State state() const { return state_; }
-
-	/** Current hand state */
-	Leap::Hand hand() const { return hand_current_; }
-
-	/** Hand state when engaged */
-	Leap::Hand handEngaged() const { return hand_engaged_; }
+	/** Fingers are together */
+	bool isClosed() const { return closed_; }
 
 	/** Current index finger state */
-	Leap::Finger index() const { return hand_current_.fingers()[Leap::Finger::TYPE_INDEX]; }
+	Leap::Finger index() const { return hand().fingers()[Leap::Finger::TYPE_INDEX]; }
 
 	/** Index finger state when engaged */
-	Leap::Finger indexEngaged() const { return hand_engaged_.fingers()[Leap::Finger::TYPE_INDEX]; }
+	Leap::Finger indexEngaged() const { return handEngaged().fingers()[Leap::Finger::TYPE_INDEX]; }
 
 	/** Current middle finger state */
-	Leap::Finger middle() const { return hand_current_.fingers()[Leap::Finger::TYPE_MIDDLE]; }
+	Leap::Finger middle() const { return hand().fingers()[Leap::Finger::TYPE_MIDDLE]; }
 
 	/** Middle finger state when engaged */
-	Leap::Finger middleEngaged() const  { return hand_engaged_.fingers()[Leap::Finger::TYPE_MIDDLE]; }
+	Leap::Finger middleEngaged() const  { return handEngaged().fingers()[Leap::Finger::TYPE_MIDDLE]; }
 
-	/** Set greatest palm speed that is allowed for tracking to engage */
-	void maxEngageSpeed(float speed) { max_engage_spd_ = speed; }
-
-	/** Set millimeters between index and middle fingers above which fingers are considered open. */
+	/** Millimeters between index and middle fingers above which fingers are considered open. */
 	void maxSeparation(float separation) { max_separation_ = separation; }
 
+	/** Callback for when fingers separate */
+	void openFn(std::function<void(const Leap::Frame&)> fn) { open_fn_ = fn; }
+
+	/** Callback for when fingers close */
+	void closeFn(std::function<void(const Leap::Frame&)> fn) { close_fn_ = fn; }
+
 protected:
-	bool shouldEngage(const Leap::Controller& controller) override;
-	bool shouldDisengage(const Leap::Controller& controller) override;
-	void track(const Leap::Controller& controller) override;
+	bool shouldEngage(const Leap::Frame& frame) override;
+	bool shouldDisengage(const Leap::Frame& frame) override;
+	void track(const Leap::Frame& frame) override;
 
 private:
-	State state_;
-	float max_engage_spd_;
+	bool closed_;
 	float max_separation_;
-	Leap::Hand hand_engaged_;
-	Leap::Hand hand_current_;
+	std::function<void(const Leap::Frame&)> open_fn_;
+	std::function<void(const Leap::Frame&)> close_fn_;
 };
 
 #endif

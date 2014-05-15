@@ -72,9 +72,9 @@ void LeapCameraControl::update(const Leap::Controller& controller)
 	//vc.markDirty();
 
 
-	fist_pose_.update(controller);
+	fist_pose_.update(controller.frame());
 
-	if (fist_pose_.tracking() && fist_pose_.framesTracked() > 1) {
+	if (fist_pose_.tracking()) {
 
 		if (fist_pose_.state() == FistPose::State::open) {
 
@@ -116,7 +116,7 @@ void LeapCameraControl::update(const Leap::Controller& controller)
 	}
 }
 
-void LeapCameraControl::grab(const Leap::Controller& controller)
+void LeapCameraControl::grab(const Leap::Frame& controller)
 {
 	Camera& camera = MainController::getInstance().volumeController().getCamera();
 	old_view_ = camera.getView();
@@ -132,7 +132,7 @@ void LeapCameraControl::grab(const Leap::Controller& controller)
 	//std::cout << std::endl;
 }
 
-void LeapCameraControl::release(const Leap::Controller& controller)
+void LeapCameraControl::release(const Leap::Frame& controller)
 {
 
 }

@@ -1,40 +1,25 @@
-#ifndef __MEDLEAP_ONE_FINGER_TRACKER_H__
-#define __MEDLEAP_ONE_FINGER_TRACKER_H__
+#ifndef __LEAP_POSES_POINT_H__
+#define __LEAP_POSES_POINT_H__
 
-#include "PoseTracker.h"
-#include <functional>
+#include "Pose1H.h"
 
-/** Leap tracker that tracks a one-finger pose. */
-class PointPose  : public PoseTracker
+class PointPose  : public Pose1H
 {
 public:
-	PointPose();
+	PointPose(Pose1H::TrackedHand hand = Pose1H::TrackedHand::first);
 
-	/** Current state of index finger */
-	Leap::Finger index() const { return current_; }
-
-	/** State of index finger when engaged */
-	Leap::Finger indexEngaged() const { return engaged_; }
-
-	/** Difference of current finger position and position when tracking engaged */
-	Leap::Vector posDelta() const;
-
-	/** Max speed fingers can be moving and have tracking engage */
-	void engageSpeedThreshold(float speed) { engage_spd_thresh_ = speed; }
-
-	/** Max speed fingers can move before tracking will disengage */
-	void disengageSpeedThreshold(float speed) { disengage_spd_thresh_ = speed; }
+	const Leap::Finger& pointer() const { return pointer_; }
+	const Leap::Finger& pointerEngaged() const { return pointer_engaged_; }
 
 protected:
-	bool shouldEngage(const Leap::Controller& controller) override;
-	bool shouldDisengage(const Leap::Controller& controller) override;
-	void track(const Leap::Controller& controller) override;
+	bool shouldEngage(const Leap::Frame& frame) override;
+	bool shouldDisengage(const Leap::Frame& frame) override;
+	void engage(const Leap::Frame& frame) override;
+	void track(const Leap::Frame& frame) override;
 
 private:
-	Leap::Finger engaged_;
-	Leap::Finger current_;
-	float engage_spd_thresh_;
-	float disengage_spd_thresh_;
+	Leap::Finger pointer_;
+	Leap::Finger pointer_engaged_;
 };
 
 #endif

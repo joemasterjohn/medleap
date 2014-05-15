@@ -100,31 +100,34 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 	cluts[activeCLUT].saveTexture(clutTexture);
 
-	pinch_pose_.stateFunction([&](const Leap::Controller& c, PinchPose::State prev_state, PinchPose::State state) {
-		if (prev_state == PinchPose::State::open && (state == PinchPose::State::pinch_left || state == PinchPose::State::pinch_right)) {
+	pinch_pose_.closeFn([&](const Leap::Frame&){
+		if (pinch_pose_.isPinching()) {
 			cout << "PINCH" << endl;
 			selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
 			saved_interval_ = selected_->interval();
-		} else if (state == PinchPose::State::open) {
+		} else {
 			cout << "RELEASE" << endl;
 			selected_ = nullptr;
-		} else if (state == PinchPose::State::pinch_both) {
-			selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
-			saved_interval_ = selected_->interval();
-			Leap::Vector l = pinch_pose_.left().stabilizedPalmPosition();
-			Leap::Vector r = pinch_pose_.right().stabilizedPalmPosition();
-			saved_hand_sep_ = (l - r).magnitude() / 200.0f;;
 		}
 	});
 
-	pinch_pose_.doublePinchFunction([&](const Leap::Controller& c){
-		selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
-		auto cb = [&](const Color& color) {
-			selected_->color(color);
-			cluts[activeCLUT].saveTexture(clutTexture);
-			volumeRenderer->markDirty();
-		};
-		MainController::getInstance().pickColor(selected_->color(), cb);
+	l_pose_.minValidFrames(5);
+	l_pose_.clickFn([&](const Leap::Frame&) {
+
+		Interval interval(cursor_center_, 0.2f);
+		ColorRGB marker_color{ .5f, .5f, .5f, 1.0f };
+		cluts[activeCLUT].addMarker(CLUT::Marker({ interval, marker_color }));
+		cluts[activeCLUT].saveTexture(clutTexture);
+		volumeRenderer->markDirty();
+		//selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
+		//auto cb = [&](const Color& color) {
+		//	selected_->color(color);
+		//	cluts[activeCLUT].saveTexture(clutTexture);
+		//	volumeRenderer->markDirty();
+		//	l_pose_.tracking(false);
+		//};
+
+		//MainController::getInstance().pickColor(selected_->color(), cb);
 	});
 }
 
@@ -337,36 +340,43 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 	return true;
 }
 
-bool Transfer1DController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
+bool Transfer1DController::leapInput(const Leap::Controller& leapController, const Leap::Frame& frame)
 {
 	using namespace Leap;
 
-	pinch_pose_.update(leapController);
+	l_pose_.update(frame);
+	if (l_pose_.tracking()) {
+		InteractionBox ib = frame.interactionBox();
+		Vector v = ib.normalizePoint(l_pose_.pointer().stabilizedTipPosition());
+		cursor_center_ = v.x;
+		leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height) + Vec2(viewport_.x, viewport_.y);
+
+		return false;
+	}
+
+	pinch_pose_.update(frame);
 
 	if (pinch_pose_.tracking()) {
-		Vector v = currentFrame.interactionBox().normalizePoint(pinch_pose_.right().stabilizedPalmPosition());
+		InteractionBox ib = frame.interactionBox();
+
+		Vector v = ib.normalizePoint(pinch_pose_.hand().stabilizedPalmPosition());
 
 		cursor_center_ = v.x;
 		leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height) + Vec2(viewport_.x, viewport_.y);
 
-		InteractionBox ib = currentFrame.interactionBox();
-		Vector l = ib.normalizePoint(pinch_pose_.right().stabilizedPalmPosition()) - ib.normalizePoint(pinch_pose_.rightPinched().stabilizedPalmPosition());
+		Vector l = ib.normalizePoint(pinch_pose_.hand().stabilizedPalmPosition()) - ib.normalizePoint(pinch_pose_.handPinched().stabilizedPalmPosition());
 
 		float width = saved_interval_.width() + l.y;
 
-
 		if (selected_){
-			switch (pinch_pose_.state()) {
-			case PinchPose::State::pinch_left:
-			case PinchPose::State::pinch_right:
+			if (pinch_pose_.isPinching()) {
 				editInterval(cursor_center_, width);
-				break;
 			}
 		}
 	}
 
 	static auto lastSwipe = std::chrono::system_clock::now();
-	Leap::GestureList gestures = currentFrame.gestures();
+	Leap::GestureList gestures = frame.gestures();
 	for (Leap::Gesture g : gestures) {
 		if (g.type() == Leap::Gesture::TYPE_SWIPE) {
 
@@ -443,7 +453,7 @@ void Transfer1DController::draw()
 
 	viewport_.apply();
 
-	if (pinch_pose_.tracking()) {
+	if (pinch_pose_.tracking() || l_pose_.tracking()) {
 		Draw& d = MainController::getInstance().draw();
 		d.setModelViewProj(viewport_.orthoProjection());
 		d.begin(GL_LINES);

@@ -8,7 +8,6 @@ using namespace Leap;
 
 FocusController::FocusController()
 {
-	point_pose_.engageSpeedThreshold(50.0f);
 }
 
 void FocusController::gainFocus()
@@ -23,7 +22,6 @@ void FocusController::loseFocus()
 
 bool FocusController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
-	point_pose_.update(controller);
 
 
 

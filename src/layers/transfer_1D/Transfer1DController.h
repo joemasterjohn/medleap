@@ -12,6 +12,8 @@
 #include "Histogram.h"
 #include "CLUT.h"
 #include "leap/PinchPose.h"
+#include "leap/LPose.h"
+#include "leap/PointPose2H.h"
 #include "util/TextRenderer.h"
 #include "gl/util/Draw.h"
 
@@ -28,6 +30,7 @@ public:
 	bool leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame) override;
 	std::set<Leap::Gesture::Type> requiredGestures() override;
 	std::unique_ptr<Menu> contextMenu() override;
+
 
 	void gainFocus() override;
 	void loseFocus() override;
@@ -51,6 +54,8 @@ private:
 
 	// leap
 	PinchPose pinch_pose_;
+	LPose l_pose_;
+	PointPose2H point_2_pose_;
 	Interval saved_interval_;
 	float saved_hand_sep_;
 	gl::Vec2 leap_cursor_;

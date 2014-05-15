@@ -1,91 +1,99 @@
 #include "LPose.h"
 
 using namespace Leap;
+using namespace std::chrono;
 
 LPose::LPose() :
-	state_(State::open),
-	open_function_(nullptr),
-	close_function_(nullptr)
+	closed_(false),
+	last_close_(high_resolution_clock::now()),
+	open_fn_(nullptr),
+	close_fn_(nullptr)
 {
+	maxHandEngageSpeed(35.0f);
 }
 
-bool LPose::shouldEngage(const Leap::Controller& controller)
+bool LPose::shouldEngage(const Frame& frame)
 {
-	Frame frame = controller.frame();
-
-	if (frame.hands().count() != 1)
-		return false;
-
-	Hand front_hand = frame.hands().frontmost();
-
-	if (!front_hand.isValid())
-		return false;
-
-	FingerList fingers = front_hand.fingers();
-	if (!fingers[Finger::TYPE_THUMB].isExtended() ||
-		!fingers[Finger::TYPE_INDEX].isExtended() ||
-		fingers[Finger::TYPE_MIDDLE].isExtended() ||
-		fingers[Finger::TYPE_RING].isExtended() ||
-		fingers[Finger::TYPE_PINKY].isExtended())
-	{
+	if (!Pose1H::shouldEngage(frame)) {
 		return false;
 	}
 
-	hand_engaged_ = hand_current_ = front_hand;
+	FingerList fingers = hand().fingers();
+
+	thumb_ = fingers[Finger::TYPE_THUMB];
+	if (!thumb_.isExtended()) {
+		return false;
+	}
+
+	// prefer index finger as pointer over middle finger
+	pointer_ = Finger{};
+	if (fingers[Finger::TYPE_INDEX].isExtended()) {
+		pointer_ = fingers[Finger::TYPE_INDEX];
+	} else if (fingers[Finger::TYPE_MIDDLE].isExtended()) {
+		pointer_ = fingers[Finger::TYPE_MIDDLE];
+	}
+
+	if (!pointer_.isValid()) {
+		return false;
+	}
+
+	if (fingers[Finger::TYPE_RING].isExtended() || fingers[Finger::TYPE_PINKY].isExtended()) {
+		return false;
+	}
+
 	return true;
 }
 
-bool LPose::shouldDisengage(const Leap::Controller& controller)
+bool LPose::shouldDisengage(const Frame& frame)
 {
-	Frame frame = controller.frame();
-
-	if (frame.hands().count() != 1)
+	if (Pose1H::shouldDisengage(frame)) {
 		return true;
+	}
 
-	hand_current_ = frame.hand(hand_current_.id());
-	if (!hand_current_.isValid())
+	FingerList fingers = hand().fingers();
+
+	if (fingers[Finger::TYPE_RING].isExtended()) {
 		return true;
+	}
 
-	FingerList fingers = hand_current_.fingers();
-
-	// it is intentional I'm not checking thumb: it could be
-	// perceived as not extended when tucked into hand
-	if (!fingers[Finger::TYPE_INDEX].isExtended() ||
-		fingers[Finger::TYPE_MIDDLE].isExtended() ||
-		fingers[Finger::TYPE_RING].isExtended() ||
-		fingers[Finger::TYPE_PINKY].isExtended())
-	{
+	if (fingers[Finger::TYPE_PINKY].isExtended()) {
 		return true;
 	}
 
 	return false;
 }
 
-void LPose::track(const Leap::Controller& controller)
+void LPose::track(const Frame& frame)
 {
-	Frame frame = controller.frame();
-	hand_current_ = frame.hand(hand_current_.id());
-
-	Finger index = hand_current_.fingers()[Finger::TYPE_INDEX];
-	Finger thumb = hand_current_.fingers()[Finger::TYPE_THUMB];
+	pointer_ = frame.finger(pointer_.id());
+	thumb_ = frame.finger(thumb_.id());
 
 	// consider angle in XZ plane only
-	Vector u = index.direction();
+	Vector u = pointer_.direction();
 	u.y = 0;
 	u = u.normalized();
-	Vector v = thumb.direction();
+	Vector v = thumb_.direction();
 	v.y = 0;
 	v = v.normalized();
 	float angle = u.angleTo(v);
 
-	State prev = state_;
-	state_ = (angle > 0.3f) ? State::open : State::closed;
+	bool was_closed = closed_;
+	closed_ = (angle <= 0.3f);
 
-	if (prev == State::open && state_ == State::closed && close_function_) {
-		close_function_(controller);
-	} else if (prev == State::closed && state_ == State::open && open_function_) {
-		open_function_(controller);
+	if (hand().confidence() > 0.75f && was_closed && !closed_) {
+		if (open_fn_) {
+			open_fn_(frame);
+		}
+		if (click_fn_) {
+			auto elapsed = duration_cast<milliseconds>(high_resolution_clock::now() - last_close_);
+			if (elapsed.count() < 200.0f) {
+				click_fn_(frame);
+			}
+		}
+	} else if (hand().confidence() > 0.75f && !was_closed && closed_) {
+		if (close_fn_) {
+			close_fn_(frame);
+		}
+		last_close_ = high_resolution_clock::now();
 	}
-
-	PoseTracker::track(controller);
 }
