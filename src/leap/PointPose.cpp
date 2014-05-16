@@ -47,6 +47,7 @@ bool PointPose::shouldDisengage(const Leap::Frame& frame)
 
 void PointPose::engage(const Frame& frame)
 {
+	Pose1H::engage(frame);
 	pointer_engaged_ = pointer_;
 }
 

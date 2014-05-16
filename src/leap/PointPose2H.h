@@ -15,9 +15,20 @@ public:
 	const Leap::Finger& rightPointerPrevious() const { return right_pointer_prev_; }
 	const Leap::Finger& rightPointerEngaged() const { return right_pointer_engaged_; }
 
-	Leap::Vector center() const;
-	Leap::Vector deltaCenter() const;
-	Leap::Vector deltaCenterEngaged() const;
+	/** Average of both pointer positions */
+	Leap::Vector fingerCenter(bool stabilized = false) const;
+
+	/** Average of pointer positions from previous frame */
+	Leap::Vector fingerCenterPrevious(bool stabilized = false) const;
+
+	/** Average of pointer positions when engaged */
+	Leap::Vector fingerCenterEngaged(bool stabilized = false) const;
+
+	/** Difference in current pointer center and pointer center from previous frame */
+	Leap::Vector fingerCenterDelta(bool stabilized = false) const;
+
+	/** Difference in current pointer center and pointer center when engaged */
+	Leap::Vector fingerCenterDeltaEngaged(bool stabilized = false) const;
 
 protected:
 	bool shouldEngage(const Leap::Frame& frame) override;

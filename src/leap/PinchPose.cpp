@@ -23,6 +23,10 @@ bool PinchPose::shouldEngage(const Frame& frame)
 		return false;
 	}
 
+	if (hand().grabStrength() > 0.25f) {
+		return false;
+	}
+
 	pinching_ = false;
 	return true;
 }
@@ -34,6 +38,10 @@ bool PinchPose::shouldDisengage(const Frame& frame)
 	}
 
 	if (hand().fingers().extended().count() < 3) {
+		return true;
+	}
+
+	if (hand().grabStrength() > 0.25f) {
 		return true;
 	}
 

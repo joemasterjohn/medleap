@@ -85,10 +85,27 @@ void Pose1H::engage(const Frame& frame)
 	hand_previous_ = hand_;
 }
 
-void Pose1H::disengage(const Frame& frame)
+Vector Pose1H::handPosition(bool stabilized) const
 {
+	return stabilized ? hand_.stabilizedPalmPosition() : hand_.palmPosition();
 }
 
-void Pose1H::track(const Frame& frame)
+Vector Pose1H::handPositionEngaged(bool stabilized) const
 {
+	return stabilized ? hand_engaged_.stabilizedPalmPosition() : hand_engaged_.palmPosition();
+}
+
+Vector Pose1H::handPositionPrevious(bool stabilized) const
+{
+	return stabilized ? hand_previous_.stabilizedPalmPosition() : hand_previous_.palmPosition();
+}
+
+Vector Pose1H::handPositionDeltaEngaged(bool stabilized) const
+{
+	return handPosition(stabilized) - handPositionEngaged(stabilized);
+}
+
+Vector Pose1H::handPositionDelta(bool stabilized) const
+{
+	return handPosition(stabilized) - handPositionPrevious(stabilized);
 }

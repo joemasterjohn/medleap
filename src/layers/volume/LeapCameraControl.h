@@ -3,7 +3,7 @@
 
 #include "Leap.h"
 #include "leap/FistPose.h"
-#include "leap/PointPose2H.h"
+#include "leap/CarryPose.h"
 #include "gl/math/Math.h"
 #include "util/Camera.h"
 
@@ -11,13 +11,13 @@ class LeapCameraControl
 {
 public:
 	LeapCameraControl();
-	void update(const Leap::Controller& controller);
+	void update(const Leap::Controller& controller, const Leap::Frame& frame);
 
 	bool tracking() const { return tracking_; }
 
 private:
 	FistPose fist_pose_;
-	PointPose2H point_pose_;
+	CarryPose carry_pose_;
 	gl::Mat4 old_view_;
 	Camera old_camera_;
 	bool tracking_;

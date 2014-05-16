@@ -268,7 +268,7 @@ bool VolumeController::scroll(GLFWwindow* window, double dx, double dy)
 
 bool VolumeController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
-	leap_cam_control_.update(leapController);
+	leap_cam_control_.update(leapController, currentFrame);
 
 	return false;
 }

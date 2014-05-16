@@ -129,6 +129,12 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 		//MainController::getInstance().pickColor(selected_->color(), cb);
 	});
+
+	point_2_pose_.disengageOnExit(true);
+	point_2_pose_.exitSpeed(300.0f);
+	point_2_pose_.engageFunction([&](const Leap::Frame&){
+		saved_interval_ = cluts[activeCLUT].interval();
+	});
 }
 
 Transfer1DController::~Transfer1DController()
@@ -344,6 +350,20 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 {
 	using namespace Leap;
 
+	point_2_pose_.update(frame);
+	if (point_2_pose_.tracking()) {
+		float c = saved_interval_.center() + point_2_pose_.handsCenterDeltaEngaged(true).x / 400.0f;
+		cluts[activeCLUT].interval().center(c);
+
+		float delta_width = point_2_pose_.handsSeparationDeltaEngaged(true);
+		float w = std::max(0.0f, saved_interval_.width() + delta_width / 400.0f);
+		cluts[activeCLUT].interval().width(w);
+
+		cluts[activeCLUT].saveTexture(clutTexture);
+		volumeRenderer->markDirty();
+		return false;
+	}
+
 	l_pose_.update(frame);
 	if (l_pose_.tracking()) {
 		InteractionBox ib = frame.interactionBox();
@@ -373,7 +393,10 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 				editInterval(cursor_center_, width);
 			}
 		}
+		return false;
 	}
+
+	camera_control_.update(leapController, frame);
 
 	static auto lastSwipe = std::chrono::system_clock::now();
 	Leap::GestureList gestures = frame.gestures();

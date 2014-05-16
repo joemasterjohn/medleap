@@ -5,6 +5,7 @@
 #include "data/VolumeData.h"
 #include "layers/volume/VolumeController.h"
 #include "layers/slice/SliceController.h"
+#include "layers/volume/LeapCameraControl.h"
 #include "gl/Texture.h"
 #include "gl/Program.h"
 #include "gl/Buffer.h"
@@ -53,6 +54,7 @@ private:
 	CLUT::Marker* selected_;
 
 	// leap
+	LeapCameraControl camera_control_;
 	PinchPose pinch_pose_;
 	LPose l_pose_;
 	PointPose2H point_2_pose_;

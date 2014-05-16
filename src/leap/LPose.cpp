@@ -50,6 +50,10 @@ bool LPose::shouldDisengage(const Frame& frame)
 		return true;
 	}
 
+	if (!pointer_.isValid() || !pointer_.isExtended()) {
+		return true;
+	}
+
 	FingerList fingers = hand().fingers();
 
 	if (fingers[Finger::TYPE_RING].isExtended()) {

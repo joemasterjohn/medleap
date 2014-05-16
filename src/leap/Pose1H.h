@@ -37,12 +37,25 @@ public:
 	/** Maximum speed hand can be moving in mm/sec to engage. Use speed <= 0 for any speed. */
 	void maxHandEngageSpeed(float speed) { max_hand_engage_speed_ = speed; }
 
+	/** Current palm position */
+	Leap::Vector handPosition(bool stabilized = false) const;
+
+	/** Average of palm positions from previous frame */
+	Leap::Vector handPositionPrevious(bool stabilized = false) const;
+
+	/** Average of palm positions when engaged */
+	Leap::Vector handPositionEngaged(bool stabilized = false) const;
+
+	/** Difference in current hands center and hands center from previous frame */
+	Leap::Vector handPositionDelta(bool stabilized = false) const;
+
+	/** Difference in current hands center and hands center when engaged */
+	Leap::Vector handPositionDeltaEngaged(bool stabilized = false) const;
+
 protected:
 	virtual bool shouldEngage(const Leap::Frame& frame) override;
 	virtual bool shouldDisengage(const Leap::Frame& frame) override;
 	virtual void engage(const Leap::Frame& frame) override;
-	virtual void disengage(const Leap::Frame& frame) override;
-	virtual void track(const Leap::Frame& frame) override;
 
 private:
 	TrackedHand tracked_;

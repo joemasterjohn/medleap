@@ -79,7 +79,7 @@ bool MaskController::leapInput(const Leap::Controller& controller, const Leap::F
 	}
 
 	if (!v_pose_.tracking()) {
-		cam_control_.update(controller);
+		cam_control_.update(controller, frame);
 	}
 
 
