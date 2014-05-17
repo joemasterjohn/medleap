@@ -95,6 +95,7 @@ void LPose::track(const Frame& frame)
 			}
 		}
 	} else if (hand().confidence() > 0.75f && !was_closed && closed_) {
+		pointer_closed_ = pointer_;
 		if (close_fn_) {
 			close_fn_(frame);
 		}

@@ -115,7 +115,6 @@ bool ClipController::leapInput(const Leap::Controller& controller, const Leap::F
 		}
 	}
 
-	//grab_tracker_.update(controller);
 
 	return false;
 }

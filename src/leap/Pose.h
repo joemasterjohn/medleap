@@ -26,6 +26,12 @@ public:
 	/** Manually toggles tracking */
 	void tracking(bool tracking);
 
+	/** Updates are processed */
+	bool enabled() const { return enabled_; }
+
+	/** Toggles blocking of updates */
+	void enabled(bool enabled);
+
 	/** Number of frames tracking has been active */
 	uint64_t frames() const { return frames_tracked_; }
 
@@ -64,6 +70,7 @@ protected:
 	virtual void track(const Leap::Frame& frame);
 
 private:
+	bool enabled_;
 	bool tracking_;
 	uint64_t min_valid_frames_;
 	uint64_t valid_frames_;

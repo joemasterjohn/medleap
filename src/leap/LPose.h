@@ -20,6 +20,8 @@ public:
 	/** Current state of pointer finger (index or middle possibly) */
 	const Leap::Finger& pointer() const { return pointer_; }
 
+	const Leap::Finger& pointerClosed() const { return pointer_closed_; }
+
 	/** Current state of thumb */
 	const Leap::Finger& thumb() const { return thumb_; }
 
@@ -39,6 +41,7 @@ protected:
 private:
 	bool closed_;
 	Leap::Finger pointer_;
+	Leap::Finger pointer_closed_;
 	Leap::Finger thumb_;
 	std::chrono::high_resolution_clock::time_point last_close_;
 	std::function<void(const Leap::Frame&)> open_fn_;

@@ -21,6 +21,7 @@
 class Transfer1DController : public Controller
 {
 public:
+
     Transfer1DController();
     ~Transfer1DController();
     void setVolume(VolumeData* volume);
@@ -61,6 +62,7 @@ private:
 	Interval saved_interval_;
 	float saved_hand_sep_;
 	gl::Vec2 leap_cursor_;
+	bool leap_drag_performed_;
 
 	// rendering
 	TextRenderer text;

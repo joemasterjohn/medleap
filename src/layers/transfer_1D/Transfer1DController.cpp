@@ -8,6 +8,7 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 {
     lMouseDrag = false;
     rMouseDrag = false;
+	leap_drag_performed_ = false;
 	selected_ = nullptr;
     
 	volumeRenderer = NULL;
@@ -100,34 +101,34 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 	cluts[activeCLUT].saveTexture(clutTexture);
 
+	pinch_pose_.openFn([&](const Leap::Frame&){leap_drag_performed_ = false; });
+	pinch_pose_.disengageFunction([&](const Leap::Frame&){leap_drag_performed_ = false; });
 	pinch_pose_.closeFn([&](const Leap::Frame&){
 		if (pinch_pose_.isPinching()) {
-			cout << "PINCH" << endl;
 			selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
-			saved_interval_ = selected_->interval();
+			if (abs(selected_->interval().center() - cursor_center_) < 0.05f) {
+				saved_interval_ = selected_->interval();
+				std::cout << "SELECT" << std::endl;
+			} else {
+				selected_ = nullptr;
+			}
 		} else {
-			cout << "RELEASE" << endl;
 			selected_ = nullptr;
 		}
 	});
 
 	l_pose_.minValidFrames(5);
+	l_pose_.openFn([&](const Leap::Frame&){leap_drag_performed_ = false; });
+	l_pose_.disengageFunction([&](const Leap::Frame&){leap_drag_performed_ = false; });
 	l_pose_.clickFn([&](const Leap::Frame&) {
-
-		Interval interval(cursor_center_, 0.2f);
-		ColorRGB marker_color{ .5f, .5f, .5f, 1.0f };
-		cluts[activeCLUT].addMarker(CLUT::Marker({ interval, marker_color }));
-		cluts[activeCLUT].saveTexture(clutTexture);
-		volumeRenderer->markDirty();
-		//selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
-		//auto cb = [&](const Color& color) {
-		//	selected_->color(color);
-		//	cluts[activeCLUT].saveTexture(clutTexture);
-		//	volumeRenderer->markDirty();
-		//	l_pose_.tracking(false);
-		//};
-
-		//MainController::getInstance().pickColor(selected_->color(), cb);
+		selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
+		auto cb = [&](const Color& color) {
+			selected_->color(color);
+			cluts[activeCLUT].saveTexture(clutTexture);
+			volumeRenderer->markDirty();
+			l_pose_.tracking(false);
+		};
+		MainController::getInstance().pickColor(selected_->color(), cb);
 	});
 
 	point_2_pose_.disengageOnExit(true);
@@ -364,18 +365,36 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 		return false;
 	}
 
-	l_pose_.update(frame);
-	if (l_pose_.tracking()) {
-		InteractionBox ib = frame.interactionBox();
-		Vector v = ib.normalizePoint(l_pose_.pointer().stabilizedTipPosition());
-		cursor_center_ = v.x;
-		leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height) + Vec2(viewport_.x, viewport_.y);
+	//l_pose_.update(frame);
+	//if (l_pose_.tracking()) {
+	//	InteractionBox ib = frame.interactionBox();
+	//	Vector v = ib.normalizePoint(l_pose_.pointer().stabilizedTipPosition());
+	//	cursor_center_ = v.x;
+	//	leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height) + Vec2(viewport_.x, viewport_.y);
 
-		return false;
-	}
+	//	if (l_pose_.isClosed() && !leap_drag_performed_) {
+	//		Vector dp = l_pose_.pointer().tipPosition() - l_pose_.pointerClosed().tipPosition();
+	//		if (dp.y > 35) {
+	//			leap_drag_performed_ = true;
+	//			Interval interval(cursor_center_, 0.2f);
+	//			ColorRGB marker_color{ .5f, .5f, .5f, 1.0f };
+	//			cluts[activeCLUT].addMarker(CLUT::Marker({ interval, marker_color }));
+	//			cluts[activeCLUT].saveTexture(clutTexture);
+	//			volumeRenderer->markDirty();
+	//		} else if (dp.y < -35) {
+	//			if (!cluts[activeCLUT].markers().empty()) {
+	//				leap_drag_performed_ = true;
+	//				cluts[activeCLUT].removeMarker(cursor_center_);
+	//				cluts[activeCLUT].saveTexture(clutTexture);
+	//				volumeRenderer->markDirty();
+	//			}
+	//		}
+	//	}
+
+	//	return false;
+	//}
 
 	pinch_pose_.update(frame);
-
 	if (pinch_pose_.tracking()) {
 		InteractionBox ib = frame.interactionBox();
 
@@ -384,16 +403,27 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 		cursor_center_ = v.x;
 		leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height) + Vec2(viewport_.x, viewport_.y);
 
-		Vector l = ib.normalizePoint(pinch_pose_.hand().stabilizedPalmPosition()) - ib.normalizePoint(pinch_pose_.handPinched().stabilizedPalmPosition());
-
-		float width = saved_interval_.width() + l.y;
-
-		if (selected_){
-			if (pinch_pose_.isPinching()) {
-				editInterval(cursor_center_, width);
+		if (pinch_pose_.isPinching()) {
+			if (!leap_drag_performed_ && pinch_pose_.hand().palmVelocity().z < -250 && !selected_) {
+				leap_drag_performed_ = true;
+				Interval interval(cursor_center_, 0.2f);
+				ColorRGB marker_color{ .5f, .5f, .5f, 1.0f };
+				cluts[activeCLUT].addMarker(CLUT::Marker({ interval, marker_color }));
+				cluts[activeCLUT].saveTexture(clutTexture);
+				volumeRenderer->markDirty();
+			} else if (!leap_drag_performed_ && pinch_pose_.hand().palmVelocity().z > 250 && selected_ && !cluts[activeCLUT].markers().empty()) {
+				leap_drag_performed_ = true;
+				cluts[activeCLUT].removeMarker(selected_->interval().center());
+				cluts[activeCLUT].saveTexture(clutTexture);
+				volumeRenderer->markDirty();
+			} else if (selected_ && !leap_drag_performed_){
+				Vector l = ib.normalizePoint(pinch_pose_.hand().stabilizedPalmPosition()) - ib.normalizePoint(pinch_pose_.handPinched().stabilizedPalmPosition());
+				float width = saved_interval_.width() + l.y;
+				if (pinch_pose_.isPinching()) {
+					editInterval(cursor_center_, width);
+				}
 			}
 		}
-		return false;
 	}
 
 	camera_control_.update(leapController, frame);
@@ -407,7 +437,7 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastSwipe);
 			Leap::SwipeGesture swipe(g);
 
-			if (elapsed.count() > 1000 && g.isValid() && swipe.speed() > 200 && std::abs(swipe.direction().z) < 0.5f && swipe.hands().frontmost().fingers().extended().count() == 5) {
+			if (elapsed.count() > 350 && g.isValid() && swipe.speed() > 200 && std::abs(swipe.direction().z) < 0.5f && swipe.hands().frontmost().fingers().extended().count() == 5) {
 				lastSwipe = curTime;
 				if (swipe.direction().x > 0)
 					nextCLUT();

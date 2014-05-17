@@ -4,17 +4,18 @@ using namespace std::chrono;
 using namespace Leap;
 
 Pose::Pose() : 
-		tracking_(false),
-		min_valid_frames_(0),
-		valid_frames_(0),
-		frames_tracked_(0),
-		engage_delay_(0),
-		disengage_delay_(0),
-		total_elapsed_(0),
-        last_update_(std::chrono::high_resolution_clock::now()),
-		track_function_(nullptr),
-		engage_function_(nullptr),
-		disengage_function_(nullptr)
+	enabled_(true),
+	tracking_(false),
+	min_valid_frames_(0),
+	valid_frames_(0),
+	frames_tracked_(0),
+	engage_delay_(0),
+	disengage_delay_(0),
+	total_elapsed_(0),
+    last_update_(std::chrono::high_resolution_clock::now()),
+	track_function_(nullptr),
+	engage_function_(nullptr),
+	disengage_function_(nullptr)
 {
 }
 
@@ -24,6 +25,10 @@ Pose::~Pose()
 
 void Pose::update(const Frame& frame)
 {
+	if (!enabled_) {
+		return;
+	}
+
 	auto time = std::chrono::high_resolution_clock::now();
 	milliseconds elapsed = duration_cast<milliseconds>(time - last_update_);
 	last_update_ = time;
@@ -82,6 +87,14 @@ void Pose::tracking(bool tracking)
 	tracking_ = tracking;
 	total_elapsed_ = milliseconds(0);
 	valid_frames_ = 0;
+}
+
+void Pose::enabled(bool enabled)
+{
+	enabled_ = enabled;
+	if (!enabled_) {
+		tracking(false);
+	}
 }
 
 void Pose::engage(const Frame& frame)
