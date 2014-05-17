@@ -104,16 +104,33 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 	pinch_pose_.openFn([&](const Leap::Frame&){leap_drag_performed_ = false; });
 	pinch_pose_.disengageFunction([&](const Leap::Frame&){leap_drag_performed_ = false; });
 	pinch_pose_.closeFn([&](const Leap::Frame&){
+		static std::chrono::high_resolution_clock::time_point last_close = std::chrono::high_resolution_clock::now();
+
+		auto now = std::chrono::high_resolution_clock::now();
+		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_close);
+		last_close = now;
+		cout << elapsed.count() << endl;
+
 		if (pinch_pose_.isPinching()) {
 			selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
-			if (abs(selected_->interval().center() - cursor_center_) < 0.05f) {
+			if (abs(selected_->interval().center() - cursor_center_) < 0.1f) {
 				saved_interval_ = selected_->interval();
-				std::cout << "SELECT" << std::endl;
 			} else {
 				selected_ = nullptr;
 			}
 		} else {
 			selected_ = nullptr;
+		}
+
+		if (elapsed.count() > 100 && elapsed.count() < 500 && !leap_drag_performed_) {
+			selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
+			auto cb = [&](const Color& color) {
+				selected_->color(color);
+				cluts[activeCLUT].saveTexture(clutTexture);
+				volumeRenderer->markDirty();
+				l_pose_.tracking(false);
+			};
+			MainController::getInstance().pickColor(selected_->color(), cb);
 		}
 	});
 
@@ -407,7 +424,8 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 			if (!leap_drag_performed_ && pinch_pose_.hand().palmVelocity().z < -250 && !selected_) {
 				leap_drag_performed_ = true;
 				Interval interval(cursor_center_, 0.2f);
-				ColorRGB marker_color{ .5f, .5f, .5f, 1.0f };
+				Vec3 c = Vec3::random();
+				ColorRGB marker_color{ c.x, c.y, c.z, 1.0f };
 				cluts[activeCLUT].addMarker(CLUT::Marker({ interval, marker_color }));
 				cluts[activeCLUT].saveTexture(clutTexture);
 				volumeRenderer->markDirty();
