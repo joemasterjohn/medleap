@@ -23,6 +23,9 @@ private:
 	LeapCameraControl cam_control_;
 	std::unique_ptr<MaskVolume> mask_volume_;
 	History<MaskVolume::Edit, 10> edits_;
+
+	void moveCursor();
+	void applyEdit();
 };
 
 #endif // __medleap_MaskController__

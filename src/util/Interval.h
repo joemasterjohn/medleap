@@ -29,6 +29,8 @@ public:
 	/** Width of influence in [0,1] */
 	float width() const { return width_; }
 
+	bool contains(float value) const { return value >= left_ && value <= right_; }
+
 	/** Sets the center value of the area of influence in [0, 1]. */
 	void center(float value) {
 		center_ = value;

@@ -42,6 +42,7 @@ VolumeController::VolumeController()
 	glUniform1i(boxShader.getUniform("tex_clut"), 2);
 	glUniform1i(boxShader.getUniform("tex_jitter"), 3);
 	glUniform1i(boxShader.getUniform("tex_mask"), 4);
+	glUniform1i(boxShader.getUniform("tex_context"), 5);
 
 	fullResRT.setInternalColorFormat(GL_RGB16F);
 	fullResRT.generate(viewport_.width, viewport_.height, true);
@@ -420,6 +421,8 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	//}
 
 	// proxy geometry
+	glActiveTexture(GL_TEXTURE5);
+	tex_context_.bind();
 	glActiveTexture(GL_TEXTURE4);
 	maskTexture.bind();
 	glActiveTexture(GL_TEXTURE3);
@@ -471,34 +474,35 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	Vec3 r = volume->getMaxGradient() - volume->getMinGradient();
 	glUniform3f(boxShader.getUniform("rangeGradient"), r.x, r.y, r.z);
 
-	glUniform3f(boxShader.getUniform("cursor_position"), cursor3D.x, cursor3D.y, cursor3D.z);
+
+	boxShader.uniform("cursor_position", maskCenter);
 
 
 
 
 
 
-	Vec4 cpss = mvp * Vec4(cursor3D.x, cursor3D.y, cursor3D.z, 1.0);
+	Vec4 cpss = mvp * Vec4(maskCenter, 1.0f);
 	cpss /= cpss.w;
-	cpss.x = (cpss.x + 1.0) * (viewport_.width / 2.0);
-	cpss.y = (cpss.y + 1.0) * (viewport_.height / 2.0);
+	cpss.x = (cpss.x + 1.0) * (w / 2.0);
+	cpss.y = (cpss.y + 1.0) * (h / 2.0);
 	glUniform3f(boxShader.getUniform("cursor_position_ss"), cpss.x, cpss.y, cpss.z);
 
 
 
 
-	Vec4 cpee = camera.getView() * Vec4(cursor3D.x, cursor3D.y, cursor3D.z, 1.0f);
+	Vec4 cpee = camera.getView() * Vec4(maskCenter, 1.0f);
 	glUniform3f(boxShader.getUniform("cursor_position_es"), cpee.x, cpee.y, cpee.z);
 
 
 	glUniform1f(boxShader.getUniform("cursor_radius_ws"), cursorRadius);
-	float cursorRadiusSS = gl::projectedRadius(0.8726388, (cursor3D - camera.getEye()).length(), cursorRadius) * viewport_.height / 2.0f;
+	float cursorRadiusSS = gl::projectedRadius(0.8726388, (maskCenter - camera.getEye()).length(), cursorRadius) * h / 2.0f;
 	glUniform1f(boxShader.getUniform("cursor_radius_ss"), cursorRadiusSS);
 
 	glUniform2f(boxShader.getUniform("window_size"), w, h);
 
 
-	glUniform1i(boxShader.getUniform("cursor_on"), true);
+	glUniform1i(boxShader.getUniform("cursor_on"), use_context);
 
 	int loc = boxShader.getAttribute("vs_position");
 	glEnableVertexAttribArray(loc);

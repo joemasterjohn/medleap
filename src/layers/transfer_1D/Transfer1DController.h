@@ -85,6 +85,7 @@ private:
 	gl::Draw histoOutline;
 	GLsizei histoVBOCount;
 	gl::Texture clutTexture;
+	gl::Texture contextTexture;
 	gl::Draw colorStops;
 
 

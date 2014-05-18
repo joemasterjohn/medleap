@@ -5,6 +5,7 @@ uniform sampler3D tex_volume;
 uniform sampler3D tex_gradients;
 uniform sampler1D tex_clut;
 uniform sampler2D tex_jitter;
+uniform sampler1D tex_context;
 
 uniform float visible_min;
 uniform float visible_scale;
@@ -61,24 +62,31 @@ float shading(vec3 samplePos)
 	return max(min(1.0, dot(n, lightDirection)), AMBIENT);
 }
 
-float cursorAlpha()
+float cursorAlpha(float value)
 {
-	float x_w = (fs_voxel_position_ss.x + 1.0) * (window_size.x * 0.5);
-	float y_w = (fs_voxel_position_ss.y + 1.0) * (window_size.y * 0.5);
+	float x_w = (fs_voxel_position_ss.x + 1.0) * window_size.x * 0.5;
+	float y_w = (fs_voxel_position_ss.y + 1.0) * window_size.y * 0.5;
 
 	float d = length(vec2(x_w, y_w) - cursor_position_ss.xy);
 
-	bool frontAOI = cursor_position_es.z < fs_voxel_position_es.z;
-	bool inCursorZone = d < cursor_radius_ss;
-	bool outsideAOI = length(fs_voxel_position_ws - cursor_position) > cursor_radius_ws;
+	bool in_front = dot((fs_voxel_position_es - cursor_position_es), cursor_position_es) < 0.0;
+	bool in_circle = d < cursor_radius_ss;
+	bool context = texture(tex_context, value).r < 0.5;
 
-	if (inCursorZone && frontAOI) {
-		//float dd = length(fs_voxel_position_ws - cursor_position) - cursor_radius_ws;
-		//return max(1.0 - dd / cursor_radius_ws, 0.0);
-		return max(0.0, 1.0 - (length(fs_voxel_position_ws - cursor_position) - cursor_radius_ws) * 4.0);
+	if (in_front && in_circle && context) {
+		return 0.0;
+	} else {
+		return 1.0;
 	}
 
-	return 1.0;
+
+	//if (inCursorZone && frontAOI) {
+		//float dd = length(fs_voxel_position_ws - cursor_position) - cursor_radius_ws;
+		//return max(1.0 - dd / cursor_radius_ws, 0.0);
+	//	return max(0.0, 1.0 - (length(fs_voxel_position_ws - cursor_position) - cursor_radius_ws) * 4.0);
+	//}
+
+	//return 1.0;
 }
 
 void main()
@@ -119,7 +127,7 @@ void main()
     //value = max(min(1.0, value), 0.0);
 
 	// min(max) not necessary? should be ok with sampler state
-    
+
 	// color/opacity from look-up table using windowed data value
 	vec4 color = texture(tex_clut, value).rgba;
 
@@ -130,7 +138,13 @@ void main()
 		// correct opacity and associated colors based on variable sampling distance
 		float alpha_stored = color.a;
 		float alpha_corrected = 1.0 - pow(1.0 - alpha_stored * opacity_scale, opacity_correction);
-		color.a = alpha_corrected;// * cursorAlpha();
+
+		if (cursor_on) {
+			alpha_corrected *= cursorAlpha(value);
+		}
+
+		color.a = alpha_corrected;
+
 		color.rgb *= max(0.0, alpha_corrected / alpha_stored);
 
 		// apply lighting

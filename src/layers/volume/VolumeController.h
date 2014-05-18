@@ -54,17 +54,18 @@ public:
 	bool cursorActive;
 	gl::Buffer cursor3DVBO;
 	gl::Program cursor3DShader;
-	gl::Vec3 cursor3D;
 	bool useJitter;
 	gl::Vec3 maskColor;
 	gl::Vec3 maskCenter;
 	bool draw_bounds;
 	bool draw_planes;
 	bool draw_cursor3D;
-
+	bool use_context;
 
 	gl::Texture maskTexture;
 	gl::Geometry maskGeometry;
+
+	gl::Texture tex_context_;
 
 	std::vector<gl::Plane>& clipPlanes() { return clip_planes_; }
 

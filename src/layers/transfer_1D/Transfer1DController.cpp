@@ -32,9 +32,9 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 	{
 		CLUT c(CLUT::piecewise);
-		c.addMarker({ { 0.0f, 0.2f }, { 1.f, 0.f, 0.f, 0.5f } });
-		c.addMarker({ { 0.5f, 0.6f }, { 0.f, 1.f, 0.f, 0.5f } });
-		c.addMarker({ { 1.0f, 0.2f }, { 0.f, 0.f, 1.f, 0.5f } });
+		c.addMarker({ { 0.2f, 0.2f }, { 0.0f, 0.0f, 1.0f, 0.5f }, false });
+		c.addMarker({ { 0.4f, 0.2f }, { 0.0f, 0.0f, 1.0f, 0.5f }, true });
+		c.addMarker({ { 0.6f, 0.2f }, { 0.0f, 0.0f, 1.0f, 0.5f }, false });
 		cluts.push_back(c);
 	}
     
@@ -78,8 +78,7 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 	stride = 4 * sizeof(GLfloat);
 
-	// initialize clut strip
-	clutTexture.generate(GL_TEXTURE_1D);
+
 
 	{
 		bgShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
@@ -99,7 +98,10 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 		bgBuffer.data(vertices, sizeof(vertices));
 	}
 
+	clutTexture.generate(GL_TEXTURE_1D);
+	contextTexture.generate(GL_TEXTURE_1D);
 	cluts[activeCLUT].saveTexture(clutTexture);
+	cluts[activeCLUT].saveContext(contextTexture);
 
 	pinch_pose_.openFn([&](const Leap::Frame&){leap_drag_performed_ = false; });
 	pinch_pose_.disengageFunction([&](const Leap::Frame&){leap_drag_performed_ = false; });
@@ -127,6 +129,7 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 			auto cb = [&](const Color& color) {
 				selected_->color(color);
 				cluts[activeCLUT].saveTexture(clutTexture);
+				cluts[activeCLUT].saveContext(contextTexture);
 				volumeRenderer->markDirty();
 				l_pose_.tracking(false);
 			};
@@ -142,6 +145,7 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 		auto cb = [&](const Color& color) {
 			selected_->color(color);
 			cluts[activeCLUT].saveTexture(clutTexture);
+			cluts[activeCLUT].saveContext(contextTexture);
 			volumeRenderer->markDirty();
 			l_pose_.tracking(false);
 		};
@@ -212,32 +216,32 @@ void Transfer1DController::setVolume(VolumeData* volume)
     }
     
 	this->histogram = histogram;
-	int drawWidth = histogram->getNumBins();
-	int drawHeight = 256;
+	//int drawWidth = histogram->getNumBins();
+	//int drawHeight = 256;
 
-	std::vector<unsigned char> pixels(drawWidth * drawHeight);
-	std::fill(pixels.begin(), pixels.end(), 0);
+	//std::vector<unsigned char> pixels(drawWidth * drawHeight);
+	//std::fill(pixels.begin(), pixels.end(), 0);
 
 	double logMaxFreq = std::log(histogram->getMaxFrequency() + 1);
 
-	for (int bin = 0; bin < histogram->getNumBins(); bin++) {
-		int size = histogram->getSize(bin);
-		double sizeNorm = std::log(size + 1) / logMaxFreq;
+	//for (int bin = 0; bin < histogram->getNumBins(); bin++) {
+	//	int size = histogram->getSize(bin);
+	//	double sizeNorm = std::log(size + 1) / logMaxFreq;
 
-		int binHeight = (int)(sizeNorm * drawHeight);
+	//	int binHeight = (int)(sizeNorm * drawHeight);
 
-		for (int j = 0; j < binHeight; j++) {
-			pixels[bin + j * drawWidth] = 255;
-		}
-	}
+	//	for (int j = 0; j < binHeight; j++) {
+	//		pixels[bin + j * drawWidth] = 255;
+	//	}
+	//}
 
-	histo1D.bind();
-	histo1D.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	histo1D.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	histo1D.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	histo1D.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	histo1D.setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, &pixels[0]);
+	//histo1D.bind();
+	//histo1D.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//histo1D.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//histo1D.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	//histo1D.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	//histo1D.setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, &pixels[0]);
 
 
 	// histo vbo triangle strip
@@ -267,6 +271,7 @@ void Transfer1DController::setVolumeRenderer(VolumeController* volumeRenderer)
 {
     this->volumeRenderer = volumeRenderer;
     volumeRenderer->setCLUTTexture(clutTexture);
+	volumeRenderer->tex_context_ = contextTexture;
 }
 
 void Transfer1DController::setSliceRenderer(SliceController* sliceRenderer)
@@ -287,6 +292,7 @@ bool Transfer1DController::keyboardInput(GLFWwindow* window, int key, int action
     
 	if (key == GLFW_KEY_B && action == GLFW_PRESS) {
 		cluts[activeCLUT].saveTexture(clutTexture);
+		cluts[activeCLUT].saveContext(contextTexture);
 		volumeRenderer->markDirty();
 	}
 
@@ -305,6 +311,7 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
 		if (cluts[activeCLUT].mode() == CLUT::continuous) {
 			cluts[activeCLUT].interval().center(static_cast<float>(x - viewport_.x) / viewport_.width);
 			cluts[activeCLUT].saveTexture(clutTexture);
+			cluts[activeCLUT].saveContext(contextTexture);
 			volumeRenderer->markDirty();
 		}
 		else if (selected_) {
@@ -312,6 +319,7 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
 			float newCenter = static_cast<float>((x - viewport_.x) / viewport_.width);
 			selected_->interval({ newCenter, current.width() });
 			cluts[activeCLUT].saveTexture(clutTexture);
+			cluts[activeCLUT].saveContext(contextTexture);
 			volumeRenderer->markDirty();
 		}
 
@@ -322,6 +330,7 @@ bool Transfer1DController::mouseMotion(GLFWwindow* window, double x, double y)
 		float cc = intv.center();
 		intv.width(2.0f * std::abs(cv - cc));
 		cluts[activeCLUT].saveTexture(clutTexture);
+		cluts[activeCLUT].saveContext(contextTexture);
 		volumeRenderer->markDirty();
     }
    
@@ -354,6 +363,7 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 		auto cb = [&](const Color& color) {
 			selected_->color(color);
 			cluts[activeCLUT].saveTexture(clutTexture);
+			cluts[activeCLUT].saveContext(contextTexture);
 			volumeRenderer->markDirty();
 		};
 
@@ -378,6 +388,7 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 		cluts[activeCLUT].interval().width(w);
 
 		cluts[activeCLUT].saveTexture(clutTexture);
+		cluts[activeCLUT].saveContext(contextTexture);
 		volumeRenderer->markDirty();
 		return false;
 	}
@@ -428,11 +439,13 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 				ColorRGB marker_color{ c.x, c.y, c.z, 1.0f };
 				cluts[activeCLUT].addMarker(CLUT::Marker({ interval, marker_color }));
 				cluts[activeCLUT].saveTexture(clutTexture);
+				cluts[activeCLUT].saveContext(contextTexture);
 				volumeRenderer->markDirty();
 			} else if (!leap_drag_performed_ && pinch_pose_.hand().palmVelocity().z > 250 && selected_ && !cluts[activeCLUT].markers().empty()) {
 				leap_drag_performed_ = true;
 				cluts[activeCLUT].removeMarker(selected_->interval().center());
 				cluts[activeCLUT].saveTexture(clutTexture);
+				cluts[activeCLUT].saveContext(contextTexture);
 				volumeRenderer->markDirty();
 			} else if (selected_ && !leap_drag_performed_){
 				Vector l = ib.normalizePoint(pinch_pose_.hand().stabilizedPalmPosition()) - ib.normalizePoint(pinch_pose_.handPinched().stabilizedPalmPosition());
@@ -472,6 +485,7 @@ void Transfer1DController::editInterval(float center, float width)
 {
 	selected_->interval({ center, width });
 	cluts[activeCLUT].saveTexture(clutTexture);
+	cluts[activeCLUT].saveContext(contextTexture);
 	volumeRenderer->markDirty();
 }
 
@@ -499,6 +513,7 @@ void Transfer1DController::nextCLUT()
 	if (++activeCLUT == cluts.size())
 		activeCLUT = 0;
 	cluts[activeCLUT].saveTexture(clutTexture);
+	cluts[activeCLUT].saveContext(contextTexture);
 	volumeRenderer->markDirty();
 }
 
@@ -507,6 +522,7 @@ void Transfer1DController::prevCLUT()
 	if (--activeCLUT < 0)
 		activeCLUT = cluts.size() - 1;
 	cluts[activeCLUT].saveTexture(clutTexture);
+	cluts[activeCLUT].saveContext(contextTexture);
 	volumeRenderer->markDirty();
 }
 
@@ -590,6 +606,7 @@ void Transfer1DController::drawBackground()
 
 void Transfer1DController::drawHistogram()
 {
+	contextTexture.bind();
 	histoVBO.bind();
 	histoProg.enable();
 	glEnableVertexAttribArray(0);

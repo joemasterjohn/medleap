@@ -5,11 +5,11 @@
 using namespace gl;
 using namespace std;
 
-CLUT::Marker::Marker(const Interval& interval, const ColorRGB& color) : 
+CLUT::Marker::Marker(const Interval& interval, const ColorRGB& color, bool context) : 
 	clut_(nullptr),
 	interval_(interval),
 	color_(color),
-	context_(false),
+	context_(context),
 	opacity_(gl::exponentialC(9.f))
 {
 }
@@ -202,17 +202,6 @@ void CLUT::savePiecewise(Texture& texture)
 	vector<GLushort> buf;
 	buf.resize(texWidth * 4, 0);
 
-	const float std_deviation = 0.15f;
-	auto curve = [&](float x)->float {
-		const float var = std_deviation * std_deviation;
-		return (exp(-x*x/(2.0f*var)) / sqrt(two_pi*var));
-	};
-
-	// offset/scale so weight=0 at -1 and +1 and weight=1 at 0.5
-	// smaller std_deviation will make a sharp peak; larger will make parabola
-	const float offset = curve(-1.0f);
-	const float scale = 1.0f / (curve(0.0f) - offset);
-
 	vector<Vec4> pixels;
 	pixels.resize(texWidth, Vec4(0.0f));
 
@@ -242,4 +231,28 @@ void CLUT::savePiecewise(Texture& texture)
 	texture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	texture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	texture.setData1D(0, GL_RGBA, texWidth, GL_RGBA, GL_UNSIGNED_SHORT, &buf[0]);
+}
+
+void CLUT::saveContext(Texture& texture)
+{
+	static const unsigned texWidth = 512;
+	vector<GLubyte> buf;
+	buf.resize(texWidth, 0);
+
+	for (int i = 0; i < texWidth; i++) {
+		float p = static_cast<float>(i) / texWidth;
+		for (Marker& m : markers_) {
+			// if continuous: lerp alpha from 0 (context) to 255 (focus)
+			// if discrete: 1 for focus, 0 for context
+			if (!m.context() && m.interval().contains(p)) {
+				buf[i] = static_cast<GLubyte>(255);
+			}
+		}
+	}
+
+	texture.bind();
+	texture.setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	texture.setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	texture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	texture.setData1D(0, GL_R8, texWidth, GL_RED, GL_UNSIGNED_BYTE, &buf[0]);
 }

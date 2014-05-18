@@ -21,7 +21,7 @@ public:
 	class Marker
 	{
 	public:
-		Marker(const Interval& interval, const ColorRGB& color);
+		Marker(const Interval& interval, const ColorRGB& color, bool context = false);
 
 		const ColorRGB& color() const { return color_; }
 		const Interval& interval() const { return interval_; }
@@ -86,6 +86,7 @@ public:
 
 	/** Saves CLUT into a 1D texture based on mode */
 	void saveTexture(gl::Texture& texture);
+	void saveContext(gl::Texture& texture);
 
 	Interval& interval() { return interval_; }
     
