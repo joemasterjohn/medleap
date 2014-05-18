@@ -239,13 +239,24 @@ void CLUT::saveContext(Texture& texture)
 	vector<GLubyte> buf;
 	buf.resize(texWidth, 0);
 
-	for (int i = 0; i < texWidth; i++) {
-		float p = static_cast<float>(i) / texWidth;
-		for (Marker& m : markers_) {
-			// if continuous: lerp alpha from 0 (context) to 255 (focus)
-			// if discrete: 1 for focus, 0 for context
-			if (!m.context() && m.interval().contains(p)) {
-				buf[i] = static_cast<GLubyte>(255);
+	if (mode_ == continuous) {
+		for (int i = 0; i < texWidth; i++) {
+			float p = static_cast<float>(i) / texWidth;
+			for (Marker& m : markers_) {
+				// if continuous: lerp alpha from 0 (context) to 255 (focus)
+				// if discrete: 1 for focus, 0 for context
+				if (!m.context() && m.interval().contains(p)) {
+					buf[i] = static_cast<GLubyte>(255);
+				}
+			}
+		}
+	} else {
+		for (int i = 0; i < texWidth; i++) {
+			float p = static_cast<float>(i) / texWidth;
+			for (Marker& m : markers_) {
+				if (!m.context() && m.interval().contains(p)) {
+					buf[i] = static_cast<GLubyte>(255);
+				}
 			}
 		}
 	}

@@ -32,8 +32,8 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 	{
 		CLUT c(CLUT::piecewise);
-		c.addMarker({ { 0.2f, 0.2f }, { 0.0f, 0.0f, 1.0f, 0.5f }, false });
-		c.addMarker({ { 0.4f, 0.2f }, { 0.0f, 0.0f, 1.0f, 0.5f }, true });
+		c.addMarker({ { 0.2f, 0.2f }, { 1.0f, 0.0f, 0.0f, 0.5f }, false });
+		c.addMarker({ { 0.4f, 0.2f }, { 0.0f, 1.0f, 0.0f, 0.5f }, true });
 		c.addMarker({ { 0.6f, 0.2f }, { 0.0f, 0.0f, 1.0f, 0.5f }, false });
 		cluts.push_back(c);
 	}
