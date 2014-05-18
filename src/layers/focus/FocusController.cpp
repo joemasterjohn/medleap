@@ -8,6 +8,8 @@ using namespace Leap;
 
 FocusController::FocusController()
 {
+	poses_.v().enabled(true);
+	poses_.push().enabled(true);
 }
 
 void FocusController::gainFocus()
@@ -32,13 +34,18 @@ void FocusController::loseFocus()
 
 bool FocusController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
-	point_pose_.update(frame);
+	poses_.update(frame);
 
-	if (point_pose_.tracking()) {
+	if (poses_.v().tracking()) {
 		moveCursor();
+	}
+
+	if (poses_.push().tracking() && poses_.push().isClosed()) {
+		scaleCursor();
 	} else {
 		camera_control_.update(controller, frame);
 	}
+	
 
 	return false;
 }
@@ -51,10 +58,28 @@ void FocusController::moveCursor()
 	vc.maskColor = { 1.0f, 1.0f, 0.0f };
 
 	Mat4 eye2world = vc.getCamera().getView().inverse();
-	Vec4 hand_delta_ws = eye2world * point_pose_.handPositionDelta().toVector4<Vec4>();
+	Vec4 hand_delta_ws = eye2world * poses_.v().handPositionDelta().toVector4<Vec4>();
 
 	cursor_pos_ = mc.volumeData()->getBounds().clamp(cursor_pos_ + hand_delta_ws / 400.0f);
 
 	vc.maskCenter = cursor_pos_;
+	vc.markDirty();
+}
+
+void FocusController::scaleCursor()
+{
+	MainController& mc = MainController::getInstance();
+	VolumeController& vc = mc.volumeController();
+	
+	PushPose& pose = poses_.push();
+	Vector v = pose.handPositionDelta();
+	float delta = v.magnitude();
+	if (v.z < 0) {
+		delta *= -1.0f;
+	}
+
+	vc.cursorRadius += delta * 0.001;
+
+
 	vc.markDirty();
 }

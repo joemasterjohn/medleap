@@ -2,7 +2,7 @@
 #define __medleap_FocusController__
 
 #include "layers/Controller.h"
-#include "leap/PointPose.h"
+#include "leap/PoseTracker.h"
 #include "layers/volume/LeapCameraControl.h"
 
 class FocusController : public Controller
@@ -16,10 +16,11 @@ public:
 
 private:
 	LeapCameraControl camera_control_;
-	PointPose point_pose_;
+	PoseTracker poses_;
 	gl::Vec3 cursor_pos_;
 
 	void moveCursor();
+	void scaleCursor();
 };
 
 #endif // __medleap_FocusController__
