@@ -30,6 +30,9 @@ namespace gl
 		/** Sets distance from origin */
 		void distFromOrigin(float dist);
 
+		/** Sets point on the plane */
+		void point(const Vec3& point);
+
 		/** Creates a triangulated surface centered at the point nearest to the plane's surface. */
 		Geometry triangles(unsigned u_segments, unsigned v_segments);
 

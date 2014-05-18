@@ -16,7 +16,7 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 	// start out with the default CLUT: black->white gradient
 	{
 		CLUT c(CLUT::continuous);
-		c.addMarker({ { 0.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.f } });
+		c.addMarker({ { 0.0f, 0.2f }, { 0.f, 0.f, 0.f, 0.f }, true });
 		c.addMarker({ { 1.0f, 0.2f }, { 1.f, 1.f, 1.f, 1.f } });
 		cluts.push_back(c);
 	}

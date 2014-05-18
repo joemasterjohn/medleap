@@ -1,6 +1,7 @@
 #include "ClipController.h"
 #include "main/MainController.h"
 #include "gl/math/Math.h"
+#include "util/Util.h"
 
 using namespace gl;
 using namespace std;
@@ -8,7 +9,7 @@ using namespace Leap;
 
 static const int max_planes = 4;
 
-ClipController::ClipController() : cur_plane_(0)
+ClipController::ClipController() : selected_plane_(0)
 {
 }
 
@@ -17,32 +18,20 @@ std::unique_ptr<Menu> ClipController::contextMenu()
 	Menu* menu = new Menu("Clipping");
 	MenuItem& mi_new = menu->createItem("New Plane");
 	mi_new.setAction([&]{
-		auto& vc = MainController::getInstance().volumeController();
-		if (vc.clipPlanes().size() < max_planes) {
-			vc.clipPlanes().push_back(Plane(Vec3::yAxis(), 0.0f));
-			cur_plane_ = vc.clipPlanes().size() - 1;
-		}
-		vc.markDirty();
+		addPlane(Plane(Vec3::yAxis(), 2.0f));
 		MainController::getInstance().menuController().hideMenu();
 	});
 
 	MenuItem& mi_delete = menu->createItem("Delete Plane");
 	mi_delete.setAction([&]{
-		auto& vc = MainController::getInstance().volumeController();
-		if (!vc.clipPlanes().empty()) {
-			vc.clipPlanes().erase(vc.clipPlanes().begin() + cur_plane_);
-			cur_plane_ = 0;
-		}
-		vc.markDirty();
+		deleteSelectedPlane();
 		MainController::getInstance().menuController().hideMenu();
 	});
 
 	MenuItem& mi_clear = menu->createItem("Clear");
 	mi_clear.setAction([&]{
-		auto& vc = MainController::getInstance().volumeController();
-		vc.clipPlanes().clear();
-		vc.markDirty();
-		cur_plane_ = 0;
+		clearPlanes();
+		MainController::getInstance().menuController().hideMenu();
 	});
 
 	return std::unique_ptr<Menu>(menu);
@@ -50,6 +39,7 @@ std::unique_ptr<Menu> ClipController::contextMenu()
 
 void ClipController::gainFocus()
 {
+	MainController::getInstance().showTransfer1D(false);
 	MainController::getInstance().setMode(MainController::MODE_3D);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();
@@ -62,7 +52,6 @@ void ClipController::gainFocus()
 	vc.draw_planes = true;
 	vc.markDirty();
 }
-
 void ClipController::loseFocus()
 {
 	VolumeController& vc = MainController::getInstance().volumeController();
@@ -72,50 +61,109 @@ void ClipController::loseFocus()
 	v_pose_.tracking(false);
 }
 
+Plane& ClipController::selectedPlane()
+{
+	vector<Plane>& planes = MainController::getInstance().volumeController().clipPlanes();
+	if (planes.empty()) {
+		addPlane(Plane(Vec3::yAxis(), 2.0f));
+	}
+	return planes[selected_plane_];
+}
+
+void ClipController::addPlane(const Plane& plane)
+{
+	VolumeController& vc = MainController::getInstance().volumeController();
+	vector<Plane>& planes = MainController::getInstance().volumeController().clipPlanes();
+	if (planes.size() < max_planes) {
+		planes.push_back(plane);
+		selected_plane_ = planes.size() - 1;
+		vc.markDirty();
+	}
+}
+
+void ClipController::deleteSelectedPlane()
+{
+	VolumeController& vc = MainController::getInstance().volumeController();
+	if (!vc.clipPlanes().empty()) {
+		vc.clipPlanes().erase(vc.clipPlanes().begin() + selected_plane_);
+		selected_plane_ = 0;
+		vc.markDirty();
+	}
+}
+
+void ClipController::clearPlanes()
+{
+	VolumeController& vc = MainController::getInstance().volumeController();
+	if (!vc.clipPlanes().empty()) {
+		vc.clipPlanes().clear();
+		vc.markDirty();
+		selected_plane_ = 0;
+	}
+}
+
+void ClipController::clip1H(const Leap::Frame& frame)
+{
+	leap_current_ = denormalize(viewport_, frame, v_pose_.hand().stabilizedPalmPosition());
+
+	if (!v_pose_.isClosed()) {
+		leap_start_ = leap_current_;
+	} else {
+		leap_end_ = denormalize(viewport_, frame, v_pose_.hand().stabilizedPalmPosition());
+
+		VolumeController& vc = MainController::getInstance().volumeController();
+
+		Mat4 inv = (vc.getCamera().getProjection() * vc.getCamera().getView()).inverse();
+		auto unproject = [&](const Vec2& p, float z)->Vec4 {
+			Vec2 ndc = (viewport_.normalize(p) - 0.5f) * 2.0f;
+			Vec4 result = inv * Vec4(ndc.x, ndc.y, z, 1.0f);
+			return result / result.w;
+		};
+
+		Vec3 sn = unproject(leap_start_, -1.0f);
+		Vec3 sf = unproject(leap_start_, +1.0f);
+		Vec3 en = unproject(leap_end_, -1.0f);
+		Vec3 n = (en - sn).cross(sf - sn).normalize();
+
+		selectedPlane().normal(n);
+		selectedPlane().point(sn);
+		vc.markDirty();
+	}
+}
+
+void ClipController::clip2H(const Leap::Frame& frame)
+{
+	Hand hand = frame.hands().frontmost();
+	Hand other_hand = frame.hands()[0].id() == hand.id() ? frame.hands()[1] : frame.hands()[0];
+
+	if (other_hand.grabStrength() > 0.8f) {
+		VolumeController& vc = MainController::getInstance().volumeController();
+
+		Mat4 inv = vc.getCamera().getView().inverse();
+		Vec3 n = inv * hand.palmNormal().toVector4<Vec4>();
+		Vec3 p = frame.interactionBox().normalizePoint(hand.palmPosition()).toVector4<Vec4>();
+		p = (p - 0.5f) * 2.0f;
+		p = inv * Vec4(p.x, p.y, p.z, 0.0f);
+
+		selectedPlane().normal(n);
+		selectedPlane().point(p);
+		vc.markDirty();
+	}
+}
+
 bool ClipController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
-	if (!cam_control_.tracking()) {
-		v_pose_.update(frame);
+	if (frame.hands().count() == 2) {
+		clip2H(frame);
+		return false;
 	}
 
-	if (!v_pose_.tracking()) {
-		cam_control_.update(controller, frame);
-	}
-
+	v_pose_.update(frame);
 	if (v_pose_.tracking()) {
-		Vector p = v_pose_.hand().stabilizedPalmPosition();
-		p = frame.interactionBox().normalizePoint(p);
-		leap_current_ = Vec2(p.x * viewport_.width, p.y * viewport_.width) + Vec2(viewport_.x, viewport_.y);
-
-		if (!v_pose_.isClosed()) {
-			leap_start_ = leap_current_;
-		} else {
-			Vector end = v_pose_.hand().stabilizedPalmPosition();
-			end = frame.interactionBox().normalizePoint(end);
-			leap_end_ = Vec2(end.x * viewport_.width, end.y * viewport_.width) + Vec2(viewport_.x, viewport_.y);
-
-			VolumeController& vc = MainController::getInstance().volumeController();
-			if (!vc.clipPlanes().empty()) {
-				Mat4 inv = (vc.getCamera().getProjection() * vc.getCamera().getView()).inverse();
-
-				auto unproject = [&](const Vec2& p, float z)->Vec4 {
-					Vec2 ndc = (viewport_.normalize(p) - 0.5f) * 2.0f;
-					Vec4 result = inv * Vec4(ndc.x, ndc.y, z, 1.0f);
-					return result / result.w;
-				};
-
-				Vec3 sn = unproject(leap_start_, -1.0f);
-				Vec3 sf = unproject(leap_start_, +1.0f);
-				Vec3 en = unproject(leap_end_, -1.0f);
-				Vec3 n = (en - sn).cross(sf - sn).normalize();
-
-				vc.clipPlanes()[cur_plane_] = Plane(n, sn);
-				vc.markDirty();
-			}
-		}
+		clip1H(frame);
+		return false;
 	}
 
-
+	cam_control_.update(controller, frame);
 	return false;
 }
 

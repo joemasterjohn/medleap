@@ -17,6 +17,7 @@ void PoseTracker::enableAll(bool enabled)
 	point_.enabled(enabled);
 	point2_.enabled(enabled);
 	v_.enabled(enabled);
+	push_.enabled(enabled);
 }
 
 void PoseTracker::update(const Frame& frame)
@@ -29,4 +30,5 @@ void PoseTracker::update(const Frame& frame)
 	point_.update(frame);
 	point2_.update(frame);
 	v_.update(frame);
+	push_.update(frame);
 }

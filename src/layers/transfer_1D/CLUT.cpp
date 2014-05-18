@@ -235,22 +235,44 @@ void CLUT::savePiecewise(Texture& texture)
 
 void CLUT::saveContext(Texture& texture)
 {
+	// context texture will store 0 for context values and 255 for focus values
 	static const unsigned texWidth = 512;
 	vector<GLubyte> buf;
 	buf.resize(texWidth, 0);
 
 	if (mode_ == continuous) {
+		// for continuous gradient, lerp pixel values between markers
+		auto l = markers_.begin();
+		auto r = markers_.begin() + 1;
+
 		for (int i = 0; i < texWidth; i++) {
-			float p = static_cast<float>(i) / texWidth;
-			for (Marker& m : markers_) {
-				// if continuous: lerp alpha from 0 (context) to 255 (focus)
-				// if discrete: 1 for focus, 0 for context
-				if (!m.context() && m.interval().contains(p)) {
+			float p_tex = static_cast<float>(i) / texWidth;
+			float p_clut = (p_tex - interval_.left()) / interval_.width();
+
+			if (p_clut < markers_.front().interval().center()) {
+				if (!markers_.front().context()) {
 					buf[i] = static_cast<GLubyte>(255);
 				}
+			} else if (p_clut > markers_.back().interval().center()) {
+				if (!markers_.back().context()) {
+					buf[i] = static_cast<GLubyte>(255);
+				}
+			} else {
+				if (p_clut > r->interval().center()) {
+					l++;
+					r++;
+				}
+
+				float pn = (p_clut - l->interval().center()) / (r->interval().center() - l->interval().center());
+				float l_context_value = l->context() ? 0.0f : 1.0f;
+				float r_context_value = r->context() ? 0.0f : 1.0f;
+				float p_context_value = gl::lerp(l_context_value, r_context_value, pn);
+
+				buf[i] = static_cast<GLubyte>(p_context_value * numeric_limits<GLubyte>::max());
 			}
 		}
 	} else {
+		// for piecewise, any marker interval that is focus will be 255 (regardless of overlapping context markers)
 		for (int i = 0; i < texWidth; i++) {
 			float p = static_cast<float>(i) / texWidth;
 			for (Marker& m : markers_) {

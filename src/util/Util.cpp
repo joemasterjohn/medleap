@@ -10,21 +10,21 @@ namespace gl
 	{
 		switch (typeEnum)
 		{
-			case GL_BYTE:
-			case GL_UNSIGNED_BYTE:
-				return sizeof(GLbyte);
-			case GL_SHORT:
-			case GL_UNSIGNED_SHORT:
-				return sizeof(GLshort);
-			case GL_INT:
-			case GL_UNSIGNED_INT:
-				return sizeof(GLint);
-			case GL_FLOAT:
-				return sizeof(GLfloat);
-			case GL_DOUBLE:
-				return sizeof(GLdouble);
-			default:
-				return 0;
+		case GL_BYTE:
+		case GL_UNSIGNED_BYTE:
+			return sizeof(GLbyte);
+		case GL_SHORT:
+		case GL_UNSIGNED_SHORT:
+			return sizeof(GLshort);
+		case GL_INT:
+		case GL_UNSIGNED_INT:
+			return sizeof(GLint);
+		case GL_FLOAT:
+			return sizeof(GLfloat);
+		case GL_DOUBLE:
+			return sizeof(GLdouble);
+		default:
+			return 0;
 		}
 	}
 
@@ -32,16 +32,16 @@ namespace gl
 	{
 		switch (glEnum)
 		{
-			case GL_UNSIGNED_BYTE:
-				return "GL_UNSIGNED_BYTE";
-			case GL_BYTE:
-				return "GL_BYTE";
-			case GL_UNSIGNED_SHORT:
-				return "GL_UNSIGNED_SHORT";
-			case GL_SHORT:
-				return "GL_SHORT";
-			default:
-				return "UNKNOWN";
+		case GL_UNSIGNED_BYTE:
+			return "GL_UNSIGNED_BYTE";
+		case GL_BYTE:
+			return "GL_BYTE";
+		case GL_UNSIGNED_SHORT:
+			return "GL_UNSIGNED_SHORT";
+		case GL_SHORT:
+			return "GL_SHORT";
+		default:
+			return "UNKNOWN";
 		}
 	}
 
@@ -50,8 +50,8 @@ namespace gl
 		char* buf = (char*)buffer;
 		int rowSize = pixelSize * width;
 
-		std::vector<char> temp(rowSize);    
-		for (int i = 0; i < height/2; i++) {
+		std::vector<char> temp(rowSize);
+		for (int i = 0; i < height / 2; i++) {
 
 			// swap rows A and B
 			char* a = buf + i * rowSize;
@@ -129,5 +129,13 @@ namespace gl
 		{
 			return (1.0f / (1.0f + std::exp(-s * x)) - c) * d;
 		};
+	}
+
+	Vec2 denormalize(const Viewport& viewport, const Leap::Frame& frame, const Leap::Vector& vector)
+	{
+		Leap::Vector v = frame.interactionBox().normalizePoint(vector);
+		float x = viewport.x + viewport.width * v.x;
+		float y = viewport.y + viewport.height * v.y;
+		return{ x, y };
 	}
 }

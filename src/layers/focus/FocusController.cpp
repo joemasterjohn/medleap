@@ -12,8 +12,8 @@ FocusController::FocusController()
 
 void FocusController::gainFocus()
 {
-	MainController::getInstance().setMode(MainController::MODE_3D);
 	MainController::getInstance().showTransfer1D(false);
+	MainController::getInstance().setMode(MainController::MODE_3D);
 	VolumeController& vc = MainController::getInstance().volumeController();
 	vc.draw_bounds = true;
 	vc.draw_cursor3D = true;

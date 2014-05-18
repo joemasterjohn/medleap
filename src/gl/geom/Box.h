@@ -21,6 +21,7 @@ namespace gl
 		float width() const { return size_.x; }
 		float height() const { return size_.y; }
 		float length() const { return size_.z; }
+		Vec3 size() const { return size_; }
 		Vec3 center() const { return center_; }
 		Vec3 min() const { return min_; }
 		Vec3 max() const { return max_; }

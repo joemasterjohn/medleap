@@ -3,6 +3,8 @@
 
 #include "gl/glew.h"
 #include <functional>
+#include "gl/Viewport.h"
+#include <Leap.h>
 
 namespace gl
 {
@@ -48,6 +50,8 @@ namespace gl
 
 	/** f(x) = (a-c)/(b-c), a = 1/(1+exp(-sx)), b = 1/(1+exp(s)), c = 1/(1+exp(-s))  */
 	std::function<float(float)> exponentialL(float s);
+
+	Vec2 denormalize(const Viewport& viewport, const Leap::Frame& frame, const Leap::Vector& point);
 }
 
 #endif // __MEDLEAP_GL_UTIL__

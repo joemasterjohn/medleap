@@ -39,6 +39,10 @@ void Plane::distFromOrigin(float dist)
 	dist_origin_ = dist;
 }
 
+void Plane::point(const Vec3& point)
+{
+	dist_origin_ = normal_.dot(point);
+}
 
 Geometry Plane::triangles(unsigned u_segments, unsigned v_segments)
 {

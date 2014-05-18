@@ -45,6 +45,7 @@ SliceController::SliceController() :
 
 void SliceController::gainFocus()
 {
+	MainController::getInstance().showTransfer1D(false);
 	MainController::getInstance().setMode(MainController::MODE_2D);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();

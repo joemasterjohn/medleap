@@ -9,6 +9,7 @@
 #include "PointPose.h"
 #include "PointPose2H.h"
 #include "VPose.h"
+#include "PushPose.h"
 
 class PoseTracker
 {
@@ -26,6 +27,7 @@ public:
 	PointPose& point() { return point_; }
 	PointPose2H& point2() { return point2_; }
 	VPose& v() { return v_; }
+	PushPose& push() { return push_; }
 
 private:
 	CarryPose carry_;
@@ -36,6 +38,7 @@ private:
 	PointPose point_;
 	PointPose2H point2_;
 	VPose v_;
+	PushPose push_;
 };
 
 #endif

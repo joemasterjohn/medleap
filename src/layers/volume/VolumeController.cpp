@@ -79,6 +79,7 @@ VolumeController::VolumeController()
 
 void VolumeController::gainFocus()
 {
+	MainController::getInstance().showTransfer1D(false);
 	MainController::getInstance().setMode(MainController::MODE_3D);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();

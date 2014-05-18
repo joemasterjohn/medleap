@@ -67,26 +67,14 @@ float cursorAlpha(float value)
 	float x_w = (fs_voxel_position_ss.x + 1.0) * window_size.x * 0.5;
 	float y_w = (fs_voxel_position_ss.y + 1.0) * window_size.y * 0.5;
 
-	float d = length(vec2(x_w, y_w) - cursor_position_ss.xy);
-
 	bool in_front = dot((fs_voxel_position_es - cursor_position_es), cursor_position_es) < 0.0;
-	bool in_circle = d < cursor_radius_ss;
-	bool context = texture(tex_context, value).r < 0.5;
+	bool in_circle = (length(vec2(x_w, y_w) - cursor_position_ss.xy)) < cursor_radius_ss;
 
-	if (in_front && in_circle && context) {
-		return 0.0;
+	if (in_front && in_circle) {
+		return texture(tex_context, value).r;
 	} else {
 		return 1.0;
 	}
-
-
-	//if (inCursorZone && frontAOI) {
-		//float dd = length(fs_voxel_position_ws - cursor_position) - cursor_radius_ws;
-		//return max(1.0 - dd / cursor_radius_ws, 0.0);
-	//	return max(0.0, 1.0 - (length(fs_voxel_position_ws - cursor_position) - cursor_radius_ws) * 4.0);
-	//}
-
-	//return 1.0;
 }
 
 void main()
@@ -157,8 +145,6 @@ void main()
 		}
 
 		color.rgb = vec3(1.0);
-
-
 
 		// apply lighting
 		if (use_shading) {
