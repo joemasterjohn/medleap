@@ -32,7 +32,7 @@ CLUT::Marker& CLUT::Marker::interval(const Interval& interval)
 
 CLUT::Marker& CLUT::Marker::context(bool context)
 {
-	context_ = true;
+	context_ = context;
 	return *this;
 }
 

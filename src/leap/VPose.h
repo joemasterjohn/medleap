@@ -24,6 +24,8 @@ public:
 	/** Middle finger state when engaged */
 	Leap::Finger middleEngaged() const  { return handEngaged().fingers()[Leap::Finger::TYPE_MIDDLE]; }
 
+	Leap::Hand handClosed() const { return hand_closed_; }
+
 	/** Millimeters between index and middle fingers above which fingers are considered open. */
 	void maxSeparation(float separation) { max_separation_ = separation; }
 
@@ -41,6 +43,7 @@ protected:
 private:
 	bool closed_;
 	float max_separation_;
+	Leap::Hand hand_closed_;
 	std::function<void(const Leap::Frame&)> open_fn_;
 	std::function<void(const Leap::Frame&)> close_fn_;
 };

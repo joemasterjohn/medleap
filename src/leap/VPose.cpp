@@ -65,6 +65,7 @@ void VPose::track(const Leap::Frame& frame)
 	if (open_fn_ && was_closed && !closed_) {
 		open_fn_(frame);
 	} else if (close_fn_ && !was_closed && closed_) {
+		hand_closed_ = hand();
 		close_fn_(frame);
 	}
 }

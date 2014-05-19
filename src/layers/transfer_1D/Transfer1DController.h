@@ -10,20 +10,15 @@
 #include "gl/Program.h"
 #include "gl/Buffer.h"
 #include "gl/math/Math.h"
-#include "Histogram.h"
 #include "CLUT.h"
-#include "leap/PinchPose.h"
-#include "leap/LPose.h"
-#include "leap/PointPose2H.h"
+#include "leap/PoseTracker.h"
 #include "util/TextRenderer.h"
 #include "gl/util/Draw.h"
 
 class Transfer1DController : public Controller
 {
 public:
-
     Transfer1DController();
-    ~Transfer1DController();
     void setVolume(VolumeData* volume);
     
     bool keyboardInput(GLFWwindow* window, int key, int action, int mods) override;
@@ -45,9 +40,10 @@ public:
 private:
     bool lMouseDrag, rMouseDrag;
     VolumeData* volume;
-    GLubyte* transfer1DPixels;
 	float cursor_center_;
     
+	bool dirty_textures_;
+
     VolumeController* volumeRenderer;
     SliceController* sliceRenderer;
     std::vector<CLUT> cluts;
@@ -56,9 +52,7 @@ private:
 
 	// leap
 	LeapCameraControl camera_control_;
-	PinchPose pinch_pose_;
-	LPose l_pose_;
-	PointPose2H point_2_pose_;
+	PoseTracker poses_;
 	Interval saved_interval_;
 	float saved_hand_sep_;
 	gl::Vec2 leap_cursor_;
@@ -73,7 +67,6 @@ private:
 	GLuint vbo; // TODO: replace with object
 	GLsizei stride;
 	gl::Mat4 histoModelMatrix;
-	Histogram* histogram;
 	int cursorX, cursorY;
 	float cursorShaderOffset;
 	float cursorValue;
@@ -88,17 +81,22 @@ private:
 	gl::Texture contextTexture;
 	gl::Draw colorStops;
 
-
-	void editInterval(float center, float width);
-	void moveAndScale(const Leap::Controller& controller);
-
-	void nextCLUT();
-	void prevCLUT();
+	CLUT& currentCLUT();
 
 	void drawMarkerBar();
 	void drawBackground();
 	void drawHistogram();
 
+	void nextCLUT();
+	void prevCLUT();
+	void markDirty();
+	void updateTextures();
+	void updateSelected(float cursor);
+	void toggleSelectedContext();
+	void moveSelected();
+	void scaleSelected(float width);
+	void addMarker();
+	void deleteMarker();
 };
 
 #endif /* defined(__medleap__Transfer1DController__) */

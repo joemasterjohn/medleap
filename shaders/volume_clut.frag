@@ -71,7 +71,8 @@ float cursorAlpha(float value)
 	bool in_circle = (length(vec2(x_w, y_w) - cursor_position_ss.xy)) < cursor_radius_ss;
 
 	if (in_front && in_circle) {
-		return texture(tex_context, value).r;
+		float scale = texture(tex_context, value).r;
+		return scale * scale;
 	} else {
 		return 1.0;
 	}

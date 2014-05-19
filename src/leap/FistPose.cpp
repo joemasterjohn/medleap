@@ -4,7 +4,6 @@ using namespace Leap;
 
 FistPose::FistPose() : state_(State::open)
 {
-	minValidFrames(5);
 	maxHandEngageSpeed(175.0f);
 }
 

@@ -17,7 +17,7 @@ bool PushPose::shouldEngage(const Frame& frame)
 		return false;
 	}
 
-	if (hand().palmNormal().dot(-Vector::zAxis()) < 0.7f) {
+	if (hand().palmNormal().dot(-Vector::zAxis()) < 0.5f) {
 		return false;
 	}
 
@@ -30,7 +30,7 @@ bool PushPose::shouldDisengage(const Frame& frame)
 		return true;
 	}
 
-	if (hand().palmNormal().dot(-Vector::zAxis()) < 0.7f) {
+	if (hand().palmNormal().dot(-Vector::zAxis()) < 0.5f) {
 		return true;
 	}
 

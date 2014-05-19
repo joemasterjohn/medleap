@@ -1,15 +1,19 @@
 #include "Transfer1DController.h"
 #include "main/MainController.h"
+#include "util/Util.h"
+#include "Histogram.h"
 
 using namespace gl;
 using namespace std;
+using namespace Leap;
 
-Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels(NULL)
+Transfer1DController::Transfer1DController()
 {
     lMouseDrag = false;
     rMouseDrag = false;
 	leap_drag_performed_ = false;
 	selected_ = nullptr;
+	dirty_textures_ = true;
     
 	volumeRenderer = NULL;
 
@@ -78,8 +82,6 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 	stride = 4 * sizeof(GLfloat);
 
-
-
 	{
 		bgShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 		bgShader.enable();
@@ -100,26 +102,21 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 
 	clutTexture.generate(GL_TEXTURE_1D);
 	contextTexture.generate(GL_TEXTURE_1D);
-	cluts[activeCLUT].saveTexture(clutTexture);
-	cluts[activeCLUT].saveContext(contextTexture);
+	updateTextures();
 
-	pinch_pose_.openFn([&](const Leap::Frame&){leap_drag_performed_ = false; });
-	pinch_pose_.disengageFunction([&](const Leap::Frame&){leap_drag_performed_ = false; });
-	pinch_pose_.closeFn([&](const Leap::Frame&){
+	poses_.v().enabled(true);
+	poses_.v().openFn([&](const Leap::Frame&){leap_drag_performed_ = false; });
+	poses_.v().disengageFunction([&](const Leap::Frame&){leap_drag_performed_ = false; });
+	poses_.v().closeFn([&](const Leap::Frame&) {
 		static std::chrono::high_resolution_clock::time_point last_close = std::chrono::high_resolution_clock::now();
 
 		auto now = std::chrono::high_resolution_clock::now();
 		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_close);
 		last_close = now;
-		cout << elapsed.count() << endl;
 
-		if (pinch_pose_.isPinching()) {
-			selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
-			if (abs(selected_->interval().center() - cursor_center_) < 0.1f) {
-				saved_interval_ = selected_->interval();
-			} else {
-				selected_ = nullptr;
-			}
+		selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
+		if (abs(selected_->interval().center() - cursor_center_) < 0.1f) {
+			saved_interval_ = selected_->interval();
 		} else {
 			selected_ = nullptr;
 		}
@@ -131,38 +128,28 @@ Transfer1DController::Transfer1DController() : histogram(NULL), transfer1DPixels
 				cluts[activeCLUT].saveTexture(clutTexture);
 				cluts[activeCLUT].saveContext(contextTexture);
 				volumeRenderer->markDirty();
-				l_pose_.tracking(false);
 			};
 			MainController::getInstance().pickColor(selected_->color(), cb);
 		}
 	});
 
-	l_pose_.minValidFrames(5);
-	l_pose_.openFn([&](const Leap::Frame&){leap_drag_performed_ = false; });
-	l_pose_.disengageFunction([&](const Leap::Frame&){leap_drag_performed_ = false; });
-	l_pose_.clickFn([&](const Leap::Frame&) {
+	poses_.pinch().enabled(true);
+	poses_.pinch().closeFn([&](const Leap::Frame&){
+		// toggle context
 		selected_ = cluts[activeCLUT].closestMarker(cursor_center_);
-		auto cb = [&](const Color& color) {
-			selected_->color(color);
-			cluts[activeCLUT].saveTexture(clutTexture);
+		if (selected_) {
+			selected_->context(!selected_->context());
 			cluts[activeCLUT].saveContext(contextTexture);
 			volumeRenderer->markDirty();
-			l_pose_.tracking(false);
-		};
-		MainController::getInstance().pickColor(selected_->color(), cb);
+		}
 	});
 
-	point_2_pose_.disengageOnExit(true);
-	point_2_pose_.exitSpeed(300.0f);
-	point_2_pose_.engageFunction([&](const Leap::Frame&){
+	poses_.point2().enabled(true);
+	poses_.point2().disengageOnExit(true);
+	poses_.point2().exitSpeed(300.0f);
+	poses_.point2().engageFunction([&](const Leap::Frame&){
 		saved_interval_ = cluts[activeCLUT].interval();
 	});
-}
-
-Transfer1DController::~Transfer1DController()
-{
-    if (transfer1DPixels)
-        delete transfer1DPixels;
 }
 
 void Transfer1DController::gainFocus()
@@ -192,64 +179,36 @@ void Transfer1DController::setVolume(VolumeData* volume)
 {
     this->volume = volume;
     
-    if (histogram)
-        delete histogram;
+	// create histogram geometry
     
     // 512 bins is somewhat arbitrary; consider adding customization later
     int numBins = 512;
-    histogram = new Histogram(volume->getMinValue(), volume->getMaxValue(), numBins);
+    Histogram histogram(volume->getMinValue(), volume->getMaxValue(), numBins);
     
     switch (volume->getType())
     {
         case GL_BYTE:
-            histogram->readData((GLbyte*)volume->getData(), volume->getNumVoxels());
+            histogram.readData((GLbyte*)volume->getData(), volume->getNumVoxels());
             break;
         case GL_UNSIGNED_BYTE:
-            histogram->readData((GLubyte*)volume->getData(), volume->getNumVoxels());
+			histogram.readData((GLubyte*)volume->getData(), volume->getNumVoxels());
             break;
         case GL_SHORT:
-            histogram->readData((GLshort*)volume->getData(), volume->getNumVoxels());
+			histogram.readData((GLshort*)volume->getData(), volume->getNumVoxels());
             break;
         case GL_UNSIGNED_SHORT:
-            histogram->readData((GLushort*)volume->getData(), volume->getNumVoxels());
+			histogram.readData((GLushort*)volume->getData(), volume->getNumVoxels());
             break;
     }
     
-	this->histogram = histogram;
-	//int drawWidth = histogram->getNumBins();
-	//int drawHeight = 256;
-
-	//std::vector<unsigned char> pixels(drawWidth * drawHeight);
-	//std::fill(pixels.begin(), pixels.end(), 0);
-
-	double logMaxFreq = std::log(histogram->getMaxFrequency() + 1);
-
-	//for (int bin = 0; bin < histogram->getNumBins(); bin++) {
-	//	int size = histogram->getSize(bin);
-	//	double sizeNorm = std::log(size + 1) / logMaxFreq;
-
-	//	int binHeight = (int)(sizeNorm * drawHeight);
-
-	//	for (int j = 0; j < binHeight; j++) {
-	//		pixels[bin + j * drawWidth] = 255;
-	//	}
-	//}
-
-	//histo1D.bind();
-	//histo1D.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//histo1D.setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//histo1D.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	//histo1D.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	//histo1D.setData2D(GL_RED, drawWidth, drawHeight, GL_RED, GL_UNSIGNED_BYTE, &pixels[0]);
-
+	double logMaxFreq = std::log(histogram.getMaxFrequency() + 1);
 
 	// histo vbo triangle strip
 	{
 		vector<Vec2> buffer;
-		for (unsigned i = 0; i < histogram->getNumBins(); ++i) {
-			float x = (float)i / (histogram->getNumBins() - 1);
-			float y = std::log(histogram->getSize(i) + 1) / logMaxFreq;
+		for (unsigned i = 0; i < histogram.getNumBins(); ++i) {
+			float x = (float)i / (histogram.getNumBins() - 1);
+			float y = std::log(histogram.getSize(i) + 1) / logMaxFreq;
 			x = (x - 0.5f) * 2.0f;
 			y = (y - 0.5f) * 2.0f;
 			buffer.push_back({ x, y });
@@ -261,10 +220,6 @@ void Transfer1DController::setVolume(VolumeData* volume)
 		histoVBO.data(&buffer[0], buffer.size() * sizeof(Vec2));
 		histoVBOCount = buffer.size();
 	}
-    
-    if (transfer1DPixels)
-        delete transfer1DPixels;
-    transfer1DPixels = new GLubyte[histogram->getNumBins() * 256]; // 256 is height (shouldn't be hardcoded)
 }
 
 void Transfer1DController::setVolumeRenderer(VolumeController* volumeRenderer)
@@ -376,83 +331,39 @@ bool Transfer1DController::mouseButton(GLFWwindow* window, int button, int actio
 
 bool Transfer1DController::leapInput(const Leap::Controller& leapController, const Leap::Frame& frame)
 {
-	using namespace Leap;
+	poses_.update(frame);
 
-	point_2_pose_.update(frame);
-	if (point_2_pose_.tracking()) {
-		float c = saved_interval_.center() + point_2_pose_.handsCenterDeltaEngaged(true).x / 400.0f;
+	if (poses_.point2().tracking()) {
+		// scale clut interval
+		float c = saved_interval_.center() + poses_.point2().handsCenterDeltaEngaged(true).x / 400.0f;
 		cluts[activeCLUT].interval().center(c);
 
-		float delta_width = point_2_pose_.handsSeparationDeltaEngaged(true);
+		float delta_width = poses_.point2().handsSeparationDeltaEngaged(true);
 		float w = std::max(0.0f, saved_interval_.width() + delta_width / 400.0f);
 		cluts[activeCLUT].interval().width(w);
 
-		cluts[activeCLUT].saveTexture(clutTexture);
-		cluts[activeCLUT].saveContext(contextTexture);
-		volumeRenderer->markDirty();
+		markDirty();
 		return false;
 	}
 
-	//l_pose_.update(frame);
-	//if (l_pose_.tracking()) {
-	//	InteractionBox ib = frame.interactionBox();
-	//	Vector v = ib.normalizePoint(l_pose_.pointer().stabilizedTipPosition());
-	//	cursor_center_ = v.x;
-	//	leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height) + Vec2(viewport_.x, viewport_.y);
+	if (poses_.v().tracking()) {
+		cursor_center_ = frame.interactionBox().normalizePoint(poses_.v().handPosition(true)).x;
+		leap_cursor_ = denormalize(viewport_, frame, poses_.v().handPosition(true));
 
-	//	if (l_pose_.isClosed() && !leap_drag_performed_) {
-	//		Vector dp = l_pose_.pointer().tipPosition() - l_pose_.pointerClosed().tipPosition();
-	//		if (dp.y > 35) {
-	//			leap_drag_performed_ = true;
-	//			Interval interval(cursor_center_, 0.2f);
-	//			ColorRGB marker_color{ .5f, .5f, .5f, 1.0f };
-	//			cluts[activeCLUT].addMarker(CLUT::Marker({ interval, marker_color }));
-	//			cluts[activeCLUT].saveTexture(clutTexture);
-	//			volumeRenderer->markDirty();
-	//		} else if (dp.y < -35) {
-	//			if (!cluts[activeCLUT].markers().empty()) {
-	//				leap_drag_performed_ = true;
-	//				cluts[activeCLUT].removeMarker(cursor_center_);
-	//				cluts[activeCLUT].saveTexture(clutTexture);
-	//				volumeRenderer->markDirty();
-	//			}
-	//		}
-	//	}
+		if (poses_.v().isClosed() && !leap_drag_performed_) {
 
-	//	return false;
-	//}
-
-	pinch_pose_.update(frame);
-	if (pinch_pose_.tracking()) {
-		InteractionBox ib = frame.interactionBox();
-
-		Vector v = ib.normalizePoint(pinch_pose_.hand().stabilizedPalmPosition());
-
-		cursor_center_ = v.x;
-		leap_cursor_ = Vec2(v.x, v.y) * Vec2(viewport_.width, viewport_.height) + Vec2(viewport_.x, viewport_.y);
-
-		if (pinch_pose_.isPinching()) {
-			if (!leap_drag_performed_ && pinch_pose_.hand().palmVelocity().z < -250 && !selected_) {
-				leap_drag_performed_ = true;
-				Interval interval(cursor_center_, 0.2f);
-				Vec3 c = Vec3::random();
-				ColorRGB marker_color{ c.x, c.y, c.z, 1.0f };
-				cluts[activeCLUT].addMarker(CLUT::Marker({ interval, marker_color }));
-				cluts[activeCLUT].saveTexture(clutTexture);
-				cluts[activeCLUT].saveContext(contextTexture);
-				volumeRenderer->markDirty();
-			} else if (!leap_drag_performed_ && pinch_pose_.hand().palmVelocity().z > 250 && selected_ && !cluts[activeCLUT].markers().empty()) {
-				leap_drag_performed_ = true;
-				cluts[activeCLUT].removeMarker(selected_->interval().center());
-				cluts[activeCLUT].saveTexture(clutTexture);
-				cluts[activeCLUT].saveContext(contextTexture);
-				volumeRenderer->markDirty();
-			} else if (selected_ && !leap_drag_performed_){
-				Vector l = ib.normalizePoint(pinch_pose_.hand().stabilizedPalmPosition()) - ib.normalizePoint(pinch_pose_.handPinched().stabilizedPalmPosition());
-				float width = saved_interval_.width() + l.y;
-				if (pinch_pose_.isPinching()) {
-					editInterval(cursor_center_, width);
-				}
+			if (poses_.v().hand().palmVelocity().z < -250 && !selected_) {
+				addMarker();
+			} else if (poses_.v().hand().palmVelocity().z > 250 && selected_ && !cluts[activeCLUT].markers().empty()) {
+				deleteMarker();
+			} else if (selected_) {
+				Vector d = poses_.v().handPositionDelta(true);
+				Vector hand_velocity = poses_.v().hand().palmVelocity();
+				float delta_width = poses_.v().handPositionDelta(true).y / 200.0f;
+				delta_width *= max(0.0f, 1.0f - hand_velocity.x * hand_velocity.x / 10000.0f);
+				float width = selected_->interval().width() + delta_width;
+				moveSelected();
+				scaleSelected(width);
 			}
 		}
 	}
@@ -481,26 +392,6 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 	return false;
 }
 
-void Transfer1DController::editInterval(float center, float width)
-{
-	selected_->interval({ center, width });
-	cluts[activeCLUT].saveTexture(clutTexture);
-	cluts[activeCLUT].saveContext(contextTexture);
-	volumeRenderer->markDirty();
-}
-
-void Transfer1DController::moveAndScale(const Leap::Controller& controller)
-{
-	//float c = saved_interval_.center() + finger_tracker_.centerDelta().x / 400.0f;
-	//cluts[activeCLUT].interval().center(c);
-
-	//float w = std::max(0.0f, saved_interval_.width() + finger_tracker_.fingerGapDelta() / 400.0f);
-	//cluts[activeCLUT].interval().width(w);
-
-	//cluts[activeCLUT].saveTexture(clutTexture);
-	//volumeRenderer->markDirty();
-}
-
 std::set<Leap::Gesture::Type> Transfer1DController::requiredGestures()
 {
 	std::set<Leap::Gesture::Type> gestures;
@@ -508,26 +399,12 @@ std::set<Leap::Gesture::Type> Transfer1DController::requiredGestures()
 	return gestures;
 }
 
-void Transfer1DController::nextCLUT()
-{
-	if (++activeCLUT == cluts.size())
-		activeCLUT = 0;
-	cluts[activeCLUT].saveTexture(clutTexture);
-	cluts[activeCLUT].saveContext(contextTexture);
-	volumeRenderer->markDirty();
-}
-
-void Transfer1DController::prevCLUT()
-{
-	if (--activeCLUT < 0)
-		activeCLUT = cluts.size() - 1;
-	cluts[activeCLUT].saveTexture(clutTexture);
-	cluts[activeCLUT].saveContext(contextTexture);
-	volumeRenderer->markDirty();
-}
-
 void Transfer1DController::draw()
 {
+	if (dirty_textures_) {
+		updateTextures();
+	}
+
 	static const int totalHeight = 80;
 	static const float colorBarHeight = 0.3f;
 	static const int histoHeight = totalHeight;
@@ -540,7 +417,7 @@ void Transfer1DController::draw()
 
 	viewport_.apply();
 
-	if (pinch_pose_.tracking() || l_pose_.tracking()) {
+	// draw leap cursor
 		Draw& d = MainController::getInstance().draw();
 		d.setModelViewProj(viewport_.orthoProjection());
 		d.begin(GL_LINES);
@@ -548,43 +425,56 @@ void Transfer1DController::draw()
 		d.line(cursor_center_ * viewport_.width + viewport_.x, viewport_.y, cursor_center_ * viewport_.width + viewport_.x, viewport_.top());
 		d.end();
 		d.draw();
-	}
+	
 }
 
 void Transfer1DController::drawMarkerBar()
 {
 	static Draw d;
+
+	viewport_.apply();
+
+	float outer_height = viewport_.height * 0.3f;
+	float outer_side = 2.0f * outer_height / sqrt(3);
+	float inner_height = outer_height * 0.75f;
+	float inner_side = 2.0f * inner_height / sqrt(3);
+
+	d.setModelViewProj(viewport_.orthoProjection());
 	d.begin(GL_TRIANGLES);
 	for (const CLUT::Marker& marker : cluts[activeCLUT].markers()) {
 		Vec3 c = marker.color().vec3();
-		float x = marker.interval().center();
 
+		float x;
 		if (cluts[activeCLUT].mode() == CLUT::continuous) {
-			x = x * cluts[activeCLUT].interval().width() + cluts[activeCLUT].interval().left();
+			x = marker.interval().center() * cluts[activeCLUT].interval().width() + cluts[activeCLUT].interval().left();
+			x = viewport_.x + viewport_.width * x;
+		} else {
+			x = viewport_.x + viewport_.width * marker.interval().center();
 		}
 
-		float max_scale = 1.5f;
-		float scale_cutoff = 0.2f;
-		float dist = abs(x - cursor_center_);
-		float scale = max(1.0f, max_scale - dist / scale_cutoff);
-		
+		float scale = 1.0f;
 
-		// [0,1] to [-1,1]
-		x = (x - 0.5f) * 2.0f;
+		// outer triangle with context highlight
+		float half_side = outer_side * scale * 0.5f;
+		float l = x - half_side;
+		float r = x + half_side;
+		if (marker.context()) {
+			d.color(.25f, .25f, .25f);
+		} else {
+			d.color(1.0f, 1.0f, 1.0f);
+		}
+		d.vertex(l, 0.0f);
+		d.vertex(x, outer_height * scale);
+		d.vertex(r, 0.0f);
 
-		float l = x - 0.05f * 800.0f / viewport_.width;
-		float r = x + 0.05f * 800.0f / viewport_.width;
-		d.color(.5f, .5f, .5f);
-		d.vertex(l, -1);
-		d.vertex(x, .6f);
-		d.vertex(r, -1);
-
+		// inner triangle with marker color
+		half_side = inner_side * scale * 0.5f;
+		l = x - half_side;
+		r = x + half_side;
 		d.color(c.x, c.y, c.z);
-		l = x - 0.04f * 800.0f / viewport_.width;
-		r = x + 0.04f * 800.0f / viewport_.width;
-		d.vertex(l, -1);
-		d.vertex(x, .5f);
-		d.vertex(r, -1);
+		d.vertex(l, 0.0f);
+		d.vertex(x, inner_height);
+		d.vertex(r, 0.0f);
 	}
 	d.end();
 	d.draw();
@@ -606,7 +496,7 @@ void Transfer1DController::drawBackground()
 
 void Transfer1DController::drawHistogram()
 {
-	contextTexture.bind();
+	clutTexture.bind();
 	histoVBO.bind();
 	histoProg.enable();
 	glEnableVertexAttribArray(0);
@@ -617,4 +507,90 @@ void Transfer1DController::drawHistogram()
 	histoOutlineProg.uniform("color", 0.5f, 0.5f, 0.5f, 1.0f);
 	glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * sizeof(GLfloat), 0);
 	glDrawArrays(GL_LINE_STRIP, 0, histoVBOCount / 2);
+}
+
+CLUT& Transfer1DController::currentCLUT()
+{
+	return cluts[activeCLUT];
+}
+
+void Transfer1DController::nextCLUT()
+{
+	if (cluts.size() > 1) {
+		activeCLUT++;
+		if (activeCLUT == cluts.size()) {
+			activeCLUT = 0;
+		}
+		markDirty();
+	}
+}
+
+void Transfer1DController::prevCLUT()
+{
+	if (cluts.size() > 1) {
+		activeCLUT--;
+		if (activeCLUT < 0) {
+			activeCLUT = cluts.size() - 1;
+		}
+		markDirty();
+	}
+}
+
+void Transfer1DController::updateTextures()
+{
+	currentCLUT().saveTexture(clutTexture);
+	currentCLUT().saveContext(contextTexture);
+	dirty_textures_ = false;
+}
+
+void Transfer1DController::markDirty()
+{
+	dirty_textures_ = true;
+	volumeRenderer->markDirty();
+}
+
+void Transfer1DController::updateSelected(float cursor)
+{
+	selected_ = cluts[activeCLUT].closestMarker(cursor);
+}
+
+void Transfer1DController::toggleSelectedContext()
+{
+	if (selected_) {
+		selected_->context(!selected_->context());
+		markDirty();
+	}
+}
+
+void Transfer1DController::moveSelected()
+{
+	if (selected_) {
+		selected_->interval({ cursor_center_, selected_->interval().width() });
+		markDirty();
+	}
+}
+
+void Transfer1DController::scaleSelected(float width)
+{
+	if (selected_) {
+		selected_->interval({ selected_->interval().center(), width });
+		markDirty();
+	}
+}
+
+void Transfer1DController::addMarker()
+{
+	leap_drag_performed_ = true;
+	Vec3 c = Vec3::random();
+	currentCLUT().addMarker(CLUT::Marker({ { cursor_center_, 0.2f }, { c.x, c.y, c.z, 1.0f } }));
+	markDirty();
+}
+
+void Transfer1DController::deleteMarker()
+{
+	if (selected_) {
+		leap_drag_performed_ = true;
+		cluts[activeCLUT].removeMarker(selected_->interval().center());
+		markDirty();
+	}
 }
