@@ -48,6 +48,8 @@ LeapStateController::LeapStateController() : active_(icon_none)
 	icon_vbo_.data(vertices, sizeof(vertices));
 
 	icon_prog_ = Program::create("shaders/icon.vert", "shaders/icon.frag");
+
+	text_.loadFont("menlo14");
 }
 
 void LeapStateController::clear()
@@ -109,14 +111,17 @@ void LeapStateController::draw()
 	
 	glDisable(GL_BLEND);
 
-	TextRenderer& text = MainController::getInstance().getText();
 	rendered = 0;
-	text.begin(viewport_.width, viewport_.height);
+	text_.clear();
+	text_.color(MainController::getInstance().getRenderer().getInverseBGColor());
+	text_.viewport(viewport_);
+	text_.hAlign(TextRenderer::HAlign::center);
+	text_.vAlign(TextRenderer::VAlign::center);
 	offset += padding / 2;
 	for (DisplayedIcon& d : displayed_) {
-		text.add(d.label, viewport_.width / 2, offset + (padding + viewport_.width) * rendered++, TextRenderer::CENTER, TextRenderer::CENTER);
+		text_.add(d.label, viewport_.width / 2, offset + (padding + viewport_.width) * rendered++);
 	}
-	text.end();
+	text_.draw();
 
 	Draw& draw = MainController::getInstance().draw();
 	draw.setModelViewProj(m_proj);

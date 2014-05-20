@@ -54,6 +54,7 @@ private:
 
 	void resize() override;
 	void quad(gl::Program prog, const gl::Rectangle<float>& rect);
+	void updateText();
 };
 
 #endif // medleap_ColorPickController_h

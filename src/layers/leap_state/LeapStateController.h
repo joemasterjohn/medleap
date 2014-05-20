@@ -5,6 +5,7 @@
 #include "gl/Buffer.h"
 #include "gl/Program.h"
 #include "gl/Texture.h"
+#include "util/TextRenderer.h"
 #include <vector>
 #include <set>
 
@@ -39,6 +40,7 @@ private:
 		std::string label;
 	};
 	
+	TextRenderer text_;
 	std::vector<gl::Texture> textures_;
 	std::vector<DisplayedIcon> displayed_;
 	Icon active_;

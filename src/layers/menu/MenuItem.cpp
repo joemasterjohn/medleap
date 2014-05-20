@@ -4,10 +4,6 @@ MenuItem::MenuItem(std::string name, Action action) : name(name), action(action)
 {
 }
 
-MenuItem::~MenuItem()
-{
-}
-
 void MenuItem::trigger()
 {
 	if (action)

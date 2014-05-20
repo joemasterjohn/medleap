@@ -154,7 +154,6 @@ void ColorPickController::resize()
 	circle_rect_.width = circleRadius * 2.0f;
 	circle_rect_.height = circleRadius * 2.0f;
 
-
 	alpha_rect_.x = circle_rect_.left() - barSize * 5;
 	alpha_rect_.y = circle_rect_.bottom();
 	alpha_rect_.width = barSize;
@@ -169,6 +168,25 @@ void ColorPickController::resize()
 	select_rect_.y = circle_rect_.y - barSize * 4;
 	select_rect_.width = circle_rect_.width / 2;
 	select_rect_.height = barSize * 3;
+
+	updateText();
+}
+
+void ColorPickController::updateText()
+{
+	text_.clear();
+	text_.viewport(viewport_);
+	text_.hAlign(TextRenderer::HAlign::center);
+	text_.vAlign(TextRenderer::VAlign::center);
+	text_.color(1.0f, 1.0f, 1.0f);
+
+	stringstream ss;
+	ss << "Opacity: " << fixed << setprecision(2) << color_.alpha();
+	text_.add(ss.str(), alpha_rect_.center().x, alpha_rect_.bottom() - viewport_.y - 24);
+	
+	ss.str("");
+	ss << "Brightness: " << color_.value();
+	text_.add(ss.str(), value_rect_.center().x, alpha_rect_.bottom() - viewport_.y - 24);
 }
 
 void ColorPickController::draw()
@@ -231,18 +249,7 @@ void ColorPickController::draw()
 		color_cursor_.draw();
 	}
 
-
-	// text
-	text_.begin(viewport_.width, viewport_.height);
-	text_.setColor(1, 1, 1);
-
-	stringstream ss;
-	ss << "Opacity: " << fixed << setprecision(2) << color_.alpha();
-	text_.add(ss.str(), alpha_rect_.center().x, alpha_rect_.bottom() - viewport_.y - 24, TextRenderer::CENTER, TextRenderer::CENTER);
-	ss.str("");
-	ss << "Brightness: " << color_.value();
-	text_.add(ss.str(), value_rect_.center().x, alpha_rect_.bottom() - viewport_.y - 24, TextRenderer::CENTER, TextRenderer::CENTER);
-	text_.end();
+	text_.draw();
 }
 
 void ColorPickController::quad(Program prog, const Rectangle<float>& rect)

@@ -21,10 +21,10 @@ namespace gl
 
 		Mat4 orthoProjection() const {
 			return ortho2D(
-				static_cast<float>(left()), 
-				static_cast<float>(right()),
-				static_cast<float>(bottom()),
-				static_cast<float>(top()));
+				0.0f,
+				width,
+				0.0f,
+				height);
 		}
     };
     

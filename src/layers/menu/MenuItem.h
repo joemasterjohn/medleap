@@ -14,9 +14,6 @@ public:
 	/** Creates a new menu item with an optional action in the constructor */
 	MenuItem(std::string name, Action action = nullptr);
 
-	/** Destructor for the menu item */
-	~MenuItem();
-
 	/** Triggers the menu item, which will notify the listener */
 	void trigger();
 

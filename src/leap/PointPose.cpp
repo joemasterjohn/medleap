@@ -4,7 +4,6 @@ using namespace Leap;
 
 PointPose::PointPose(Pose1H::TrackedHand tracked) : Pose1H(tracked)
 {
-	maxHandEngageSpeed(35.0f);
 }
 
 bool PointPose::shouldEngage(const Leap::Frame& frame)

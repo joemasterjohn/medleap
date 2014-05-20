@@ -6,6 +6,7 @@
 #include "data/VolumeData.h"
 #include "gl/Buffer.h"
 #include "gl/Program.h"
+#include "util/TextRenderer.h"
 
 /** Draws orientation cube in corner */
 class OrientationController : public Controller
@@ -17,6 +18,7 @@ public:
 	void draw() override;
 
 private:
+	TextRenderer text_;
 	Camera* camera_;
 	VolumeData* volume_;
 	gl::Buffer cube_vbo_;

@@ -3,8 +3,6 @@
 #include "util/Util.h"
 #include "gl/math/Math.h"
 #include "main/MainController.h"
-
-#include "DirectoryMenu.h"
 #include "MainMenu.h"
 
 using namespace std;
@@ -19,6 +17,8 @@ MenuController::MenuController() :
 	menuVBO.generateVBO(GL_STATIC_DRAW);
 	menuIBO.generateIBO(GL_STATIC_DRAW);
 	menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
+
+	text_.loadFont("menlo18");
 }
 
 void MenuController::loseFocus()
@@ -306,11 +306,13 @@ void MenuController::draw()
 			d.end();
 			d.draw();
 
-			TextRenderer& text = MainController::getInstance().getText();
-			text.begin(viewport_.width, viewport_.height);
-			text.setColor(1.0f, 1.0f, 1.0f);
-			text.add("Menu", c.x, c.y, TextRenderer::CENTER, TextRenderer::CENTER);
-			text.end();
+			text_.clear();
+			text_.hAlign(TextRenderer::HAlign::center);
+			text_.vAlign(TextRenderer::VAlign::center);
+			text_.viewport(viewport_);
+			text_.color(1.0f, 1.0f, 1.0f);
+			text_.add("Menu", c.x, c.y);
+			text_.draw();
 		}
 
 		d.color(0, 0, 0);
@@ -329,42 +331,35 @@ void MenuController::draw()
 
 void MenuController::drawMenu(Menu& menu, Vec3 textColor1, Vec3 textColor2)
 {
-	TextRenderer& text = MainController::getInstance().getText();
+	text_.clear();
+	text_.hAlign(TextRenderer::HAlign::center);
+	text_.vAlign(TextRenderer::VAlign::top);
+	text_.viewport(viewport_);
 
-	text.begin(viewport_.width, viewport_.height);
+	text_.color(textColor1);
+	text_.add(menu.getName(), viewport_.width / 2, viewport_.height);
 
-	text.setColor(textColor1.x, textColor1.y, textColor1.z);
-	text.add(
-		menu.getName(),
-		viewport_.width / 2,
-		viewport_.height,
-		TextRenderer::CENTER,
-		TextRenderer::TOP);
+	text_.vAlign(TextRenderer::VAlign::center);
 
 	double radius = std::min(viewport_.width, viewport_.height) * 0.5 * 0.7;
 	double angleStep = gl::two_pi / menu.getItems().size();
 	double angle = angleStep / 2.0;
-	for (MenuItem& item : menu.getItems()) {
+
+	for (int i = 0; i < menu.items().size(); i++) {
 		int x = static_cast<int>(std::cos(angle) * radius + viewport_.width / 2);
 		int y = static_cast<int>(std::sin(angle) * radius + viewport_.height / 2);
-		text.add(item.getName(), x, y, TextRenderer::CENTER, TextRenderer::CENTER);
+
+		if (i == selected_) {
+			text_.color(textColor2);
+		} else {
+			text_.color(textColor1);
+		}
+
+		text_.add(menu.items()[i].getName(), x, y);
 		angle += angleStep;
 	}
 
-	text.end();
-
-	// draw highlighted
-	if (selected_ >= 0 && selected_ < menu.getItems().size()) {
-		double angle = angleStep * selected_ + angleStep / 2.0;
-		int x = static_cast<int>(std::cos(angle) * radius + viewport_.width / 2);
-		int y = static_cast<int>(std::sin(angle) * radius + viewport_.height / 2);
-
-		text.setColor(textColor2.x, textColor2.y, textColor2.z);
-		text.begin(viewport_.width, viewport_.height);
-		text.add(menu.getItems()[selected_].getName(), x, y,
-			TextRenderer::CENTER, TextRenderer::CENTER);
-		text.end();
-	}
+	text_.draw();
 }
 
 void MenuController::createRingGeometry()

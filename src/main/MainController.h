@@ -13,8 +13,8 @@
 #include "layers/focus/FocusController.h"
 #include "layers/mask/MaskController.h"
 #include "layers/leap_state/LeapStateController.h"
+#include "layers/load/LoadController.h"
 #include "util/TextRenderer.h"
-#include "data/VolumeLoader.h"
 #include "gl/util/Draw.h"
 #include "Leap.h"
 #include <list>
@@ -51,9 +51,7 @@ public:
     void mouseButton(GLFWwindow* window, int button, int action, int mods);
     void mouseMotion(GLFWwindow* window, double x, double y);
     void scroll(GLFWwindow* window, double dx, double dy);
-    TextRenderer& getText();
     Mode getMode();
-	void setVolumeToLoad(const VolumeLoader::Source& source);
     static MainController& getInstance();
 	const MainRenderer& getRenderer() const;
 
@@ -65,6 +63,7 @@ public:
 	ClipController& clipController() { return clip_controller_; }
 	FocusController& focusController() { return focus_controller_; }
 	MaskController& maskController() { return mask_controller_; }
+	LoadController& loadController() { return load_controller_; }
 	LeapStateController& leapStateController() { return leap_state_controller_; }
 	gl::Draw& draw() { return draw_; }
 	void pickColor(const Color& initialColor, std::function<void(const Color&)> callback);
@@ -106,14 +105,13 @@ private:
 	FocusController focus_controller_;
 	MaskController mask_controller_;
 	LeapStateController leap_state_controller_;
+	LoadController load_controller_;
 	gl::Draw draw_;
 
     std::list<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;
     bool showHistogram;
-    TextRenderer text;
-    VolumeLoader loader;
 	int width;
 	int height;
 	double mMouseX;

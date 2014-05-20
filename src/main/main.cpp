@@ -62,7 +62,7 @@ int main(int argc, char** argv)
     
     if (argc > 1) {
 		VolumeLoader::Source src = { argv[1], VolumeLoader::Source::DICOM_DIR };
-        controller.setVolumeToLoad(src);
+		controller.loadController().source(src);
     }
     
     controller.startLoop();

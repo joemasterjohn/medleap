@@ -148,6 +148,9 @@ source_group("layers\\focus" FILES ${SOURCE_LAYER_FOCUS})
 file(GLOB SOURCE_LAYER_LEAP_STATE src/layers/leap_state/*.cpp src/layers/leap_state/*.h)
 source_group("layers\\leap_state" FILES ${SOURCE_LAYER_LEAP_STATE})
 
+file(GLOB SOURCE_LAYER_LOAD src/layers/load/*.cpp src/layers/load/*.h)
+source_group("layers\\load" FILES ${SOURCE_LAYER_LOAD})
+
 set(SOURCE_AND_RESOURCES
     ${SOURCE_MAIN}
     ${SOURCE_DATA}
@@ -166,6 +169,7 @@ set(SOURCE_AND_RESOURCES
 	${SOURCE_LAYER_MASK}
 	${SOURCE_LAYER_FOCUS}
 	${SOURCE_LAYER_LEAP_STATE}
+    ${SOURCE_LAYER_LOAD}
     ${SOURCE_GL}
 	${SOURCE_GL_MATH}
     ${SOURCE_GL_GEOM}

@@ -22,6 +22,8 @@ public:
 	/** Returns the menu items stored in the menu */
 	std::vector<MenuItem>& getItems();
 
+	const std::vector<MenuItem>& items() const;
+
 	/** Returns the menu's name */
 	const std::string& getName() const;
     
@@ -30,7 +32,7 @@ public:
 
 protected:
 	std::string name;
-	std::vector<MenuItem> items;
+	std::vector<MenuItem> items_;
 };
 
 #endif /* defined(__medleap__Menu__) */

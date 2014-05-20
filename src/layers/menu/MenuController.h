@@ -6,6 +6,7 @@
 #include "gl/Program.h"
 #include "gl/math/Math.h"
 #include "util/Transition.h"
+#include "util/TextRenderer.h"
 #include <memory>
 #include <functional>
 
@@ -39,6 +40,7 @@ private:
 
 
 	// renderer (clean up)
+	TextRenderer text_;
 	float progress_; // leap progress, not transition
 	gl::Vec2 leap; // leap cursor
 	gl::Mat4 modelViewProjection;

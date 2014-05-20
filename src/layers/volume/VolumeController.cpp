@@ -315,6 +315,10 @@ void VolumeController::resize()
 
 void VolumeController::draw(double samplingScale, bool limitSamples, int w, int h)
 {
+	if (!volume) {
+		return;
+	}
+
 	Mat4 modelView = camera.getView();
 	Mat4 mvp = camera.getProjection() * modelView;
 	static Draw d;

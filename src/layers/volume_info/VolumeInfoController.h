@@ -6,6 +6,7 @@
 #include "data/VolumeData.h"
 #include "layers/volume/VolumeController.h"
 #include "layers/slice/SliceController.h"
+#include "util/TextRenderer.h"
 #include <string>
 
 class VolumeInfoController : public Controller
@@ -23,6 +24,7 @@ private:
 	VolumeData* volume;
 	VolumeController* volumeRenderer;
 	SliceController* sliceRenderer;
+	TextRenderer text_;
 
 	void drawText(const std::string& str, int row);
 };

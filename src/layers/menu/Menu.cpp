@@ -15,13 +15,18 @@ MenuItem& Menu::createItem(std::string name)
 
 MenuItem& Menu::createItem(std::string name, MenuItem::Action action)
 {
-	items.push_back(MenuItem(name, action));
-	return items.back();
+	items_.push_back(MenuItem(name, action));
+	return items_.back();
 }
 
 std::vector<MenuItem>& Menu::getItems()
 {
-	return items;
+	return items_;
+}
+
+const std::vector<MenuItem>& Menu::items() const
+{
+	return items_;
 }
 
 const std::string& Menu::getName() const
@@ -31,5 +36,5 @@ const std::string& Menu::getName() const
 
 MenuItem& Menu::operator[](int i)
 {
-    return items[i];
+	return items_[i];
 }

@@ -8,6 +8,7 @@ using namespace gl;
 
 VolumeInfoController::VolumeInfoController()
 {
+	text_.loadFont("menlo14");
 }
 
 void VolumeInfoController::setVolume(VolumeData* volume)
@@ -27,20 +28,24 @@ void VolumeInfoController::setSliceRenderer(SliceController* sliceRenderer)
 
 void VolumeInfoController::drawText(const std::string& s, int row)
 {
-	TextRenderer& textRenderer = MainController::getInstance().getText();
-
 	int x = 0;
-	int y = viewport_.height - textRenderer.fontHeight() * row;
-	textRenderer.add(s, x, y, TextRenderer::LEFT, TextRenderer::TOP);
+	int y = viewport_.height - text_.fontHeight() * row;
+	text_.add(s, x, y);
 }
 
 void VolumeInfoController::draw()
 {
-	TextRenderer& text = MainController::getInstance().getText();
-	Vec3 c = MainController::getInstance().getRenderer().getInverseBGColor();
-	text.setColor(c.x, c.y, c.z);
+	if (!volume) {
+		return;
+	}
 
-	text.begin(viewport_.width, viewport_.height);
+	Vec3 c = MainController::getInstance().getRenderer().getInverseBGColor();
+
+	text_.clear();
+	text_.viewport(viewport_);
+	text_.color(c);
+	text_.hAlign(TextRenderer::HAlign::left);
+	text_.vAlign(TextRenderer::VAlign::top);
 
 	ostringstream os;
 
@@ -121,5 +126,5 @@ void VolumeInfoController::draw()
 		drawText(os.str(), textRow++);
 	}
 
-	text.end();
+	text_.draw();
 }

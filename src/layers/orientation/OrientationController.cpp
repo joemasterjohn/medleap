@@ -45,10 +45,16 @@ OrientationController::OrientationController() :
 	cube_ibo_.data(&indices[0], indices.size() * sizeof(GLushort));
 
 	cube_prog_ = Program::create("shaders/orientation_cube.vert", "shaders/orientation_cube.frag");
+
+	text_.loadFont("menlo14");
 }
 
 void OrientationController::draw()
 {
+	if (!volume_) {
+		return;
+	}
+
 	Mat4 modelView;
 	if (MainController::getInstance().getMode() == MainController::MODE_2D) {
 		modelView = rotationX(pi) * volume_->getPatientBasis().transpose();
@@ -56,12 +62,12 @@ void OrientationController::draw()
 		modelView = camera_->getView().rotScale() * rotationX(pi) * volume_->getPatientBasis().transpose();
 	}
 
-	int draw_w = std::min(viewport_.width, viewport_.height) * 0.15;
-	int draw_h = draw_w;
-	int draw_x = viewport_.width - draw_w + viewport_.x;
-	int draw_y = viewport_.height - draw_h + viewport_.y;
-
-	glViewport(draw_x, draw_y, draw_w, draw_h);
+	Viewport cube_vp;
+	cube_vp.width = std::min(viewport_.width, viewport_.height) * 0.15;
+	cube_vp.height = cube_vp.width;
+	cube_vp.x = viewport_.right() - cube_vp.width;
+	cube_vp.y = viewport_.top() - cube_vp.height;
+	cube_vp.apply();
 
 	cube_prog_.enable();
 	cube_prog_.uniform("modelViewProjection", modelView);
@@ -88,20 +94,21 @@ void OrientationController::draw()
 	cube_prog_.uniform("color", edge_color);
 	glDrawElements(GL_LINES, edge_index_count_, GL_UNSIGNED_SHORT, (GLvoid*)(edge_index_offset_));
 
-
-	TextRenderer& tr = MainController::getInstance().getText();
 	Vec3 c = MainController::getInstance().getRenderer().getInverseBGColor();
-	tr.setColor(c.x, c.y, c.z);
-	tr.begin(draw_w, draw_h);
+	text_.clear();
+	text_.color(c);
+	text_.viewport(cube_vp);
+	text_.hAlign(TextRenderer::HAlign::center);
+	text_.vAlign(TextRenderer::VAlign::center);
 
 	auto text = [&](const Vec4& p, const std::string& label){
 		// convert 3D position p to viewport coordinates x, y
 		Vec4 ndc = modelView * p;
 		ndc /= ndc.w;
-		float x = (ndc.x + 1.0f) * draw_w / 2.0f;
-		float y = (ndc.y + 1.0f) * draw_h / 2.0f;
+		float x = (ndc.x + 1.0f) * cube_vp.width * 0.5f;
+		float y = (ndc.y + 1.0f) * cube_vp.height * 0.5f;
 		if (ndc.z > -0.1)
-			tr.add(label, x, y, TextRenderer::CENTER, TextRenderer::CENTER);
+			text_.add(label, x, y);
 	};
 
 	if (volume_->getModality() == VolumeData::UNKNOWN) {
@@ -120,5 +127,5 @@ void OrientationController::draw()
 		text(Vec4(0.0f, 0.0f, -0.6f, 1.0f), "I");
 	}
 
-	tr.end();
+	text_.draw();
 }

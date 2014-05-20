@@ -1,5 +1,4 @@
 #include "MainMenu.h"
-#include "DirectoryMenu.h"
 #include "main/MainConfig.h"
 #include "main/MainController.h"
 
@@ -44,6 +43,13 @@ MainMenu::MainMenu() : Menu("Main Menu")
 	mi_view2d.setAction([]{
 		MainController& mc = MainController::getInstance();
 		mc.focusLayer(&mc.sliceController());
+		mc.menuController().hideMenu();
+	});
+
+	MenuItem& mi_load = createItem("Load");
+	mi_load.setAction([]{
+		MainController& mc = MainController::getInstance();
+		mc.focusLayer(&mc.loadController());
 		mc.menuController().hideMenu();
 	});
 }

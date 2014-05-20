@@ -31,11 +31,6 @@ void scrollCB(GLFWwindow* window, double dx, double dy)
     MainController::getInstance().scroll(window, dx, dy);
 }
 
-TextRenderer& MainController::getText()
-{
-    return text;
-}
-
 MainController& MainController::getInstance()
 {
     static MainController controller;
@@ -62,9 +57,7 @@ void MainController::init(GLFWwindow* window)
 	glfwSetMouseButtonCallback(window, mouseCB);
 	glfwSetCursorPosCallback(window, cursorCB);
 	glfwSetScrollCallback(window, scrollCB);
-    
-    text.loadFont("menlo14");
-    
+       
 	volumeInfoController.setVolumeRenderer(&volumeController_);
 	volumeInfoController.setSliceRenderer(&sliceController_);
 	histogramController.setVolumeRenderer(&volumeController_);
@@ -76,6 +69,7 @@ void MainController::init(GLFWwindow* window)
 	leapController.config().setFloat("Gesture.Circle.MinRadius", 50.0f);
 	leapController.config().save();
 
+	setMode(MODE_3D);
 }
 
 void MainController::setMode(MainController::Mode mode)
@@ -90,6 +84,7 @@ void MainController::setMode(MainController::Mode mode)
             if (showHistogram)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
 			pushController(&orientationController);
+			pushController(&load_controller_);
 			pushController(&leap_state_controller_, Docking(Docking::LEFT, .07, 64));
 			pushController(&menuController_);
 			break;
@@ -104,6 +99,7 @@ void MainController::setMode(MainController::Mode mode)
 			pushController(&clip_controller_);
 			pushController(&focus_controller_);
 			pushController(&mask_controller_);
+			pushController(&load_controller_);
 			pushController(&leap_state_controller_, Docking(Docking::LEFT, .07, 64));
 			pushController(&menuController_);
             break;
@@ -126,9 +122,7 @@ void MainController::setVolume(VolumeData* volume)
         return;
     
     if (this->volume != NULL)
-        delete this->volume;
-    else
-        setMode(mode);
+        delete this->volume;        
     
     this->volume = volume;
 	sliceController_.setVolume(volume);
@@ -138,35 +132,11 @@ void MainController::setVolume(VolumeData* volume)
 	orientationController.volume(volume);
 }
 
-void MainController::setVolumeToLoad(const VolumeLoader::Source& source)
-{
-    loader.setSource(source);
-}
-
 void MainController::startLoop()
 {
-    static double f = 0;
-
     while (!glfwWindowShouldClose(window)) {
-
-		if (loader.getState() == VolumeLoader::FINISHED) {
-            setVolume(loader.getVolume());
-			volumeController_.markDirty();
-        }
-
 		update();
 		renderer.draw(width, height);
-
-		if (loader.getState() == VolumeLoader::LOADING) {
-			GLclampf c = static_cast<GLclampf>((std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5);
-			glViewport(0, 0, width, height);
-			getText().setColor(1, c, c);
-			getText().begin(width, height);
-			getText().add(string("Loading"), width / 2, height / 2, TextRenderer::CENTER, TextRenderer::CENTER);
-			getText().add(loader.getStateMessage(), width / 2, height / 2 - 36, TextRenderer::CENTER, TextRenderer::CENTER);
-			getText().end();
-		}
-
 		glfwSwapBuffers(window);
     }
     glfwTerminate();
