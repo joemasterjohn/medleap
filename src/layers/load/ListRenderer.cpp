@@ -8,7 +8,8 @@ ListRenderer::ListRenderer() :
 	horizontal_pad_(40.0f),
 	vertical_pad_(10.0f),
 	item_height_(120.0f),
-	index_count_(0)
+	index_count_(0),
+	alpha_(1.0f)
 {
 	prog_ = Program::create("shaders/menu.vert", "shaders/menu.frag");
 	vbo_.generateVBO(GL_DYNAMIC_DRAW);
@@ -90,17 +91,20 @@ void ListRenderer::drawBoxes()
 {
 	prog_.enable();
 	prog_.uniform("modelViewProjection", projection_ * model_);
-	prog_.uniform("color", .1f, .1f, .1f, 1.0f);
+	prog_.uniform("color", .1f, .1f, .1f, alpha_);
 
 	vbo_.bind();
 	ibo_.bind();
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawElements(GL_TRIANGLES, index_count_, GL_UNSIGNED_SHORT, 0);
 
 	if (highlighted_ >= 0) {
-		prog_.uniform("color", .2f, 0.3f, .2f, 1.0f);
+		prog_.uniform("color", .2f, 0.3f, .2f, alpha_);
 		GLvoid* offset = (GLvoid*)(indices_per_item_ * highlighted_ * sizeof(GLushort));
 		glDrawElements(GL_TRIANGLES, indices_per_item_, GL_UNSIGNED_SHORT, offset);
 	}
+	glDisable(GL_BLEND);
 }

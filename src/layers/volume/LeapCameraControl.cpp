@@ -8,7 +8,7 @@ using namespace gl;
 LeapCameraControl::LeapCameraControl() : tracking_(false)
 {
 	poses_.fist().enabled(true);
-	poses_.fist().maxHandEngageSpeed(75.0f);
+	poses_.fist().maxHandEngageSpeed(175.0f);
 	poses_.fist().minValidFrames(0);
 	poses_.fist().engageFunction(bind(&LeapCameraControl::grab, this, placeholders::_1));
 

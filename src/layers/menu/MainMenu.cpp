@@ -49,7 +49,7 @@ MainMenu::MainMenu() : Menu("Main Menu")
 	MenuItem& mi_load = createItem("Load");
 	mi_load.setAction([]{
 		MainController& mc = MainController::getInstance();
-		mc.focusLayer(&mc.loadController());
+		mc.pushFocus(&mc.loadController());
 		mc.menuController().hideMenu();
 	});
 }

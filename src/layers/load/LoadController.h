@@ -6,6 +6,7 @@
 #include "DirectoryMenu.h"
 #include "ListRenderer.h"
 #include "leap/PoseTracker.h"
+#include "util/Transition.h"
 
 class LoadController : public Controller
 {
@@ -16,6 +17,7 @@ public:
 	void update(std::chrono::milliseconds elapsed) override;
 	void draw() override;
 	void resize() override;
+	bool modal() const override { return true; }
 	bool leapInput(const Leap::Controller& controller, const Leap::Frame& frame) override;
 	void source(const VolumeLoader::Source& source);
 
@@ -23,7 +25,6 @@ private:
 	VolumeLoader loader;
 	DirectoryMenu menu;
 	ListRenderer list_renderer_;
-	bool visible_;
 	float y_offset_;
 	PoseTracker poses_;
 	gl::Vec2 cursor_;
@@ -36,7 +37,13 @@ private:
 	float boundary_bottom_;
 	float boundary_top_;
 	MenuItem* highlighted_;
+	Transition transition_;
+	Transition cd_transition_;
+	float cd_direction_;
+	std::chrono::milliseconds timeout_;
+	std::chrono::milliseconds timer_;
 
+	void updateTransition(std::chrono::milliseconds elapsed);
 	void updateCursor(float x, float y);
 	void scroll(float amount);
 	void upDirectory();

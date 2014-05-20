@@ -69,6 +69,7 @@ void MainController::init(GLFWwindow* window)
 	leapController.config().setFloat("Gesture.Circle.MinRadius", 50.0f);
 	leapController.config().save();
 
+
 	setMode(MODE_3D);
 }
 
@@ -130,6 +131,10 @@ void MainController::setVolume(VolumeData* volume)
     volumeInfoController.setVolume(volume);
     histogramController.setVolume(volume);
 	orientationController.volume(volume);
+
+	if (focus_stack_.empty()) {
+		focusLayer(&volumeController_);
+	}
 }
 
 void MainController::startLoop()
@@ -200,8 +205,8 @@ void MainController::update()
 
 	glfwPollEvents();
 
-	for (Controller* c : activeControllers) {
-		c->update(elapsed);
+	for (int i = 0; i < activeControllers.size(); i++) {
+		activeControllers[i]->update(elapsed);
 	}
 
 	// leap input
@@ -296,7 +301,7 @@ void MainController::popController()
 {
 	Controller* c = activeControllers.front();
 	renderer.popLayer();
-	activeControllers.pop_front();
+	activeControllers.erase(activeControllers.begin());
 
 	chooseTrackedGestures();
 }
@@ -309,7 +314,7 @@ void MainController::pushController(Controller* controller)
 
 void MainController::pushController(Controller* controller, MainController::Docking docking)
 {
-    activeControllers.push_front(controller);
+    activeControllers.insert(activeControllers.begin(), controller);
         
     switch (docking.position)
     {

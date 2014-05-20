@@ -134,8 +134,8 @@ namespace gl
 	Vec2 denormalize(const Viewport& viewport, const Leap::Frame& frame, const Leap::Vector& vector)
 	{
 		Leap::Vector v = frame.interactionBox().normalizePoint(vector);
-		float x = viewport.x + viewport.width * v.x;
-		float y = viewport.y + viewport.height * v.y;
+		float x = viewport.width * v.x;
+		float y = viewport.height * v.y;
 		return{ x, y };
 	}
 }

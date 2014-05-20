@@ -77,6 +77,8 @@ public:
 	Controller* focusLayer();
 	void focusLayer(Controller* controller);
 	void setMode(Mode mode);
+	void pushFocus(Controller* focus);
+	void popFocus();
 
 private:    
     MainController();
@@ -108,7 +110,7 @@ private:
 	LoadController load_controller_;
 	gl::Draw draw_;
 
-    std::list<Controller*> activeControllers;
+    std::vector<Controller*> activeControllers;
     Mode mode;
     VolumeData* volume;
     bool showHistogram;
@@ -117,8 +119,6 @@ private:
 	double mMouseX;
 	double mMouseY;
 
-	void pushFocus(Controller* focus);
-	void popFocus();
 };
 
 #endif /* defined(__medleap__MainController__) */

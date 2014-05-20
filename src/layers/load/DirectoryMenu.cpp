@@ -8,7 +8,9 @@
 #endif
 #include <errno.h>
 
-DirectoryMenu::DirectoryMenu() :  Menu("Directory Menu")
+DirectoryMenu::DirectoryMenu() : 
+	Menu("Directory Menu"), 
+	on_load_(nullptr)
 {
 }
 
@@ -36,6 +38,12 @@ void DirectoryMenu::directory(const std::string& directory_name)
 				MenuItem& mi = this->createItem(fileName);
 				VolumeLoader::Source src = { working_dir_ + "/" + fileName, VolumeLoader::Source::RAW };
 				mi.setAction([this, src]{load(src); });
+			} 
+			else if (fileName.size() > 3 && fileName.substr(fileName.size() - 4, 4) == ".dcm") {
+				MenuItem& mi = this->createItem("DICOM Files");
+				VolumeLoader::Source src = { working_dir_, VolumeLoader::Source::DICOM_DIR };
+				mi.setAction([this, src]{load(src); });
+				break;
 			}
 		}
 		entry = readdir(dir);
@@ -52,6 +60,10 @@ void DirectoryMenu::upDirectory()
 
 void DirectoryMenu::load(const VolumeLoader::Source& source)
 {
+	if (on_load_) {
+		on_load_(source);
+	}
+
 	//MainController::getInstance().setVolumeToLoad(source);
 	//menus.pop();
 	//MainController::getInstance().menuController().menu();

@@ -7,7 +7,7 @@ using namespace gl;
 using namespace std;
 using namespace Leap;
 
-MaskController::MaskController() : mask_volume_(new BoxMask(Box(0.02f, 0.02f, 0.02f)))
+MaskController::MaskController() : mask_volume_(new BoxMask(Box(0.04f, 0.04f, 0.04f)))
 {
 	VolumeController& vc = MainController::getInstance().volumeController();
 }

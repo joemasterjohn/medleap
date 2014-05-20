@@ -422,7 +422,7 @@ void Transfer1DController::draw()
 		d.setModelViewProj(viewport_.orthoProjection());
 		d.begin(GL_LINES);
 		d.color(1.0f, 0.0f, 0.0f);
-		d.line(cursor_center_ * viewport_.width + viewport_.x, viewport_.y, cursor_center_ * viewport_.width + viewport_.x, viewport_.top());
+		d.line(cursor_center_ * viewport_.width, viewport_.y, cursor_center_ * viewport_.width, viewport_.top());
 		d.end();
 		d.draw();
 	
@@ -447,9 +447,9 @@ void Transfer1DController::drawMarkerBar()
 		float x;
 		if (cluts[activeCLUT].mode() == CLUT::continuous) {
 			x = marker.interval().center() * cluts[activeCLUT].interval().width() + cluts[activeCLUT].interval().left();
-			x = viewport_.x + viewport_.width * x;
+			x = viewport_.width * x;
 		} else {
-			x = viewport_.x + viewport_.width * marker.interval().center();
+			x = viewport_.width * marker.interval().center();
 		}
 
 		float scale = 1.0f;
@@ -551,7 +551,7 @@ void Transfer1DController::markDirty()
 
 void Transfer1DController::updateSelected(float cursor)
 {
-	selected_ = cluts[activeCLUT].closestMarker(cursor);
+	selected_ = currentCLUT().closestMarker(cursor);
 }
 
 void Transfer1DController::toggleSelectedContext()
