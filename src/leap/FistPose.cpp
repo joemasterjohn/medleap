@@ -31,13 +31,11 @@ bool FistPose::shouldDisengage(const Frame& frame)
 
 void FistPose::track(const Frame& frame)
 {
-	if (hand().grabStrength() < 1.0f) {
-		if (hand().fingers().extended().count() == 5) {
-			state_ = State::open;
-		} else {
-			state_ = State::partial;
-		}
-	} else {
+	if (hand().grabStrength() == 1.0f && hand().fingers().extended().count() == 0) {
 		state_ = State::closed;
+	} else if (hand().grabStrength() < 1.0f && hand().fingers().extended().count() == 5) {
+		state_ = State::open;
+	} else {
+		state_ = State::partial;
 	}
 }
