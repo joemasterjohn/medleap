@@ -2,146 +2,51 @@
 
 using namespace gl;
 
-Camera::Camera() : center(0, 0, -1)
-{}
-
-const Vec4& Camera::getEye() const
+Camera::Camera() : yaw_(0.0f), pitch_(0.0f), radius_(1)
 {
-    return eye;
-}
-
-const Vec4& Camera::getUp() const
-{
-    return up;
-}
-
-const Vec4& Camera::getRight() const
-{
-    return right;
-}
-
-const Vec4& Camera::getForward() const
-{
-    return forward;
-}
-
-const Mat4& Camera::getView() const
-{
-    return view;
-}
-
-const Mat4& Camera::getProjection() const
-{
-    return projection;
-}
-
-void Camera::rotateX(float radians)
-{
-	view = view * gl::rotationX(radians);
-	viewInverse = gl::rotationX(-radians) * viewInverse;
-    update();
-}
-
-void Camera::rotateY(float radians)
-{
-	view = view * gl::rotationY(radians);
-	viewInverse = gl::rotationY(-radians) * viewInverse;
-    update();
-}
-
-void Camera::rotateZ(float radians)
-{
-	view = view * gl::rotationZ(radians);
-	viewInverse = gl::rotationZ(-radians) * viewInverse;
-    update();
-}
-
-void Camera::rotate(float radians, Vec3 axis)
-{
-	view = view * gl::rotation(radians, axis);
-	viewInverse = gl::rotation(-radians, axis) * viewInverse;
-    update();
-}
-
-void Camera::translate(float x, float y, float z)
-{
-	view = view * gl::translation(x, y, z);
-	viewInverse = gl::translation(-x, -y, -z) * viewInverse;
-    update();
-}
-
-void Camera::translate(const Vec3& t)
-{
-    translate(t.x, t.y, t.z);
-}
-
-void Camera::translateForward(float units)
-{
-    translate(forward * units);
-}
-
-void Camera::translateBackward(float units)
-{
-    translate(forward * -units);
-}
-
-void Camera::translateRight(float units)
-{
-    translate(right * units);
-}
-
-void Camera::translateLeft(float units)
-{
-    translate(right * -units);
-}
-
-void Camera::translateUp(float units)
-{
-    translate(up * units);
-}
-
-void Camera::translateDown(float units)
-{
-    translate(up * -units);
+	update();
 }
 
 void Camera::update()
 {
-    right = viewInverse.col(0);
-    up = viewInverse.col(1);
-    forward = viewInverse.col(2) * -1.0f;
-    eye = viewInverse.col(3);
-	fireEvent();
+	Mat4 rot_x = rotationX(-pitch_);
+	Mat4 rot_y = rotationY(-yaw_);
+	Mat4 rot = rot_y * rot_x;
+
+	eye_ = (rot * Vec4::zAxis()) * radius_ + Vec4(center_, 0.0f);
+	view_ = lookAt(eye_, center_, Vec3::yAxis());
+	view_inverse_ = view_.inverse();
+	right_ = view_inverse_.col(0);
+	up_ = view_inverse_.col(1);
+	forward_ = view_inverse_.col(2) * -1.0f;
+	eye_ = view_inverse_.col(3);
 }
 
-void Camera::setView(const Mat4& view)
+void Camera::projection(const Mat4& projection)
 {
-    this->view = view;
-    this->viewInverse = view.inverse();
-    update();
+    projection_ = projection;
 }
 
-void Camera::setProjection(const Mat4& projection)
+void Camera::yaw(float yaw)
 {
-    this->projection = projection;
-	fireEvent();
+	yaw_ = yaw;
+	update();
 }
 
-void Camera::addListener(Listener* l)
+void Camera::pitch(float pitch)
 {
-	listeners.push_back(l);
+	pitch_ = pitch;
+	update();
 }
 
-void Camera::removeListener(Listener* l)
+void Camera::radius(float radius)
 {
-	auto it = std::find(listeners.begin(), listeners.end(), l);
-	if (it != listeners.end()) {
-		listeners.erase(it);
-	}
+	radius_ = radius;
+	update();
 }
 
-void Camera::fireEvent()
+void Camera::center(const Vec3& center)
 {
-	for (Listener* l : listeners)
-		l->cameraUpdated(*this);
+	center_.set(center.x, center.y, center.z);
+	update();
 }

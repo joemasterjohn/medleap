@@ -16,7 +16,7 @@ namespace gl
 		}
 
 		Vec2 normalize(Vec2 coords) const {
-			return{ (coords.x - x) / width, (coords.y - y) / height };
+			return{ coords.x / width, coords.y / height };
 		}
 
 		Mat4 orthoProjection() const {

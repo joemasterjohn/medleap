@@ -66,7 +66,7 @@ void MaskController::moveCursor()
 
 	vc.maskColor = { 1.0f, 1.0f, 0.0f };
 
-	Mat4 eye2world = vc.getCamera().getView().inverse();
+	const Mat4& eye2world = vc.getCamera().viewInverse();
 	Vec4 hand_delta_ws = eye2world * v_pose_.handPositionDelta().toVector4<Vec4>();
 	Vec3 center = mask_volume_->center() + hand_delta_ws / 400.0f;
 	center = MainController::getInstance().volumeData()->getBounds().clamp(center);

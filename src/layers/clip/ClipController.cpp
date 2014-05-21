@@ -112,7 +112,7 @@ void ClipController::clip1H(const Leap::Frame& frame)
 
 		VolumeController& vc = MainController::getInstance().volumeController();
 
-		Mat4 inv = (vc.getCamera().getProjection() * vc.getCamera().getView()).inverse();
+		Mat4 inv = (vc.getCamera().projection() * vc.getCamera().view()).inverse();
 		auto unproject = [&](const Vec2& p, float z)->Vec4 {
 			Vec2 ndc = (viewport_.normalize(p) - 0.5f) * 2.0f;
 			Vec4 result = inv * Vec4(ndc.x, ndc.y, z, 1.0f);
@@ -132,16 +132,16 @@ void ClipController::clip1H(const Leap::Frame& frame)
 
 void ClipController::clip2H(const Leap::Frame& frame)
 {
-	Hand hand = frame.hands().frontmost();
-	Hand other_hand = frame.hands()[0].id() == hand.id() ? frame.hands()[1] : frame.hands()[0];
+	Hand hand = frame.hands().rightmost();
+	Hand other_hand = frame.hands().leftmost();
 
 	if (other_hand.grabStrength() > 0.8f) {
 		VolumeController& vc = MainController::getInstance().volumeController();
 
-		Mat4 inv = vc.getCamera().getView().inverse();
+		const Mat4& inv = vc.getCamera().viewInverse();
 		Vec3 n = inv * hand.palmNormal().toVector4<Vec4>();
 		Vec3 p = frame.interactionBox().normalizePoint(hand.palmPosition()).toVector4<Vec4>();
-		p = (p - 0.5f) * 2.0f;
+		p = (p - 0.5f) * 2.0f * 0.75f;
 		p = inv * Vec4(p.x, p.y, p.z, 0.0f);
 
 		selectedPlane().normal(n);

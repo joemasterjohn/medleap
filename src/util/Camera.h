@@ -7,98 +7,71 @@
 class Camera
 {
 public:
-	class Listener
-	{
-	public:
-		virtual ~Listener();
-		virtual void cameraUpdated(const Camera& camera) = 0;
-	};
-
     /// Creates a camera. Initially, the view and projection are identity matrices.
     Camera();
     
     /// Returns the view matrix.
-	const gl::Mat4& getView() const;
+	const gl::Mat4& view() const { return view_; }
+
+	/// Inverse of view matrix
+	const gl::Mat4& viewInverse() const { return view_inverse_; }
     
     /// Returns the projection matrix.
-	const gl::Mat4& getProjection() const;
+	const gl::Mat4& projection() const { return projection_; }
     
     /// Returns the eye position in world coordinates; origin in eye coordinates.
-	const gl::Vec4& getEye() const;
+	const gl::Vec4& eye() const { return eye_; }
     
     /// Returns the up axis in world coordinates; (0, 1, 0) in eye coordinates.
-	const gl::Vec4& getUp() const;
+	const gl::Vec4& up() const { return up_; }
     
     /// Returns the right axis in world coordinates; (1, 0, 0) in eye coordinates.
-	const gl::Vec4& getRight() const;
+	const gl::Vec4& right() const { return right_; }
     
     /// Returns the forward axis in world coordinates; (0, 0, -1) in eye coordinates.
-	const gl::Vec4& getForward() const;
-    
-    /// Assigns a new view matrix.
-	void setView(const gl::Mat4& view);
+	const gl::Vec4& forward() const { return forward_; }
+
+	/// Yaw angle radians
+	float yaw() const { return yaw_; }
+
+	/// Pitch angle radians
+	float pitch() const { return pitch_; }
+
+	/// Distance eye is from center of rotation
+	float radius() const { return radius_; }
+
+	/// Center of rotation
+	const gl::Vec3& center() const { return center_; }
     
     /// Assigns a projection matrix.
-	void setProjection(const gl::Mat4& projection);
-    
-    /// Adds a rotation of radians around axis.
-	void rotate(float radians, gl::Vec3 axis);
-    
-    /// Adds a rotation of radians around the X axis.
-    void rotateX(float radians);
-    
-    /// Adds a rotation of radians around the Y axis.
-    void rotateY(float radians);
-    
-    /// Adds a rotation of radians around the Z axis.
-    void rotateZ(float radians);
-    
-    /// Adds a translation of (x, y, z) in world coordinates.
-    void translate(float x, float y, float z);
-    
-    /// Adds a translation of t in world coordinates.
-	void translate(const gl::Vec3& t);
-    
-    /// Adds a translation along the right axis.
-    void translateRight(float units);
-    
-    /// Adds a translation along the left axis.
-    void translateLeft(float units);
-    
-    /// Adds a translation along the up axis.
-    void translateUp(float units);
-    
-    /// Adds a translation along the down axis.
-    void translateDown(float units);
-    
-    /// Adds a translation along the forward axis.
-    void translateForward(float units);
-    
-    /// Adds a translation along the backward axis.
-    void translateBackward(float units);
-    
-	void addListener(Listener* l);
+	void projection(const gl::Mat4& projection);
 
-	void removeListener(Listener* l);
+	/// Set yaw angle radians
+	void yaw(float yaw);
 
-	// TODO: these should be part of model transform, not view
-	float yaw;
-	float pitch;
-	gl::Vec3 center;
+	/// Set pitch angle radians
+	void pitch(float pitch);
+
+	/// Set distance from center of rotation
+	void radius(float radius);
+
+	/// Set center of rotation
+	void center(const gl::Vec3& center);
 
 private:
-	gl::Mat4 view;
-	gl::Mat4 viewInverse;
-	gl::Mat4 projection;
-	gl::Vec4 eye;
-	gl::Vec4 up;
-	gl::Vec4 right;
-	gl::Vec4 forward;
-
-	std::vector<Listener*> listeners;
+	gl::Mat4 view_;
+	gl::Mat4 view_inverse_;
+	gl::Mat4 projection_;
+	gl::Vec4 eye_;
+	gl::Vec4 up_;
+	gl::Vec4 right_;
+	gl::Vec4 forward_;
+	float yaw_;
+	float pitch_;
+	float radius_;
+	gl::Vec3 center_;
     
     void update();
-	void fireEvent();
 };
 
 #endif // CGL_CAMERA_H_

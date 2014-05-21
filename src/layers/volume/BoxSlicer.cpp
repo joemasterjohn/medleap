@@ -62,7 +62,7 @@ float BoxSlicer::samplingLength(const Box& bounds, const Camera& camera, int num
 	float minDistance = numeric_limits<float>::infinity();
 	float maxDistance = -numeric_limits<float>::infinity();
 	for (Vec3 vertex : bounds.vertices()) {
-		Vec4 v = camera.getView() * Vec4(vertex.x, vertex.y, vertex.z, 1.0f);
+		Vec4 v = camera.view() * Vec4(vertex.x, vertex.y, vertex.z, 1.0f);
 		float distance = -v.z;
 		if (distance < minDistance) minDistance = distance;
 		if (distance > maxDistance) maxDistance = distance;
@@ -72,16 +72,16 @@ float BoxSlicer::samplingLength(const Box& bounds, const Camera& camera, int num
 
 void BoxSlicer::slice(const Box& bounds, const Camera& camera, float sampleLength, int minSlices, int maxSlices)
 {
-    up = camera.getUp();
-    normal = camera.getForward() * -1;
-    right = camera.getRight();
+    up = camera.up();
+    normal = camera.forward() * -1;
+    right = camera.right();
     
 	// determine the view length by projecting bounding box vertices and
 	// taking difference of max and min distances of vertices from eye
 	float minDistance = numeric_limits<float>::infinity();
 	float maxDistance = -numeric_limits<float>::infinity();
 	for (Vec3 vertex : bounds.vertices()) {
-		Vec4 v = camera.getView() * Vec4(vertex.x, vertex.y, vertex.z, 1.0f);
+		Vec4 v = camera.view() * Vec4(vertex.x, vertex.y, vertex.z, 1.0f);
 		float distance = -v.z;
 		if (distance < minDistance) minDistance = distance;
 		if (distance > maxDistance) maxDistance = distance;
@@ -97,8 +97,8 @@ void BoxSlicer::slice(const Box& bounds, const Camera& camera, float sampleLengt
 	sample_length_ = totalLength / (slice_count_ + 1);
 
 	// intersect planes with boundingbox to create slice polygons
-	Vec3 step = camera.getForward() * sample_length_;
-	Vec3 planePoint = camera.getEye() + camera.getForward() * maxDistance;
+	Vec3 step = camera.forward() * sample_length_;
+	Vec3 planePoint = camera.eye() + camera.forward() * maxDistance;
 	for (int i = 0; i < slice_count_; ++i) {
         planePoint -= step;
         slicePlane(planePoint, bounds);

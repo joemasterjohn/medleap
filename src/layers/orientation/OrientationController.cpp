@@ -59,7 +59,7 @@ void OrientationController::draw()
 	if (MainController::getInstance().getMode() == MainController::MODE_2D) {
 		modelView = rotationX(pi) * volume_->getPatientBasis().transpose();
 	} else {
-		modelView = camera_->getView().rotScale() * rotationX(pi) * volume_->getPatientBasis().transpose();
+		modelView = camera_->view().rotScale() * rotationX(pi) * volume_->getPatientBasis().transpose();
 	}
 
 	Viewport cube_vp;

@@ -10,7 +10,7 @@
 #include "gl/Program.h"
 #include "gl/Buffer.h"
 #include "gl/math/Math.h"
-#include "CLUT.h"
+#include "Transfer1D.h"
 #include "leap/PoseTracker.h"
 #include "util/TextRenderer.h"
 #include "gl/util/Draw.h"
@@ -28,50 +28,35 @@ public:
 	std::set<Leap::Gesture::Type> requiredGestures() override;
 	std::unique_ptr<Menu> contextMenu() override;
 
-
 	void gainFocus() override;
 	void loseFocus() override;
-
 	void draw() override;
-
     void setVolumeRenderer(VolumeController* volumeRenderer);
 	void setSliceRenderer(SliceController* sliceRenderer);
     
 private:
     bool lMouseDrag, rMouseDrag;
     VolumeData* volume;
-	float cursor_center_;
-    
+	float cursor_;
 	bool dirty_textures_;
-
     VolumeController* volumeRenderer;
     SliceController* sliceRenderer;
-    std::vector<CLUT> cluts;
-    int activeCLUT;
-	CLUT::Marker* selected_;
-
-	// leap
+    std::vector<Transfer1D> transfers_;
+	int active_transfer_;
+	Transfer1D::Marker* selected_;
 	LeapCameraControl camera_control_;
 	PoseTracker poses_;
-	Interval saved_interval_;
-	float saved_hand_sep_;
-	gl::Vec2 leap_cursor_;
 	bool leap_drag_performed_;
+	bool scaling_markers_;
+	Interval saved_interval_;
+	std::vector<float> saved_centers_;
 
 	// rendering
 	TextRenderer text;
-	gl::Texture histo1D;
-	gl::Texture transferFn;
-	gl::Program shader;
-	gl::Program colorShader;
 	GLuint vbo; // TODO: replace with object
 	GLsizei stride;
-	gl::Mat4 histoModelMatrix;
-	int cursorX, cursorY;
-	float cursorShaderOffset;
-	float cursorValue;
-	gl::Program bgShader;
 	gl::Buffer bgBuffer;
+	gl::Program bgShader;
 	gl::Program histoProg;
 	gl::Program histoOutlineProg;
 	gl::Buffer  histoVBO;
@@ -81,8 +66,7 @@ private:
 	gl::Texture contextTexture;
 	gl::Draw colorStops;
 
-	CLUT& currentCLUT();
-
+	Transfer1D& transfer();
 	void drawMarkerBar();
 	void drawBackground();
 	void drawHistogram();
@@ -90,13 +74,20 @@ private:
 	void nextCLUT();
 	void prevCLUT();
 	void markDirty();
+	void addMarker();
 	void updateTextures();
-	void updateSelected(float cursor);
-	void toggleSelectedContext();
+	void chooseSelected();
 	void moveSelected();
 	void scaleSelected(float width);
-	void addMarker();
-	void deleteMarker();
+	void deleteSelected();
+	void changeColorSelected();
+	void toggleContextSelected();
+	void saveInterval();
+	void scaleAllMarkers();
+
+	void createFunction();
+	void deleteFunction();
+	void toggleGradient();
 };
 
 #endif /* defined(__medleap__Transfer1DController__) */

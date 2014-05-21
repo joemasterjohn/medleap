@@ -16,11 +16,7 @@ public:
 
 private:
 	PoseTracker poses_;
-	gl::Mat4 old_view_;
-	Camera old_camera_;
 	bool tracking_;
-
-	void grab(const Leap::Frame& controller);
 };
 
 #endif

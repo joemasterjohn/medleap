@@ -32,7 +32,6 @@ VolumeController::VolumeController()
 	proxyVertices.generateVBO(GL_DYNAMIC_DRAW);
 	proxyIndices.generateIBO(GL_DYNAMIC_DRAW);
 
-	camera.setView(lookAt(Vec3(0, 0, 1), Vec3(0, 0, 0), Vec3(0, 1, 0)));
 	//camera.setView(lookAt(1, 1, 1, 0, 0, 0, 0, 1, 0));
 	//camera.setView(lookAt(0, 0, 1.5f, 0, 0, 0, 0, 1, 0));
 	boxShader = Program::create("shaders/volume_clut.vert", "shaders/volume_clut.frag");
@@ -213,7 +212,7 @@ bool VolumeController::mouseButton(GLFWwindow* window, int button, int action, i
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         mouseDragLeftButton = action == GLFW_PRESS;
         if (mouseDragLeftButton) {
-            dragStartView = camera.getView();
+            dragStartView = camera.view();
         }
     }
     
@@ -242,7 +241,7 @@ bool VolumeController::mouseMotion(GLFWwindow* window, double x, double y)
         
         Mat4 m1 = gl::rotation(static_cast<float>(pitch), dragStartView.row(0));
         Mat4 m2 = gl::rotation(static_cast<float>(yaw), dragStartView.row(1));
-        camera.setView(dragStartView * m1 * m2);
+        //camera.setView(dragStartView * m1 * m2);
         markDirty();
     } else if (mouseDragRightButton) {
 //        double dx = x - dragStartX;
@@ -262,7 +261,7 @@ bool VolumeController::mouseMotion(GLFWwindow* window, double x, double y)
 bool VolumeController::scroll(GLFWwindow* window, double dx, double dy)
 {
     if (!mouseDragLeftButton) {
-        camera.translateBackward(static_cast<float>(dy * 0.2f));
+        //camera.translateBackward(static_cast<float>(dy * 0.2f));
         markDirty();
     }
     return true;
@@ -309,7 +308,7 @@ void VolumeController::resize()
 	fullResRT.resize(viewport_.width, viewport_.height);
 	lowResRT.resize(viewport_.width / 2, viewport_.height / 2);
 	//camera.setProjection(ortho(-0.5f, 0.5f, -0.5f/viewport_.aspect(), 0.5f/viewport_.aspect(), 0, 200));
-	camera.setProjection(perspective(0.8726388f, viewport_.aspect(), 0.1f, 100.0f));
+	camera.projection(perspective(0.8726388f, viewport_.aspect(), 0.1f, 100.0f));
 	markDirty();
 }
 
@@ -319,8 +318,8 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 		return;
 	}
 
-	Mat4 modelView = camera.getView();
-	Mat4 mvp = camera.getProjection() * modelView;
+	Mat4 modelView = camera.view();
+	Mat4 mvp = camera.projection() * modelView;
 	static Draw d;
 	glEnable(GL_DEPTH_TEST);
 
@@ -470,9 +469,9 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	}
 	boxShader.uniform("clip_planes", planes);
 
-	glUniform3f(boxShader.getUniform("lightDirection"), -camera.getForward().x, -camera.getForward().y, -camera.getForward().z);
+	glUniform3f(boxShader.getUniform("lightDirection"), -camera.forward().x, -camera.forward().y, -camera.forward().z);
 
-	glUniform3f(boxShader.getUniform("camera_pos"), camera.getEye().x, camera.getEye().y, camera.getEye().z);
+	glUniform3f(boxShader.getUniform("camera_pos"), camera.eye().x, camera.eye().y, camera.eye().z);
 
 	glUniform3f(boxShader.getUniform("minGradient"), volume->getMinGradient().x, volume->getMinGradient().y, volume->getMinGradient().z);
 	glUniform1f(boxShader.getUniform("opacity_scale"), opacityScale);
@@ -496,12 +495,12 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 
 
 
-	Vec4 cpee = camera.getView() * Vec4(maskCenter, 1.0f);
+	Vec4 cpee = camera.view() * Vec4(maskCenter, 1.0f);
 	glUniform3f(boxShader.getUniform("cursor_position_es"), cpee.x, cpee.y, cpee.z);
 
 
 	glUniform1f(boxShader.getUniform("cursor_radius_ws"), cursorRadius);
-	float cursorRadiusSS = gl::projectedRadius(0.8726388, (maskCenter - camera.getEye()).length(), cursorRadius) * h / 2.0f;
+	float cursorRadiusSS = gl::projectedRadius(0.8726388, (maskCenter - camera.eye()).length(), cursorRadius) * h / 2.0f;
 	glUniform1f(boxShader.getUniform("cursor_radius_ss"), cursorRadiusSS);
 
 	glUniform2f(boxShader.getUniform("window_size"), w, h);
