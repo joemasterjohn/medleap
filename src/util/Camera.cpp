@@ -2,8 +2,9 @@
 
 using namespace gl;
 
-Camera::Camera() : yaw_(0.0f), pitch_(0.0f), radius_(1)
+Camera::Camera() : yaw_(0.0f), pitch_(0.0f), radius_(1), aspect_(1.0f), perspective_(true)
 {
+	perspective(perspective_);
 	update();
 }
 
@@ -20,11 +21,28 @@ void Camera::update()
 	up_ = view_inverse_.col(1);
 	forward_ = view_inverse_.col(2) * -1.0f;
 	eye_ = view_inverse_.col(3);
+
+	if (!perspective_) {
+		perspective(perspective_);
+	}
 }
 
-void Camera::projection(const Mat4& projection)
+void Camera::aspect(float aspect)
 {
-    projection_ = projection;
+	aspect_ = aspect;
+	perspective(perspective_);
+}
+
+void Camera::perspective(bool perspective)
+{
+	perspective_ = perspective;
+	if (perspective_) {
+		projection_ = gl::perspective(60.0f * deg_to_rad, aspect_, 0.1f, 15.0f);
+	} else {
+		float width = 0.5f * sqrt(radius_) * 2.5f;
+		float height = width / aspect_;
+		projection_ = gl::ortho(-width, width, -height, height, -15.0f, 15.0f);
+	}
 }
 
 void Camera::yaw(float yaw)

@@ -269,8 +269,7 @@ void VolumeController::resize()
 {
 	fullResRT.resize(viewport_.width, viewport_.height);
 	lowResRT.resize(viewport_.width / 2, viewport_.height / 2);
-	//camera.setProjection(ortho(-0.5f, 0.5f, -0.5f/viewport_.aspect(), 0.5f/viewport_.aspect(), 0, 200));
-	camera.projection(perspective(0.8726388f, viewport_.aspect(), 0.1f, 100.0f));
+	camera.aspect(viewport_.aspect());
 	markDirty();
 }
 
@@ -627,9 +626,16 @@ std::unique_ptr<Menu> VolumeController::contextMenu()
 		MainController::getInstance().menuController().hideMenu();
 	});
 
-	MenuItem& iso = menu->createItem("Isosurface");
-	iso.setAction([&]{
-		setMode(ISOSURFACE);
+	//MenuItem& iso = menu->createItem("Isosurface");
+	//iso.setAction([&]{
+	//	setMode(ISOSURFACE);
+	//	MainController::getInstance().menuController().hideMenu();
+	//});
+
+	MenuItem& mi_projection = menu->createItem("Projection");
+	mi_projection.setAction([&]{
+		camera.perspective(!camera.perspective());
+		markDirty();
 		MainController::getInstance().menuController().hideMenu();
 	});
 

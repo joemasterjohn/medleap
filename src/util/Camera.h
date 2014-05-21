@@ -31,6 +31,18 @@ public:
     /// Returns the forward axis in world coordinates; (0, 0, -1) in eye coordinates.
 	const gl::Vec4& forward() const { return forward_; }
 
+	/// Using perspective projection
+	bool perspective() const { return perspective_; }
+
+	/// Set projection type (true = perspective, false = orthographic)
+	void perspective(bool perspective);
+
+	/// Set aspect ratio
+	void aspect(float aspect);
+
+	/// Current aspect ratio
+	float aspect() const { return aspect_; }
+
 	/// Yaw angle radians
 	float yaw() const { return yaw_; }
 
@@ -42,9 +54,6 @@ public:
 
 	/// Center of rotation
 	const gl::Vec3& center() const { return center_; }
-    
-    /// Assigns a projection matrix.
-	void projection(const gl::Mat4& projection);
 
 	/// Set yaw angle radians
 	void yaw(float yaw);
@@ -70,6 +79,8 @@ private:
 	float pitch_;
 	float radius_;
 	gl::Vec3 center_;
+	float aspect_;
+	bool perspective_;
     
     void update();
 };
