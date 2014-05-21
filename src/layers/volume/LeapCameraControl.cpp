@@ -8,8 +8,8 @@ using namespace gl;
 LeapCameraControl::LeapCameraControl() : tracking_(false), mouse_drag_l_(false), mouse_drag_r_(false)
 {
 	poses_.fist().enabled(true);
-	poses_.fist().maxHandEngageSpeed(50.0f);
-	poses_.carry().enabled(true);
+	poses_.fist().maxHandEngageSpeed(150.0f);
+	poses_.l().enabled(true);
 }
 
 Camera& LeapCameraControl::camera()
@@ -20,29 +20,39 @@ Camera& LeapCameraControl::camera()
 void LeapCameraControl::update(const Leap::Controller& controller, const Leap::Frame& frame)
 {
 	poses_.update(frame);
+	if (poses_.fist().tracking() && poses_.fist().state() == FistPose::State::closed) {
+		leapRotate();
+	} else if (poses_.l().tracking()) {
+		leapTranslate();
+	}
+}
 
-	if (poses_.carry().tracking()) {
-		Vector t = poses_.carry().handPositionDelta() / 200.0f;
+void LeapCameraControl::leapTranslate()
+{
+	if (poses_.l().isClosed()) {
+		Vector t = poses_.l().handPositionDelta() / 300.0f;
 		Mat4 eye2world = camera().view().rotScale().transpose();
 		Vec4 v = Vec4(t.x, t.y, t.z, 0);
 		move(eye2world * -v);
+	}
+}
 
-	} else if (poses_.fist().tracking() && poses_.fist().state() == FistPose::State::closed) {
-		Vector a = poses_.fist().hand().stabilizedPalmPosition();
-		Vector b = poses_.fist().handPrevious().stabilizedPalmPosition();
-		Vector v = (a-b) / 200.0f;
+void LeapCameraControl::leapRotate()
+{
+	Vector a = poses_.fist().hand().stabilizedPalmPosition();
+	Vector b = poses_.fist().handPrevious().stabilizedPalmPosition();
+	Vector v = (a - b) / 200.0f;
 
-		float d_yaw = v.x * pi;
-		float d_pitch = -v.y;
-		rotate(d_yaw, d_pitch);
+	float d_yaw = v.x * pi;
+	float d_pitch = -v.y;
+	rotate(d_yaw, d_pitch);
 
-		float palm_speed = poses_.fist().hand().palmVelocity().magnitude();
-		if (palm_speed > 0) {
-			float z_speed = abs(poses_.fist().hand().palmVelocity().z);
-			float z_scale = (z_speed / 120.0f) / (palm_speed / 100.0f);
-			float d_radius = -poses_.fist().handPositionDelta().z / 100.0f * min(1.0f, z_scale * z_scale);
-			zoom(d_radius);
-		}
+	float palm_speed = poses_.fist().hand().palmVelocity().magnitude();
+	if (palm_speed > 0) {
+		float z_speed = abs(poses_.fist().hand().palmVelocity().z);
+		float z_scale = (z_speed / 120.0f) / (palm_speed / 100.0f);
+		float d_radius = -poses_.fist().handPositionDelta().z / 100.0f * min(1.0f, z_scale * z_scale);
+		zoom(d_radius);
 	}
 }
 

@@ -37,6 +37,9 @@ public:
 	/** Maximum speed hand can be moving in mm/sec to engage. Use speed <= 0 for any speed. */
 	void maxHandEngageSpeed(float speed) { max_hand_engage_speed_ = speed; }
 
+	/** Calculates sum of all finger velocities relative to hand velocity */
+	float fingerMotion() const;
+
 	/** Current palm position */
 	Leap::Vector handPosition(bool stabilized = false) const;
 

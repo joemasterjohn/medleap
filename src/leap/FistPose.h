@@ -13,13 +13,19 @@ public:
 		/** Some digits are extended */
 		partial,
 		/** No digits are extended */
-		closed
+		closed,
+		/** Fingers curled in, thumb out */
+		thumb_out,
+		/** Thumb, index, middle extended */
+		three_out,
 	};
 
 	FistPose();
 
 	/** Current state */
 	State state() { return state_; }
+
+	std::chrono::milliseconds timeSinceStateChange() { return time_since_change_; }
 
 protected:
 	bool shouldEngage(const Leap::Frame& frame) override;
@@ -28,6 +34,8 @@ protected:
 
 private:
 	State state_;
+	std::chrono::high_resolution_clock::time_point last_change_;
+	std::chrono::milliseconds time_since_change_;
 };
 
 #endif

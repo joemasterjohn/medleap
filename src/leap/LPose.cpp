@@ -9,7 +9,7 @@ LPose::LPose() :
 	open_fn_(nullptr),
 	close_fn_(nullptr)
 {
-	maxHandEngageSpeed(35.0f);
+	maxHandEngageSpeed(55.0f);
 }
 
 bool LPose::shouldEngage(const Frame& frame)
@@ -82,7 +82,8 @@ void LPose::track(const Frame& frame)
 	float angle = u.angleTo(v);
 
 	bool was_closed = closed_;
-	closed_ = (angle <= 0.3f);
+
+	closed_ = (angle <= 0.3f) && fingerMotion() < 300.0f;
 
 	if (hand().confidence() > 0.75f && was_closed && !closed_) {
 		if (open_fn_) {

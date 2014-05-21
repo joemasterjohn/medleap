@@ -39,7 +39,7 @@ void Camera::perspective(bool perspective)
 	if (perspective_) {
 		projection_ = gl::perspective(60.0f * deg_to_rad, aspect_, 0.1f, 15.0f);
 	} else {
-		float width = 0.5f * sqrt(radius_) * 2.5f;
+		float width = tan(30.0f * deg_to_rad) * radius_;
 		float height = width / aspect_;
 		projection_ = gl::ortho(-width, width, -height, height, -15.0f, 15.0f);
 	}

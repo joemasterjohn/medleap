@@ -109,3 +109,14 @@ Vector Pose1H::handPositionDelta(bool stabilized) const
 {
 	return handPosition(stabilized) - handPositionPrevious(stabilized);
 }
+
+float Pose1H::fingerMotion() const
+{
+	float palm_speed = hand().palmVelocity().magnitude();
+	float motion = 0.0f;
+	for (int i = 0; i < 5; i++) {
+		float finger_speed = hand().fingers()[i].tipVelocity().magnitude();
+		motion += std::abs(finger_speed - palm_speed);
+	}
+	return motion;
+}

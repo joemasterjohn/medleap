@@ -93,7 +93,7 @@ void VolumeInfoController::draw()
 		drawText(string("Rendering: MIP"), textRow++);
 		break;
 	case VolumeController::VR:
-		drawText(string("Rendering: VR"), textRow++);
+		drawText(string("Rendering: DVR"), textRow++);
 		break;
 	case VolumeController::ISOSURFACE:
 		drawText(string("Rendering: Isosurface"), textRow++);
@@ -101,6 +101,14 @@ void VolumeInfoController::draw()
 	default:
 		drawText(string("Rendering: Unknown"), textRow++);
 	}
+
+	os.str("");
+	if (volumeRenderer->getCamera().perspective()) {
+		os << "Projection: Perspective" << endl;
+	} else {
+		os << "Projection: Orthographic" << endl;
+	}
+	drawText(os.str(), textRow++);
 
 	// Rendering sample rate
 	os.str("");

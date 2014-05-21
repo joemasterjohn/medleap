@@ -28,6 +28,9 @@ private:
 
 	Camera& camera();
 
+	void leapRotate();
+	void leapTranslate();
+
 	void rotate(float delta_yaw, float delta_pitch);
 	void move(const gl::Vec3& delta);
 	void zoom(float delta_radius);
