@@ -10,8 +10,6 @@ using namespace std;
 
 VolumeController::VolumeController()
 {
-    mouseDragLeftButton = false;
-    mouseDragRightButton = false;
 	draw_bounds = true;
 	draw_planes = false;
 	draw_cursor3D = false;
@@ -209,20 +207,7 @@ bool VolumeController::keyboardInput(GLFWwindow* window, int key, int action, in
 
 bool VolumeController::mouseButton(GLFWwindow* window, int button, int action, int mods, double x, double y)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        mouseDragLeftButton = action == GLFW_PRESS;
-        if (mouseDragLeftButton) {
-            dragStartView = camera.view();
-        }
-    }
-    
-//    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-//        mouseDragRightButton = action == GLFW_PRESS;
-//        if (mouseDragRightButton) {
-//            dragStartView = camera.getView();
-//        }
-//        renderer.setMoving(mouseDragRightButton);
-//    }
+	leap_cam_control_.mouseButton(button, action, mods, x, y);
     
     return true;
 }
@@ -232,38 +217,15 @@ bool VolumeController::mouseMotion(GLFWwindow* window, double x, double y)
     if (!viewport_.contains(x, y))
         return true;
 
-    
-    if (mouseDragLeftButton) {
-        double dx = x - dragStartX;
-        double dy = y - dragStartY;
-        double pitch = dy * 0.01;
-        double yaw = dx * 0.01;
-        
-        Mat4 m1 = gl::rotation(static_cast<float>(pitch), dragStartView.row(0));
-        Mat4 m2 = gl::rotation(static_cast<float>(yaw), dragStartView.row(1));
-        //camera.setView(dragStartView * m1 * m2);
-        markDirty();
-    } else if (mouseDragRightButton) {
-//        double dx = x - dragStartX;
-//        double dy = y - dragStartY;
-//        
-//        Mat4 tm = translation(dx*0.002, dy*0.002, 0);
-//        camera.setView(tm * dragStartView);
-//        
-    } else {
-        dragStartX = x;
-        dragStartY = y;
-    }
+	leap_cam_control_.mouseMotion(x, y);
+
 
     return true;
 }
 
 bool VolumeController::scroll(GLFWwindow* window, double dx, double dy)
 {
-    if (!mouseDragLeftButton) {
-        //camera.translateBackward(static_cast<float>(dy * 0.2f));
-        markDirty();
-    }
+	leap_cam_control_.mouseScroll(dx, dy);
     return true;
 }
 

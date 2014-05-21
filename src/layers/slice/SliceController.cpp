@@ -35,7 +35,7 @@ SliceController::SliceController() :
 	poses_.v().engageDelay(milliseconds(0));
 	poses_.v().disengageDelay(milliseconds(0));
 	poses_.v().trackFunction(std::bind(&SliceController::leapScroll, this, std::placeholders::_1));
-	poses_.v().engageFunction([&](const Leap::Frame& c){
+	poses_.v().closeFn([&](const Leap::Frame& c){
 		saved_slice_ = currentSlice_;
 		MainController::getInstance().leapStateController().active(LeapStateController::icon_h2f1_point);
 	});
@@ -213,7 +213,7 @@ bool SliceController::leapInput(const Leap::Controller& leapController, const Le
 void SliceController::leapScroll(const Leap::Frame& frame)
 {
 	if (poses_.v().isClosed()) {
-		Vector delta = poses_.v().handPositionDeltaEngaged(true);
+		Vector delta = poses_.v().hand().stabilizedPalmPosition() - poses_.v().handClosed().stabilizedPalmPosition();
 		slice(saved_slice_ + delta.x / leap_scroll_dst_);
 	}
 }

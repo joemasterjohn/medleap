@@ -71,13 +71,7 @@ public:
 
 private:
     VolumeData* volume;
-    
-    // camera control
-    bool mouseDragLeftButton;
-    bool mouseDragRightButton;
-    double dragStartX;
-    double dragStartY;
-	gl::Mat4 dragStartView;
+   
 
 	std::vector<gl::Plane> clip_planes_;
 

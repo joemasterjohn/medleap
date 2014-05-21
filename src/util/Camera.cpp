@@ -35,13 +35,13 @@ void Camera::yaw(float yaw)
 
 void Camera::pitch(float pitch)
 {
-	pitch_ = pitch;
+	pitch_ = clamp(pitch, -pi_over_2 + 0.0000001f, pi_over_2 - 0.0000001f);
 	update();
 }
 
 void Camera::radius(float radius)
 {
-	radius_ = radius;
+	radius_ = std::max(0.01f, radius);
 	update();
 }
 
