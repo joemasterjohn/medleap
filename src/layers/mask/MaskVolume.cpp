@@ -16,6 +16,26 @@ MaskVolume::Edit::Edit(Edit&& edit)
 	std::swap(voxels_, edit.voxels_);
 }
 
+MaskVolume::Edit& MaskVolume::Edit::operator=(Edit&& edit)
+{
+    operation_ = edit.operation_;
+	std::swap(voxels_, edit.voxels_);
+    return *this;
+}
+
+MaskVolume::Edit::Edit(const Edit& edit)
+{
+    operation_ = edit.operation_;
+    voxels_ = edit.voxels_;
+}
+
+MaskVolume::Edit& MaskVolume::Edit::operator=(const Edit& edit)
+{
+    operation_ = edit.operation_;
+    voxels_ = edit.voxels_;
+    return *this;
+}
+
 void MaskVolume::Edit::redo(Texture& texture)
 {
 	switch (operation_)

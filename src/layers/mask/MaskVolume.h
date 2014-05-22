@@ -21,6 +21,9 @@ public:
 		Edit();
 		Edit(Operation operation, std::vector<gl::Vec3i>& voxels);
 		Edit(Edit&& edit);
+        Edit& operator=(Edit&&);
+        Edit(const Edit&);
+        Edit& operator=(const Edit&);
 
 		bool empty() { return voxels_.empty(); }
 		void redo(gl::Texture& texture);

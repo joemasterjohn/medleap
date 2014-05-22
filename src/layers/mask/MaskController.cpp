@@ -9,7 +9,6 @@ using namespace Leap;
 
 MaskController::MaskController() : mask_volume_(new BoxMask(Box(0.04f, 0.04f, 0.04f)))
 {
-	VolumeController& vc = MainController::getInstance().volumeController();
 	poses_.v().enabled(true);
 	poses_.palmsFace().enabled(true);
 }
