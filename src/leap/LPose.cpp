@@ -41,6 +41,17 @@ bool LPose::shouldEngage(const Frame& frame)
 		return false;
 	}
 
+	Vector u = pointer_.direction();
+	u.y = 0;
+	u = u.normalized();
+	Vector v = thumb_.direction();
+	v.y = 0;
+	v = v.normalized();
+	float angle = u.angleTo(v);
+	if (angle < 0.5f) {
+		return false;
+	}
+
 	return true;
 }
 

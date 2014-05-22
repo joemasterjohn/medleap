@@ -139,6 +139,10 @@ void LoadController::update(chrono::milliseconds elapsed)
 {
 	updateTransition(elapsed);
 
+	if (loader.getState() == VolumeLoader::LOADING) {
+		state_renderer_.update(loader, elapsed, viewport_);
+	}
+
 	if (loader.getState() == VolumeLoader::FINISHED) {
 		MainController::getInstance().setVolume(loader.getVolume());
 		MainController::getInstance().volumeController().markDirty();
@@ -182,20 +186,12 @@ void LoadController::updateTransition(chrono::milliseconds elapsed)
 
 void LoadController::draw()
 {
-	static float f = 0.0f;
 	if (loader.getState() == VolumeLoader::LOADING) {
-		GLclampf c = static_cast<GLclampf>((std::sin(f += 0.01) * 0.5 + 0.5) * 0.5 + 0.5);
-		viewport_.apply();
-
-		//TextRenderer& text = MainController::getInstance().getText();
-		//text.setColor(1, c, c);
-		//text.begin(viewport_.width, viewport_.height);
-		//text.add(string("Loading"), viewport_.width / 2, viewport_.height / 2, TextRenderer::CENTER, TextRenderer::CENTER);
-		//text.add(loader.getStateMessage(), viewport_.width / 2, viewport_.height / 2 - 36, TextRenderer::CENTER, TextRenderer::CENTER);
-		//text.end();
+		state_renderer_.draw();
 	} else if (!transition_.empty()) {
 		list_renderer_.draw();
 
+		// leap cursor
 		static Draw d;
 		d.setModelViewProj(viewport_.orthoProjection());
 		d.begin(GL_TRIANGLE_FAN);

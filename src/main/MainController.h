@@ -53,7 +53,7 @@ public:
     void scroll(GLFWwindow* window, double dx, double dy);
     Mode getMode();
     static MainController& getInstance();
-	const MainRenderer& getRenderer() const;
+	MainRenderer& getRenderer();
 
 	VolumeData* volumeData() { return volume; }
 	SliceController& sliceController() { return sliceController_; }

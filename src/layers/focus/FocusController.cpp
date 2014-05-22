@@ -9,7 +9,7 @@ using namespace Leap;
 FocusController::FocusController()
 {
 	poses_.v().enabled(true);
-	poses_.push().enabled(true);
+	poses_.palmsFace().enabled(true);
 }
 
 void FocusController::gainFocus()
@@ -40,7 +40,7 @@ bool FocusController::leapInput(const Leap::Controller& controller, const Leap::
 		moveCursor();
 	}
 
-	if (poses_.push().tracking() && poses_.push().isClosed()) {
+	if (poses_.palmsFace().tracking()) {
 		scaleCursor();
 	} else {
 		camera_control_.update(controller, frame);
@@ -71,14 +71,10 @@ void FocusController::scaleCursor()
 	MainController& mc = MainController::getInstance();
 	VolumeController& vc = mc.volumeController();
 	
-	PushPose& pose = poses_.push();
-	Vector v = pose.handPositionDelta();
-	float delta = v.magnitude();
-	if (v.z < 0) {
-		delta *= -1.0f;
-	}
+	PalmsFacePose& pose = poses_.palmsFace();
+	float delta = pose.handsSeparationDelta() / 1000.0f;
 
-	vc.cursorRadius += delta * 0.001;
+	vc.cursorRadius += delta;
 
 
 	vc.markDirty();

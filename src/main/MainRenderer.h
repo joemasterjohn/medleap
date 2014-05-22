@@ -44,6 +44,7 @@ public:
 	void setBackgroundColor(const gl::Vec3& c);
 	void setLightBG();
 	void setDarkBG();
+	void invertBG();
     
 private:
 	std::list<Controller*> activeLayers;

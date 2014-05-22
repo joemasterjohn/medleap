@@ -5,6 +5,7 @@
 #include "data/VolumeLoader.h"
 #include "DirectoryMenu.h"
 #include "ListRenderer.h"
+#include "LoadStateRenderer.h"
 #include "leap/PoseTracker.h"
 #include "util/Transition.h"
 
@@ -25,6 +26,7 @@ private:
 	VolumeLoader loader;
 	DirectoryMenu menu;
 	ListRenderer list_renderer_;
+	LoadStateRenderer state_renderer_;
 	float y_offset_;
 	PoseTracker poses_;
 	gl::Vec2 cursor_;

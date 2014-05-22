@@ -13,6 +13,12 @@ void BoxMask::center(const Vec3& center)
 	box_.center(center);
 }
 
+void BoxMask::scale(float scale)
+{
+	Vec3 s = box_.size();
+	box_.size(s.x * scale, s.y * scale, s.z * scale);
+}
+
 Vec3 BoxMask::center() const
 {
 	return box_.center();

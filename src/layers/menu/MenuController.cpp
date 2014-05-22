@@ -4,6 +4,7 @@
 #include "gl/math/Math.h"
 #include "main/MainController.h"
 #include "MainMenu.h"
+#include "gl/geom/SegmentRing.h"
 
 using namespace std;
 using namespace gl;
@@ -273,7 +274,7 @@ void MenuController::draw()
 				glUniform4f(menuShader.getUniform("color"), menuC.x, menuC.y, menuC.z, transition_.progress());
 			}
 
-			void* offset = (void*)(indicesPerMenuItem * i * sizeof(GLushort));
+			void* offset = (void*)(indicesPerMenuItem * i * sizeof(GLuint));
 			glDrawElements(GL_TRIANGLES, indicesPerMenuItem, indexType, offset);
 		}
 		//glUniform4f(menuShader.getUniform("color"), menuC.x, menuC.y, menuC.z, transition_.progress() * 0.85f);
@@ -370,50 +371,53 @@ void MenuController::createRingGeometry()
 	GLfloat innerRadius = min(viewport_.width, viewport_.height) * 0.5 * 0.55;
 	GLfloat outerRadius = min(viewport_.width, viewport_.height) * 0.5 * 0.85;// 0.5 * sqrt(viewport_.width * viewport_.width + viewport_.height * viewport_.height);
 
-	vector<GLfloat> verts;
-	vector<GLushort> indices;
+	//vector<GLfloat> verts;
+	//vector<GLushort> indices;
 
-	std::function<void(float, float)> pushVert = [&](float angle, float radius){
-		verts.push_back(cos(angle) * radius);
-		verts.push_back(sin(angle) * radius);
-	};
+	//std::function<void(float, float)> pushVert = [&](float angle, float radius){
+	//	verts.push_back(cos(angle) * radius);
+	//	verts.push_back(sin(angle) * radius);
+	//};
 
-	std::function<void(GLushort, GLushort, GLushort)> pushTriangle = [&](GLushort i, GLushort j, GLushort k) {
-		indices.push_back(i);
-		indices.push_back(j);
-		indices.push_back(k);
-	};
+	//std::function<void(GLushort, GLushort, GLushort)> pushTriangle = [&](GLushort i, GLushort j, GLushort k) {
+	//	indices.push_back(i);
+	//	indices.push_back(j);
+	//	indices.push_back(k);
+	//};
 
-	// I want a consistent number of segments for a smooth circle regardless of the number of menu items.
-	// However, I also need the segments to align with the boundaries of the menu items.
-	unsigned stepsPerItem = std::max(1u, static_cast<unsigned>(128u / menu_->getItems().size()));
-	unsigned numSteps = stepsPerItem * menu_->getItems().size();
-	this->indicesPerMenuItem = stepsPerItem * 6;
+	//// I want a consistent number of segments for a smooth circle regardless of the number of menu items.
+	//// However, I also need the segments to align with the boundaries of the menu items.
+	//unsigned stepsPerItem = std::max(1u, static_cast<unsigned>(128u / menu_->getItems().size()));
+	//unsigned numSteps = stepsPerItem * menu_->getItems().size();
+	//this->indicesPerMenuItem = stepsPerItem * 6;
 
-	unsigned jmod = 2 * numSteps;
-	float step = two_pi / numSteps;
-	float angle = 0.0f;
-	for (unsigned i = 0; i < numSteps; i++) {
-		pushVert(angle, innerRadius);
-		pushVert(angle, outerRadius);
-		int j = i * 2;
-		pushTriangle(j, j + 1, (j + 3) % jmod);
-		pushTriangle(j, (j + 3) % jmod, (j + 2) % jmod);
-		angle += step;
-	}
+	//unsigned jmod = 2 * numSteps;
+	//float step = two_pi / numSteps;
+	//float angle = 0.0f;
+	//for (unsigned i = 0; i < numSteps; i++) {
+	//	pushVert(angle, innerRadius);
+	//	pushVert(angle, outerRadius);
+	//	int j = i * 2;
+	//	pushTriangle(j, j + 1, (j + 3) % jmod);
+	//	pushTriangle(j, (j + 3) % jmod, (j + 2) % jmod);
+	//	angle += step;
+	//}
+
+	Geometry g = SegmentRing(menu_->getItems().size(), innerRadius, outerRadius).triangles();
 
 	menuVBO.bind();
-	menuVBO.data(&verts[0], verts.size() * sizeof(GLfloat));
+	menuVBO.data(&g.vertices[0], g.vertices.size() * sizeof(Vec3));
 
 	menuIBO.bind();
-	menuIBO.data(&indices[0], indices.size() * sizeof(GLushort));
-	indexCount = indices.size();
-	indexType = GL_UNSIGNED_SHORT;
+	menuIBO.data(&g.indices[0], g.indices.size() * sizeof(GLuint));
+	indexCount = g.indices.size();
+	indicesPerMenuItem = g.indices.size() / menu_->getItems().size();
+	indexType = GL_UNSIGNED_INT;
 
 	setShaderState = [this] {
 		int loc = menuShader.getAttribute("vs_position");
 		glEnableVertexAttribArray(loc);
-		glVertexAttribPointer(loc, 2, GL_FLOAT, false, 0, 0);
+		glVertexAttribPointer(loc, 3, GL_FLOAT, false, 0, 0);
 	};
 }
 

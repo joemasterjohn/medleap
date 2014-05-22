@@ -6,6 +6,7 @@
 #include "gdcmIPPSorter.h"
 #include "util/Util.h"
 #include <thread>
+#include <regex>
 
 using namespace std;
 using namespace gdcm;
@@ -116,7 +117,7 @@ VolumeLoader::State VolumeLoader::getState()
     return state;
 }
 
-std::string VolumeLoader::getStateMessage()
+std::string VolumeLoader::getStateMessage() const
 {
     return stateMessage;
 }
@@ -135,21 +136,22 @@ void VolumeLoader::loadRAW(const std::string& fileName)
 			this->volume = new VolumeData;
 
 			getline(f, line);
-			volume->width = std::stoi(line);
-			getline(f, line);
-			volume->height = std::stoi(line);
-			getline(f, line);
-			volume->depth = std::stoi(line);
+
+			smatch matches;
+			regex_match(line, matches, regex{"\\D*(\\d+)x(\\d+)x(\\d+)"});
+			volume->width = std::stoi(matches[1]);
+			volume->height = std::stoi(matches[2]);
+			volume->depth = std::stoi(matches[3]);
 
 			getline(f, line);
-			unsigned pixelBytes = std::stoi(line);
+			regex_match(line, matches, regex{ ("\\D*(\\d+)") });
+			unsigned pixelBytes = std::stoi(matches[1]);
 
 			getline(f, line);
-			float x = std::stof(line);
-			getline(f, line);
-			float y = std::stof(line);
-			getline(f, line);
-			float z = std::stof(line);
+			regex_match(line, matches, regex{ ("\\D*(.*):(.*):(.*)") });
+			float x = std::stoi(matches[1]);
+			float y = std::stoi(matches[2]);
+			float z = std::stoi(matches[3]);
 			f.close();
 
 			ifstream binary(fileName, ios::in | ios::binary);

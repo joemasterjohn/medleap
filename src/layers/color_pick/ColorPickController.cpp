@@ -35,7 +35,8 @@ ColorPickController::ColorPickController() :
 
 	text_.loadFont("menlo14");
 
-	l_pose_.closeFn([&](const Leap::Frame& c){ 
+	poses_.v().enabled(true);
+	poses_.v().closeFn([&](const Leap::Frame& c){ 
 		chooseState(m_leap_cursor.x, m_leap_cursor.y);
 	});
 }
@@ -56,7 +57,7 @@ void ColorPickController::gainFocus()
 
 void ColorPickController::loseFocus()
 {
-	l_pose_.tracking(false);
+	poses_.v().tracking(false);
 }
 
 bool ColorPickController::mouseMotion(GLFWwindow* window, double x, double y)
@@ -76,6 +77,9 @@ void ColorPickController::chooseState(float x, float y)
 	} else if (value_rect_.contains(x, y)) {
 		state_ = State::choose_value;
 	} else if (select_rect_.contains(x, y)) {
+		m_leap_cursor.x = -100;
+		m_leap_cursor.y = -100;
+		state_ = State::idle;
 		for (std::function<void(const Color&)>& cb : callbacks_)
 			cb(color_);
 		callbacks_.clear();
@@ -125,14 +129,14 @@ bool ColorPickController::mouseButton(GLFWwindow* window, int button, int action
 
 bool ColorPickController::leapInput(const Leap::Controller& leapController, const Leap::Frame& frame)
 {
-	l_pose_.update(frame);
-	if (l_pose_.tracking()) {
-		Vector v = l_pose_.pointer().stabilizedTipPosition();
+	poses_.v().update(frame);
+	if (poses_.v().tracking()) {
+		Vector v = poses_.v().handPosition(true);
 		v = frame.interactionBox().normalizePoint(v);
 		m_leap_cursor.x = viewport_.x + viewport_.width * v.x;
 		m_leap_cursor.y = viewport_.y + viewport_.height * v.y;
 
-		if (l_pose_.isClosed()) {
+		if (poses_.v().isClosed()) {
 			updateState(m_leap_cursor.x, m_leap_cursor.y);
 		} else {
 			state_ = State::idle;
@@ -244,7 +248,7 @@ void ColorPickController::draw()
 	color_cursor_.draw();
 
 	// draw leap cursor
-	if (l_pose_.tracking()) {
+	if (poses_.v().tracking()) {
 		color_cursor_.setModelViewProj(projection_ * translation(m_leap_cursor.x, m_leap_cursor.y, 0));
 		color_cursor_.draw();
 	}

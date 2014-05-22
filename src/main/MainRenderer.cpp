@@ -30,6 +30,11 @@ Vec3 MainRenderer::getInverseBGColor() const
 	return Vec3(1.0f) - bgColor;
 }
 
+void MainRenderer::invertBG()
+{
+	bgColor = getInverseBGColor();
+}
+
 void MainRenderer::setBackgroundColor(const Vec3& c) {
 	bgColor = c;
 }

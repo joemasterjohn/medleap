@@ -87,7 +87,7 @@ Transfer1DController::Transfer1DController()
 	poses_.v().enabled(true);
 	poses_.v().openFn([&](const Leap::Frame&){ leap_drag_performed_ = false; });
 	poses_.v().disengageFunction([&](const Leap::Frame&){leap_drag_performed_ = false; });
-	poses_.v().closeFn([&](const Leap::Frame&) { changeColorSelected(); });
+	//poses_.v().closeFn([&](const Leap::Frame&) { changeColorSelected(); });
 
 	poses_.pinch().enabled(true);
 	poses_.pinch().closeFn([&](const Leap::Frame&){ toggleContextSelected(); });
@@ -280,8 +280,12 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 		cursor_ = frame.interactionBox().normalizePoint(poses_.v().handPosition(true)).x;
 
 		if (poses_.v().isClosed()) {
-			if (!selected_ && !leap_drag_performed_ && poses_.v().hand().palmVelocity().z < -250) {
-				addMarker();
+			if (!leap_drag_performed_ && poses_.v().hand().palmVelocity().z < -250) {
+				if (selected_) {
+					changeColorSelected();
+				} else {
+					addMarker();
+				}
 			} else if (selected_ && !leap_drag_performed_ && poses_.v().hand().palmVelocity().z > 250) {
 				deleteSelected();
 			} else if (selected_ && !leap_drag_performed_) {
@@ -299,7 +303,9 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 		}
 	}
 
-	camera_control_.update(leapController, frame);
+	if (!poses_.v().tracking()) {
+		camera_control_.update(leapController, frame);
+	}
 
 	static auto lastSwipe = std::chrono::system_clock::now();
 	Leap::GestureList gestures = frame.gestures();
@@ -527,23 +533,15 @@ void Transfer1DController::deleteSelected()
 
 void Transfer1DController::changeColorSelected()
 {
-	chooseSelected();
-	if (selected_) {
-		static auto last_close = high_resolution_clock::now();
-		auto now = high_resolution_clock::now();
-		auto elapsed = duration_cast<milliseconds>(now - last_close);
-		last_close = now;
+	leap_drag_performed_ = true;
 
-		if (elapsed.count() > 100 && elapsed.count() < 500 && !leap_drag_performed_) {
-			auto cb = [&](const Color& color) {
-				selected_->color(color);
-				transfer().saveTexture(clutTexture);
-				transfer().saveContext(contextTexture);
-				volumeRenderer->markDirty();
-			};
-			MainController::getInstance().pickColor(selected_->color(), cb);
-		}
-	}
+	auto cb = [&](const Color& color) {
+		selected_->color(color);
+		transfer().saveTexture(clutTexture);
+		transfer().saveContext(contextTexture);
+		volumeRenderer->markDirty();
+	};
+	MainController::getInstance().pickColor(selected_->color(), cb);
 }
 
 void Transfer1DController::toggleContextSelected()

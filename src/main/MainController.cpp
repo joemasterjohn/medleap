@@ -107,7 +107,7 @@ void MainController::setMode(MainController::Mode mode)
     }
 }
 
-const MainRenderer& MainController::getRenderer() const
+MainRenderer& MainController::getRenderer()
 {
 	return renderer;
 }

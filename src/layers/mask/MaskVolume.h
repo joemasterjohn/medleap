@@ -36,6 +36,7 @@ public:
 	virtual gl::Geometry geometry() const = 0;
 	virtual void center(const gl::Vec3& center) = 0;
 	virtual gl::Vec3 center() const = 0;
+	virtual void scale(float scale) = 0;
 };
 
 #endif // __medleap_MaskVolume__

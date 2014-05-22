@@ -10,6 +10,7 @@
 #include "gl/math/Math.h"
 #include "gl/util/Draw.h"
 #include "util/TextRenderer.h"
+#include "leap/PoseTracker.h"
 #include <functional>
 
 class ColorPickController : public Controller
@@ -34,7 +35,7 @@ private:
 
 	std::vector<std::function<void(const Color&)>> callbacks_;
 	ColorHSV color_;
-	LPose l_pose_;
+	PoseTracker poses_;
 	State state_;
 	gl::Buffer geom_vbo_;
 	gl::Program color_circle_prog_;

@@ -10,11 +10,13 @@ using namespace Leap;
 MaskController::MaskController() : mask_volume_(new BoxMask(Box(0.04f, 0.04f, 0.04f)))
 {
 	VolumeController& vc = MainController::getInstance().volumeController();
+	poses_.v().enabled(true);
+	poses_.palmsFace().enabled(true);
 }
 
 bool MaskController::modal() const
 {
-	return v_pose_.tracking() || cam_control_.tracking();
+	return editing_;
 }
 
 void MaskController::gainFocus()
@@ -36,24 +38,32 @@ void MaskController::loseFocus()
 
 bool MaskController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)
 {
+	editing_ = false;
+	poses_.update(frame);
 	if (!cam_control_.tracking()) {
-		v_pose_.update(frame);
-
 		VolumeController& vc = MainController::getInstance().volumeController();
 		vc.maskColor = { 0.0f, 0.0f, 1.0f };
 
-		if (v_pose_.tracking()) {
+		if (poses_.v().tracking()) {
+			editing_ = true;
 			moveCursor();
-			if (v_pose_.isClosed()) {
+			if (poses_.v().isClosed()) {
 				applyEdit();
 			}
 
 			vc.maskGeometry = mask_volume_->geometry();
 			vc.markDirty();
 		}
+
+		if (poses_.palmsFace().tracking()) {
+			float scale = min(1.05f, max(1.0f + poses_.palmsFace().handsSeparationDelta() / 100.0f, 0.95f));
+			mask_volume_->scale(scale);
+			vc.maskGeometry = mask_volume_->geometry();
+			vc.markDirty();
+		}
 	}
 
-	if (!v_pose_.tracking()) {
+	if (!poses_.v().tracking()) {
 		cam_control_.update(controller, frame);
 	}
 
@@ -67,7 +77,7 @@ void MaskController::moveCursor()
 	vc.maskColor = { 1.0f, 1.0f, 0.0f };
 
 	const Mat4& eye2world = vc.getCamera().viewInverse();
-	Vec4 hand_delta_ws = eye2world * v_pose_.handPositionDelta().toVector4<Vec4>();
+	Vec4 hand_delta_ws = eye2world * poses_.v().handPositionDelta().toVector4<Vec4>();
 	Vec3 center = mask_volume_->center() + hand_delta_ws / 400.0f;
 	center = MainController::getInstance().volumeData()->getBounds().clamp(center);
 	mask_volume_->center(center);

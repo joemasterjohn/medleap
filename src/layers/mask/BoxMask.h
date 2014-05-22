@@ -13,6 +13,7 @@ public:
 	gl::Geometry geometry() const override;
 	void center(const gl::Vec3& center) override;
 	gl::Vec3 center() const override;
+	void scale(float scale) override;
 
 private:
 	gl::Box box_;

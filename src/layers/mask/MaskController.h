@@ -6,6 +6,7 @@
 #include "gl/math/Math.h"
 #include "MaskVolume.h"
 #include "util/History.h"
+#include "leap/PoseTracker.h"
 #include "layers/volume/LeapCameraControl.h"
 
 class MaskController : public Controller
@@ -19,10 +20,11 @@ public:
 	bool leapInput(const Leap::Controller& controller, const Leap::Frame& frame) override;
 
 private:
-	VPose v_pose_;
+	PoseTracker poses_;
 	LeapCameraControl cam_control_;
 	std::unique_ptr<MaskVolume> mask_volume_;
 	History<MaskVolume::Edit, 10> edits_;
+	bool editing_;
 
 	void moveCursor();
 	void applyEdit();

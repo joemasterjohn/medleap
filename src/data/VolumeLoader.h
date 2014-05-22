@@ -54,7 +54,7 @@ public:
     State getState();
     
     /** More details about what's going on */
-    std::string getStateMessage();
+    std::string getStateMessage() const;
     
 private:
     VolumeData* volume;

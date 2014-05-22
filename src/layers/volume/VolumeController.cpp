@@ -639,5 +639,13 @@ std::unique_ptr<Menu> VolumeController::contextMenu()
 		MainController::getInstance().menuController().hideMenu();
 	});
 
+
+	MenuItem& mi_background = menu->createItem("Background");
+	mi_background.setAction([&]{
+		MainController::getInstance().getRenderer().invertBG();
+		markDirty();
+		MainController::getInstance().menuController().hideMenu();
+	});
+
 	return std::unique_ptr<Menu>(menu);
 }
