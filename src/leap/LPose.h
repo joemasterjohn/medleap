@@ -33,6 +33,8 @@ public:
 
 	void clickFn(std::function <void(const Leap::Frame&)> fn) { click_fn_ = fn; }
 
+    void closeSeparation(float s) { close_separation_ = s; }
+    
 protected:
 	bool shouldEngage(const Leap::Frame& frame) override;
 	bool shouldDisengage(const Leap::Frame& frame) override;
@@ -47,6 +49,7 @@ private:
 	std::function<void(const Leap::Frame&)> open_fn_;
 	std::function<void(const Leap::Frame&)> close_fn_;
 	std::function<void(const Leap::Frame&)> click_fn_;
+    float close_separation_;
 };
 
 #endif
