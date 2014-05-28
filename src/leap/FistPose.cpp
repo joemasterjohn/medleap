@@ -5,7 +5,7 @@ using namespace std::chrono;
 
 FistPose::FistPose() : state_(State::open)
 {
-	//maxHandEngageSpeed(175.0f);
+	maxHandEngageSpeed(175.0f);
 }
 
 bool FistPose::shouldEngage(const Frame& frame)
