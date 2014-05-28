@@ -148,11 +148,11 @@ void VolumeLoader::loadRAW(const std::string& fileName)
 			unsigned pixelBytes = std::stoi(matches[1]);
 
 			getline(f, line);
-			regex_match(line, matches, regex{ ("\\D*(.*):(.*):(.*)") });
-			float x = std::stoi(matches[1]);
-			float y = std::stoi(matches[2]);
-			float z = std::stoi(matches[3]);
-			f.close();
+			regex_match(line, matches, regex{ ("scale: (.*):(.*):(.*)") });
+			float x, y, z;
+			x = stof(matches[1]);
+			y = stof(matches[2]);
+			z = stof(matches[3]);
 
 			ifstream binary(fileName, ios::in | ios::binary);
 			volume->data = new char[volume->getNumVoxels()*pixelBytes];

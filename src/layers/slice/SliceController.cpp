@@ -37,6 +37,7 @@ SliceController::SliceController() :
 	poses_.l().trackFunction(std::bind(&SliceController::leapScroll, this, std::placeholders::_1));
 	poses_.l().closeFn([&](const Leap::Frame& c){
 		saved_slice_ = currentSlice_;
+		std::cout << "saved: " << saved_slice_ << std::endl;
 	});
 }
 
