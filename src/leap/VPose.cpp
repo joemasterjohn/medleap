@@ -6,12 +6,10 @@ using namespace std;
 
 VPose::VPose() : 
 	closed_(false),
-	max_separation_(25.0f),
+	max_separation_(30.0f),
 	open_fn_(nullptr),
 	close_fn_(nullptr)
 {
-	minValidFrames(5);
-	maxHandEngageSpeed(150.0f);
 }
 
 bool VPose::shouldEngage(const Leap::Frame& frame)
@@ -57,10 +55,10 @@ void VPose::track(const Leap::Frame& frame)
 	FingerList fingers = hand().fingers();
 	Finger index = fingers[Finger::TYPE_INDEX];
 	Finger middle = fingers[Finger::TYPE_MIDDLE];
-	float dist = (index.tipPosition() - middle.tipPosition()).magnitude();
+	separation_ = (index.tipPosition() - middle.tipPosition()).magnitude();
 
 	bool was_closed = closed_;
-	closed_ = (dist <= max_separation_);
+	closed_ = (separation_ <= max_separation_);
 
 	if (open_fn_ && was_closed && !closed_) {
 		open_fn_(frame);

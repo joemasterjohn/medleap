@@ -20,7 +20,7 @@ Camera& LeapCameraControl::camera()
 void LeapCameraControl::update(const Leap::Controller& controller, const Leap::Frame& frame)
 {
 	poses_.update(frame);
-	if (poses_.fist().tracking() && poses_.fist().state() == FistPose::State::closed && poses_.fist().hand().confidence() > 0.2f) {
+	if (poses_.fist().tracking() && poses_.fist().state() == FistPose::State::closed) {
 		leapRotate();
 	} else if (poses_.l().tracking()) {
 		leapTranslate();
@@ -108,6 +108,10 @@ void LeapCameraControl::mouseScroll(double x, double y)
 
 void LeapCameraControl::move(const Vec3& delta)
 {
+    auto& lsc = MainController::getInstance().leapStateController();
+	lsc.increaseBrightness(LeapStateController::icon_l_open);
+    
+    
 	VolumeController& vc = MainController::getInstance().volumeController();
 
 	const Box& bounds = MainController::getInstance().volumeData()->getBounds();
@@ -122,6 +126,9 @@ void LeapCameraControl::move(const Vec3& delta)
 
 void LeapCameraControl::rotate(float delta_yaw, float delta_pitch)
 {
+    auto& lsc = MainController::getInstance().leapStateController();
+	lsc.increaseBrightness(LeapStateController::icon_fist);
+    
 	VolumeController& vc = MainController::getInstance().volumeController();
 	camera().yaw(camera().yaw() + delta_yaw);
 	camera().pitch(camera().pitch() + delta_pitch);
@@ -130,6 +137,9 @@ void LeapCameraControl::rotate(float delta_yaw, float delta_pitch)
 
 void LeapCameraControl::zoom(float delta_radius)
 {
+    auto& lsc = MainController::getInstance().leapStateController();
+	lsc.increaseBrightness(LeapStateController::icon_fist);
+    
 	VolumeController& vc = MainController::getInstance().volumeController();
 	camera().radius(camera().radius() + delta_radius);
 	vc.markDirty();

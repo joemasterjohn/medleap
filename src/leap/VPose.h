@@ -35,6 +35,8 @@ public:
 	/** Callback for when fingers close */
 	void closeFn(std::function<void(const Leap::Frame&)> fn) { close_fn_ = fn; }
 
+	float separation() const { return separation_; }
+
 protected:
 	bool shouldEngage(const Leap::Frame& frame) override;
 	bool shouldDisengage(const Leap::Frame& frame) override;
@@ -43,6 +45,7 @@ protected:
 private:
 	bool closed_;
 	float max_separation_;
+	float separation_;
 	Leap::Hand hand_closed_;
 	std::function<void(const Leap::Frame&)> open_fn_;
 	std::function<void(const Leap::Frame&)> close_fn_;

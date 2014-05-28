@@ -55,15 +55,18 @@ set(DATA_FONTS
 )
 
 set(DATA_ICONS
-	icons/h1f1_point.png
-    icons/h1f2_point.png
-    icons/h1f3_point.png
-    icons/h1f4_point.png
-    icons/h1f5_point.png
-    icons/h1f1_circle.png
-    icons/h1f2_circle.png
-    icons/h1f2_trigger.png
-    icons/h2f1_point.png
+	icons/carry.png
+    icons/fist.png
+    icons/l_closed.png
+    icons/l_open.png
+    icons/palms_face.png
+    icons/pinch.png
+    icons/point.png
+    icons/point2.png
+    icons/three.png
+    icons/thumb.png
+    icons/v_closed.png
+    icons/v_open.png
 )
 
 foreach(item IN LISTS DATA_SHADERS DATA_FONTS DATA_ICONS)

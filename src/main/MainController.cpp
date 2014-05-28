@@ -86,7 +86,7 @@ void MainController::setMode(MainController::Mode mode)
                 pushController(&histogramController, Docking(Docking::BOTTOM, 0.14));
 			pushController(&orientationController);
 			pushController(&load_controller_);
-			pushController(&leap_state_controller_, Docking(Docking::LEFT, .07, 64));
+			pushController(&leap_state_controller_, Docking(Docking::LEFT, .07, 96));
 			pushController(&menuController_);
 			break;
         case MODE_3D:
@@ -101,7 +101,7 @@ void MainController::setMode(MainController::Mode mode)
 			pushController(&focus_controller_);
 			pushController(&mask_controller_);
 			pushController(&load_controller_);
-			pushController(&leap_state_controller_, Docking(Docking::LEFT, .07, 64));
+			pushController(&leap_state_controller_, Docking(Docking::LEFT, .07, 96));
 			pushController(&menuController_);
             break;
     }

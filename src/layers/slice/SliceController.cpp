@@ -31,16 +31,12 @@ SliceController::SliceController() :
 	sliceVBO.bind();
 	sliceVBO.data(vertexData, sizeof(vertexData));
 
-	poses_.v().enabled(true);
-	poses_.v().engageDelay(milliseconds(0));
-	poses_.v().disengageDelay(milliseconds(0));
-	poses_.v().trackFunction(std::bind(&SliceController::leapScroll, this, std::placeholders::_1));
-	poses_.v().closeFn([&](const Leap::Frame& c){
+	poses_.l().enabled(true);
+	poses_.l().engageDelay(milliseconds(0));
+	poses_.l().disengageDelay(milliseconds(0));
+	poses_.l().trackFunction(std::bind(&SliceController::leapScroll, this, std::placeholders::_1));
+	poses_.l().closeFn([&](const Leap::Frame& c){
 		saved_slice_ = currentSlice_;
-		MainController::getInstance().leapStateController().active(LeapStateController::icon_h2f1_point);
-	});
-	poses_.v().disengageFunction([](const Leap::Frame&){
-		MainController::getInstance().leapStateController().active(LeapStateController::icon_none);
 	});
 }
 
@@ -50,8 +46,8 @@ void SliceController::gainFocus()
 	MainController::getInstance().setMode(MainController::MODE_2D);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();
-	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
-	lsc.add(LeapStateController::icon_h2f1_point, "Scroll Slices");
+	lsc.add(LeapStateController::icon_point_circle, "Main Menu");
+	lsc.add(LeapStateController::icon_l_open, "Scroll");
 }
 
 void SliceController::slice(int index)
@@ -212,13 +208,15 @@ bool SliceController::leapInput(const Leap::Controller& leapController, const Le
 
 void SliceController::leapScroll(const Leap::Frame& frame)
 {
-	if (poses_.v().isClosed()) {
-		Vector delta = poses_.v().hand().stabilizedPalmPosition() - poses_.v().handClosed().stabilizedPalmPosition();
+	if (poses_.l().isClosed()) {
+        auto& lsc = MainController::getInstance().leapStateController();
+        lsc.increaseBrightness(LeapStateController::icon_l_open);
+		Vector delta = poses_.l().hand().fingers()[Finger::TYPE_INDEX].tipPosition() - poses_.l().handClosed().fingers()[Finger::TYPE_INDEX].tipPosition();
 		slice(saved_slice_ + delta.x / leap_scroll_dst_);
 	}
 }
 
 void SliceController::loseFocus()
 {
-	poses_.v().tracking(false);
+	poses_.l().tracking(false);
 }

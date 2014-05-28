@@ -14,16 +14,10 @@ class LPose : public Pose1H
 public:
 	LPose();
 
+    Leap::Hand handClosed() const { return hand_closed_; }
+    
 	/** Pointer and thumb are together */
 	bool isClosed() const { return closed_; }
-
-	/** Current state of pointer finger (index or middle possibly) */
-	const Leap::Finger& pointer() const { return pointer_; }
-
-	const Leap::Finger& pointerClosed() const { return pointer_closed_; }
-
-	/** Current state of thumb */
-	const Leap::Finger& thumb() const { return thumb_; }
 
 	/** Callback for when fingers separate */
 	void openFn(std::function<void(const Leap::Frame&)> fn) { open_fn_ = fn; }
@@ -34,6 +28,10 @@ public:
 	void clickFn(std::function <void(const Leap::Frame&)> fn) { click_fn_ = fn; }
 
     void closeSeparation(float s) { close_separation_ = s; }
+
+	float separation() const { return separation_;  }
+
+	Leap::Vector pointerDelta(bool stabilized = false) const;
     
 protected:
 	bool shouldEngage(const Leap::Frame& frame) override;
@@ -42,14 +40,13 @@ protected:
 
 private:
 	bool closed_;
-	Leap::Finger pointer_;
-	Leap::Finger pointer_closed_;
-	Leap::Finger thumb_;
+    Leap::Hand hand_closed_;
 	std::chrono::high_resolution_clock::time_point last_close_;
 	std::function<void(const Leap::Frame&)> open_fn_;
 	std::function<void(const Leap::Frame&)> close_fn_;
 	std::function<void(const Leap::Frame&)> click_fn_;
     float close_separation_;
+	float separation_;
 };
 
 #endif

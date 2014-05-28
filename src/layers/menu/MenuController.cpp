@@ -30,7 +30,6 @@ void MenuController::hideMenu()
 {
 	leap_state_ = LeapState::closed;
 	transition_.state(Transition::State::decrease);
-	MainController::getInstance().leapStateController().active(LeapStateController::icon_none);
 }
 
 void MenuController::showMainMenu()
@@ -167,10 +166,10 @@ void MenuController::leapMenuTriggered(const Leap::Controller& controller, const
 	updateLeapPointer(controller, frame);
 
 	if (leap_state_ == LeapState::triggered_main) {
-		MainController::getInstance().leapStateController().active(LeapStateController::icon_h1f1_circle);
+		MainController::getInstance().leapStateController().increaseBrightness(LeapStateController::icon_point_circle);
 	} else if (leap_state_ == LeapState::triggered_context) {
 		leap_state_ = LeapState::triggered_context;
-		MainController::getInstance().leapStateController().active(LeapStateController::icon_h1f2_circle);
+		MainController::getInstance().leapStateController().increaseBrightness(LeapStateController::icon_three_circle);
 	}
 
 	if (pointer_.isValid()) {

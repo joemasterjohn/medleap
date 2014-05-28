@@ -43,9 +43,11 @@ void ClipController::gainFocus()
 	MainController::getInstance().setMode(MainController::MODE_3D);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();
-	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
-	lsc.add(LeapStateController::icon_h1f2_circle, "Options");
-	lsc.add(LeapStateController::icon_h1f2_trigger, "Rotate Plane");
+	lsc.add(LeapStateController::icon_point_circle, "Main Menu");
+	lsc.add(LeapStateController::icon_three_circle, "Options");
+    lsc.add(LeapStateController::icon_fist, "Rotate/Zoom");
+	lsc.add(LeapStateController::icon_l_open, "Center");
+    lsc.add(LeapStateController::icon_v_open, "Plane");
 
 	VolumeController& vc = MainController::getInstance().volumeController();
 	vc.draw_bounds = true;
@@ -108,6 +110,7 @@ void ClipController::clip1H(const Leap::Frame& frame)
 	if (!v_pose_.isClosed()) {
 		leap_start_ = leap_current_;
 	} else {
+        MainController::getInstance().leapStateController().increaseBrightness(LeapStateController::icon_v_open);
 		leap_end_ = denormalize(viewport_, frame, v_pose_.hand().stabilizedPalmPosition());
 
 		VolumeController& vc = MainController::getInstance().volumeController();

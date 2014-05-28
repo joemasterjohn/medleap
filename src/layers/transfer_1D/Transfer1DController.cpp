@@ -105,9 +105,13 @@ void Transfer1DController::gainFocus()
 	MainController::getInstance().showTransfer1D(true);
 	auto& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();
-	lsc.add(LeapStateController::icon_h1f1_circle, "Main Menu");
-	lsc.add(LeapStateController::icon_h1f2_circle, "Options");
-	lsc.add(LeapStateController::icon_h2f1_point, "Windowing");
+	lsc.add(LeapStateController::icon_point_circle, "Main Menu");
+	lsc.add(LeapStateController::icon_three_circle, "Options");
+	lsc.add(LeapStateController::icon_point2, "Contrast");
+    lsc.add(LeapStateController::icon_fist, "Rotate/Zoom");
+    lsc.add(LeapStateController::icon_l_open, "Center");
+    lsc.add(LeapStateController::icon_v_open, "Edit Color");
+    lsc.add(LeapStateController::icon_pinch, "Toggle Context");
 }
 
 void Transfer1DController::loseFocus()
@@ -485,6 +489,8 @@ void Transfer1DController::markDirty()
 
 void Transfer1DController::addMarker()
 {
+    auto& lsc = MainController::getInstance().leapStateController();
+    lsc.increaseBrightness(LeapStateController::icon_v_open);
 	leap_drag_performed_ = true;
 	Vec3 c = Vec3::random();
 	transfer().add(cursor_, 0.2f, { c.x, c.y, c.z, 1.0f });
@@ -509,6 +515,8 @@ void Transfer1DController::chooseSelected()
 void Transfer1DController::moveSelected()
 {
 	if (selected_) {
+        auto& lsc = MainController::getInstance().leapStateController();
+        lsc.increaseBrightness(LeapStateController::icon_v_open);
 		selected_->center(cursor_);
 		markDirty();
 	}
@@ -517,6 +525,8 @@ void Transfer1DController::moveSelected()
 void Transfer1DController::scaleSelected(float width)
 {
 	if (selected_) {
+        auto& lsc = MainController::getInstance().leapStateController();
+        lsc.increaseBrightness(LeapStateController::icon_v_open);
 		selected_->width(width);
 		markDirty();
 	}
@@ -525,6 +535,8 @@ void Transfer1DController::scaleSelected(float width)
 void Transfer1DController::deleteSelected()
 {
 	if (selected_ && transfer().markers().size() > 1) {
+        auto& lsc = MainController::getInstance().leapStateController();
+        lsc.increaseBrightness(LeapStateController::icon_v_open);
 		leap_drag_performed_ = true;
 		transfer().remove(selected_->center());
 		markDirty();
@@ -536,6 +548,8 @@ void Transfer1DController::changeColorSelected()
 	leap_drag_performed_ = true;
 
 	auto cb = [&](const Color& color) {
+        auto& lsc = MainController::getInstance().leapStateController();
+        lsc.increaseBrightness(LeapStateController::icon_v_open);
 		selected_->color(color);
 		transfer().saveTexture(clutTexture);
 		transfer().saveContext(contextTexture);
@@ -548,6 +562,8 @@ void Transfer1DController::toggleContextSelected()
 {
 	chooseSelected();
 	if (selected_) {
+        auto& lsc = MainController::getInstance().leapStateController();
+        lsc.increaseBrightness(LeapStateController::icon_pinch);
 		selected_->context(!selected_->context());
 		markDirty();
 	}
@@ -566,6 +582,8 @@ void Transfer1DController::saveInterval()
 void Transfer1DController::scaleAllMarkers()
 {
 	if (saved_centers_.size() > 1) {
+        auto& lsc = MainController::getInstance().leapStateController();
+        lsc.increaseBrightness(LeapStateController::icon_point2);
 		float dl = poses_.point2().leftPointer().stabilizedTipPosition().x - poses_.point2().leftPointerEngaged().stabilizedTipPosition().x;
 		float dr = poses_.point2().rightPointer().stabilizedTipPosition().x - poses_.point2().rightPointerEngaged().stabilizedTipPosition().x;
 

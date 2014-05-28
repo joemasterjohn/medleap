@@ -4,7 +4,6 @@ using namespace Leap;
 
 PointPose2H::PointPose2H()
 {
-	minValidFrames(0);
 	maxHandEngageSpeed(100.0f);
 }
 

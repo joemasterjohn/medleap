@@ -4,7 +4,6 @@ using namespace Leap;
 
 PalmsFacePose::PalmsFacePose()
 {
-	minValidFrames(5);
 	maxHandEngageSpeed(50.0f);
 }
 

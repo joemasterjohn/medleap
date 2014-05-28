@@ -6,7 +6,7 @@
 using namespace gl;
 using namespace std;
 
-LeapStateController::LeapStateController() : active_(icon_none)
+LeapStateController::LeapStateController()
 {
 	auto loadIcon = [&](Icon icon, const char* filename) {
 		int width, height, channels;
@@ -23,18 +23,24 @@ LeapStateController::LeapStateController() : active_(icon_none)
 		}
 		stbi_image_free(data);
 	};
-
+    
 	textures_.resize(num_icons);
-	loadIcon(icon_h1f1_point, "icons/h1f1_point.png");
-	loadIcon(icon_h1f2_point, "icons/h1f2_point.png");
-	loadIcon(icon_h1f3_point, "icons/h1f3_point.png");
-	loadIcon(icon_h1f4_point, "icons/h1f4_point.png");
-	loadIcon(icon_h1f5_point, "icons/h1f5_point.png");
-	loadIcon(icon_h1f1_circle, "icons/h1f1_circle.png");
-	loadIcon(icon_h1f2_circle, "icons/h1f2_circle.png");
-	loadIcon(icon_h1f2_trigger, "icons/h1f2_trigger.png");
-	loadIcon(icon_h2f1_point, "icons/h2f1_point.png");
+    loadIcon(icon_point_circle, "icons/point.png");
+    loadIcon(icon_three_circle, "icons/three.png");
+    loadIcon(icon_l_closed, "icons/l_closed.png");
+	loadIcon(icon_l_open, "icons/l_open.png");
+	loadIcon(icon_v_closed, "icons/v_closed.png");
+	loadIcon(icon_v_open, "icons/v_open.png");
+	loadIcon(icon_carry, "icons/carry.png");
+	loadIcon(icon_fist, "icons/fist.png");
+	loadIcon(icon_palms_face, "icons/palms_face.png");
+	loadIcon(icon_pinch, "icons/pinch.png");
+	loadIcon(icon_point, "icons/point.png");
+	loadIcon(icon_point2, "icons/point2.png");
+	loadIcon(icon_three, "icons/three.png");
+	loadIcon(icon_thumb, "icons/thumb.png");
 
+    
 	GLfloat vertices[] = {
 		0.0f, 0.0f, 0.0f, 0.0f,
 		1.0f, 0.0f, 1.0f, 0.0f,
@@ -59,12 +65,16 @@ void LeapStateController::clear()
 
 void LeapStateController::add(Icon icon, const std::string& label)
 {
-	displayed_.push_back({ icon, label });
+	displayed_.push_back({ icon, label, 0.0f });
 }
 
-void LeapStateController::active(Icon icon)
+void LeapStateController::increaseBrightness(Icon icon)
 {
-	active_ = icon;
+    for (DisplayedIcon& ic : displayed_) {
+        if (ic.icon == icon) {
+            ic.brightness = std::min(1.0f, ic.brightness + 0.1f);
+        }
+    }
 }
 
 void LeapStateController::draw()
@@ -97,14 +107,15 @@ void LeapStateController::draw()
 	int icons_total_height = (displayed_.size() - 1) * padding + displayed_.size() * viewport_.width;
 	int offset = (viewport_.height - icons_total_height) / 2.0f;
 	for (DisplayedIcon& d : displayed_) {
+        
+        d.brightness = std::max(0.0f, d.brightness - 0.05f);
+        
 		textures_[d.icon].bind();
 		Mat4 m_translation = translation(0, offset + (padding + viewport_.width) * rendered, 0);
 		icon_prog_.uniform("model_view", m_proj * m_translation * m_scale);
-		if (d.icon == active_) {
-			icon_prog_.uniform("color", active_color);
-		} else {
-			icon_prog_.uniform("color", inactive_color);
-		}
+        
+        Vec4 displayed_color = lerp(inactive_color, active_color, d.brightness);
+        icon_prog_.uniform("color", displayed_color);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		rendered++;
 	}

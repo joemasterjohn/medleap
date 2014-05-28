@@ -30,9 +30,9 @@ void LoadController::gainFocus()
 {
 	LeapStateController& lsc = MainController::getInstance().leapStateController();
 	lsc.clear();
-	lsc.add(LeapStateController::icon_h1f1_point, "Back");
-	lsc.add(LeapStateController::icon_h1f1_point, "Choose");
-	lsc.add(LeapStateController::icon_h1f1_point, "Scroll");
+	lsc.add(LeapStateController::icon_point, "Back");
+	lsc.add(LeapStateController::icon_point, "Choose");
+	lsc.add(LeapStateController::icon_point, "Scroll");
 	transition_.state(Transition::State::increase);
 	timer_ = chrono::milliseconds(0);
 }
@@ -83,9 +83,6 @@ bool LoadController::leapInput(const Leap::Controller& controller, const Leap::F
 
 	if (poses_.point().tracking()) {
 
-		LeapStateController& lsc = MainController::getInstance().leapStateController();
-		lsc.active(LeapStateController::icon_none);
-
 		Vector v = frame.interactionBox().normalizePoint(poses_.point().pointer().stabilizedTipPosition());
 		updateCursor(v.x * viewport_.width, v.y * viewport_.height);
 
@@ -112,7 +109,7 @@ bool LoadController::leapInput(const Leap::Controller& controller, const Leap::F
 void LoadController::scroll(float amount)
 {
 	LeapStateController& lsc = MainController::getInstance().leapStateController();
-	lsc.active(LeapStateController::icon_h1f1_point);
+	lsc.increaseBrightness(LeapStateController::icon_point);
 	y_offset_ = clamp(y_offset_ + scroll_speed_ * amount, 0.0f, max(0.0f ,list_renderer_.contentHeight() - viewport_.height));
 	list_renderer_.model(translation(0, y_offset_, 0));
 }

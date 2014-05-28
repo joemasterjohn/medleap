@@ -9,7 +9,6 @@ PinchPose::PinchPose() :
 	open_fn_(nullptr),
 	close_fn_(nullptr)
 {
-	minValidFrames(5);
 	maxHandEngageSpeed(175.0f);
 }
 

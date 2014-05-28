@@ -21,6 +21,15 @@ void FocusController::gainFocus()
 	vc.draw_cursor3D = true;
 	vc.use_context = true;
 	vc.markDirty();
+    
+    auto& lsc = MainController::getInstance().leapStateController();
+	lsc.clear();
+	lsc.add(LeapStateController::icon_point_circle, "Main Menu");
+	lsc.add(LeapStateController::icon_three_circle, "Options");
+    lsc.add(LeapStateController::icon_fist, "Rotate/Zoom");
+	lsc.add(LeapStateController::icon_l_open, "Center");
+    lsc.add(LeapStateController::icon_v_open, "Focus");
+    lsc.add(LeapStateController::icon_palms_face, "Scale");
 }
 
 void FocusController::loseFocus()
@@ -52,6 +61,10 @@ bool FocusController::leapInput(const Leap::Controller& controller, const Leap::
 
 void FocusController::moveCursor()
 {
+    
+    auto& lsc = MainController::getInstance().leapStateController();
+    lsc.increaseBrightness(LeapStateController::icon_v_open);
+    
 	MainController& mc = MainController::getInstance();
 	VolumeController& vc = mc.volumeController();
 
@@ -68,6 +81,8 @@ void FocusController::moveCursor()
 
 void FocusController::scaleCursor()
 {
+    MainController::getInstance().leapStateController().increaseBrightness(LeapStateController::icon_palms_face);
+    
 	MainController& mc = MainController::getInstance();
 	VolumeController& vc = mc.volumeController();
 	
