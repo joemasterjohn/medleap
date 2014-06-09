@@ -320,7 +320,7 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastSwipe);
 			Leap::SwipeGesture swipe(g);
 
-			if (elapsed.count() > 350 && g.isValid() && swipe.speed() > 200 && std::abs(swipe.direction().z) < 0.5f && swipe.hands().frontmost().fingers().extended().count() == 5) {
+			if (elapsed.count() > 350 && g.isValid() && swipe.speed() > 300 && std::abs(swipe.direction().z) < 0.5f && swipe.hands().frontmost().fingers().extended().count() == 5) {
 				lastSwipe = curTime;
 				if (swipe.direction().x > 0)
 					nextCLUT();

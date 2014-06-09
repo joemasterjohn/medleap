@@ -22,7 +22,7 @@ void LeapCameraControl::update(const Leap::Controller& controller, const Leap::F
 	poses_.update(frame);
 	if (poses_.fist().tracking() && poses_.fist().state() == FistPose::State::closed) {
 		leapRotate();
-	} else if (poses_.l().tracking()) {
+	} else if (poses_.fist().tracking() && poses_.l().tracking()) {
 		leapTranslate();
 	}
 }

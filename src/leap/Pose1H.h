@@ -54,6 +54,8 @@ public:
 
 	/** Difference in current hands center and hands center when engaged */
 	Leap::Vector handPositionDeltaEngaged(bool stabilized = false) const;
+    
+    // TODO: add finger motion threshold for engage
 
 protected:
 	virtual bool shouldEngage(const Leap::Frame& frame) override;

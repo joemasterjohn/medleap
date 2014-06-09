@@ -13,10 +13,10 @@ bool FistPose::shouldEngage(const Frame& frame)
 	if (!Pose1H::shouldEngage(frame)) {
 		return false;
 	}
-
-	if (hand().fingers().extended().count() != 5) {
-		return false;
-	}
+//
+//	if (hand().fingers().extended().count() != 5) {
+//		return false;
+//	}
 
 	return true;
 }
