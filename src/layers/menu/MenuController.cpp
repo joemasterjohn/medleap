@@ -20,6 +20,9 @@ MenuController::MenuController() :
 	menuShader = Program::create("shaders/menu.vert", "shaders/menu.frag");
 
 	text_.loadFont("menlo18");
+    
+    poses_.point().enabled(true);
+    poses_.fist().enabled(true);
 }
 
 void MenuController::loseFocus()
@@ -212,6 +215,14 @@ void MenuController::leapMenuOpen(const Leap::Controller& controller, const Leap
 bool MenuController::leapInput(const Leap::Controller& leapController, const Leap::Frame& currentFrame)
 {
 	progress_ = 0.0f;
+    
+    poses_.update(currentFrame);
+    if (poses_.point().tracking()) {
+        MainController::getInstance().leapStateController().increaseBrightness(LeapStateController::icon_point_circle);
+    }
+    else if (poses_.fist().tracking() && poses_.fist().state() == FistPose::State::three_out) {
+        MainController::getInstance().leapStateController().increaseBrightness(LeapStateController::icon_three_circle);
+    }
 
 	switch (leap_state_)
 	{

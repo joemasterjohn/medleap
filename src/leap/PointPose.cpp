@@ -14,15 +14,14 @@ bool PointPose::shouldEngage(const Leap::Frame& frame)
 
 	FingerList extended = hand().fingers().extended();
 
-	if (extended.count() > 1) {
+	if (extended.count() > 1 || extended[0].type() == Finger::TYPE_THUMB) {
 		return false;
 	}
+    
 
-	pointer_ = hand().fingers().frontmost();
-	if (!pointer_.isExtended() || !pointer_.isValid()) {
-		return false;
-	}
-
+	pointer_ = extended.frontmost();
+    
+    
 	return true;
 }
 

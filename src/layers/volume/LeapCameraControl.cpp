@@ -8,8 +8,9 @@ using namespace gl;
 LeapCameraControl::LeapCameraControl() : tracking_(false), mouse_drag_l_(false), mouse_drag_r_(false)
 {
 	poses_.fist().enabled(true);
-	poses_.fist().maxHandEngageSpeed(150.0f);
+	poses_.fist().maxHandEngageSpeed(50.0f);
 	poses_.l().enabled(true);
+    poses_.l().maxHandEngageSpeed(200.0f);
 }
 
 Camera& LeapCameraControl::camera()
@@ -19,10 +20,15 @@ Camera& LeapCameraControl::camera()
 
 void LeapCameraControl::update(const Leap::Controller& controller, const Leap::Frame& frame)
 {
+    tracking_ = false;
 	poses_.update(frame);
 	if (poses_.fist().tracking() && poses_.fist().state() == FistPose::State::closed) {
-		leapRotate();
-	} else if (poses_.fist().tracking() && poses_.l().tracking()) {
+		tracking_ = true;
+        leapRotate();
+	} else if (poses_.l().tracking()) {
+        tracking_ = true;
+        auto& lsc = MainController::getInstance().leapStateController();
+        lsc.increaseBrightness(LeapStateController::icon_l_open);
 		leapTranslate();
 	}
 }
@@ -108,8 +114,7 @@ void LeapCameraControl::mouseScroll(double x, double y)
 
 void LeapCameraControl::move(const Vec3& delta)
 {
-    auto& lsc = MainController::getInstance().leapStateController();
-	lsc.increaseBrightness(LeapStateController::icon_l_open);
+
     
     
 	VolumeController& vc = MainController::getInstance().volumeController();

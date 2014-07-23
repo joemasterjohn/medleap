@@ -61,12 +61,13 @@ public:
 	bool draw_planes;
 	bool draw_cursor3D;
 	bool use_context;
+    bool draw_lines;
 
 	gl::Texture maskTexture;
 	gl::Geometry maskGeometry;
 
 	gl::Texture tex_context_;
-
+    float isovalue;
 	std::vector<gl::Plane>& clipPlanes() { return clip_planes_; }
 
 private:

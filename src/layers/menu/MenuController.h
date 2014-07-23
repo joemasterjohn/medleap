@@ -7,6 +7,7 @@
 #include "gl/math/Math.h"
 #include "util/Transition.h"
 #include "util/TextRenderer.h"
+#include "leap/PoseTracker.h"
 #include <memory>
 #include <functional>
 
@@ -37,6 +38,7 @@ private:
 	int selected_;
 	LeapState leap_state_;
 	Leap::Finger pointer_;
+    PoseTracker poses_;
 
 
 	// renderer (clean up)

@@ -96,7 +96,9 @@ void main()
 		// stochastic jittering of sample position (need window position of frag) (MOVE WPOS TO VERTEX SHADER)
 		// rayDir is NOT the world position; it should be world_pos - eye_pos_ws
 		vec2 WPOS = (vec2(1.0) + fs_voxel_position_ss.xy) * window_size * 0.5;
-		samplePos += texture(tex_jitter, WPOS / jitter_size).x * normalize(fs_voxel_position_ws - camera_pos) * sampling_length * 3.0;
+        float jitter_amount = (texture(tex_jitter, WPOS / jitter_size).x - 0.5) * 2.0; // in [-1,1]
+        vec3 jitter_direction = normalize(fs_voxel_position_ws - camera_pos);
+		samplePos += jitter_amount * sampling_length * jitter_direction;
 	}
 
 	if (texture(tex_mask, samplePos).r > 0.5) {

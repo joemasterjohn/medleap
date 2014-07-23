@@ -38,10 +38,10 @@ void MaskController::gainFocus()
 
 void MaskController::loseFocus()
 {
-	VolumeController& vc = MainController::getInstance().volumeController();
-	vc.draw_bounds = false;
-	vc.draw_cursor3D = false;
-	vc.markDirty();
+//	VolumeController& vc = MainController::getInstance().volumeController();
+//	vc.draw_bounds = false;
+//	vc.draw_cursor3D = false;
+//	vc.markDirty();
 }
 
 bool MaskController::leapInput(const Leap::Controller& controller, const Leap::Frame& frame)

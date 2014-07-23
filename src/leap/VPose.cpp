@@ -26,8 +26,16 @@ bool VPose::shouldEngage(const Leap::Frame& frame)
 	{
 		return false;
 	}
+    
+    Finger index = fingers[Finger::TYPE_INDEX];
+	Finger middle = fingers[Finger::TYPE_MIDDLE];
+	separation_ = (index.tipPosition() - middle.tipPosition()).magnitude();
+	closed_ = (separation_ <= max_separation_);
 
-	closed_ = false;
+    if (closed_) {
+        return false;
+    }
+    
 	return true;
 }
 

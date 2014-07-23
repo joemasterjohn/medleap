@@ -12,6 +12,7 @@ VolumeController::VolumeController()
 {
 	draw_bounds = true;
 	draw_planes = false;
+    draw_lines = true;
 	draw_cursor3D = false;
 
 	dirty = true;
@@ -21,6 +22,7 @@ VolumeController::VolumeController()
 	drawnHighRes = false;
 	cursorActive = false;
 	cursorRadius = 0.1;
+    isovalue = 0.5f;
 	useJitter = true;
 
 	volumeTexture.generate(GL_TEXTURE_3D);
@@ -202,6 +204,12 @@ bool VolumeController::keyboardInput(GLFWwindow* window, int key, int action, in
 			markDirty();
 		}
 		break;
+        case GLFW_KEY_I:
+            if (action == GLFW_PRESS) {
+                draw_lines = !draw_lines;
+                markDirty();
+            }
+            break;
 	}
 
     return true;
@@ -286,7 +294,7 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 	static Draw d;
 	glEnable(GL_DEPTH_TEST);
 
-
+    if (draw_lines) {
 	if (draw_bounds) {
 		const Box& bb = volume->getBounds();
 		d.setModelViewProj(mvp);
@@ -370,6 +378,7 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 		d.end();
 		d.draw();
 	}
+    }
 
 	//{
 	//	glEnable(GL_CULL_FACE);
@@ -491,7 +500,7 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 		break;
 	case ISOSURFACE:
 		glDisable(GL_BLEND);
-		//glUniform1f(boxShader.getUniform("isoValue"), volume->getCurrentWindow().getCenterNorm());
+		glUniform1f(boxShader.getUniform("isoValue"), isovalue);
 		break;
 	default:
 		break;
@@ -536,7 +545,7 @@ void VolumeController::draw(double samplingScale, bool limitSamples, int w, int 
 
 void VolumeController::updateSlices(double samplingScale, bool limitSamples)
 {
-	float refSampleLength = volume->getBounds().length() / Vec3(volume->getWidth(), volume->getHeight(), volume->getDepth()).length();
+	float refSampleLength = volume->getBounds().size().length() / Vec3(volume->getWidth(), volume->getHeight(), volume->getDepth()).length();
 
 	// upload geometry
 	BoxSlicer slicer;
@@ -628,11 +637,11 @@ std::unique_ptr<Menu> VolumeController::contextMenu()
 		MainController::getInstance().menuController().hideMenu();
 	});
 
-	//MenuItem& iso = menu->createItem("Isosurface");
-	//iso.setAction([&]{
-	//	setMode(ISOSURFACE);
-	//	MainController::getInstance().menuController().hideMenu();
-	//});
+	MenuItem& iso = menu->createItem("Isosurface");
+	iso.setAction([&]{
+		setMode(ISOSURFACE);
+		MainController::getInstance().menuController().hideMenu();
+	});
 
 	MenuItem& mi_projection = menu->createItem("Projection");
 	mi_projection.setAction([&]{

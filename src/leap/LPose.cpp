@@ -10,7 +10,7 @@ LPose::LPose() :
 	close_fn_(nullptr),
     close_separation_(35.0f)
 {
-	maxHandEngageSpeed(55.0f);
+	maxHandEngageSpeed(155.0f);
 }
 
 bool LPose::shouldEngage(const Frame& frame)
@@ -21,19 +21,17 @@ bool LPose::shouldEngage(const Frame& frame)
 
 	FingerList fingers = hand().fingers();
 
+	if (!fingers[Finger::TYPE_THUMB].isExtended() ||
+		!fingers[Finger::TYPE_INDEX].isExtended() ||
+		fingers[Finger::TYPE_MIDDLE].isExtended() ||
+		fingers[Finger::TYPE_RING].isExtended() ||
+		fingers[Finger::TYPE_PINKY].isExtended())
+	{
+		return false;
+	}
+    
 	Finger thumb = fingers[Finger::TYPE_THUMB];
-	if (!thumb.isExtended() || !thumb.isValid()) {
-		return false;
-	}
-
 	Finger index = fingers[Finger::TYPE_INDEX];
-	if (!index.isExtended() || !index.isValid()) {
-		return false;
-	}
-
-	if (fingers[Finger::TYPE_RING].isExtended() || fingers[Finger::TYPE_PINKY].isExtended()) {
-		return false;
-	}
 
     Vector u = index.bone(Bone::TYPE_PROXIMAL).prevJoint();
     Vector v = thumb.tipPosition();
@@ -51,18 +49,14 @@ bool LPose::shouldDisengage(const Frame& frame)
 		return true;
 	}
 
-	Finger index = hand().fingers()[Finger::TYPE_INDEX];
-	if (!index.isValid() || !index.isExtended()) {
-		return true;
-	}
-
 	FingerList fingers = hand().fingers();
-
-	if (fingers[Finger::TYPE_RING].isExtended()) {
-		return true;
-	}
-
-	if (fingers[Finger::TYPE_PINKY].isExtended()) {
+    
+	if (!fingers[Finger::TYPE_THUMB].isExtended() ||
+		!fingers[Finger::TYPE_INDEX].isExtended() ||
+		fingers[Finger::TYPE_MIDDLE].isExtended() ||
+		fingers[Finger::TYPE_RING].isExtended() ||
+		fingers[Finger::TYPE_PINKY].isExtended())
+	{
 		return true;
 	}
 

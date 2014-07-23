@@ -57,7 +57,7 @@ void ClipController::gainFocus()
 void ClipController::loseFocus()
 {
 	VolumeController& vc = MainController::getInstance().volumeController();
-	vc.draw_bounds = false;
+//	vc.draw_bounds = false;
 	vc.draw_planes = false;
 	vc.markDirty();
 	v_pose_.tracking(false);
@@ -138,7 +138,7 @@ void ClipController::clip2H(const Leap::Frame& frame)
 	Hand hand = frame.hands().rightmost();
 	Hand other_hand = frame.hands().leftmost();
 
-	if (other_hand.grabStrength() > 0.8f) {
+	if (other_hand.grabStrength() > 0.95f) {
 		VolumeController& vc = MainController::getInstance().volumeController();
 
 		const Mat4& inv = vc.getCamera().viewInverse();

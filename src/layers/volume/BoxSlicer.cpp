@@ -91,10 +91,13 @@ void BoxSlicer::slice(const Box& bounds, const Camera& camera, float sampleLengt
     vertices.clear();
     indices.clear();
 
-	slice_count_ = (int)std::round(totalLength / sampleLength);
-	if (maxSlices > 0)
+	slice_count_ = (int)(totalLength / sampleLength) - 1;
+    sample_length_ = sampleLength;
+
+	if (maxSlices > 0) {
 		slice_count_ = std::max(minSlices, std::min(maxSlices, slice_count_));
-	sample_length_ = totalLength / (slice_count_ + 1);
+        sample_length_ = totalLength / (slice_count_ + 1);
+    }
 
 	// intersect planes with boundingbox to create slice polygons
 	Vec3 step = camera.forward() * sample_length_;

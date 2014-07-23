@@ -50,7 +50,7 @@ void FistPose::track(const Frame& frame)
 			state_ = State::thumb_out;
 		}
 	} else if (num_extended == 0) {
-		if (grab  > 0.95f) {
+		if (grab >= 1.0f) {
 			state_ = State::closed;
 		}
 	}

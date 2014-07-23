@@ -92,6 +92,14 @@ Transfer1DController::Transfer1DController()
 	poses_.pinch().enabled(true);
 	poses_.pinch().closeFn([&](const Leap::Frame&){ toggleContextSelected(); });
 
+    poses_.carry().enabled(true);
+    poses_.carry().engageFunction([&](const Leap::Frame& f){
+        if (f.hands().count() == 1 && f.hands()[0].isRight())
+            nextCLUT();
+        else if (f.hands().count() == 2 && f.hands()[0].isLeft())
+            prevCLUT();
+    });
+    
 	poses_.point2().enabled(true);
 	poses_.point2().disengageOnExit(true);
 	poses_.point2().exitSpeed(300.0f);
@@ -311,24 +319,24 @@ bool Transfer1DController::leapInput(const Leap::Controller& leapController, con
 		camera_control_.update(leapController, frame);
 	}
 
-	static auto lastSwipe = std::chrono::system_clock::now();
-	Leap::GestureList gestures = frame.gestures();
-	for (Leap::Gesture g : gestures) {
-		if (g.type() == Leap::Gesture::TYPE_SWIPE) {
-
-			auto curTime = std::chrono::system_clock::now();
-			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastSwipe);
-			Leap::SwipeGesture swipe(g);
-
-			if (elapsed.count() > 350 && g.isValid() && swipe.speed() > 300 && std::abs(swipe.direction().z) < 0.5f && swipe.hands().frontmost().fingers().extended().count() == 5) {
-				lastSwipe = curTime;
-				if (swipe.direction().x > 0)
-					nextCLUT();
-				else
-					prevCLUT();
-			}
-		}
-	}
+//	static auto lastSwipe = std::chrono::system_clock::now();
+//	Leap::GestureList gestures = frame.gestures();
+//	for (Leap::Gesture g : gestures) {
+//		if (g.type() == Leap::Gesture::TYPE_SWIPE) {
+//
+//			auto curTime = std::chrono::system_clock::now();
+//			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastSwipe);
+//			Leap::SwipeGesture swipe(g);
+//
+//			if (elapsed.count() > 350 && g.isValid() && swipe.speed() > 300 && std::abs(swipe.direction().z) < 0.5f && swipe.hands().frontmost().fingers().extended().count() == 5) {
+//				lastSwipe = curTime;
+//				if (swipe.direction().x > 0)
+//					nextCLUT();
+//				else
+//					prevCLUT();
+//			}
+//		}
+//	}
 
 	if (dirty_textures_) {
 		updateTextures();
@@ -484,6 +492,7 @@ void Transfer1DController::prevCLUT()
 void Transfer1DController::markDirty()
 {
 	dirty_textures_ = true;
+    volumeRenderer->isovalue = transfer().center();
 	volumeRenderer->markDirty();
 }
 

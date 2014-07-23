@@ -35,8 +35,8 @@ void FocusController::gainFocus()
 void FocusController::loseFocus()
 {
 	VolumeController& vc = MainController::getInstance().volumeController();
-	vc.draw_bounds = false;
-	vc.draw_cursor3D = false;
+//	vc.draw_bounds = false;
+//	vc.draw_cursor3D = false;
 	vc.use_context = false;
 	vc.markDirty();
 }
