@@ -5,6 +5,8 @@
 #include "gdcmReader.h"
 #include "gdcmAttribute.h"
 
+
+
 /** Utility class for constructing a VolumeData from DICOM image series */
 class VolumeLoader
 {
@@ -12,7 +14,7 @@ public:
 
 	struct Source
 	{
-		enum Type { DICOM_DIR, RAW };
+		enum Type { DICOM_DIR, RAW, TIFF_DIR };
 		std::string name;
 		Type type;
 	};
@@ -45,6 +47,9 @@ public:
     /** Stores file names sorted by Z into the fileNames parameter. Also stores the computed Z spacing into zSpacing parameter. */
     void sortFiles(ID seriesID, std::vector<std::string>& fileNames, double* zSpacing);
 
+
+	void sortTIFF(const std::string& directoryPath, std::vector<std::string>& files);
+
 	void loadRAW(const std::string& fileName);
 
     /** Retrieves the previously loaded volume, or NULL if it failed. The caller now owns the volume memory and is responsible for deleting it. After calling once this will return NULL until the next load is called. Resets the state to READY. */
@@ -64,6 +69,8 @@ private:
     
     /** Actual loading work */
     void load();
+	void loadTIFF(std::string&);
+
     
     /** The modality LUT transforms device-dependent values to device-independent modality values. For example, it will transform raw UINT16 CT data values into signed CT Hounsfield units. It uses the slope and intercept stored in the DICOM dataset to transform values. */
     template <typename T>

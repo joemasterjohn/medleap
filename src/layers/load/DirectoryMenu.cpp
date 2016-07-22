@@ -16,7 +16,8 @@ static enum class FileType
 	readable_dir,
 	dcm,
 	file,
-	raw
+	raw,
+	tiff
 };
 
 static FileType fileType(const std::string& wd, struct dirent* entry)
@@ -41,6 +42,10 @@ static FileType fileType(const std::string& wd, struct dirent* entry)
 			return FileType::raw;
 		} else if (name.size() > 3 && name.substr(name.size() - 4, 4) == ".dcm") {
 			return FileType::dcm;
+		}
+		else if ((name.size() > 3 && name.substr(name.size() - 4, 4) == ".tif") ||
+			     (name.size() > 4 && name.substr(name.size() - 5, 5) == ".tiff")) {
+			return FileType::tiff;
 		}
 
 		return FileType::file;
@@ -75,6 +80,10 @@ void DirectoryMenu::directory(const std::string& directory_name)
 			createItem(subdir, [this, full_subdir]{ load({ full_subdir, VolumeLoader::Source::RAW }); });
 		} else if (type == FileType::dcm) {
 			createItem(subdir, [this]{ load({ working_dir_, VolumeLoader::Source::DICOM_DIR }); });
+			break;
+		}
+		else if (type == FileType::tiff) {
+			createItem(subdir, [this] { load({ working_dir_, VolumeLoader::Source::TIFF_DIR });  });
 			break;
 		}
 		entry = readdir(dir);

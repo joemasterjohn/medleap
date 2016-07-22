@@ -38,9 +38,9 @@ if(WIN32)
 
 	if(LEAP_INCLUDE_DIR)
 		set(LEAP_LIB_RELEASE "${LEAP_LIBRARY_DIR}/Leap.lib")
-		set(LEAP_LIB_DEBUG "${LEAP_LIBRARY_DIR}/Leapd.lib")
+		set(LEAP_LIB_DEBUG "${LEAP_LIBRARY_DIR}/Leap.lib")
 		set(LEAP_DLL_RELEASE "${LEAP_LIBRARY_DIR}/Leap.dll")
-		set(LEAP_DLL_DEBUG "${LEAP_LIBRARY_DIR}/Leapd.dll")
+		set(LEAP_DLL_DEBUG "${LEAP_LIBRARY_DIR}/Leap.dll")
 	endif(LEAP_INCLUDE_DIR)
 
 else(WIN32)

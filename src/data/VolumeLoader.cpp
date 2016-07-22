@@ -8,6 +8,18 @@
 #include <thread>
 #include <regex>
 
+#if defined(_WIN32)
+#include "util/dirent.h"
+#define DELIM "\\"
+#else
+#define DELIM "/"
+#include <dirent.h>
+#endif
+
+extern "C" {
+#include "tiffio.h"
+}
+
 using namespace std;
 using namespace gdcm;
 using namespace gl;
@@ -96,6 +108,14 @@ void VolumeLoader::setSource(const Source& source)
 			setSource(ids[0]);
 		else
 			std::cout << "WARNING: directory does not seem to contain DICOM images" << std::endl;
+	}
+	else if (source.type == Source::TIFF_DIR) {
+		//TODO load logic, get directory of images.
+		if (state == READY) {
+
+			thread t(&VolumeLoader::loadTIFF, this, source.name);
+			t.detach();
+		}
 	}
 	else {
 		loadRAW(source.name);
@@ -383,6 +403,304 @@ void VolumeLoader::load()
     
     state = FINISHED;
     stateMessage = "Finished";
+}
+
+void VolumeLoader::sortTIFF(const std::string& directoryPath, std::vector<string>& files) {
+
+	DIR* dir = opendir(directoryPath.c_str());
+
+	struct dirent* entry = readdir(dir);
+
+	while (entry != NULL)
+	{
+		std::string name{ entry->d_name };
+		if ((name.size() > 3 && name.substr(name.size() - 4, 4) == ".tif") ||
+			(name.size() > 4 && name.substr(name.size() - 5, 5) == ".tiff")) {
+			files.push_back(directoryPath + DELIM + name);
+		}
+		entry = readdir(dir);
+	}
+
+	std::sort(files.begin(), files.end(), [](string a, string b) {
+		int x = a.find_last_of('\\');
+		int off = a.find('.') - x - 1;
+		string a_ = a.substr(x + 1, off);
+		x = b.find_last_of('\\');
+		off = b.find('.') - x - 1;
+		string b_ = b.substr(x + 1, off);
+		int i = atoi(a_.c_str());
+		int j = atoi(b_.c_str());
+		return i < j;
+	});
+
+}
+
+void VolumeLoader::loadTIFF(std::string& directoryPath)
+{
+
+	int iPrev = _CrtSetReportMode(_CRT_ASSERT, 0);
+
+	this->state = LOADING;
+
+	// sort TIFF files so they are ordered correctly along Z
+	stateMessage = "Scanning TIFF files";
+	vector<string> files;
+	double zSpacing;
+
+	sortTIFF(directoryPath, files);
+
+	if (files.size() < 2) {
+		this->volume = NULL;
+		return;
+	}
+
+	// using the first image to read dimensions that shouldn't change
+	cout << files[0].c_str() << endl;
+
+	wstring fname = wstring(files[0].begin(), files[0].end());
+
+	//TIFF* img = TIFFOpenW(fname.c_str(), "r");
+	TIFF* img = TIFFOpen(files[0].c_str(), "r");
+
+	stateMessage = "Opened First tif";
+
+
+	if (!img) {
+		cout << "image not opened properly" << endl;
+		this->volume = NULL;
+		return;
+	}
+
+	volume = new VolumeData;
+	volume->modality = VolumeData::Modality::UNKNOWN;
+	TIFFGetField(img, TIFFTAG_IMAGEWIDTH, &(volume->height));
+	TIFFGetField(img, TIFFTAG_IMAGELENGTH, &(volume->width));
+	volume->depth = static_cast<unsigned int>(files.size());
+	
+	cout << "read width: " << volume->width << " and height: " << volume->height << endl;
+
+	volume->format = GL_RED;
+	uint16 format;
+	uint16 bits_per;
+	TIFFGetField(img, TIFFTAG_SAMPLEFORMAT, &format);
+	TIFFGetField(img, TIFFTAG_BITSPERSAMPLE, &bits_per);
+
+	cout << "read bits and format" << endl;
+
+	switch (format)
+	{
+	case SAMPLEFORMAT_UINT:
+		switch (bits_per) {
+		case 8:
+			volume->type = GL_UNSIGNED_BYTE;
+			break;
+		case 16:
+			volume->type = GL_UNSIGNED_SHORT;
+			break;
+		case 32:
+			volume->type = GL_UNSIGNED_INT;
+			break;
+		case 64:
+			volume->type = GL_UNSIGNED_INT64_NV;
+			break;
+		}
+		break;
+	case SAMPLEFORMAT_INT:
+		switch (bits_per) {
+		case 8:
+			volume->type = GL_BYTE;
+			break;
+		case 16:
+			volume->type = GL_SHORT;
+			break;
+		case 32:
+			volume->type = GL_INT;
+			break;
+		case 64:
+			volume->type = GL_INT64_NV;
+			break;
+		}
+		break;
+	case SAMPLEFORMAT_IEEEFP:
+		switch (bits_per) {
+		case 32:
+			volume->type = GL_FLOAT;
+			break;
+		case 64:
+			volume->type = GL_DOUBLE;
+			break;
+		}
+		break;
+	case SAMPLEFORMAT_VOID:
+	default:
+		switch (bits_per) {
+		case 8:
+			volume->type = GL_UNSIGNED_BYTE;
+			break;
+		case 16:
+			volume->type = GL_UNSIGNED_SHORT;
+			break;
+		case 32:
+			volume->type = GL_UNSIGNED_INT;
+			break;
+		case 64:
+			volume->type = GL_UNSIGNED_INT64_NV;
+			break;
+		}
+		break;
+
+	}
+
+	volume->getPixelSizeBytes();
+
+	cout << bits_per << " bits per pixel" << endl;
+
+	cout << "about to load tif directory" << endl;
+
+	// now that the type and dimensions are known, allocate memory for voxels
+	stateMessage = "Reading TIFF Images";
+	volume->data = new char[volume->width * volume->height * volume->depth * gl::sizeOf(volume->type)];
+
+	// load first image (already in reader memory)
+	//img.GetBuffer(volume->data);
+	//gl::flipImage(volume->data, volume->width, volume->height, volume->getPixelSizeBytes());
+
+	// load all other images
+	//  for (int i = 0; i < volume->depth; i++) {
+	//      size_t offset = i * volume->getSliceSizeBytes();
+	//      ImageReader reader;
+	//      reader.SetFileName(files[i].c_str());
+	//      reader.Read();
+	//      reader.GetImage().GetBuffer(volume->data + offset);
+	//gl::flipImage(volume->data + offset, volume->width, volume->height, volume->getPixelSizeBytes());
+	//  }
+
+	for (int i = 0; i < volume->depth; i++) {
+
+		size_t offset = (volume->depth - i - 1) * volume->getSliceSizeBytes();
+
+		img = TIFFOpen(files[i].c_str(), "r");
+
+		//cout << "offset: " << offset << endl;
+
+		//cout << i << ": stripsize: " << TIFFStripSize(img) << " #strips: " << TIFFNumberOfStrips(img) << endl;
+
+		tstrip_t strip;
+		tsize_t acc = 0;
+		for (strip = 0; strip < TIFFNumberOfStrips(img); strip++) {
+			//cout << "strip: " << strip << endl;
+			tsize_t r = TIFFReadEncodedStrip(img, strip, volume->data + (offset + acc), (tsize_t)-1);
+			if (r == -1) {
+				cout << "error reading tiff" << endl;
+			}
+			acc += r;
+		}
+
+		cout << "read " << acc << " bytes" << endl;
+
+		TIFFClose(img);
+	}
+
+	/*
+	for (int i = 0; i < volume->depth; i++) {
+		cout << "i: " << i;
+		size_t offset = (volume->depth - i - 1) * volume->getSliceSizeBytes();
+		img = TIFFOpen(files[i].c_str(), "r");
+
+		cout << "line size: " << TIFFScanlineSize(img) << " # cols" << volume->width << endl;
+
+		cout << "j: ";
+
+		for (int j = 0; j < volume->height; j++) {
+			cout << j << " ";
+			size_t row_offset = j * (TIFFScanlineSize(img));
+			TIFFReadScanline(img, volume->data + offset + row_offset, j);
+		}
+		cout << endl;
+
+		gl::flipImage(volume->data + offset, volume->width, volume->height, volume->getPixelSizeBytes());
+	}
+	*/
+
+
+	//TODO use the correct tiff attributes
+	// Z spacing should be regular between images (this is NOT slice thickness attribute)
+	{
+		volume->setVoxelSize(1, 1, 1);
+	}
+
+	cout << "after loading tiffs" << endl;
+	
+	// Apply modality LUT (if possible) and update min/max values
+	switch (volume->type)
+	{
+	case GL_BYTE:
+			calculateMinMax<GLbyte>();
+		stateMessage = "Calculating Gradients";
+		volume->computeGradients<GLbyte>();
+		break;
+	case GL_UNSIGNED_BYTE:
+			calculateMinMax<GLubyte>();
+		stateMessage = "Calculating Gradients";
+		volume->computeGradients<GLubyte>();
+		break;
+	case GL_SHORT:
+			calculateMinMax<GLshort>();
+		stateMessage = "Calculating Gradients";
+		volume->computeGradients<GLshort>();
+		break;
+	case GL_UNSIGNED_SHORT:
+			calculateMinMax<GLushort>();
+		stateMessage = "Calculating Gradients";
+		volume->computeGradients<GLushort>();
+		break;
+	case GL_INT:
+		calculateMinMax<GLint>();
+		stateMessage = "Calculating Gradients";
+		volume->computeGradients<GLint>();
+		break;
+	case GL_UNSIGNED_INT:
+		calculateMinMax<GLuint>();
+		stateMessage = "Calculating Gradients";
+		volume->computeGradients<GLuint>();
+		break;
+	case GL_INT64_NV:
+		calculateMinMax<GLint64>();
+		stateMessage = "Calculating Gradients";
+		volume->computeGradients<GLint64>();
+		break;
+	case GL_FLOAT:
+		calculateMinMax<GLfloat>();
+		stateMessage = "Calculating Gradients";
+		volume->computeGradients<GLfloat>();
+		break;
+	case GL_DOUBLE:
+		calculateMinMax<GLdouble>();
+		stateMessage = "Calculating Gradients";
+		volume->computeGradients<GLdouble>();
+		break;
+	default:
+		break; // should not happen
+	}
+	
+	// store value of interest LUTs as windows
+	stateMessage = "Calculating Gradients";
+
+	cout << "about to get name" << endl;
+
+	{
+		//char name[500];
+		//TIFFGetField(img, TIFFTAG_DOCUMENTNAME, name);
+		//volume->name = name;
+		volume->name = files[0].c_str();
+	}
+
+	cout << "Finished" << endl;
+
+	state = FINISHED;
+	stateMessage = "Finished";
+
+	_CrtSetReportMode(_CRT_ASSERT, iPrev);
 }
 
 VolumeData* VolumeLoader::getVolume()

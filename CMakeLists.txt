@@ -193,8 +193,11 @@ find_package(GLFW CONFIG REQUIRED)
 include_directories(${GLFW_INCLUDE_DIR})
 find_package(Leap REQUIRED)
 include_directories(${LEAP_INCLUDE_DIR})
+find_package(TIFF REQUIRED)
+include_directories(${TIFF_INCLUDE_DIR})
 
 message(STATUS ${LEAP_INCLUDE_DIR})
+message(STATUS ${TIFF_INCLUDE_DIR})
 
 if (APPLE)
 
@@ -258,6 +261,8 @@ if (WIN32)
 	# is this still needed? check
 	add_definitions(-DGLEW_STATIC)
 
+
+	
     target_link_libraries(
         ${PROJECT_NAME}
         gdcmMSFF
@@ -268,12 +273,23 @@ if (WIN32)
     # use Leap.lib for RELEASE or Leapd.lib for DEBUG
     target_link_libraries (${PROJECT_NAME} optimized ${LEAP_LIB_RELEASE} debug ${LEAP_LIB_DEBUG})
 
+	target_link_libraries (${PROJECT_NAME} optimized ${TIFF_LIB_RELEASE} debug ${TIFF_LIB_DEBUG})
+
+	
     # copy Leap.dll for RELEASE or Leapd.dll for DEBUG into output directory
     add_custom_command(
         TARGET ${PROJECT_NAME}
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} ARGS -E copy
         "$<$<CONFIG:debug>:${LEAP_DLL_DEBUG}>$<$<CONFIG:release>:${LEAP_DLL_RELEASE}>"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+	
+	add_custom_command(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} ARGS -E copy
+        "$<$<CONFIG:debug>:${TIFF_DLL_DEBUG}>$<$<CONFIG:release>:${TIFF_DLL_RELEASE}>"
         $<TARGET_FILE_DIR:${PROJECT_NAME}>
     )
 endif(WIN32)
