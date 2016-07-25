@@ -1,0 +1,56 @@
+﻿Build started 7/25/2016 3:39:03 PM.
+     1>Project "C:\Users\Joe\Compiled Software\src\medleap\build\SHADER_COPY.vcxproj" on node 2 (Build target(s)).
+     1>CustomBuild:
+         Building Custom Rule C:/Users/Joe/Compiled Software/src/medleap/CMakeLists.txt
+         CMake does not need to re-run because C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\generate.stamp is up-to-date.
+         Generating shaders/color.vert
+         Generating shaders/color.frag
+         Generating shaders/slice_clut.vert
+         Generating shaders/slice_clut.frag
+         Generating shaders/volume_clut.vert
+         Generating shaders/volume_clut.frag
+         Generating shaders/histo_line.vert
+         Generating shaders/histo_line.frag
+         Generating shaders/clut_strip.vert
+         Generating shaders/clut_strip.frag
+         Generating shaders/texture_2D.vert
+         Generating shaders/texture_2D.frag
+         Generating shaders/menu.vert
+         Generating shaders/menu.frag
+         Generating shaders/color_pick_hsv_circle.vert
+         Generating shaders/color_pick_hsv_circle.frag
+         Generating shaders/color_pick_selected.vert
+         Generating shaders/color_pick_selected.frag
+         Generating shaders/color_pick_gradient.vert
+         Generating shaders/color_pick_gradient.frag
+         Generating shaders/tf1d_histo.vert
+         Generating shaders/tf1d_histo.frag
+         Generating shaders/tf1d_histo_outline.vert
+         Generating shaders/tf1d_histo_outline.frag
+         Generating shaders/orientation_cube.vert
+         Generating shaders/orientation_cube.frag
+         Generating shaders/icon.vert
+         Generating shaders/icon.frag
+         Generating fonts/menlo14.bmp
+         Generating fonts/menlo14.dat
+         Generating fonts/menlo18.bmp
+         Generating fonts/menlo18.dat
+         Generating fonts/menlo24.bmp
+         Generating fonts/menlo24.dat
+         Generating icons/carry.png
+         Generating icons/fist.png
+         Generating icons/l_closed.png
+         Generating icons/l_open.png
+         Generating icons/palms_face.png
+         Generating icons/pinch.png
+         Generating icons/point.png
+         Generating icons/point2.png
+         Generating icons/three.png
+         Generating icons/thumb.png
+         Generating icons/v_closed.png
+         Generating icons/v_open.png
+     1>Done Building Project "C:\Users\Joe\Compiled Software\src\medleap\build\SHADER_COPY.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.96

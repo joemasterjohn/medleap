@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\color.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\color.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\slice_clut.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\slice_clut.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\volume_clut.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\volume_clut.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\histo_line.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\histo_line.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\clut_strip.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\clut_strip.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\texture_2D.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\texture_2D.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\menu.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\menu.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\color_pick_hsv_circle.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\color_pick_hsv_circle.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\color_pick_selected.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\color_pick_selected.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\color_pick_gradient.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\color_pick_gradient.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\tf1d_histo.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\tf1d_histo.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\tf1d_histo_outline.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\tf1d_histo_outline.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\orientation_cube.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\orientation_cube.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\icon.vert.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\2996c1ad7cec4cf66f0d6e31bb8f2a08\icon.frag.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\28e669b53a963f75bcf8bb60ca50aa1e\menlo14.bmp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\28e669b53a963f75bcf8bb60ca50aa1e\menlo14.dat.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\28e669b53a963f75bcf8bb60ca50aa1e\menlo18.bmp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\28e669b53a963f75bcf8bb60ca50aa1e\menlo18.dat.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\28e669b53a963f75bcf8bb60ca50aa1e\menlo24.bmp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\28e669b53a963f75bcf8bb60ca50aa1e\menlo24.dat.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\carry.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\fist.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\l_closed.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\l_open.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\palms_face.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\pinch.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\point.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\point2.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\three.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\thumb.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\v_closed.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\1a572698427a6531a741841dd8ebc998\v_open.png.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\920949e8defab0246b0ce670c1cce2cd\SHADER_COPY.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\SHADER_COPY" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{79056C7A-4852-367F-B832-369187C007F9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,4 @@
+C:/Users/Joe/Compiled Software/src/medleap/build/CMakeFiles/SHADER_COPY.dir
+C:/Users/Joe/Compiled Software/src/medleap/build/CMakeFiles/medleap.dir
+C:/Users/Joe/Compiled Software/src/medleap/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Joe/Compiled Software/src/medleap/build/CMakeFiles/ZERO_CHECK.dir

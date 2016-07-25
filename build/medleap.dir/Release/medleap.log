@@ -1,0 +1,318 @@
+﻿Build started 7/25/2016 3:39:04 PM.
+     1>Project "C:\Users\Joe\Compiled Software\src\medleap\build\medleap.vcxproj" on node 2 (Build target(s)).
+     1>CustomBuild:
+         Building Custom Rule C:/Users/Joe/Compiled Software/src/medleap/CMakeLists.txt
+         CMake does not need to re-run because C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\generate.stamp is up-to-date.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Users\Joe\Compiled Software\src\medleap\src" /I"C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\include\gdcm-2.4" /I"C:\Users\Joe\Compiled Software\lib\glfw-3.0.4\include" /I"C:\Users\Joe\Compiled Software\lib\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include" /I"C:\Users\Joe\Compiled Software\src\tiff-4.0.6\libtiff" /nologo /W3 /WX- /O2 /Ob2 /D WIN32 /D _WINDOWS /D NDEBUG /D GLEW_STATIC /D "CMAKE_INTDIR=\"Release\"" /D _MBCS /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"medleap.dir\Release\\" /Fd"medleap.dir\Release\vc120.pdb" /Gd /TP /errorReport:prompt "C:\Users\Joe\Compiled Software\src\medleap\src\main\MainConfig.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\main\MainController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\main\MainRenderer.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\main\main.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeData.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\CarryPose.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\FistPose.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\LPose.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\PalmsFacePose.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\PinchPose.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\PointPose.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\PointPose2H.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\Pose.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\Pose1H.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\Pose2H.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\PoseTracker.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\PushPose.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\leap\VPose.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\slice\SliceController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Histogram.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1D.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\BoxSlicer.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\LeapCameraControl.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume_info\VolumeInfoController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MainMenu.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\Menu.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuItem.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\color_pick\ColorPickController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\orientation\OrientationController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\clip\ClipController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\BoxMask.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\MaskController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\MaskVolume.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\SphereMask.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\focus\FocusController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\DirectoryMenu.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\ListRenderer.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\LoadController.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\LoadStateRenderer.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\Buffer.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\Framebuffer.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\Program.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\Renderbuffer.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\Shader.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\Texture.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\math\Math.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Box.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Plane.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\SegmentRing.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Sphere.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\Draw.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\FullScreenQuad.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\Geometry.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\RenderTarget.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\Transform.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\util\Camera.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\util\Color.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\util\Config.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\util\TextRenderer.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\util\Transition.cpp" "C:\Users\Joe\Compiled Software\src\medleap\src\util\Util.cpp"
+         MainConfig.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\main\MainConfig.cpp(15): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdlib.h(462) : see declaration of 'getenv'
+         MainController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         MainRenderer.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         main.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         VolumeData.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         VolumeLoader.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(284): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(431): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(432): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(434): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(435): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(456): warning C4101: 'zSpacing' : unreferenced local variable
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeData.h(167): warning C4018: '<' : signed/unsigned mismatch
+                 C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(187) : see reference to function template instantiation 'void VolumeData::computeGradients<GLubyte>(void)' being compiled
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeData.h(168): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeLoader.h(106): warning C4244: '=' : conversion from 'GLint64' to 'int', possible loss of data
+                 C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(703) : see reference to function template instantiation 'void VolumeLoader::calculateMinMax<GLint64>(void)' being compiled
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeLoader.h(107): warning C4244: '=' : conversion from 'GLint64' to 'int', possible loss of data
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeLoader.h(106): warning C4244: '=' : conversion from 'GLfloat' to 'int', possible loss of data
+                 C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(708) : see reference to function template instantiation 'void VolumeLoader::calculateMinMax<GLfloat>(void)' being compiled
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeLoader.h(107): warning C4244: '=' : conversion from 'GLfloat' to 'int', possible loss of data
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeLoader.h(111): warning C4244: 'argument' : conversion from 'int' to 'GLfloat', possible loss of data
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeLoader.h(112): warning C4244: 'argument' : conversion from 'int' to 'GLfloat', possible loss of data
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeLoader.h(106): warning C4244: '=' : conversion from 'GLdouble' to 'int', possible loss of data
+                 C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(713) : see reference to function template instantiation 'void VolumeLoader::calculateMinMax<GLdouble>(void)' being compiled
+     1>c:\users\joe\compiled software\src\medleap\src\data\VolumeLoader.h(107): warning C4244: '=' : conversion from 'GLdouble' to 'int', possible loss of data
+     1>c:\users\joe\compiled software\src\medleap\src\gl\math\Math.h(69): warning C4244: 'return' : conversion from 'GLdouble' to 'float', possible loss of data
+                 c:\users\joe\compiled software\src\medleap\src\data\VolumeLoader.h(111) : see reference to function template instantiation 'float gl::normalize<T>(T)' being compiled
+                 with
+                 [
+                     T=GLdouble
+                 ]
+                 C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp(713) : see reference to function template instantiation 'void VolumeLoader::calculateMinMax<GLdouble>(void)' being compiled
+         CarryPose.cpp
+         FistPose.cpp
+         LPose.cpp
+         PalmsFacePose.cpp
+         PinchPose.cpp
+         PointPose.cpp
+         PointPose2H.cpp
+         Pose.cpp
+         Pose1H.cpp
+         Pose2H.cpp
+         PoseTracker.cpp
+         PushPose.cpp
+         VPose.cpp
+         SliceController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\slice\SliceController.cpp(97): warning C4244: 'argument' : conversion from 'double' to 'GLint', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\slice\SliceController.cpp(215): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/geom/Rectangle.h(55): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+                 C:\Users\Joe\Compiled Software\src\medleap\src\gl/geom/Rectangle.h(54) : while compiling class template member function 'float gl::Rectangle<GLint>::aspect(void) const'
+                 C:\Users\Joe\Compiled Software\src\medleap\src\layers\slice\SliceController.cpp(159) : see reference to function template instantiation 'float gl::Rectangle<GLint>::aspect(void) const' being compiled
+                 C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(10) : see reference to class template instantiation 'gl::Rectangle<GLint>' being compiled
+         Generating Code...
+         Compiling...
+         Histogram.cpp
+         Transfer1D.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         Transfer1DController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(186): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(196): warning C4267: '=' : conversion from 'size_t' to 'GLsizei', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(234): warning C4244: 'argument' : conversion from 'double' to 'GLint', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(365): warning C4244: 'argument' : conversion from 'float' to 'GLsizei', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(365): warning C4244: 'argument' : conversion from 'float' to 'GLint', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(367): warning C4244: 'argument' : conversion from 'float' to 'GLsizei', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(378): warning C4244: 'argument' : conversion from 'GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(390): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(392): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(486): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(620): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp(628): warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+         BoxSlicer.cpp
+         LeapCameraControl.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\LeapCameraControl.cpp(109): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\LeapCameraControl.cpp(111): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+         VolumeController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp(24): warning C4305: '=' : truncation from 'double' to 'float'
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp(227): warning C4244: 'argument' : conversion from 'double' to 'GLint', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp(463): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp(464): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp(475): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp(478): warning C4244: 'argument' : conversion from 'int' to 'GLfloat', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp(548): warning C4244: 'argument' : conversion from 'unsigned int' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp(552): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/geom/Rectangle.h(55): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+                 C:\Users\Joe\Compiled Software\src\medleap\src\gl/geom/Rectangle.h(54) : while compiling class template member function 'float gl::Rectangle<GLint>::aspect(void) const'
+                 C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp(282) : see reference to function template instantiation 'float gl::Rectangle<GLint>::aspect(void) const' being compiled
+                 C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(10) : see reference to class template instantiation 'gl::Rectangle<GLint>' being compiled
+         VolumeInfoController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume_info\VolumeInfoController.cpp(33): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+         MainMenu.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         Menu.cpp
+         MenuController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(199): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(200): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(201): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(310): warning C4244: 'argument' : conversion from 'GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(351): warning C4244: 'argument' : conversion from 'GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(351): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(369): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(381): warning C4244: 'initializing' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(382): warning C4244: 'initializing' : conversion from 'double' to 'GLfloat', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(416): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(423): warning C4267: '=' : conversion from 'size_t' to 'GLsizei', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(424): warning C4267: '=' : conversion from 'size_t' to 'GLsizei', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp(441): warning C4244: 'argument' : conversion from 'GLint' to 'float', possible loss of data
+         MenuItem.cpp
+         ColorPickController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\color_pick\ColorPickController.cpp(65): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\color_pick\ColorPickController.cpp(121): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\color_pick\ColorPickController.cpp(154): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+         OrientationController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\orientation\OrientationController.cpp(66): warning C4244: '=' : conversion from 'double' to 'GLint', possible loss of data
+         ClipController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\clip\ClipController.cpp(81): warning C4267: '=' : conversion from 'size_t' to 'unsigned int', possible loss of data
+         BoxMask.cpp
+         MaskController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         MaskVolume.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         SphereMask.cpp
+         FocusController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         LeapStateController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.cpp(83): warning C4244: 'argument' : conversion from 'GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.cpp(107): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.cpp(108): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.cpp(114): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.cpp(133): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.cpp(141): warning C4244: 'argument' : conversion from 'GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.cpp(142): warning C4244: 'argument' : conversion from 'GLint' to 'float', possible loss of data
+         Generating Code...
+         Compiling...
+         DirectoryMenu.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Program Files (x86)\Windows Kits\8.1\Include\shared\minwindef.h(130): warning C4005: 'APIENTRY' : macro redefinition
+                 C:\Users\Joe\Compiled Software\lib\glfw-3.0.4\include\GLFW/glfw3.h(92) : see previous definition of 'APIENTRY'
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\DirectoryMenu.cpp(96): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+         ListRenderer.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\ListRenderer.cpp(55): warning C4267: '=' : conversion from 'size_t' to 'GLsizei', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\ListRenderer.cpp(56): warning C4267: '=' : conversion from 'size_t' to 'GLsizei', possible loss of data
+         LoadController.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         LoadStateRenderer.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\LoadStateRenderer.cpp(31): warning C4267: '=' : conversion from 'size_t' to 'GLsizei', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\LoadStateRenderer.cpp(32): warning C4267: '=' : conversion from 'size_t' to 'GLsizei', possible loss of data
+         Buffer.cpp
+         Framebuffer.cpp
+         Program.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl\Program.cpp(187): warning C4267: 'argument' : conversion from 'size_t' to 'GLsizei', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl\Program.cpp(194): warning C4267: 'argument' : conversion from 'size_t' to 'GLsizei', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl\Program.cpp(201): warning C4267: 'argument' : conversion from 'size_t' to 'GLsizei', possible loss of data
+         Renderbuffer.cpp
+         Shader.cpp
+         Texture.cpp
+         Math.cpp
+         Box.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Box.cpp(85): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+         Plane.cpp
+         SegmentRing.cpp
+         Sphere.cpp
+         Draw.cpp
+         FullScreenQuad.cpp
+         Geometry.cpp
+         RenderTarget.cpp
+         Transform.cpp
+         Generating Code...
+         Compiling...
+         Camera.cpp
+         Color.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\Color.cpp(49): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\Color.cpp(44): warning C4101: 'b' : unreferenced local variable
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\Color.cpp(44): warning C4101: 'g' : unreferenced local variable
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\Color.cpp(44): warning C4101: 'r' : unreferenced local variable
+         Config.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\Config.cpp(24): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+         TextRenderer.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         Transition.cpp
+         Util.cpp
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\gl/Viewport.h(27): warning C4244: 'argument' : conversion from 'const GLint' to 'float', possible loss of data
+         Generating Code...
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Users\Joe\Compiled Software\src\medleap\src" /I"C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\include\gdcm-2.4" /I"C:\Users\Joe\Compiled Software\lib\glfw-3.0.4\include" /I"C:\Users\Joe\Compiled Software\lib\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include" /I"C:\Users\Joe\Compiled Software\src\tiff-4.0.6\libtiff" /nologo /W3 /WX- /O2 /Ob2 /D WIN32 /D _WINDOWS /D NDEBUG /D GLEW_STATIC /D "CMAKE_INTDIR=\"Release\"" /D _MBCS /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"medleap.dir\Release\\" /Fd"medleap.dir\Release\vc120.pdb" /Gd /TC /errorReport:prompt "C:\Users\Joe\Compiled Software\src\medleap\src\gl\glew.c" "C:\Users\Joe\Compiled Software\src\medleap\src\util\stb_image.c"
+         glew.c
+         stb_image.c
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\stb_image.c(228): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\stb_image.c(290): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\stb_image.c(328): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\stb_image.c(429): warning C4244: 'initializing' : conversion from '__int64' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\stb_image.c(442): warning C4244: 'initializing' : conversion from '__int64' to 'int', possible loss of data
+     1>C:\Users\Joe\Compiled Software\src\medleap\src\util\stb_image.c(4220): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Joe\Compiled Software\src\medleap\build\medleap.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmMSFF.lib" opengl32.lib "C:\Users\Joe\Compiled Software\lib\glfw-3.0.4\lib\glfw3.lib" "C:\Users\Joe\Compiled Software\lib\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x64\Leap.lib" "C:\Users\Joe\Compiled Software\src\tiff-4.0.6\libtiff\libtiff.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmDICT.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmIOD.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmexpat.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmDSED.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmCommon.lib" ws2_32.lib crypt32.lib "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmzlib.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmjpeg8.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmjpeg12.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmjpeg16.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmopenjpeg.lib" "C:\Users\Joe\Compiled Software\lib\gdcm-2.4.4\lib\gdcmcharls.lib" rpcrt4.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:/Users/Joe/Compiled Software/src/medleap/build/medleap.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Joe/Compiled Software/src/medleap/build/Release/medleap.lib" /MACHINE:X64  /machine:x64 medleap.dir\Release\MainConfig.obj
+         medleap.dir\Release\MainController.obj
+         medleap.dir\Release\MainRenderer.obj
+         medleap.dir\Release\main.obj
+         medleap.dir\Release\VolumeData.obj
+         medleap.dir\Release\VolumeLoader.obj
+         medleap.dir\Release\CarryPose.obj
+         medleap.dir\Release\FistPose.obj
+         medleap.dir\Release\LPose.obj
+         medleap.dir\Release\PalmsFacePose.obj
+         medleap.dir\Release\PinchPose.obj
+         medleap.dir\Release\PointPose.obj
+         medleap.dir\Release\PointPose2H.obj
+         medleap.dir\Release\Pose.obj
+         medleap.dir\Release\Pose1H.obj
+         medleap.dir\Release\Pose2H.obj
+         medleap.dir\Release\PoseTracker.obj
+         medleap.dir\Release\PushPose.obj
+         medleap.dir\Release\VPose.obj
+         medleap.dir\Release\SliceController.obj
+         medleap.dir\Release\Histogram.obj
+         medleap.dir\Release\Transfer1D.obj
+         medleap.dir\Release\Transfer1DController.obj
+         medleap.dir\Release\BoxSlicer.obj
+         medleap.dir\Release\LeapCameraControl.obj
+         medleap.dir\Release\VolumeController.obj
+         medleap.dir\Release\VolumeInfoController.obj
+         medleap.dir\Release\MainMenu.obj
+         medleap.dir\Release\Menu.obj
+         medleap.dir\Release\MenuController.obj
+         medleap.dir\Release\MenuItem.obj
+         medleap.dir\Release\ColorPickController.obj
+         medleap.dir\Release\OrientationController.obj
+         medleap.dir\Release\ClipController.obj
+         medleap.dir\Release\BoxMask.obj
+         medleap.dir\Release\MaskController.obj
+         medleap.dir\Release\MaskVolume.obj
+         medleap.dir\Release\SphereMask.obj
+         medleap.dir\Release\FocusController.obj
+         medleap.dir\Release\LeapStateController.obj
+         medleap.dir\Release\DirectoryMenu.obj
+         medleap.dir\Release\ListRenderer.obj
+         medleap.dir\Release\LoadController.obj
+         medleap.dir\Release\LoadStateRenderer.obj
+         medleap.dir\Release\Buffer.obj
+         medleap.dir\Release\Framebuffer.obj
+         medleap.dir\Release\Program.obj
+         medleap.dir\Release\Renderbuffer.obj
+         medleap.dir\Release\Shader.obj
+         medleap.dir\Release\Texture.obj
+         medleap.dir\Release\glew.obj
+         medleap.dir\Release\Math.obj
+         medleap.dir\Release\Box.obj
+         medleap.dir\Release\Plane.obj
+         medleap.dir\Release\SegmentRing.obj
+         medleap.dir\Release\Sphere.obj
+         medleap.dir\Release\Draw.obj
+         medleap.dir\Release\FullScreenQuad.obj
+         medleap.dir\Release\Geometry.obj
+         medleap.dir\Release\RenderTarget.obj
+         medleap.dir\Release\Transform.obj
+         medleap.dir\Release\Camera.obj
+         medleap.dir\Release\Color.obj
+         medleap.dir\Release\Config.obj
+         medleap.dir\Release\TextRenderer.obj
+         medleap.dir\Release\Transition.obj
+         medleap.dir\Release\Util.obj
+         medleap.dir\Release\stb_image.obj
+         medleap.vcxproj -> C:\Users\Joe\Compiled Software\src\medleap\build\medleap.exe
+       PostBuildEvent:
+         setlocal
+         "C:\Program Files\CMake\bin\cmake.exe" -E copy "C:/Users/Joe/Compiled Software/lib/LeapDeveloperKit_2.3.1+31549_win/LeapSDK/lib/x64/Leap.dll" "C:/Users/Joe/Compiled Software/src/medleap/build"
+         if %errorlevel% neq 0 goto :cmEnd
+         :cmEnd
+         endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+         :cmErrorLevel
+         exit /b %1
+         :cmDone
+         if %errorlevel% neq 0 goto :VCEnd
+         setlocal
+         "C:\Program Files\CMake\bin\cmake.exe" -E copy "C:/Users/Joe/Compiled Software/src/tiff-4.0.6/libtiff/libtiff.dll" "C:/Users/Joe/Compiled Software/src/medleap/build"
+         if %errorlevel% neq 0 goto :cmEnd
+         :cmEnd
+         endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+         :cmErrorLevel
+         exit /b %1
+         :cmDone
+         if %errorlevel% neq 0 goto :VCEnd
+         :VCEnd
+     1>Done Building Project "C:\Users\Joe\Compiled Software\src\medleap\build\medleap.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:56.71

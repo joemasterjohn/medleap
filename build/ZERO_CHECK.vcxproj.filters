@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\build\CMakeFiles\920949e8defab0246b0ce670c1cce2cd\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{79056C7A-4852-367F-B832-369187C007F9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

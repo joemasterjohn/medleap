@@ -1,0 +1,673 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\main\MainConfig.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\main\MainController.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\main\MainRenderer.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\main\main.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeData.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\CarryPose.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\FistPose.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\LPose.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PalmsFacePose.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PinchPose.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PointPose.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PointPose2H.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\Pose.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\Pose1H.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\Pose2H.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PoseTracker.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PushPose.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\VPose.cpp">
+      <Filter>leap</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\slice\SliceController.cpp">
+      <Filter>layers\slice</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Histogram.cpp">
+      <Filter>layers\transfer_1D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1D.cpp">
+      <Filter>layers\transfer_1D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.cpp">
+      <Filter>layers\transfer_1D</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\BoxSlicer.cpp">
+      <Filter>layers\volume</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\LeapCameraControl.cpp">
+      <Filter>layers\volume</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.cpp">
+      <Filter>layers\volume</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume_info\VolumeInfoController.cpp">
+      <Filter>layers\volume_info</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MainMenu.cpp">
+      <Filter>layers\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\Menu.cpp">
+      <Filter>layers\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.cpp">
+      <Filter>layers\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuItem.cpp">
+      <Filter>layers\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\color_pick\ColorPickController.cpp">
+      <Filter>layers\color_pick</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\orientation\OrientationController.cpp">
+      <Filter>layers\orientation</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\clip\ClipController.cpp">
+      <Filter>layers\clip</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\BoxMask.cpp">
+      <Filter>layers\mask</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\MaskController.cpp">
+      <Filter>layers\mask</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\MaskVolume.cpp">
+      <Filter>layers\mask</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\SphereMask.cpp">
+      <Filter>layers\mask</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\focus\FocusController.cpp">
+      <Filter>layers\focus</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.cpp">
+      <Filter>layers\leap_state</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\DirectoryMenu.cpp">
+      <Filter>layers\load</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\ListRenderer.cpp">
+      <Filter>layers\load</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\LoadController.cpp">
+      <Filter>layers\load</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\LoadStateRenderer.cpp">
+      <Filter>layers\load</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Buffer.cpp">
+      <Filter>gl</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Framebuffer.cpp">
+      <Filter>gl</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Program.cpp">
+      <Filter>gl</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Renderbuffer.cpp">
+      <Filter>gl</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Shader.cpp">
+      <Filter>gl</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Texture.cpp">
+      <Filter>gl</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\glew.c">
+      <Filter>gl</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\math\Math.cpp">
+      <Filter>gl\math</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Box.cpp">
+      <Filter>gl\geom</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Plane.cpp">
+      <Filter>gl\geom</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\SegmentRing.cpp">
+      <Filter>gl\geom</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Sphere.cpp">
+      <Filter>gl\geom</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\Draw.cpp">
+      <Filter>gl\util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\FullScreenQuad.cpp">
+      <Filter>gl\util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\Geometry.cpp">
+      <Filter>gl\util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\RenderTarget.cpp">
+      <Filter>gl\util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\Transform.cpp">
+      <Filter>gl\util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Camera.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Color.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Config.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\TextRenderer.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Transition.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Util.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\stb_image.c">
+      <Filter>util</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\main\MainConfig.h">
+      <Filter>main</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\main\MainController.h">
+      <Filter>main</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\main\MainRenderer.h">
+      <Filter>main</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeData.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\data\VolumeLoader.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\CarryPose.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\FistPose.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\LPose.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PalmsFacePose.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PinchPose.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PointPose.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PointPose2H.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\Pose.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\Pose1H.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\Pose2H.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PoseTracker.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\PushPose.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\leap\VPose.h">
+      <Filter>leap</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\Controller.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\slice\SliceController.h">
+      <Filter>layers\slice</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Histogram.h">
+      <Filter>layers\transfer_1D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1D.h">
+      <Filter>layers\transfer_1D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\transfer_1D\Transfer1DController.h">
+      <Filter>layers\transfer_1D</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\BoxSlicer.h">
+      <Filter>layers\volume</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\LeapCameraControl.h">
+      <Filter>layers\volume</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume\VolumeController.h">
+      <Filter>layers\volume</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\volume_info\VolumeInfoController.h">
+      <Filter>layers\volume_info</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MainMenu.h">
+      <Filter>layers\menu</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\Menu.h">
+      <Filter>layers\menu</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuController.h">
+      <Filter>layers\menu</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\menu\MenuItem.h">
+      <Filter>layers\menu</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\color_pick\ColorPickController.h">
+      <Filter>layers\color_pick</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\orientation\OrientationController.h">
+      <Filter>layers\orientation</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\clip\ClipController.h">
+      <Filter>layers\clip</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\BoxMask.h">
+      <Filter>layers\mask</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\MaskController.h">
+      <Filter>layers\mask</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\MaskVolume.h">
+      <Filter>layers\mask</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\mask\SphereMask.h">
+      <Filter>layers\mask</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\focus\FocusController.h">
+      <Filter>layers\focus</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\leap_state\LeapStateController.h">
+      <Filter>layers\leap_state</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\DirectoryMenu.h">
+      <Filter>layers\load</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\ListRenderer.h">
+      <Filter>layers\load</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\LoadController.h">
+      <Filter>layers\load</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\layers\load\LoadStateRenderer.h">
+      <Filter>layers\load</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Buffer.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Framebuffer.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Program.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Renderbuffer.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Shader.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Texture.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\Viewport.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\glew.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\glxew.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\wglew.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\math\Math.h">
+      <Filter>gl\math</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\math\Matrix2.h">
+      <Filter>gl\math</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\math\Matrix3.h">
+      <Filter>gl\math</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\math\Matrix4.h">
+      <Filter>gl\math</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\math\Vector2.h">
+      <Filter>gl\math</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\math\Vector3.h">
+      <Filter>gl\math</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\math\Vector4.h">
+      <Filter>gl\math</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Box.h">
+      <Filter>gl\geom</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Plane.h">
+      <Filter>gl\geom</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Rectangle.h">
+      <Filter>gl\geom</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\SegmentRing.h">
+      <Filter>gl\geom</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\geom\Sphere.h">
+      <Filter>gl\geom</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\Draw.h">
+      <Filter>gl\util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\FullScreenQuad.h">
+      <Filter>gl\util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\Geometry.h">
+      <Filter>gl\util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\RenderTarget.h">
+      <Filter>gl\util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\gl\util\Transform.h">
+      <Filter>gl\util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Camera.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Color.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Config.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\History.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Interval.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\TextRenderer.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Transition.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\Util.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\dirent.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Joe\Compiled Software\src\medleap\src\util\stb_image.h">
+      <Filter>util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Joe\Compiled Software\src\medleap\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\carry.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\fist.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\l_closed.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\l_open.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\palms_face.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\pinch.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\point.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\point2.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\three.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\thumb.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\v_closed.png">
+      <Filter>icons</Filter>
+    </Image>
+    <Image Include="C:\Users\Joe\Compiled Software\src\medleap\icons\v_open.png">
+      <Filter>icons</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\color.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\color.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\slice_clut.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\slice_clut.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\volume_clut.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\volume_clut.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\histo_line.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\histo_line.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\clut_strip.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\clut_strip.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\texture_2D.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\texture_2D.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\menu.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\menu.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\color_pick_hsv_circle.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\color_pick_hsv_circle.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\color_pick_selected.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\color_pick_selected.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\color_pick_gradient.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\color_pick_gradient.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\tf1d_histo.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\tf1d_histo.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\tf1d_histo_outline.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\tf1d_histo_outline.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\orientation_cube.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\orientation_cube.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\icon.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\shaders\icon.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\fonts\menlo14.bmp">
+      <Filter>fonts</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\fonts\menlo14.dat">
+      <Filter>fonts</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\fonts\menlo18.bmp">
+      <Filter>fonts</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\fonts\menlo18.dat">
+      <Filter>fonts</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\fonts\menlo24.bmp">
+      <Filter>fonts</Filter>
+    </None>
+    <None Include="C:\Users\Joe\Compiled Software\src\medleap\fonts\menlo24.dat">
+      <Filter>fonts</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{DC3BB403-8CD8-31F8-8379-D8F443F87FE0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fonts">
+      <UniqueIdentifier>{D5212B1B-F9F6-30AF-B6D0-9F49A5A23C07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="icons">
+      <UniqueIdentifier>{C19BA6C0-2984-372D-B700-46FB9DB2EBF4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gl">
+      <UniqueIdentifier>{F138A921-89EF-356E-BF83-ABC750F0E6BD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{2181888D-8B3A-3049-B78F-A343CC91D8CB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{DDA23216-A02E-3240-B4C0-44F28EE1AC88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="leap">
+      <UniqueIdentifier>{881506FD-7D66-3FA3-8C23-1AA8ABC44A9C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{9C389CB1-EDB2-3B19-B648-A27A8500C4CA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers">
+      <UniqueIdentifier>{A2708D2F-42D4-3C45-A749-B8459DC04BE3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\slice">
+      <UniqueIdentifier>{0C396D75-6DDB-3E44-BF21-7EB112062F37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\transfer_1D">
+      <UniqueIdentifier>{FCC587D6-6E8C-35B2-856E-CB0815515C9F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\volume">
+      <UniqueIdentifier>{525D4A84-E83C-36D1-906D-64C239D998B9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\volume_info">
+      <UniqueIdentifier>{305594FB-F9BF-3E91-B3BB-D5945E41A3F2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\menu">
+      <UniqueIdentifier>{8AA5C061-A980-315F-8E56-9A83C0F408E9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\color_pick">
+      <UniqueIdentifier>{ABF94BF3-E95A-3132-AF5C-B8527E4ED666}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\orientation">
+      <UniqueIdentifier>{982E55AB-0AA3-31AA-8323-5D83F71F3F92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\clip">
+      <UniqueIdentifier>{F27A0332-0764-3146-8761-FCD0774254C8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\mask">
+      <UniqueIdentifier>{C91B8430-18E4-326C-865A-1AEE6EE54CB6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\focus">
+      <UniqueIdentifier>{70EB58A2-BCFC-31F0-9FA4-CA6579DFDDF5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\leap_state">
+      <UniqueIdentifier>{D0C95B97-5A62-3C6A-BF97-CA76D47FB152}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="layers\load">
+      <UniqueIdentifier>{A8C18C2F-D4D0-384E-9B3D-362125A7C327}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gl\geom">
+      <UniqueIdentifier>{F2D6C07E-217C-3F5B-ABD1-2AB61DC558EB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gl\util">
+      <UniqueIdentifier>{30D79C71-2EA1-32CB-8BED-66A31FCC83DA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gl\math">
+      <UniqueIdentifier>{E1FA35A1-4192-3CEE-93E3-0CC6BF5B4B4B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
