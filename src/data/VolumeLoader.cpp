@@ -421,17 +421,25 @@ void VolumeLoader::sortTIFF(const std::string& directoryPath, std::vector<string
 		entry = readdir(dir);
 	}
 
-	std::sort(files.begin(), files.end(), [](string a, string b) {
-		int x = a.find_last_of('\\');
-		int off = a.find('.') - x - 1;
-		string a_ = a.substr(x + 1, off);
-		x = b.find_last_of('\\');
-		off = b.find('.') - x - 1;
-		string b_ = b.substr(x + 1, off);
-		int i = atoi(a_.c_str());
-		int j = atoi(b_.c_str());
-		return i < j;
-	});
+
+	//sort lexocographically
+	if (false) {
+		std::sort(files.begin(), files.end());
+	}
+	else {
+		std::sort(files.begin(), files.end(), [](string a, string b) {
+			int x = a.find_last_of('\\');
+			int off = a.find('.') - x - 1;
+			string a_ = a.substr(x + 1, off);
+			x = b.find_last_of('\\');
+			off = b.find('.') - x - 1;
+			string b_ = b.substr(x + 1, off);
+			int i = atoi(a_.c_str());
+			int j = atoi(b_.c_str());
+			return i < j;
+		});
+	}
+
 
 }
 
@@ -473,10 +481,17 @@ void VolumeLoader::loadTIFF(std::string& directoryPath)
 
 	volume = new VolumeData;
 	volume->modality = VolumeData::Modality::UNKNOWN;
-	TIFFGetField(img, TIFFTAG_IMAGEWIDTH, &(volume->height));
-	TIFFGetField(img, TIFFTAG_IMAGELENGTH, &(volume->width));
+	TIFFGetField(img, TIFFTAG_IMAGEWIDTH, &(volume->width));
+	TIFFGetField(img, TIFFTAG_IMAGELENGTH, &(volume->height));
 	volume->depth = static_cast<unsigned int>(files.size());
-	
+
+	uint32 tw, th;
+	TIFFGetField(img, TIFFTAG_TILEWIDTH, &tw);
+	TIFFGetField(img, TIFFTAG_TILELENGTH, &th);
+
+	cout << "tw: " << tw << " th: " << th << endl;
+
+
 	cout << "read width: " << volume->width << " and height: " << volume->height << endl;
 
 	volume->format = GL_RED;
@@ -568,7 +583,7 @@ void VolumeLoader::loadTIFF(std::string& directoryPath)
 	// load all other images
 	//  for (int i = 0; i < volume->depth; i++) {
 	//      size_t offset = i * volume->getSliceSizeBytes();
-	//      ImageReader reader;
+	//      ImageReader reader;0
 	//      reader.SetFileName(files[i].c_str());
 	//      reader.Read();
 	//      reader.GetImage().GetBuffer(volume->data + offset);
@@ -581,25 +596,45 @@ void VolumeLoader::loadTIFF(std::string& directoryPath)
 
 		img = TIFFOpen(files[i].c_str(), "r");
 
+		//cout << files[i] << endl;
+
 		//cout << "offset: " << offset << endl;
 
 		//cout << i << ": stripsize: " << TIFFStripSize(img) << " #strips: " << TIFFNumberOfStrips(img) << endl;
 
-		tstrip_t strip;
+		/*
 		tsize_t acc = 0;
-		for (strip = 0; strip < TIFFNumberOfStrips(img); strip++) {
-			//cout << "strip: " << strip << endl;
-			tsize_t r = TIFFReadEncodedStrip(img, strip, volume->data + (offset + acc), (tsize_t)-1);
+		for (int row = 0; row < volume->height; row++) {
+			tsize_t r;
+			r = TIFFReadScanline(img, volume->data + (offset + acc), row);
 			if (r == -1) {
 				cout << "error reading tiff" << endl;
 			}
 			acc += r;
 		}
+		*/
 
-		cout << "read " << acc << " bytes" << endl;
+
+		
+		tstrip_t strip;
+		tsize_t acc = 0;
+
+		for (strip = 0; strip < TIFFNumberOfStrips(img); strip++) {
+			//cout << "strip: " << strip << endl;
+			tsize_t r = TIFFReadRawStrip(img, strip, volume->data + (offset + acc), (tsize_t)-1);
+			if (r == -1) {
+				cout << "error reading tiff" << endl;
+			}
+			acc += r;
+		}
+		
+		
+
+		//cout << "read " << acc << " bytes" << endl;
 
 		TIFFClose(img);
 	}
+
 
 	/*
 	for (int i = 0; i < volume->depth; i++) {
